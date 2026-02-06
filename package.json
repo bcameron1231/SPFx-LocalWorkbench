@@ -10,7 +10,8 @@
     "url": "https://github.com/your-username/spfx-local-workbench"
   },
   "engines": {
-    "vscode": "^1.100.0"
+    "vscode": "^1.100.0",
+    "node": "22.x"
   },
   "categories": [
     "Other",

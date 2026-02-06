@@ -150,6 +150,10 @@ npm install
 npm run compile
 ```
 
+### Sample SPFx Projects
+
+If you keep test SPFx projects under `samples/`, they are excluded from VSIX packaging and VS Code search to keep the extension lean. The folder is still visible in the explorer. For the most reliable detection and debugging, open a sample project folder directly in its own VS Code window (or Extension Host) when testing.
+
 ### Project Structure
 
 ```

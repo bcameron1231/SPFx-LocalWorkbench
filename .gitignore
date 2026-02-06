@@ -3,3 +3,13 @@ dist
 node_modules
 workbench-runtime
 *.vsix
+# SPFx sample project artifacts
+samples/**/node_modules/
+samples/**/lib/
+samples/**/dist/
+samples/**/temp/
+samples/**/sharepoint/
+samples/**/coverage/
+samples/**/.heft/
+samples/**/.eslintcache
+samples/**/.cache/
