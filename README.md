@@ -10,22 +10,20 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 - **Web Part Discovery**: Parses all web part manifests from your project  
 - **SPFx Runtime Environment**: Custom-built workbench that simulates the SPFx runtime with AMD module loading
 - **Property Pane**: Full property pane support for configuring web parts
-- **Live Reload Support**: Works with `heft start` or `gulp serve` for real-time development
+- **Live Reload Support**: Works with `heft start` for real-time development
 - **Multiple Web Parts**: Add, configure, and test multiple web parts simultaneously on the canvas
 - **Theme Support**: Choose from multiple SharePoint theme presets (Team Site, Communication Site, Dark Mode)
 
 ## Requirements
 
 - VS Code 1.100.0 or higher
-- An SPFx project
+- An SPFx 1.22+ project (Heft-based)
 - Node.js and npm/pnpm/yarn
 
 ## Getting Started
 
 1. Open your SPFx project in VS Code
-2. Start your SPFx development server:
-   - **SPFx 1.22+**: Run `heft start` in a terminal
-   - **Legacy SPFx**: Run `gulp serve --nobrowser` in a terminal
+2. Start your SPFx development server: Run `heft start` in a terminal
 3. Use the Command Palette (`Ctrl+Shift+P`) and search for "SPFx: Open Local Workbench"
 
 ## Usage
@@ -41,9 +39,8 @@ There are several ways to open the workbench:
 ### Starting Development Server
 
 Use the command "SPFx: Start Serve & Open Workbench" to:
-1. Automatically detect your SPFx version
-2. Start `heft start` (SPFx 1.22+) or `gulp serve --nobrowser` (legacy) in a terminal
-3. Open the workbench after a short delay
+1. Start `heft start` in a terminal
+2. Open the workbench after a short delay
 
 ### How It Works
 
@@ -113,9 +110,10 @@ Customize the mock SharePoint context:
 ## Troubleshooting
 
 ### "Could not load manifests from serve URL"
-- Make sure `heft start` or `gulp serve` is running
+- Make sure `heft start` is running
 - Check that the serve URL matches your SPFx project's port (default: 4321)
 - Accept the self-signed certificate in your browser first: visit `https://localhost:4321`
+- This extension only supports SPFx 1.22+ (Heft-based projects)
 
 ### Web parts not rendering
 - Open DevTools in the workbench (click "DevTools" button) to see console errors

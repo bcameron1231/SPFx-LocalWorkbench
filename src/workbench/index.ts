@@ -14,11 +14,11 @@ export {
     getWorkbenchSettings, 
     onConfigurationChanged, 
     openWorkbenchSettings,
-    WorkbenchSettings,
-    ContextConfig,
-    PageContextConfig,
-    ThemeConfig,
-    LoggingConfig
+    IWorkbenchSettings,
+    IContextConfig,
+    IPageContextConfig,
+    IThemeConfig,
+    ILoggingConfig
 } from './config';
 
 // Types

@@ -23,7 +23,7 @@ export class CanvasRenderer {
         if (!this.canvasElement) return;
 
         if (!hasManifests) {
-            this.canvasElement.innerHTML = '<div class="error-message">No web parts found. Make sure <code>gulp serve</code> is running.</div>';
+            this.canvasElement.innerHTML = '<div class="error-message">No web parts found. Make sure <code>heft start</code> is running.</div>';
             return;
         }
 
@@ -86,7 +86,7 @@ export class CanvasRenderer {
             <div class="error-message"><strong>Error:</strong> ${escapeHtml(message)}</div>
             <div class="webpart-picker">
                 <h2>Troubleshooting</h2>
-                <p>Make sure <code>gulp serve</code> or <code>heft start</code> is running at ${escapeHtml(serveUrl)}</p>
+                <p>Make sure <code>heft start</code> is running at ${escapeHtml(serveUrl)}</p>
                 <button class="webpart-btn" onclick="location.reload()">Try Again</button>
             </div>
         `;

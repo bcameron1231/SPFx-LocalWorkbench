@@ -33,28 +33,17 @@ export function activate(context: vscode.ExtensionContext) {
 				return;
 			}
 
-			// Detect SPFx version and use appropriate serve command
-			const spfxVersion = await detector.getSpfxVersion();
-			const useHeft = detector.usesHeft();
-			
-			// Create a terminal and run the appropriate serve command
-			const terminal = vscode.window.createTerminal('SPFx Serve');
-			terminal.show();
-			
-			if (useHeft) {
-				// SPFx 1.22+ uses Heft
-				terminal.sendText('heft start');
-			} else {
-				// Legacy SPFx uses Gulp
-				terminal.sendText('gulp serve --nobrowser');
-			}
+		// Create a terminal and run heft start
+		const terminal = vscode.window.createTerminal('SPFx Serve');
+		terminal.show();
+		terminal.sendText('heft start');
 
-			// Open the workbench after a delay
-			setTimeout(() => {
-				WorkbenchPanel.createOrShow(context.extensionUri);
-			}, 3000);
-		}
-	);
+		// Open the workbench after a delay
+		setTimeout(() => {
+			WorkbenchPanel.createOrShow(context.extensionUri);
+		}, 3000);
+	}
+);
 
 	// Register the Detect Web Parts command
 	const detectWebPartsCommand = vscode.commands.registerCommand(

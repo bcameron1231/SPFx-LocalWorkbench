@@ -3,11 +3,11 @@
 // Re-exports all configuration-related types and functions.
 
 export {
-    WorkbenchSettings,
-    ContextConfig,
-    PageContextConfig,
-    ThemeConfig,
-    LoggingConfig,
+    IWorkbenchSettings,
+    IContextConfig,
+    IPageContextConfig,
+    IThemeConfig,
+    ILoggingConfig,
     getWorkbenchSettings,
     onConfigurationChanged,
     openWorkbenchSettings,
