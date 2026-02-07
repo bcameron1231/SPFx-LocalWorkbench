@@ -71,16 +71,6 @@
           "default": false,
           "description": "Automatically open the workbench when starting serve"
         },
-        "spfxLocalWorkbench.devProxyEnabled": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enable Dev Proxy integration for API mocking"
-        },
-        "spfxLocalWorkbench.devProxyPort": {
-          "type": "number",
-          "default": 8000,
-          "description": "The port where Dev Proxy is running"
-        },
         "spfxLocalWorkbench.context.siteUrl": {
           "type": "string",
           "default": "https://contoso.sharepoint.com/sites/devsite",
@@ -173,16 +163,6 @@
           "type": "boolean",
           "default": true,
           "description": "Whether this is SharePoint Online (vs. on-premises)"
-        },
-        "spfxLocalWorkbench.logging.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable logging in the workbench output channel"
-        },
-        "spfxLocalWorkbench.logging.verbose": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enable verbose logging for debugging"
         }
       }
     }

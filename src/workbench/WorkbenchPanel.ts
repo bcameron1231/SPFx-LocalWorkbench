@@ -197,8 +197,7 @@ export class WorkbenchPanel {
             extensionUri: this._extensionUri,
             themeSettings: this._settings.theme,
             contextSettings: this._settings.context,
-            pageContextSettings: this._settings.pageContext,
-            verboseLogging: this._settings.logging.verbose
+            pageContextSettings: this._settings.pageContext
         });
     }
 }

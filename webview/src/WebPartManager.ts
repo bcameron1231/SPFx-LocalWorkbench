@@ -11,20 +11,17 @@ export class WebPartManager {
     private serveUrl: string;
     private contextProvider: SpfxContext;
     private themeProvider: ThemeProvider;
-    private verboseLogging: boolean;
 
     constructor(
         vscode: IVsCodeApi,
         serveUrl: string,
         contextProvider: SpfxContext,
-        themeProvider: ThemeProvider,
-        verboseLogging: boolean = false
+        themeProvider: ThemeProvider
     ) {
         this.vscode = vscode;
         this.serveUrl = serveUrl;
         this.contextProvider = contextProvider;
         this.themeProvider = themeProvider;
-        this.verboseLogging = verboseLogging;
     }
 
     async loadWebPartBundle(manifest: IWebPartManifest): Promise<void> {

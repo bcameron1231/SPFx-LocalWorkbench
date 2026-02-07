@@ -41,19 +41,16 @@ export class ExtensionManager {
     private serveUrl: string;
     private contextProvider: SpfxContext;
     private themeProvider: ThemeProvider;
-    private verboseLogging: boolean;
 
     constructor(
         _vscode: IVsCodeApi,
         serveUrl: string,
         contextProvider: SpfxContext,
-        themeProvider: ThemeProvider,
-        verboseLogging: boolean = false
+        themeProvider: ThemeProvider
     ) {
         this.serveUrl = serveUrl;
         this.contextProvider = contextProvider;
         this.themeProvider = themeProvider;
-        this.verboseLogging = verboseLogging;
     }
 
     async loadExtensionBundle(manifest: IWebPartManifest): Promise<void> {
@@ -340,9 +337,7 @@ export class ExtensionManager {
                 const hasFooterContent = footerElement.innerHTML.trim().length > 0;
                 
                 if (!hasHeaderContent && !hasFooterContent) {
-                    if (this.verboseLogging) {
-                        console.log('ExtensionManager - Extension rendered but no placeholder content was created. This is normal if the extension uses conditional rendering.');
-                    }
+                    console.log('ExtensionManager - Extension rendered but no placeholder content was created. This is normal if the extension uses conditional rendering.');
                 }
             }, 500);
 

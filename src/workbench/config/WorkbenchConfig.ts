@@ -31,30 +31,19 @@ export interface IThemeConfig {
     customColors: Record<string, string>;
 }
 
-// Logging configuration
-export interface ILoggingConfig {
-    enabled: boolean;
-    verbose: boolean;
-}
-
 // Complete workbench configuration
 export interface IWorkbenchSettings {
     serveUrl: string;
     autoOpenWorkbench: boolean;
-    devProxyEnabled: boolean;
-    devProxyPort: number;
     context: IContextConfig;
     pageContext: IPageContextConfig;
     theme: IThemeConfig;
-    logging: ILoggingConfig;
 }
 
 // Default configuration values
 const defaults: IWorkbenchSettings = {
     serveUrl: 'https://localhost:4321',
     autoOpenWorkbench: false,
-    devProxyEnabled: false,
-    devProxyPort: 8000,
     context: {
         siteUrl: 'https://contoso.sharepoint.com/sites/devsite',
         webUrl: 'https://contoso.sharepoint.com/sites/devsite',
@@ -75,10 +64,6 @@ const defaults: IWorkbenchSettings = {
     theme: {
         preset: 'teamSite',
         customColors: {}
-    },
-    logging: {
-        enabled: true,
-        verbose: false
     }
 };
 
@@ -89,8 +74,6 @@ export function getWorkbenchSettings(): IWorkbenchSettings {
     return {
         serveUrl: config.get<string>('serveUrl', defaults.serveUrl),
         autoOpenWorkbench: config.get<boolean>('autoOpenWorkbench', defaults.autoOpenWorkbench),
-        devProxyEnabled: config.get<boolean>('devProxyEnabled', defaults.devProxyEnabled),
-        devProxyPort: config.get<number>('devProxyPort', defaults.devProxyPort),
         context: {
             siteUrl: config.get<string>('context.siteUrl', defaults.context.siteUrl),
             webUrl: config.get<string>('context.webUrl', defaults.context.webUrl),
@@ -111,10 +94,6 @@ export function getWorkbenchSettings(): IWorkbenchSettings {
         theme: {
             preset: config.get<IThemeConfig['preset']>('theme.preset', defaults.theme.preset),
             customColors: config.get<Record<string, string>>('theme.customColors', defaults.theme.customColors)
-        },
-        logging: {
-            enabled: config.get<boolean>('logging.enabled', defaults.logging.enabled),
-            verbose: config.get<boolean>('logging.verbose', defaults.logging.verbose)
         }
     };
 }

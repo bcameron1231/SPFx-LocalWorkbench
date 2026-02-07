@@ -36,16 +36,14 @@ export class WorkbenchRuntime {
             this.vscode,
             config.serveUrl,
             this.contextProvider,
-            this.themeProvider,
-            config.verboseLogging || false
+            this.themeProvider
         );
 
         this.extensionManager = new ExtensionManager(
             this.vscode,
             config.serveUrl,
             this.contextProvider,
-            this.themeProvider,
-            config.verboseLogging || false
+            this.themeProvider
         );
 
         // Setup event listeners after a short delay to ensure DOM is ready
