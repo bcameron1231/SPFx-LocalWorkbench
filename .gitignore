@@ -2,6 +2,8 @@ out
 dist
 node_modules
 *.vsix
+# Generated CSS type declarations
+*.css.d.ts
 # SPFx sample project artifacts
 samples/**/node_modules/
 samples/**/lib/

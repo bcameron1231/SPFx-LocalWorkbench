@@ -37,12 +37,10 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
 
     useEffect(() => {
         if (webPart?.instance && typeof webPart.instance.getPropertyPaneConfiguration === 'function') {
-            console.log('PropertyPanePanel - Received webPart:', webPart);
             (window as any).ckWP = webPart; // Expose for debugging
             try {
                 const paneConfig = webPart.instance.getPropertyPaneConfiguration();
                 setConfig(paneConfig);
-                console.log('PropertyPanePanel - Retrieved configuration:', paneConfig);
             } catch (e: any) {
                 console.error('PropertyPane - Error getting configuration:', e);
                 setConfig(null);

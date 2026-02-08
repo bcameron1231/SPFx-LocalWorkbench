@@ -170,13 +170,15 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
-    "compile": "npm run check-types && npm run lint && npm-run-all compile:*",
+    "compile": "npm run check-types && npm run lint && npm run generate:css-types && npm-run-all compile:*",
     "compile:extension": "node esbuild.js",
     "compile:webview": "node webview/esbuild.config.js",
+    "generate:css-types": "tcm webview/src",
     "watch": "npm-run-all -p watch:*",
     "watch:esbuild": "node esbuild.js --watch",
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
     "watch:webview": "node webview/esbuild.config.js --watch",
+    "watch:css-types": "tcm webview/src --watch",
     "package": "npm run check-types && npm run lint && npm-run-all package:*",
     "package:extension": "node esbuild.js --production",
     "package:webview": "node webview/esbuild.config.js --production",
@@ -194,6 +196,7 @@
     "npm-run-all": "^4.1.5",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "typed-css-modules": "^0.9.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.54.0"
   }

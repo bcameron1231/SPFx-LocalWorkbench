@@ -33,7 +33,7 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
     const [extensionPickerOpen, setExtensionPickerOpen] = useState(false);
 
     const extensionManifests = manifests.filter(m => m.componentType === 'Extension');
-
+    
     // Expose handlers to parent (WorkbenchRuntime)
     useEffect(() => {
         const handlers: IAppHandlers = {
@@ -70,8 +70,7 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
         <ErrorBoundary>
             <div className={styles.workbenchApp}>
                 <Toolbar onRefresh={handleRefresh} onOpenDevTools={handleOpenDevTools} />
-                
-                {/* Application Customizer Header Placeholder */}
+                {/* Application Customizer Header Placeholder */}         
                 <div className={`${styles.appCustomizerZone} ${styles.appCustomizerHeader}`} id="app-customizer-header">
                     {activeExtensions.map((ext) => (
                         <div key={ext.instanceId} className={styles.appCustomizerExtensionWrapper}>

@@ -48,8 +48,25 @@ async function build() {
         loader: { 
             '.tsx': 'tsx', 
             '.ts': 'ts',
-            '.css': 'css'
+            '.css': 'css',
         },
+        plugins: [
+            {
+                name: 'css-modules-convention',
+                setup(build) {
+                    // Treat *.module.css as CSS modules (locally scoped)
+                    build.onResolve({ filter: /\.module\.css$/ }, args => ({
+                        path: path.resolve(args.resolveDir, args.path),
+                        namespace: 'css-module',
+                    }));
+                    build.onLoad({ filter: /.*/, namespace: 'css-module' }, args => ({
+                        contents: `@import ${JSON.stringify(args.path)};`,
+                        loader: 'local-css',
+                        resolveDir: path.dirname(args.path),
+                    }));
+                },
+            },
+        ],
         format: 'iife',
         target: 'es2020',
         platform: 'browser',
