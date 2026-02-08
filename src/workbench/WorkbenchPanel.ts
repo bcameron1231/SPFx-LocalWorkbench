@@ -30,6 +30,7 @@ export class WorkbenchPanel {
     private _webParts: IWebPartManifest[] = [];
     private _extensions: IWebPartManifest[] = [];
     private _settings: IWorkbenchSettings;
+    private _liveReloadDebounceTimer: ReturnType<typeof setTimeout> | undefined;
 
     // Creates or reveals the workbench panel
     public static createOrShow(extensionUri: vscode.Uri): void {
@@ -78,16 +79,9 @@ export class WorkbenchPanel {
         // Handle panel disposal
         this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
-        // Handle visibility changes
-        this._panel.onDidChangeViewState(
-            () => {
-                if (this._panel.visible) {
-                    this._update();
-                }
-            },
-            null,
-            this._disposables
-        );
+        // Note: retainContextWhenHidden is enabled so re-setting HTML on
+        // visibility change would destroy all webview state (active web parts,
+        // React tree, loaded bundles).  Only set HTML once during construction.
 
         // Listen for configuration changes
         this._disposables.push(
@@ -105,6 +99,9 @@ export class WorkbenchPanel {
             null,
             this._disposables
         );
+
+        // Watch for bundle changes (live reload)
+        this._setupLiveReloadWatcher();
 
         // Load web parts
         this._loadWebParts();
@@ -158,9 +155,39 @@ export class WorkbenchPanel {
         }
     }
 
+    // Sets up a file system watcher on the SPFx dist/ folder for live reload
+    private _setupLiveReloadWatcher(): void {
+        const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+        if (!workspaceFolder) {
+            return;
+        }
+
+        // Watch for compiled bundle changes in dist/ (heft start output)
+        const distPattern = new vscode.RelativePattern(workspaceFolder, 'dist/*.js');
+        const distWatcher = vscode.workspace.createFileSystemWatcher(distPattern);
+
+        const onBundleChanged = () => {
+            // Debounce: heft may write multiple files in quick succession
+            if (this._liveReloadDebounceTimer) {
+                clearTimeout(this._liveReloadDebounceTimer);
+            }
+            this._liveReloadDebounceTimer = setTimeout(() => {
+                this._panel.webview.postMessage({ command: 'liveReload' });
+            }, 500);
+        };
+
+        distWatcher.onDidChange(onBundleChanged);
+        distWatcher.onDidCreate(onBundleChanged);
+        this._disposables.push(distWatcher);
+    }
+
     // Disposes the panel and all resources
     public dispose(): void {
         WorkbenchPanel.currentPanel = undefined;
+
+        if (this._liveReloadDebounceTimer) {
+            clearTimeout(this._liveReloadDebounceTimer);
+        }
 
         this._panel.dispose();
 
@@ -197,8 +224,7 @@ export class WorkbenchPanel {
             extensionUri: this._extensionUri,
             themeSettings: this._settings.theme,
             contextSettings: this._settings.context,
-            pageContextSettings: this._settings.pageContext,
-            verboseLogging: this._settings.logging.verbose
+            pageContextSettings: this._settings.pageContext
         });
     }
 }

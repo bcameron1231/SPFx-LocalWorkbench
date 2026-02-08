@@ -6,12 +6,18 @@
 export function getWorkbenchStyles(): string {
     return `
         * { box-sizing: border-box; }
+        html {
+            height: auto;
+            overflow-y: auto;
+        }
         body {
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #fff;
+            height: auto;
             min-height: 100vh;
+            overflow-y: auto;
         }
         
         /* Top toolbar - SharePoint style */
@@ -841,21 +847,7 @@ export function getWorkbenchStyles(): string {
             /* content rendered by the extension */
         }
         
-        /* Footer placeholder zone */
-        .app-customizer-footer {
-            border-top: 1px dashed transparent;
-            min-height: 0;
-            margin-bottom: 48px; /* space for status bar */
-            transition: min-height 0.2s, border-color 0.2s;
-        }
-        
-        .app-customizer-footer:not(:empty) {
-            min-height: 4px;
-        }
-        
-        .app-customizer-footer-content:not(:empty) {
-            /* content rendered by the extension */
-        }
+
         
         /* Extension wrapper with toolbar */
         .app-customizer-extension-wrapper {
@@ -925,15 +917,16 @@ export function getWorkbenchStyles(): string {
             display: none;
         }
         
+        
         .extension-picker-popup.open {
             display: block;
         }
         
-        /* Hover label badges for placeholder zones */
-        .app-customizer-header:hover::before,
-        .app-customizer-footer:hover::before {
+        /* Hover label badge for extension zone */
+        .app-customizer-header:hover::before {
             position: absolute;
             left: 8px;
+            top: 0;
             font-size: 10px;
             color: #fff;
             background: #0078d4;
@@ -941,16 +934,7 @@ export function getWorkbenchStyles(): string {
             border-radius: 2px;
             z-index: 5;
             pointer-events: none;
-        }
-        
-        .app-customizer-header:hover::before {
-            content: 'Header Placeholder (Top)';
-            top: 0;
-        }
-        
-        .app-customizer-footer:hover::before {
-            content: 'Footer Placeholder (Bottom)';
-            bottom: 0;
+            content: 'Application Customizer';
         }
     `;
 }

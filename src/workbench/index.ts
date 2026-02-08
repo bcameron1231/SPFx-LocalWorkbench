@@ -17,8 +17,7 @@ export {
     IWorkbenchSettings,
     IContextConfig,
     IPageContextConfig,
-    IThemeConfig,
-    ILoggingConfig
+    IThemeConfig
 } from './config';
 
 // Types

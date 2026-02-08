@@ -41,19 +41,16 @@ export class ExtensionManager {
     private serveUrl: string;
     private contextProvider: SpfxContext;
     private themeProvider: ThemeProvider;
-    private verboseLogging: boolean;
 
     constructor(
         _vscode: IVsCodeApi,
         serveUrl: string,
         contextProvider: SpfxContext,
-        themeProvider: ThemeProvider,
-        verboseLogging: boolean = false
+        themeProvider: ThemeProvider
     ) {
         this.serveUrl = serveUrl;
         this.contextProvider = contextProvider;
         this.themeProvider = themeProvider;
-        this.verboseLogging = verboseLogging;
     }
 
     async loadExtensionBundle(manifest: IWebPartManifest): Promise<void> {
@@ -77,11 +74,19 @@ export class ExtensionManager {
         const baseUrl = manifest.loaderConfig?.internalModuleBaseUrls?.[0] || (this.serveUrl + '/');
         const fullUrl = baseUrl + bundlePath;
 
+        // Cache-bust so live reload always fetches the freshly compiled bundle
+        const cacheBustedUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + '_v=' + Date.now();
+
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = fullUrl;
-            script.onload = () => resolve();
-            script.onerror = () => reject(new Error('Failed to load ' + fullUrl));
+            script.src = cacheBustedUrl;
+            script.onload = () => {
+                resolve();
+            };
+            script.onerror = () => {
+                console.error('ExtensionManager - Failed to load bundle:', fullUrl);
+                reject(new Error('Failed to load ' + fullUrl));
+            };
             document.head.appendChild(script);
         });
     }
@@ -340,9 +345,8 @@ export class ExtensionManager {
                 const hasFooterContent = footerElement.innerHTML.trim().length > 0;
                 
                 if (!hasHeaderContent && !hasFooterContent) {
-                    if (this.verboseLogging) {
-                        console.log('ExtensionManager - Extension rendered but no placeholder content was created. This is normal if the extension uses conditional rendering.');
-                    }
+                    // Extension rendered but no placeholder content was created.
+                    // This is normal if the extension uses conditional rendering.
                 }
             }, 500);
 

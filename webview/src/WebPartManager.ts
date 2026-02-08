@@ -11,20 +11,17 @@ export class WebPartManager {
     private serveUrl: string;
     private contextProvider: SpfxContext;
     private themeProvider: ThemeProvider;
-    private verboseLogging: boolean;
 
     constructor(
         vscode: IVsCodeApi,
         serveUrl: string,
         contextProvider: SpfxContext,
-        themeProvider: ThemeProvider,
-        verboseLogging: boolean = false
+        themeProvider: ThemeProvider
     ) {
         this.vscode = vscode;
         this.serveUrl = serveUrl;
         this.contextProvider = contextProvider;
         this.themeProvider = themeProvider;
-        this.verboseLogging = verboseLogging;
     }
 
     async loadWebPartBundle(manifest: IWebPartManifest): Promise<void> {
@@ -48,14 +45,16 @@ export class WebPartManager {
         const baseUrl = manifest.loaderConfig?.internalModuleBaseUrls?.[0] || (this.serveUrl + '/');
         const fullUrl = baseUrl + bundlePath;
 
+        // Cache-bust so live reload always fetches the freshly compiled bundle
+        const cacheBustedUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + '_v=' + Date.now();
+
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = fullUrl;
+            script.src = cacheBustedUrl;
             script.onload = () => {
                 resolve();
             };
             script.onerror = () => {
-
                 reject(new Error('Failed to load ' + fullUrl));
             };
             document.head.appendChild(script);

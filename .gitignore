@@ -1,7 +1,6 @@
 out
 dist
 node_modules
-workbench-runtime
 *.vsix
 # SPFx sample project artifacts
 samples/**/node_modules/

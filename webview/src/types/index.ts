@@ -11,7 +11,6 @@ export interface IWorkbenchConfig {
     theme?: IThemeSettings;
     context?: IContextSettings;
     pageContext?: IPageContextSettings;
-    verboseLogging?: boolean;
 }
 
 export interface IWebPartManifest {

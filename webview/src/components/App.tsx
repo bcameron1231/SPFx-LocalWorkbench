@@ -72,7 +72,7 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
                 {/* Application Customizer Header Placeholder */}
                 <div className="app-customizer-zone app-customizer-header" id="app-customizer-header">
                     {activeExtensions.map((ext, index) => (
-                        <div key={ext.instanceId + '-header'} className="app-customizer-extension-wrapper">
+                        <div key={ext.instanceId} className="app-customizer-extension-wrapper">
                             <div className="app-customizer-extension-toolbar">
                                 <span className="app-customizer-extension-label">
                                     {ext.manifest.preconfiguredEntries?.[0]?.title?.default || ext.manifest.alias}
@@ -90,7 +90,7 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
                                     ariaLabel="Remove extension"
                                     styles={{ root: { color: '#a80000', height: 24, width: 24 }, icon: { fontSize: 12 } }}
                                     onClick={() => {
-                                        window.dispatchEvent(new CustomEvent('removeExtension', { detail: { index } }));
+                                        window.dispatchEvent(new CustomEvent('removeExtension', { detail: { instanceId: ext.instanceId } }));
                                     }}
                                 />
                             </div>
@@ -146,17 +146,6 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
                         }));
                     }}
                 />
-
-                {/* Application Customizer Footer Placeholder */}
-                <div className="app-customizer-zone app-customizer-footer" id="app-customizer-footer">
-                    {activeExtensions.map((ext) => (
-                        <div
-                            key={ext.instanceId + '-footer'}
-                            className="app-customizer-footer-content"
-                            id={`ext-footer-${ext.instanceId}`}
-                        />
-                    ))}
-                </div>
 
                 {/* Extension picker overlay */}
                 {extensionPickerOpen && (

@@ -40,7 +40,7 @@ function initialize() {
         }) as EventListener);
 
         window.addEventListener('removeExtension', ((e: CustomEvent) => {
-            runtime.removeExtension(e.detail.index);
+            runtime.removeExtension(e.detail.instanceId);
         }) as EventListener);
 
         window.addEventListener('updateProperty', ((e: CustomEvent) => {
@@ -65,6 +65,14 @@ function initialize() {
         window.addEventListener('openDevTools', (() => {
             runtime.handleOpenDevTools();
         }) as EventListener);
+
+        // Listen for live reload messages from the extension
+        window.addEventListener('message', (event: MessageEvent) => {
+            const message = event.data;
+            if (message && message.command === 'liveReload') {
+                runtime.liveReload();
+            }
+        });
 
         // Mount React app
         const root = document.getElementById('root');

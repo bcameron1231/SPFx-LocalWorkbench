@@ -13,10 +13,3 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
-# Exclude the tgz but keep the extracted package
-workbench-runtime/*.tgz
-# Exclude d.ts files from runtime (not needed at runtime)
-workbench-runtime/package/lib/**/*.d.ts
-workbench-runtime/package/lib/**/*.d.ts.map
-# Keep the local-workbench folder (runtime JS files)
-!workbench-runtime/package/local-workbench/**

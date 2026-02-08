@@ -48,13 +48,14 @@ export const WebPartPicker: FC<IWebPartPickerProps> = ({
                     {filteredWebParts.length > 0 ? (
                         filteredWebParts.map((wp) => {
                             const title = wp.preconfiguredEntries?.[0]?.title?.default || wp.alias;
+                            const manifestIndex = webParts.findIndex(w => w.id === wp.id);
                             return (
                                 <div
                                     key={wp.id}
                                     className="picker-item"
                                     data-insert={insertIndex}
-                                    data-manifest={webParts.indexOf(wp)}
-                                    onClick={() => onSelect(insertIndex, webParts.indexOf(wp))}
+                                    data-manifest={manifestIndex}
+                                    onClick={() => onSelect(insertIndex, manifestIndex)}
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',

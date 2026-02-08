@@ -27,8 +27,6 @@ export interface IHtmlGeneratorConfig {
     contextSettings?: Partial<IContextConfig>;
     // Page context settings from user configuration
     pageContextSettings?: Partial<IPageContextConfig>;
-    // Enable verbose logging
-    verboseLogging?: boolean;
 }
 
 // Generates the Content Security Policy for the webview
@@ -107,8 +105,7 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
         extensions: extensions,
         theme: config.themeSettings,
         context: config.contextSettings,
-        pageContext: config.pageContextSettings,
-        verboseLogging: config.verboseLogging
+        pageContext: config.pageContextSettings
     };
     
     return `

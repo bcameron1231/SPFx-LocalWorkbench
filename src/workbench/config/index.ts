@@ -7,7 +7,6 @@ export {
     IContextConfig,
     IPageContextConfig,
     IThemeConfig,
-    ILoggingConfig,
     getWorkbenchSettings,
     onConfigurationChanged,
     openWorkbenchSettings,

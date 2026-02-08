@@ -78,8 +78,6 @@ This extension provides a **custom-built workbench environment** that simulates 
 |---------|---------|-------------|
 | `spfxLocalWorkbench.serveUrl` | `https://localhost:4321` | The URL where SPFx serve is running |
 | `spfxLocalWorkbench.autoOpenWorkbench` | `false` | Auto-open workbench when starting serve |
-| `spfxLocalWorkbench.devProxyEnabled` | `false` | Enable Dev Proxy integration |
-| `spfxLocalWorkbench.devProxyPort` | `8000` | Dev Proxy port |
 
 ### Context Settings
 
@@ -108,13 +106,6 @@ Customize the mock SharePoint context:
 | `spfxLocalWorkbench.pageContext.webTitle` | `Local Workbench` | Title of the web |
 | `spfxLocalWorkbench.pageContext.webTemplate` | `STS#3` | Web template ID |
 | `spfxLocalWorkbench.pageContext.isSPO` | `true` | Whether this is SharePoint Online |
-
-### Logging Settings
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `spfxLocalWorkbench.logging.enabled` | `true` | Enable logging in the output channel |
-| `spfxLocalWorkbench.logging.verbose` | `false` | Enable verbose logging for debugging |
 
 ## Troubleshooting
 

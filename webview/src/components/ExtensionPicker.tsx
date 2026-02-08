@@ -30,8 +30,10 @@ export const ExtensionPicker: FC<IExtensionPickerProps> = ({
         return title.toLowerCase().includes(filter.toLowerCase());
     });
 
+    const popupClassName = `extension-picker-popup ${isOpen ? 'open' : ''}`;
+
     return (
-        <div className={`extension-picker-popup ${isOpen ? 'open' : ''}`}>
+        <div className={popupClassName}>
             <Stack tokens={{ childrenGap: 8 }} styles={{ root: { padding: '12px' } }}>
                 <SearchBox
                     placeholder="Search extensions"
@@ -46,11 +48,14 @@ export const ExtensionPicker: FC<IExtensionPickerProps> = ({
                     {filteredExtensions.length > 0 ? (
                         filteredExtensions.map((ext) => {
                             const title = ext.preconfiguredEntries?.[0]?.title?.default || ext.alias;
+                            const manifestIndex = extensions.findIndex(e => e.id === ext.id);
                             return (
                                 <div
                                     key={ext.id}
                                     className="picker-item"
-                                    onClick={() => onSelect(extensions.indexOf(ext))}
+                                    onClick={() => {
+                                        onSelect(manifestIndex);
+                                    }}
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',
