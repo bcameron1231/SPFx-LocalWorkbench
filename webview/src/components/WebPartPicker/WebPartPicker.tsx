@@ -1,15 +1,17 @@
 import React, { useState, useEffect, FC } from 'react';
 import { SearchBox, Text, Stack, Icon } from '@fluentui/react';
-import type { IWebPartManifest } from '../types';
-import styles from './ExtensionPicker.module.css';
+import type { IWebPartManifest } from '../../types';
+import styles from './WebPartPicker.module.css';
 
-interface IExtensionPickerProps {
+interface IWebPartPickerProps {
+    insertIndex: number;
     manifests: IWebPartManifest[];
     isOpen: boolean;
-    onSelect: (manifestIndex: number) => void;
+    onSelect: (insertIndex: number, manifestIndex: number) => void;
 }
 
-export const ExtensionPicker: FC<IExtensionPickerProps> = ({
+export const WebPartPicker: FC<IWebPartPickerProps> = ({
+    insertIndex,
     manifests,
     isOpen,
     onSelect
@@ -23,40 +25,38 @@ export const ExtensionPicker: FC<IExtensionPickerProps> = ({
         }
     }, [isOpen]);
 
-    const extensions = manifests.filter(m => m.componentType === 'Extension');
+    const webParts = manifests.filter(m => m.componentType === 'WebPart');
 
-    const filteredExtensions = extensions.filter(ext => {
+    const filteredWebParts = webParts.filter(wp => {
         if (!filter) return true;
-        const title = ext.preconfiguredEntries?.[0]?.title?.default || ext.alias;
+        const title = wp.preconfiguredEntries?.[0]?.title?.default || wp.alias;
         return title.toLowerCase().includes(filter.toLowerCase());
     });
 
-    const popupClassName = `${styles.popup} ${isOpen ? styles.open : ''}`;
-
     return (
-        <div className={popupClassName}>
+        <div className={`${styles.popup} ${isOpen ? styles.open : ''}`} id={`picker-${insertIndex}`}>
             <Stack tokens={{ childrenGap: 8 }} styles={{ root: { padding: '12px' } }}>
                 <SearchBox
-                    placeholder="Search extensions"
+                    placeholder="Search web parts"
                     value={filter}
                     onChange={(_, newValue) => setFilter(newValue || '')}
                     autoFocus={isOpen}
                 />
                 <Text variant="medium" styles={{ root: { fontWeight: 600 } }}>
-                    Available extensions
+                    Available web parts
                 </Text>
-                <div className={styles.results}>
-                    {filteredExtensions.length > 0 ? (
-                        filteredExtensions.map((ext) => {
-                            const title = ext.preconfiguredEntries?.[0]?.title?.default || ext.alias;
-                            const manifestIndex = extensions.findIndex(e => e.id === ext.id);
+                <div className={styles.results} id={`picker-results-${insertIndex}`}>
+                    {filteredWebParts.length > 0 ? (
+                        filteredWebParts.map((wp) => {
+                            const title = wp.preconfiguredEntries?.[0]?.title?.default || wp.alias;
+                            const manifestIndex = webParts.findIndex(w => w.id === wp.id);
                             return (
                                 <div
-                                    key={ext.id}
+                                    key={wp.id}
                                     className={styles.item}
-                                    onClick={() => {
-                                        onSelect(manifestIndex);
-                                    }}
+                                    data-insert={insertIndex}
+                                    data-manifest={manifestIndex}
+                                    onClick={() => onSelect(insertIndex, manifestIndex)}
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',
@@ -66,7 +66,7 @@ export const ExtensionPicker: FC<IExtensionPickerProps> = ({
                                         transition: 'background-color 0.1s'
                                     }}
                                 >
-                                    <Icon iconName="CustomizeToolbar" styles={{ root: { fontSize: '20px', marginRight: '12px' } }} />
+                                    <Icon iconName="WebAppBuilderFragment" styles={{ root: { fontSize: '20px', marginRight: '12px' } }} />
                                     <Text>{title}</Text>
                                 </div>
                             );
@@ -74,7 +74,7 @@ export const ExtensionPicker: FC<IExtensionPickerProps> = ({
                     ) : (
                         <Stack horizontalAlign="center" styles={{ root: { padding: '12px' } }}>
                             <Text styles={{ root: { color: '#605e5c' } }}>
-                                No extensions found
+                                No web parts found
                             </Text>
                         </Stack>
                     )}

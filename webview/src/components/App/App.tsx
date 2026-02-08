@@ -1,12 +1,12 @@
 import React, { useState, useEffect, FC } from 'react';
-import type { IWorkbenchConfig, IWebPartManifest, IWebPartConfig, IActiveWebPart, IExtensionConfig } from '../types';
-import { isActiveWebPart } from '../types';
-import { WorkbenchCanvas } from './WorkbenchCanvas';
-import { PropertyPanePanel } from './PropertyPanePanel';
-import { ErrorBoundary } from './ErrorBoundary';
-import { Toolbar } from './Toolbar';
-import { ExtensionPicker } from './ExtensionPicker';
-import { ExtensionPropertiesPanel } from './ExtensionPropertiesPanel';
+import type { IWorkbenchConfig, IWebPartManifest, IWebPartConfig, IActiveWebPart, IExtensionConfig } from '../../types';
+import { isActiveWebPart } from '../../types';
+import { WorkbenchCanvas } from '../WorkbenchCanvas';
+import { PropertyPanePanel } from '../PropertyPanePanel';
+import { ErrorBoundary } from '../ErrorBoundary';
+import { Toolbar } from '../Toolbar';
+import { ExtensionPicker } from '../ExtensionPicker';
+import { ExtensionPropertiesPanel } from '../ExtensionPropertiesPanel';
 import { IconButton } from '@fluentui/react';
 import styles from './App.module.css';
 

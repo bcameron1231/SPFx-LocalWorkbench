@@ -1,7 +1,7 @@
 import React, { useState, Fragment, FC } from 'react';
 import { IconButton, Text, Stack } from '@fluentui/react';
-import type { IWebPartManifest, IWebPartConfig } from '../types';
-import { WebPartPicker } from './WebPartPicker';
+import type { IWebPartManifest, IWebPartConfig } from '../../types';
+import { WebPartPicker } from '../WebPartPicker';
 import styles from './WorkbenchCanvas.module.css';
 
 interface IWorkbenchCanvasProps {

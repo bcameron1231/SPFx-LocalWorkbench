@@ -16,8 +16,8 @@ import {
     Stack,
     IconButton
 } from '@fluentui/react';
-import type { IActiveWebPart } from '../types';
-import { PropertyPaneFieldType } from '../mocks/PropertyPaneMocks';
+import type { IActiveWebPart } from '../../types';
+import { PropertyPaneFieldType } from '../../mocks/PropertyPaneMocks';
 import styles from './PropertyPanePanel.module.css';
 
 interface IPropertyPanePanelProps {

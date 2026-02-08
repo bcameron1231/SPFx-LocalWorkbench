@@ -1,0 +1,1 @@
+export { WebPartPicker } from './WebPartPicker';

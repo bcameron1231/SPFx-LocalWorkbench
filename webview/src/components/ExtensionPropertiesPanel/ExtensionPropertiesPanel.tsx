@@ -8,7 +8,7 @@ import {
     PrimaryButton,
     Separator
 } from '@fluentui/react';
-import type { IExtensionConfig } from '../types';
+import type { IExtensionConfig } from '../../types';
 import styles from './ExtensionPropertiesPanel.module.css';
 
 interface IExtensionPropertiesPanelProps {

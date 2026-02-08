@@ -1,0 +1,1 @@
+export { ExtensionPropertiesPanel } from './ExtensionPropertiesPanel';
