@@ -208,6 +208,7 @@ export class WorkbenchRuntime {
                     extension.instance.onDispose();
                 } catch (e: any) {
                     // Error disposing
+                    console.error('Workbench - Error disposing extension:', e);
                 }
             }
 
@@ -269,6 +270,7 @@ export class WorkbenchRuntime {
                 webPart.instance.onDispose();
             } catch (e: any) {
                 // Error disposing
+                console.error('Workbench - Error disposing web part:', e);
             }
         }
 
