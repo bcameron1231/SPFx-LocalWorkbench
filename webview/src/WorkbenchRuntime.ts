@@ -75,7 +75,7 @@ export class WorkbenchRuntime {
             
             const webPartCount = this.loadedManifests.filter(m => m.componentType === 'WebPart').length;
             const extensionCount = this.loadedManifests.filter(m => m.componentType === 'Extension').length;
-            this.updateWebPartCount(webPartCount, extensionCount);
+            this.updateComponentCount(webPartCount, extensionCount);
 
             // Update React app
             if (this.appHandlers) {
@@ -406,7 +406,7 @@ export class WorkbenchRuntime {
 
             const webPartCount = this.loadedManifests.filter(m => m.componentType === 'WebPart').length;
             const extensionCount = this.loadedManifests.filter(m => m.componentType === 'Extension').length;
-            this.updateWebPartCount(webPartCount, extensionCount);
+            this.updateComponentCount(webPartCount, extensionCount);
 
             if (this.appHandlers) {
                 this.appHandlers.setManifests(this.loadedManifests);
@@ -462,14 +462,15 @@ export class WorkbenchRuntime {
         }
     }
 
-    private updateWebPartCount(count: number, extensionCount?: number): void {
-        const webPartCountEl = document.getElementById('webpart-count');
-        if (webPartCountEl) {
-            let text = count + ' web part(s) available';
+    private updateComponentCount(webpartCount: number, extensionCount?: number): void {
+        const componentCountEl = document.getElementById('component-count');
+        if (componentCountEl) {
+            let text = `${webpartCount} web part${webpartCount === 1 ? '' : 's'}`;
             if (extensionCount && extensionCount > 0) {
-                text += ', ' + extensionCount + ' extension(s)';
+                text += `, ${extensionCount} extension${extensionCount === 1 ? '' : 's'}`;
             }
-            webPartCountEl.textContent = text;
+            text += ' available';
+            componentCountEl.textContent = text;
         }
     }
 

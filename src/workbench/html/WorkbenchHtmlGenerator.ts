@@ -72,17 +72,18 @@ function generateMainContent(): string {
 
 // Generates the status bar HTML
 function generateStatusBar(webPartCount: number, extensionCount: number = 0): string {
-    let countText = `${webPartCount} web part(s) detected`;
+    let countText = `${webPartCount} web part${webPartCount === 0 ? '' : 's'}`;
     if (extensionCount > 0) {
-        countText += `, ${extensionCount} extension(s)`;
+        countText += `, ${extensionCount} extension${extensionCount === 0 ? '' : 's'}`;
     }
+    countText += ' detected';
     return `
     <div class="status-bar">
         <div class="status-indicator">
             <div class="status-dot" id="status-dot"></div>
             <span id="status-text">Initializing...</span>
         </div>
-        <span id="webpart-count">${countText}</span>
+        <span id="component-count">${countText}</span>
     </div>
     `;
 }
