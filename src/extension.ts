@@ -33,17 +33,17 @@ export function activate(context: vscode.ExtensionContext) {
 				return;
 			}
 
-		// Create a terminal and run heft start
-		const terminal = vscode.window.createTerminal('SPFx Serve');
-		terminal.show();
-		terminal.sendText('heft start');
+			// Create a terminal and run heft start
+			const terminal = vscode.window.createTerminal('SPFx Serve');
+			terminal.show();
+			terminal.sendText('heft start --clean --nobrowser');
 
-		// Open the workbench after a delay
-		setTimeout(() => {
-			WorkbenchPanel.createOrShow(context.extensionUri);
-		}, 3000);
-	}
-);
+			// Open the workbench after a delay
+			setTimeout(() => {
+				WorkbenchPanel.createOrShow(context.extensionUri);
+			}, 3000);
+		}
+	);
 
 	// Register the Detect Web Parts command
 	const detectWebPartsCommand = vscode.commands.registerCommand(
@@ -70,13 +70,13 @@ export function activate(context: vscode.ExtensionContext) {
 	// Auto-detect SPFx projects and show status bar item
 	const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
 	statusBarItem.command = 'spfx-local-workbench.openWorkbench';
-	
+
 	async function updateStatusBar() {
 		const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
 		if (workspaceFolder) {
 			const detector = new SpfxProjectDetector(workspaceFolder.uri.fsPath);
 			const isSpfx = await detector.isSpfxProject();
-			
+
 			if (isSpfx) {
 				const version = await detector.getSpfxVersion();
 				statusBarItem.text = `$(beaker) SPFx Workbench`;
@@ -115,4 +115,4 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
