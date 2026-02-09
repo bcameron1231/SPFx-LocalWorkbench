@@ -1,31 +1,13 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import * as path from 'path';
-import {
+import type {
     IWebPartManifest,
-    IPreconfiguredEntry,
-    ILocalizedString,
-    ILoaderConfig,
-    IScriptResource,
     ISpfxConfig,
-    IBundleEntry,
-    IComponentEntry
 } from './types';
 
-// Re-export types for backward compatibility
-export {
-    IWebPartManifest,
-    IPreconfiguredEntry,
-    ILocalizedString,
-    ILoaderConfig,
-    IScriptResource,
-    ISpfxConfig,
-    IBundleEntry,
-    IComponentEntry
-};
-
 export class SpfxProjectDetector {
-    private workspacePath: string;
+    public readonly workspacePath: string;
 
     constructor(workspacePath: string) {
         this.workspacePath = workspacePath;
@@ -34,13 +16,9 @@ export class SpfxProjectDetector {
     // Checks if the current workspace is an SPFx project
     public async isSpfxProject(): Promise<boolean> {
         const packageJsonPath = path.join(this.workspacePath, 'package.json');
-        
-        if (!fs.existsSync(packageJsonPath)) {
-            return false;
-        }
 
         try {
-            const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+            const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
             const dependencies = {
                 ...packageJson.dependencies,
                 ...packageJson.devDependencies
@@ -54,7 +32,9 @@ export class SpfxProjectDetector {
                 dependencies['@microsoft/generator-sharepoint']
             );
         } catch (error) {
-            console.error('SpfxProjectDetector - Error reading package.json:', error);
+            if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+                console.error('SpfxProjectDetector - Error reading package.json:', error);
+            }
             return false;
         }
     }
@@ -62,17 +42,14 @@ export class SpfxProjectDetector {
     // Gets the SPFx version from the project
     public async getSpfxVersion(): Promise<string | undefined> {
         const packageJsonPath = path.join(this.workspacePath, 'package.json');
-        
-        if (!fs.existsSync(packageJsonPath)) {
-            return undefined;
-        }
 
         try {
-            const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+            const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
             const dependencies = {
                 ...packageJson.dependencies,
                 ...packageJson.devDependencies
-            };            return dependencies['@microsoft/sp-core-library'] || 
+            };
+            return dependencies['@microsoft/sp-core-library'] || 
                    dependencies['@microsoft/sp-webpart-base'];
         } catch (error) {
             return undefined;
@@ -80,15 +57,11 @@ export class SpfxProjectDetector {
     }
 
     // Checks if the project uses Heft (SPFx 1.22+) instead of Gulp
-    public usesHeft(): boolean {
+    public async usesHeft(): Promise<boolean> {
         const packageJsonPath = path.join(this.workspacePath, 'package.json');
-        
-        if (!fs.existsSync(packageJsonPath)) {
-            return false;
-        }
 
         try {
-            const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+            const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
             const dependencies = {
                 ...packageJson.dependencies,
                 ...packageJson.devDependencies
@@ -116,8 +89,10 @@ export class SpfxProjectDetector {
         // Look for manifest files in src directory
         const srcPath = path.join(this.workspacePath, 'src');
         console.log('Looking for manifests in:', srcPath);
-        
-        if (!fs.existsSync(srcPath)) {
+
+        try {
+            await fs.access(srcPath);
+        } catch {
             console.log('src directory does not exist');
             return manifests;
         }
@@ -127,7 +102,7 @@ export class SpfxProjectDetector {
         
         for (const manifestFile of manifestFiles) {
             try {
-                const content = fs.readFileSync(manifestFile, 'utf8');
+                const content = await fs.readFile(manifestFile, 'utf8');
                 // Remove BOM and comments (SPFx manifests can have comments)
                 const cleanContent = this.removeJsonComments(content.replace(/^\uFEFF/, ''));
                 const manifest = JSON.parse(cleanContent) as IWebPartManifest;
@@ -151,7 +126,9 @@ export class SpfxProjectDetector {
         const manifests: IWebPartManifest[] = [];
         
         const srcPath = path.join(this.workspacePath, 'src');
-        if (!fs.existsSync(srcPath)) {
+        try {
+            await fs.access(srcPath);
+        } catch {
             return manifests;
         }
 
@@ -159,7 +136,7 @@ export class SpfxProjectDetector {
         
         for (const manifestFile of manifestFiles) {
             try {
-                const content = fs.readFileSync(manifestFile, 'utf8');
+                const content = await fs.readFile(manifestFile, 'utf8');
                 const cleanContent = this.removeJsonComments(content.replace(/^\uFEFF/, ''));
                 const manifest = JSON.parse(cleanContent) as IWebPartManifest;
                 
@@ -176,15 +153,11 @@ export class SpfxProjectDetector {
     }
 
     // Gets the serve configuration
-    public getServeConfig(): { initialPage?: string; port?: number } {
+    public async getServeConfig(): Promise<{ initialPage?: string; port?: number }> {
         const serveConfigPath = path.join(this.workspacePath, 'config', 'serve.json');
-        
-        if (!fs.existsSync(serveConfigPath)) {
-            return { port: 4321 };
-        }
 
         try {
-            const content = fs.readFileSync(serveConfigPath, 'utf8');
+            const content = await fs.readFile(serveConfigPath, 'utf8');
             const cleanContent = this.removeJsonComments(content);
             const config = JSON.parse(cleanContent);
             
@@ -198,15 +171,11 @@ export class SpfxProjectDetector {
     }
 
     // Gets bundle configuration
-    public getBundleConfig(): ISpfxConfig | undefined {
+    public async getBundleConfig(): Promise<ISpfxConfig | undefined> {
         const configPath = path.join(this.workspacePath, 'config', 'config.json');
-        
-        if (!fs.existsSync(configPath)) {
-            return undefined;
-        }
 
         try {
-            const content = fs.readFileSync(configPath, 'utf8');
+            const content = await fs.readFile(configPath, 'utf8');
             const cleanContent = this.removeJsonComments(content);
             return JSON.parse(cleanContent);
         } catch (error) {
@@ -218,7 +187,7 @@ export class SpfxProjectDetector {
     private async findManifestFiles(dir: string): Promise<string[]> {
         const files: string[] = [];
         
-        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        const entries = await fs.readdir(dir, { withFileTypes: true });
         
         for (const entry of entries) {
             const fullPath = path.join(dir, entry.name);
@@ -229,7 +198,7 @@ export class SpfxProjectDetector {
             } else if (entry.isFile() && entry.name.endsWith('.manifest.json')) {
                 files.push(fullPath);
             }
-    }
+        }
         
         return files;
     }

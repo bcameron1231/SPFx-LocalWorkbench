@@ -73,6 +73,9 @@ function initialize() {
             if (message && message.command === 'liveReload') {
                 runtime.liveReload();
             }
+            if (message && message.command === 'settingsChanged' && message.settings) {
+                runtime.updateSettings(message.settings);
+            }
         });
 
         // Mount React app

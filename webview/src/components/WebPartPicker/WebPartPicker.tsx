@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FC } from 'react';
+import React, { useState, useEffect, useRef, FC } from 'react';
 import { SearchBox, Text, Stack, Icon } from '@fluentui/react';
 import type { IWebPartManifest } from '../../types';
 import styles from './WebPartPicker.module.css';
@@ -17,11 +17,24 @@ export const WebPartPicker: FC<IWebPartPickerProps> = ({
     onSelect
 }) => {
     const [filter, setFilter] = useState('');
+    const [openUpward, setOpenUpward] = useState(false);
+    const popupRef = useRef<HTMLDivElement>(null);
 
     // Reset filter when picker closes
     useEffect(() => {
         if (!isOpen) {
             setFilter('');
+            setOpenUpward(false);
+        }
+    }, [isOpen]);
+
+    // Flip the popup upward if it would overflow the viewport
+    useEffect(() => {
+        if (isOpen && popupRef.current) {
+            const rect = popupRef.current.getBoundingClientRect();
+            if (rect.bottom > window.innerHeight) {
+                setOpenUpward(true);
+            }
         }
     }, [isOpen]);
 
@@ -34,7 +47,11 @@ export const WebPartPicker: FC<IWebPartPickerProps> = ({
     });
 
     return (
-        <div className={`${styles.popup} ${isOpen ? styles.open : ''}`} id={`picker-${insertIndex}`}>
+        <div
+            ref={popupRef}
+            className={`${styles.popup} ${isOpen ? styles.open : ''} ${openUpward ? styles.upward : ''}`}
+            id={`picker-${insertIndex}`}
+        >
             <Stack tokens={{ childrenGap: 8 }} styles={{ root: { padding: '12px' } }}>
                 <SearchBox
                     placeholder="Search web parts"

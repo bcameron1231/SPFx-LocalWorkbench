@@ -7,7 +7,7 @@
   "icon": "media/icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/spfx-local-workbench"
+    "url": "https://github.com/bcameron1231/SPFx-LocalWorkbench"
   },
   "engines": {
     "vscode": "^1.100.0",
@@ -26,7 +26,7 @@
     "Local Development"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "workspaceContains:**/config/package-solution.json"
   ],
   "main": "./dist/extension.js",
   "contributes": {

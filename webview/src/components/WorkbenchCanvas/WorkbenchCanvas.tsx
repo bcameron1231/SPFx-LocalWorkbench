@@ -63,7 +63,6 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
                     <Fragment key={webPart.instanceId}>
                         <WebPartZone
                             webPart={webPart}
-                            index={index}
                             onEdit={() => onEditWebPart(index)}
                             onDelete={() => onDeleteWebPart(index)}
                         />
@@ -131,14 +130,12 @@ const AddZone: FC<IAddZoneProps> = ({
 
 interface IWebPartZoneProps {
     webPart: IWebPartConfig;
-    index: number;
     onEdit: () => void;
     onDelete: () => void;
 }
 
 const WebPartZone: FC<IWebPartZoneProps> = ({
     webPart,
-    index,
     onEdit,
     onDelete
 }) => {
@@ -159,7 +156,7 @@ const WebPartZone: FC<IWebPartZoneProps> = ({
                 />
             </div>
             <div className={styles.webPartContainer}>
-                <div className={styles.webPartContent} id={`webpart-${index}`}>
+                <div className={styles.webPartContent} id={`webpart-${webPart.instanceId}`}>
                     {/* Web part rendered here by WorkbenchRuntime */}
                 </div>
             </div>

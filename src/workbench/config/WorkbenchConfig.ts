@@ -111,7 +111,7 @@ export function onConfigurationChanged(callback: (settings: IWorkbenchSettings) 
 
 // Opens the settings UI filtered to SPFx Local Workbench settings
 export async function openWorkbenchSettings(): Promise<void> {
-    await vscode.commands.executeCommand('workbench.action.openSettings', '@ext:spfxLocalWorkbench');
+    await vscode.commands.executeCommand('workbench.action.openSettings', '@ext:BeauCameron.spfx-local-workbench');
 }
 
 // Serializes the settings to JSON for passing to the webview

@@ -1,5 +1,25 @@
 import { spPropertyPaneModule } from './PropertyPaneMocks';
 
+// Deep recursive merge matching lodash merge behaviour
+function deepMerge(target: any, ...sources: any[]): any {
+    for (const source of sources) {
+        if (source == null) { continue; }
+        for (const key of Object.keys(source)) {
+            const srcVal = source[key];
+            const tgtVal = target[key];
+            if (
+                srcVal && typeof srcVal === 'object' && !Array.isArray(srcVal) &&
+                tgtVal && typeof tgtVal === 'object' && !Array.isArray(tgtVal)
+            ) {
+                target[key] = deepMerge({ ...tgtVal }, srcVal);
+            } else {
+                target[key] = srcVal;
+            }
+        }
+    }
+    return target;
+}
+
 export function initializeSpfxMocks(): void {
     const amdModules = window.__amdModules!;
 
@@ -149,7 +169,7 @@ export function initializeSpfxMocks(): void {
         escape: (s: string) => s,
         cloneDeep: (o: any) => JSON.parse(JSON.stringify(o)),
         isEqual: (a: any, b: any) => JSON.stringify(a) === JSON.stringify(b),
-        merge: Object.assign,
+        merge: deepMerge,
         find: (arr: any[], pred: any) => arr.find(pred),
         findIndex: (arr: any[], pred: any) => arr.findIndex(pred)
     };

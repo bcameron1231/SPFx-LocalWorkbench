@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FC } from 'react';
+import React, { useState, useEffect, useRef, FC } from 'react';
 import { SearchBox, Text, Stack, Icon } from '@fluentui/react';
 import type { IWebPartManifest } from '../../types';
 import styles from './ExtensionPicker.module.css';
@@ -15,11 +15,24 @@ export const ExtensionPicker: FC<IExtensionPickerProps> = ({
     onSelect
 }) => {
     const [filter, setFilter] = useState('');
+    const [openUpward, setOpenUpward] = useState(false);
+    const popupRef = useRef<HTMLDivElement>(null);
 
     // Reset filter when picker closes
     useEffect(() => {
         if (!isOpen) {
             setFilter('');
+            setOpenUpward(false);
+        }
+    }, [isOpen]);
+
+    // Flip the popup upward if it would overflow the viewport
+    useEffect(() => {
+        if (isOpen && popupRef.current) {
+            const rect = popupRef.current.getBoundingClientRect();
+            if (rect.bottom > window.innerHeight) {
+                setOpenUpward(true);
+            }
         }
     }, [isOpen]);
 
@@ -31,10 +44,10 @@ export const ExtensionPicker: FC<IExtensionPickerProps> = ({
         return title.toLowerCase().includes(filter.toLowerCase());
     });
 
-    const popupClassName = `${styles.popup} ${isOpen ? styles.open : ''}`;
+    const popupClassName = `${styles.popup} ${isOpen ? styles.open : ''} ${openUpward ? styles.upward : ''}`;
 
     return (
-        <div className={popupClassName}>
+        <div ref={popupRef} className={popupClassName}>
             <Stack tokens={{ childrenGap: 8 }} styles={{ root: { padding: '12px' } }}>
                 <SearchBox
                     placeholder="Search extensions"

@@ -1,6 +1,6 @@
-import type { ContextSettings, PageContextSettings } from '../types';
+import type { IContextSettings, IPageContextSettings } from '../types';
 
-const defaultContextSettings: ContextSettings = {
+const defaultContextSettings: IContextSettings = {
     siteUrl: 'https://contoso.sharepoint.com/sites/devsite',
     webUrl: 'https://contoso.sharepoint.com/sites/devsite',
     userDisplayName: 'Local Workbench User',
@@ -11,7 +11,7 @@ const defaultContextSettings: ContextSettings = {
     customContext: {}
 };
 
-const defaultPageContextSettings: PageContextSettings = {
+const defaultPageContextSettings: IPageContextSettings = {
     webTitle: 'Local Workbench',
     webDescription: 'Local development workbench for SPFx web parts',
     webTemplate: 'STS#3',
@@ -20,12 +20,12 @@ const defaultPageContextSettings: PageContextSettings = {
 };
 
 export class SpfxContext {
-    private contextSettings: ContextSettings;
-    private pageContextSettings: PageContextSettings;
+    private contextSettings: IContextSettings;
+    private pageContextSettings: IPageContextSettings;
 
     constructor(
-        contextSettings?: Partial<ContextSettings>,
-        pageContextSettings?: Partial<PageContextSettings>
+        contextSettings?: Partial<IContextSettings>,
+        pageContextSettings?: Partial<IPageContextSettings>
     ) {
         this.contextSettings = { ...defaultContextSettings, ...contextSettings };
         this.pageContextSettings = { ...defaultPageContextSettings, ...pageContextSettings };
