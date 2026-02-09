@@ -5,6 +5,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { WorkbenchRuntime } from './WorkbenchRuntime';
+import { initializeProxyBridge } from './proxy';
 import { App, IAppHandlers } from './components/App';
 import './styles/global.css';
 
@@ -24,8 +25,13 @@ function initialize() {
             throw new Error('Workbench configuration not found');
         }
 
-        // Create the workbench runtime
-        const runtime = new WorkbenchRuntime(config);
+        // Initialize the API proxy bridge so HTTP client calls route through
+        // the extension host for configurable mock/passthrough responses
+        const vscodeApi = window.acquireVsCodeApi();
+        initializeProxyBridge(vscodeApi);
+
+        // Create the workbench runtime (pass vscodeApi so it doesn't call acquireVsCodeApi again)
+        const runtime = new WorkbenchRuntime(config, vscodeApi);
 
         // Setup event listeners for React -> Runtime communication
         window.addEventListener('addWebPart', ((e: CustomEvent) => {

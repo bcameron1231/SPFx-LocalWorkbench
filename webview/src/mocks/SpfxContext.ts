@@ -1,4 +1,7 @@
 import type { IContextSettings, IPageContextSettings } from '../types';
+import { ProxyHttpClient } from '../proxy/ProxyHttpClient';
+import { ProxySPHttpClient } from '../proxy/ProxySPHttpClient';
+import { ProxyAadHttpClient } from '../proxy/ProxyAadHttpClient';
 
 const defaultContextSettings: IContextSettings = {
     siteUrl: 'https://contoso.sharepoint.com/sites/devsite',
@@ -107,10 +110,10 @@ export class SpfxContext {
                 }),
                 finish: () => {}
             },
-            httpClient: this.createMockHttpClient(),
-            spHttpClient: this.createMockSpHttpClient(),
+            httpClient: new ProxyHttpClient(),
+            spHttpClient: new ProxySPHttpClient(),
             aadHttpClientFactory: {
-                getClient: () => Promise.resolve(this.createMockHttpClient())
+                getClient: () => Promise.resolve(new ProxyAadHttpClient())
             },
             msGraphClientFactory: {
                 getClient: () => Promise.resolve({
@@ -141,47 +144,6 @@ export class SpfxContext {
         const rtlCultures = ['ar', 'he', 'fa', 'ur'];
         const langCode = culture.split('-')[0].toLowerCase();
         return rtlCultures.includes(langCode);
-    }
-
-    private createMockHttpClient(): any {
-        return {
-            get: (_url: string, _config?: any) => Promise.resolve({ 
-                ok: true, 
-                json: () => Promise.resolve({}) 
-            }),
-            post: (_url: string, _config?: any, _options?: any) => Promise.resolve({ 
-                ok: true, 
-                json: () => Promise.resolve({}) 
-            }),
-            fetch: (_url: string, _config?: any, _options?: any) => Promise.resolve({ 
-                ok: true, 
-                json: () => Promise.resolve({}) 
-            })
-        };
-    }
-
-    private createMockSpHttpClient(): any {
-        const configurations = {
-            v1: { flags: {} }
-        };
-        return {
-            configurations: configurations,
-            get: (_url: string, _config?: any) => Promise.resolve({
-                ok: true,
-                status: 200,
-                json: () => Promise.resolve({ d: {} })
-            }),
-            post: (_url: string, _config?: any, _options?: any) => Promise.resolve({
-                ok: true,
-                status: 200,
-                json: () => Promise.resolve({ d: {} })
-            }),
-            fetch: (_url: string, _config?: any, _options?: any) => Promise.resolve({
-                ok: true,
-                status: 200,
-                json: () => Promise.resolve({ d: {} })
-            })
-        };
     }
 
     private getLanguageCodeFromCulture(culture: string): number {

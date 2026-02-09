@@ -26,8 +26,8 @@ export class WorkbenchRuntime {
     private activeWebParts: IWebPartConfig[] = [];
     private activeExtensions: IExtensionConfig[] = [];
 
-    constructor(config: IWorkbenchConfig) {
-        this.vscode = window.acquireVsCodeApi();
+    constructor(config: IWorkbenchConfig, vscodeApi: IVsCodeApi) {
+        this.vscode = vscodeApi;
         this.config = config;
 
         // Initialize core components

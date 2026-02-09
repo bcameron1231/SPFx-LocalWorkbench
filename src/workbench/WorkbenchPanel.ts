@@ -10,6 +10,7 @@ import { SpfxProjectDetector } from './SpfxProjectDetector';
 import type { IWebPartManifest } from './types';
 import { generateWorkbenchHtml, generateErrorHtml } from './html';
 import { getWorkbenchSettings, onConfigurationChanged, IWorkbenchSettings } from './config';
+import { ApiProxyService } from './proxy';
 
 // Generates a cryptographic nonce for CSP
 function getNonce(): string {
@@ -28,6 +29,7 @@ export class WorkbenchPanel {
     private _extensions: IWebPartManifest[] = [];
     private _settings: IWorkbenchSettings;
     private _liveReloadDebounceTimer: ReturnType<typeof setTimeout> | undefined;
+    private _apiProxyService: ApiProxyService | undefined;
 
     // Creates or reveals the workbench panel
     public static createOrShow(extensionUri: vscode.Uri): void {
@@ -106,6 +108,13 @@ export class WorkbenchPanel {
             this._disposables
         );
 
+        // Initialize the API proxy service
+        const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+        if (workspaceFolder) {
+            this._apiProxyService = new ApiProxyService(workspaceFolder.uri.fsPath);
+            this._disposables.push(this._apiProxyService);
+        }
+
         // Watch for bundle changes (live reload)
         this._setupLiveReloadWatcher();
 
@@ -114,8 +123,25 @@ export class WorkbenchPanel {
     }
 
     // Handles messages from the webview
-    private async _handleMessage(message: { command: string; url?: string; text?: string }): Promise<void> {
+    private async _handleMessage(message: { command: string; url?: string; text?: string; [key: string]: any }): Promise<void> {
         switch (message.command) {
+            case 'apiRequest':
+                if (this._apiProxyService) {
+                    const response = await this._apiProxyService.handleRequest({
+                        id: message.id,
+                        url: message.url!,
+                        method: message.method,
+                        headers: message.headers,
+                        body: message.body,
+                        clientType: message.clientType
+                    });
+                    this._panel.webview.postMessage({
+                        command: 'apiResponse',
+                        ...response
+                    });
+                }
+                return;
+
             case 'refresh':
                 await this._loadWebParts();
                 this._update();

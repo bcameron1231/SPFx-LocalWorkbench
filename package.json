@@ -48,6 +48,12 @@
         "title": "Detect Web Parts",
         "category": "SPFx",
         "icon": "$(search)"
+      },
+      {
+        "command": "spfx-local-workbench.scaffoldMockConfig",
+        "title": "Scaffold API Mock Configuration",
+        "category": "SPFx",
+        "icon": "$(file-code)"
       }
     ],
     "menus": {
@@ -164,6 +170,26 @@
           "type": "boolean",
           "default": true,
           "description": "Whether this is SharePoint Online (vs. on-premises)"
+        },
+        "spfxLocalWorkbench.proxy.mockFile": {
+          "type": "string",
+          "default": ".spfx-workbench/api-mocks.json",
+          "description": "Path to the mock rules configuration file (relative to workspace root)"
+        },
+        "spfxLocalWorkbench.proxy.defaultDelay": {
+          "type": "number",
+          "default": 0,
+          "description": "Default simulated latency in milliseconds for mock responses"
+        },
+        "spfxLocalWorkbench.proxy.fallbackStatus": {
+          "type": "number",
+          "default": 404,
+          "description": "HTTP status code returned when no mock rule matches in mock mode"
+        },
+        "spfxLocalWorkbench.proxy.logRequests": {
+          "type": "boolean",
+          "default": true,
+          "description": "Log all proxied API requests to the 'SPFx API Proxy' output channel"
         }
       }
     }

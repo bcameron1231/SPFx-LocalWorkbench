@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { WorkbenchPanel, SpfxProjectDetector, createManifestWatcher, getWorkbenchSettings } from './workbench';
+import { WorkbenchPanel, SpfxProjectDetector, createManifestWatcher, getWorkbenchSettings, ApiProxyService } from './workbench';
 
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -96,6 +96,22 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	);
 
+	// Register the Scaffold Mock Config command
+	const scaffoldMockConfigCommand = vscode.commands.registerCommand(
+		'spfx-local-workbench.scaffoldMockConfig',
+		async () => {
+			const wsFolder = vscode.workspace.workspaceFolders?.[0];
+			if (!wsFolder) {
+				vscode.window.showWarningMessage('No workspace folder open');
+				return;
+			}
+			const proxy = new ApiProxyService(wsFolder.uri.fsPath);
+			await proxy.scaffoldMockConfig();
+			proxy.dispose();
+			vscode.window.showInformationMessage('API mock configuration scaffolded at .spfx-workbench/api-mocks.json');
+		}
+	);
+
 	// Auto-detect SPFx projects and show status bar item
 	const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
 	statusBarItem.command = 'spfx-local-workbench.openWorkbench';
@@ -141,6 +157,7 @@ export function activate(context: vscode.ExtensionContext) {
 		openWorkbenchCommand,
 		startServeCommand,
 		detectWebPartsCommand,
+		scaffoldMockConfigCommand,
 		statusBarItem
 	);
 }

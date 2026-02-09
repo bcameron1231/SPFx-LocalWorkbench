@@ -1,4 +1,6 @@
 import { spPropertyPaneModule } from './PropertyPaneMocks';
+import { ProxyHttpClient } from '../proxy/ProxyHttpClient';
+import { ProxySPHttpClient } from '../proxy/ProxySPHttpClient';
 
 // Deep recursive merge matching lodash merge behaviour
 function deepMerge(target: any, ...sources: any[]): any {
@@ -141,26 +143,11 @@ export function initializeSpfxMocks(): void {
     // Also make it globally available for direct imports
     (window as any)['@microsoft/sp-property-pane'] = spPropertyPaneModule;
     
-    // Mock HTTP clients
-    class MockHttpClient {
-        async get() { 
-            return { ok: true, json: async () => ({}) }; 
-        }
-        async post() { 
-            return { ok: true, json: async () => ({}) }; 
-        }
-        async fetch() { 
-            return { ok: true, json: async () => ({}) }; 
-        }
-    }
-    
-    class MockSPHttpClient extends MockHttpClient {
-        static configurations = { v1: {} };
-    }
-    
+    // Proxy-aware HTTP clients: route API calls through the extension host
+    // via postMessage bridge for configurable mock/passthrough/record responses
     amdModules['@microsoft/sp-http'] = {
-        HttpClient: MockHttpClient,
-        SPHttpClient: MockSPHttpClient,
+        HttpClient: ProxyHttpClient,
+        SPHttpClient: ProxySPHttpClient,
         SPHttpClientConfiguration: {},
         HttpClientConfiguration: {}
     };
