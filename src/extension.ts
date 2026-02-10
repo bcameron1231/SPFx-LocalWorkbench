@@ -19,7 +19,6 @@ function delay(ms: number): Promise<void> {
 
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
-	console.log('SPFx Local Workbench is now active!');
 
 	// Shared detector instance — workspace path rarely changes
 	let detector: SpfxProjectDetector | undefined;
