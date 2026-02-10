@@ -7,7 +7,7 @@
 import type { IVsCodeApi } from '../types';
 
 // Client type identifier (mirrors extension-side ApiClientType)
-export type ApiClientType = 'spHttp' | 'http' | 'aadHttp';
+export type ApiClientType = 'spHttp' | 'http' | 'aadHttp' | 'fetch';
 
 // Serialized request sent to extension host
 export interface IProxyRequest {

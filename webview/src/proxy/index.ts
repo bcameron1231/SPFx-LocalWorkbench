@@ -4,3 +4,4 @@ export { ProxyHttpClient } from './ProxyHttpClient';
 export { ProxySPHttpClient } from './ProxySPHttpClient';
 export { ProxyAadHttpClient } from './ProxyAadHttpClient';
 export { PassthroughHttpClient } from './PassthroughHttpClient';
+export { installFetchProxy, uninstallFetchProxy } from './ProxyFetchClient';

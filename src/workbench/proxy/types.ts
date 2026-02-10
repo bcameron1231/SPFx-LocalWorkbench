@@ -7,7 +7,7 @@
 export type ProxyMode = 'mock';
 
 // Client type identifier for matching rules
-export type ApiClientType = 'spHttp' | 'http' | 'aadHttp';
+export type ApiClientType = 'spHttp' | 'http' | 'aadHttp' | 'fetch';
 
 // A single mock rule that maps a request pattern to a response
 export interface IMockRule {

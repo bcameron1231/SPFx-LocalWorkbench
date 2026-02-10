@@ -2,6 +2,7 @@ import { spPropertyPaneModule } from './PropertyPaneMocks';
 import { ProxyHttpClient } from '../proxy/ProxyHttpClient';
 import { ProxySPHttpClient } from '../proxy/ProxySPHttpClient';
 import { PassthroughHttpClient } from '../proxy/PassthroughHttpClient';
+import { installFetchProxy, uninstallFetchProxy } from '../proxy/ProxyFetchClient';
 
 // Deep recursive merge matching lodash merge behaviour
 function deepMerge(target: any, ...sources: any[]): any {
@@ -150,6 +151,14 @@ export function initializeSpfxMocks(proxyEnabled: boolean = true): void {
     // like Dev Proxy can intercept them.
     const HttpClientImpl = proxyEnabled ? ProxyHttpClient : PassthroughHttpClient;
     const SPHttpClientImpl = proxyEnabled ? ProxySPHttpClient : PassthroughHttpClient;
+    
+    // Fetch proxy: when enabled, override window.fetch so libraries like
+    // PnPJS that use fetch() directly also get routed through the proxy bridge.
+    if (proxyEnabled) {
+        installFetchProxy();
+    } else {
+        uninstallFetchProxy();
+    }
     amdModules['@microsoft/sp-http'] = {
         HttpClient: HttpClientImpl,
         SPHttpClient: SPHttpClientImpl,
