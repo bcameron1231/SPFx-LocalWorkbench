@@ -22,6 +22,16 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 - **Property Editing**: Click the edit (pencil) icon on a loaded extension to modify its `ClientSideComponentProperties` and re-render
 - **PlaceholderProvider Mock**: Full mock of `context.placeholderProvider` including `tryCreateContent()` and `changedEvent`
 
+### API Proxy & Mock System
+- **Drop-in HTTP client replacements**: `SPHttpClient`, `HttpClient`, and `AadHttpClient` are replaced with proxy-aware classes — no code changes needed in your web parts
+- **Configurable mock rules**: Define URL matching rules with inline or file-based JSON responses
+- **Glob pattern matching**: Match URLs with wildcards (e.g., `/_api/web/lists/getbytitle('*')/items`)
+- **Client type filtering**: Target rules to specific client types (`spHttp`, `http`, `aadHttp`)
+- **Hot reload**: Edit your mock config and rules are reloaded instantly
+- **Request logging**: All proxied calls are logged to the "SPFx API Proxy" output channel
+
+> 📖 **[Full proxy documentation →](PROXY.md)** — architecture, setup guide, mock rule reference, and examples.
+
 ## Requirements
 
 - VS Code 1.100.0 or higher
@@ -155,6 +165,7 @@ src/
     SpfxProjectDetector.ts  # SPFx project detection and manifest parsing
     html/                   # HTML and CSS generation for webview
     config/                 # Configuration management
+    proxy/                  # API proxy service and mock rule engine
     types/                  # Type definitions
 webview/
   src/
@@ -166,6 +177,7 @@ webview/
     amd/                    # AMD module loader for SPFx bundles
     components/             # React components (App, Canvas, PropertyPane, ExtensionPicker, etc.)
     mocks/                  # SharePoint API mocks (Context, Theme, PropertyPane, sp-application-base)
+    proxy/                  # Proxy HTTP client replacements and bridge
     ui/                     # UI utilities (CanvasRenderer)
     types/                  # Webview-specific type definitions
 ```
