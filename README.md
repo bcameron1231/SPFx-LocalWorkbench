@@ -112,76 +112,12 @@ Customize the mock SharePoint context:
 
 ## Troubleshooting
 
-### "Could not load manifests from serve URL"
+Having issues? See the [Troubleshooting Guide](TROUBLESHOOTING.md).
 
-- Make sure `heft start` is running
-- Check that the serve URL matches your SPFx project's port (default: 4321)
-- Accept the self-signed certificate in your browser first: visit `https://localhost:4321`
-- This extension only supports SPFx 1.22+ (Heft-based projects)
+## Contributing
 
-### Web parts not rendering
-
-- Open DevTools in the workbench (click "DevTools" button) to see console errors
-- Verify your SPFx project builds successfully
-- Check that your web part bundle is being served correctly
-
-### Application Customizer not rendering
-
-- Open DevTools and check for errors loading the extension bundle
-- Ensure your extension's `componentType` is set to `"Extension"` in the manifest
-- Verify the extension bundle is being served (check `internalModuleBaseUrls` in the manifest)
-- If the extension uses localized strings, a proxy mock is provided automatically
-
-### Certificate errors
-
-SPFx uses HTTPS with a self-signed certificate. You may need to:
-
-1. Visit `https://localhost:4321` in your browser
-2. Accept the security warning / add certificate exception
-3. Refresh the workbench
-
-## Development
-
-### Building the Extension
-
-```bash
-npm install
-npm run compile
-```
-
-### Sample SPFx Projects
-
-If you keep test SPFx projects under `samples/`, they are excluded from VSIX packaging and VS Code search to keep the extension lean. The folder is still visible in the explorer. For the most reliable detection and debugging, open a sample project folder directly in its own VS Code window (or Extension Host) when testing.
-
-### Project Structure
-
-```text
-src/
-  extension.ts              # Main extension entry point
-  workbench/
-    WorkbenchPanel.ts       # Webview panel that hosts the workbench
-    SpfxProjectDetector.ts  # SPFx project detection and manifest parsing
-    html/                   # HTML and CSS generation for webview
-    config/                 # Configuration management
-    types/                  # Type definitions
-webview/
-  src/
-    main.tsx                # React-based webview entry point
-    main.ts                 # Alternative non-React entry point
-    WorkbenchRuntime.ts     # Main workbench orchestrator
-    WebPartManager.ts       # Web part loading and lifecycle
-    ExtensionManager.ts     # Application Customizer loading and lifecycle
-    amd/                    # AMD module loader for SPFx bundles
-    components/             # React components (App, Canvas, PropertyPane, ExtensionPicker, etc.)
-    mocks/                  # SharePoint API mocks (Context, Theme, PropertyPane, sp-application-base)
-    ui/                     # UI utilities (CanvasRenderer)
-    types/                  # Webview-specific type definitions
-```
+Contributions are welcome! See the [Contributing Guide](CONTRIBUTING.md) for development setup, project structure, and more.
 
 ## License
 
 MIT License - See LICENSE file for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit issues and pull requests.
