@@ -9,21 +9,16 @@ import { SpfxContext } from './mocks/SpfxContext';
 import { ThemeProvider } from './mocks/ThemeProvider';
 
 // PlaceholderName enum matching @microsoft/sp-application-base
-const PlaceholderName = {
-    Top: 0,
-    Bottom: 1
+enum PlaceholderName {
+    Top = 0,
+    Bottom = 1
 };
 
 // Mock PlaceholderContent that wraps an actual DOM element
 class MockPlaceholderContent {
-    public domElement: HTMLDivElement;
-    public name: number;
     private _disposed = false;
 
-    constructor(name: number, domElement: HTMLDivElement) {
-        this.name = name;
-        this.domElement = domElement;
-    }
+    constructor(public name: PlaceholderName, public domElement: HTMLDivElement) {}
 
     public dispose(): void {
         this._disposed = true;
@@ -150,9 +145,9 @@ export class ExtensionManager {
         // Mock placeholderProvider - this is what Application Customizers use
         // to access the Top and Bottom placeholders
         const placeholderProvider = {
-            placeholderNames: [PlaceholderName.Top, PlaceholderName.Bottom],
+            placeholderNames: [PlaceholderName[PlaceholderName.Top], PlaceholderName[PlaceholderName.Bottom]],
             changedEvent: changedEvent,
-            tryCreateContent: (name: number, _options?: any) => {
+            tryCreateContent: (name: PlaceholderName, _options?: any) => {
                 if (name === PlaceholderName.Top) {
                     return topPlaceholder;
                 } else if (name === PlaceholderName.Bottom) {
