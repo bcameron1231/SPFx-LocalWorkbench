@@ -4,7 +4,7 @@
 
 - Make sure `heft start` is running
 - Check that the serve URL matches your SPFx project's port (default: 4321)
-- Accept the self-signed certificate in your browser first: visit `https://localhost:4321`
+- Ensure you have trusted the dev certificate by running `heft trust-dev-cert` (see [Certificate errors](#certificate-errors))
 - This extension only supports SPFx 1.22+ (Heft-based projects)
 
 ## Web parts not rendering
@@ -22,8 +22,12 @@
 
 ## Certificate errors
 
-SPFx uses HTTPS with a self-signed certificate. You may need to:
+The SharePoint Framework's local web server uses HTTPS by default via a development self-signed SSL certificate. Self-signed SSL certificates are not trusted by your developer environment, so you must first configure your development environment to trust the certificate.
 
-1. Visit `https://localhost:4321` in your browser
-2. Accept the security warning / add certificate exception
-3. Refresh the workbench
+Run the following command to trust the dev certificate:
+
+```bash
+heft trust-dev-cert
+```
+
+For more details, see the [official documentation](https://learn.microsoft.com/en-us/sharepoint/dev/spfx/set-up-your-development-environment#trusting-the-self-signed-developer-certificate).
