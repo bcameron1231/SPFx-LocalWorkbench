@@ -1,0 +1,19 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "useGulp": false,
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "22.17.0",
+    "sdksVersions": {},
+    "version": "1.22.2",
+    "libraryName": "react",
+    "libraryId": "f535a84c-7a3e-4387-9e77-6629b1051954",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "react",
+    "solutionShortDescription": "react description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

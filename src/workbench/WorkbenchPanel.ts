@@ -5,18 +5,15 @@
 // extension and the webview.
 
 import * as vscode from 'vscode';
-import { SpfxProjectDetector, IWebPartManifest } from './SpfxProjectDetector';
+import { randomBytes } from 'crypto';
+import { SpfxProjectDetector } from './SpfxProjectDetector';
+import type { IWebPartManifest } from './types';
 import { generateWorkbenchHtml, generateErrorHtml } from './html';
 import { getWorkbenchSettings, onConfigurationChanged, IWorkbenchSettings } from './config';
 
 // Generates a cryptographic nonce for CSP
 function getNonce(): string {
-    let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (let i = 0; i < 32; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
+    return randomBytes(16).toString('base64url');
 }
 
 // WorkbenchPanel manages the webview that hosts the SPFx local workbench.
@@ -83,11 +80,20 @@ export class WorkbenchPanel {
         // visibility change would destroy all webview state (active web parts,
         // React tree, loaded bundles).  Only set HTML once during construction.
 
-        // Listen for configuration changes
+        // Listen for configuration changes — post a message to the webview
+        // instead of re-setting HTML which would destroy all webview state
         this._disposables.push(
             onConfigurationChanged((newSettings) => {
                 this._settings = newSettings;
-                this._update();
+                this._panel.webview.postMessage({
+                    command: 'settingsChanged',
+                    settings: {
+                        serveUrl: newSettings.serveUrl,
+                        theme: newSettings.theme,
+                        context: newSettings.context,
+                        pageContext: newSettings.pageContext
+                    }
+                });
             })
         );
 
@@ -179,6 +185,12 @@ export class WorkbenchPanel {
         distWatcher.onDidChange(onBundleChanged);
         distWatcher.onDidCreate(onBundleChanged);
         this._disposables.push(distWatcher);
+    }
+
+    // Reloads manifests and updates the webview (called by manifest file watcher)
+    public async refreshManifests(): Promise<void> {
+        await this._loadWebParts();
+        this._update();
     }
 
     // Disposes the panel and all resources

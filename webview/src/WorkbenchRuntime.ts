@@ -2,7 +2,7 @@
 // 
 // Main runtime class that manages the SPFx local workbench
 
-import type { IWorkbenchConfig, IWebPartManifest, IWebPartConfig, IActiveWebPart, IExtensionConfig, IVsCodeApi } from './types';
+import type { IWorkbenchConfig, IWebPartManifest, IWebPartConfig, IExtensionConfig, IVsCodeApi } from './types';
 import { isActiveWebPart, isActiveExtension } from './types';
 import type { IAppHandlers } from './components/App';
 import { AmdLoader } from './amd/AmdLoader';
@@ -48,15 +48,26 @@ export class WorkbenchRuntime {
             this.themeProvider
         );
 
-        // Setup event listeners after a short delay to ensure DOM is ready
-        setTimeout(() => this.setupEventListeners(), 100);
-
         // Expose to window for debugging
         (window as any).__workbench = this;
     }
 
     setAppHandlers(handlers: IAppHandlers): void {
         this.appHandlers = handlers;
+    }
+
+    // Applies updated settings from the extension host without full reload
+    updateSettings(settings: { serveUrl?: string; theme?: any; context?: any; pageContext?: any }): void {
+        if (settings.serveUrl) {
+            this.config.serveUrl = settings.serveUrl;
+        }
+        if (settings.theme) {
+            this.themeProvider = new ThemeProvider(settings.theme);
+        }
+        if (settings.context || settings.pageContext) {
+            this.contextProvider = new SpfxContext(settings.context, settings.pageContext);
+        }
+        console.log('[Workbench] Settings updated in-place');
     }
 
     async initialize(): Promise<void> {
@@ -256,7 +267,7 @@ export class WorkbenchRuntime {
         await new Promise(r => setTimeout(r, 50));
 
         // Instantiate the web part
-        await this.instantiateWebPart(config, insertIndex);
+        await this.instantiateWebPart(config);
 
         // Update React app with the active web part
         if (this.appHandlers) {
@@ -269,11 +280,13 @@ export class WorkbenchRuntime {
         
         // Dispose the web part instance if active
         if (isActiveWebPart(webPart)) {
-            try {
-                webPart.instance.onDispose();
-            } catch (e: any) {
-                // Error disposing
-                console.error('Workbench - Error disposing web part:', e);
+            if (typeof webPart.instance.onDispose === 'function') {
+                try {
+                    webPart.instance.onDispose();
+                } catch (e: any) {
+                    // Error disposing
+                    console.error('Workbench - Error disposing web part:', e);
+                }
             }
         }
 
@@ -283,28 +296,18 @@ export class WorkbenchRuntime {
         if (this.appHandlers) {
             this.appHandlers.setActiveWebParts([...this.activeWebParts]);
         }
-
-        // Allow DOM to update
-        await new Promise(r => setTimeout(r, 50));
-
-        // Re-instantiate remaining web parts
-        for (let i = 0; i < this.activeWebParts.length; i++) {
-            await this.instantiateWebPart(this.activeWebParts[i], i);
-        }
-
-        // Update React app with the re-instantiated web parts
-        if (this.appHandlers) {
-            this.appHandlers.setActiveWebParts([...this.activeWebParts]);
-        }
     }
 
-    private async instantiateWebPart(config: IWebPartConfig, index: number): Promise<void> {
-        const domElement = document.getElementById('webpart-' + index);
+    private async instantiateWebPart(config: IWebPartConfig): Promise<void> {
+        const domElement = document.getElementById('webpart-' + config.instanceId);
         if (!domElement) {return;}
 
         const active = await this.webPartManager.instantiateWebPart(config, domElement);
         if (active) {
-            this.activeWebParts[index] = active;
+            const idx = this.activeWebParts.findIndex(wp => wp.instanceId === config.instanceId);
+            if (idx !== -1) {
+                this.activeWebParts[idx] = active;
+            }
         }
     }
 
@@ -399,10 +402,6 @@ export class WorkbenchRuntime {
         }
     }
 
-    private setupEventListeners(): void {
-        // Toolbar buttons are now handled by React Toolbar component in App.tsx
-        // Event listeners for toolbar actions are in main.tsx
-    }
     async liveReload(): Promise<void> {
         console.log('[Workbench] Live reload triggered — reloading bundles...');
         this.updateStatus('Reloading...');
@@ -453,9 +452,10 @@ export class WorkbenchRuntime {
         }
 
         for (let i = 0; i < this.activeWebParts.length; i++) {
-            const domElement = document.getElementById('webpart-' + i);
+            const wp = this.activeWebParts[i];
+            const domElement = document.getElementById('webpart-' + wp.instanceId);
             if (domElement) {
-                const active = await this.webPartManager.instantiateWebPart(this.activeWebParts[i], domElement);
+                const active = await this.webPartManager.instantiateWebPart(wp, domElement);
                 if (active) {
                     this.activeWebParts[i] = active;
                 }

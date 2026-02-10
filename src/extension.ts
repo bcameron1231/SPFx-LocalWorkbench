@@ -1,16 +1,25 @@
 import * as vscode from 'vscode';
-import { WorkbenchPanel, SpfxProjectDetector, createManifestWatcher } from './workbench';
+import { WorkbenchPanel, SpfxProjectDetector, createManifestWatcher, getWorkbenchSettings } from './workbench';
 
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
 	console.log('SPFx Local Workbench is now active!');
-	vscode.window.showInformationMessage('SPFx Local Workbench activated!');
+
+	// Shared detector instance — workspace path rarely changes
+	let detector: SpfxProjectDetector | undefined;
+	function getDetector(): SpfxProjectDetector | undefined {
+		const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+		if (!workspaceFolder) { return undefined; }
+		if (!detector || detector.workspacePath !== workspaceFolder.uri.fsPath) {
+			detector = new SpfxProjectDetector(workspaceFolder.uri.fsPath);
+		}
+		return detector;
+	}
 
 	// Register the Open Workbench command
 	const openWorkbenchCommand = vscode.commands.registerCommand(
 		'spfx-local-workbench.openWorkbench',
 		() => {
-			vscode.window.showInformationMessage('Opening SPFx Workbench...');
 			WorkbenchPanel.createOrShow(context.extensionUri);
 		}
 	);
@@ -19,14 +28,13 @@ export function activate(context: vscode.ExtensionContext) {
 	const startServeCommand = vscode.commands.registerCommand(
 		'spfx-local-workbench.startServe',
 		async () => {
-			const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-			if (!workspaceFolder) {
+			const det = getDetector();
+			if (!det) {
 				vscode.window.showErrorMessage('No workspace folder open');
 				return;
 			}
 
-			const detector = new SpfxProjectDetector(workspaceFolder.uri.fsPath);
-			const isSpfx = await detector.isSpfxProject();
+			const isSpfx = await det.isSpfxProject();
 
 			if (!isSpfx) {
 				vscode.window.showErrorMessage('This does not appear to be an SPFx project');
@@ -38,10 +46,32 @@ export function activate(context: vscode.ExtensionContext) {
 			terminal.show();
 			terminal.sendText('heft start --clean --nobrowser');
 
-			// Open the workbench after a delay
-			setTimeout(() => {
-				WorkbenchPanel.createOrShow(context.extensionUri);
-			}, 3000);
+			// Poll the serve URL until it responds, then open the workbench
+			const settings = getWorkbenchSettings();
+			const serveUrl = settings.serveUrl;
+			const maxAttempts = 60; // up to ~60 seconds
+			let attempts = 0;
+			const pollTimer = setInterval(async () => {
+				attempts++;
+				try {
+					const response = await fetch(serveUrl, {
+						method: 'HEAD',
+						signal: AbortSignal.timeout(2000)
+					});
+					if (response.ok || response.status === 426) {
+						// Server is up (426 = HTTPS upgrade expected, still means it's running)
+						clearInterval(pollTimer);
+						WorkbenchPanel.createOrShow(context.extensionUri);
+					}
+				} catch {
+					// Not ready yet
+				}
+				if (attempts >= maxAttempts) {
+					clearInterval(pollTimer);
+					// Open anyway — user can manually refresh
+					WorkbenchPanel.createOrShow(context.extensionUri);
+				}
+			}, 1000);
 		}
 	);
 
@@ -49,14 +79,13 @@ export function activate(context: vscode.ExtensionContext) {
 	const detectWebPartsCommand = vscode.commands.registerCommand(
 		'spfx-local-workbench.detectWebParts',
 		async () => {
-			const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-			if (!workspaceFolder) {
+			const det = getDetector();
+			if (!det) {
 				vscode.window.showWarningMessage('No workspace folder open');
 				return;
 			}
 
-			const detector = new SpfxProjectDetector(workspaceFolder.uri.fsPath);
-			const manifests = await detector.getWebPartManifests();
+			const manifests = await det.getWebPartManifests();
 
 			if (manifests.length === 0) {
 				vscode.window.showInformationMessage('No web parts found in this project');
@@ -72,13 +101,12 @@ export function activate(context: vscode.ExtensionContext) {
 	statusBarItem.command = 'spfx-local-workbench.openWorkbench';
 
 	async function updateStatusBar() {
-		const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-		if (workspaceFolder) {
-			const detector = new SpfxProjectDetector(workspaceFolder.uri.fsPath);
-			const isSpfx = await detector.isSpfxProject();
+		const det = getDetector();
+		if (det) {
+			const isSpfx = await det.isSpfxProject();
 
 			if (isSpfx) {
-				const version = await detector.getSpfxVersion();
+				const version = await det.getSpfxVersion();
 				statusBarItem.text = `$(beaker) SPFx Workbench`;
 				statusBarItem.tooltip = `SPFx Project detected${version ? ` (${version})` : ''}\nClick to open local workbench`;
 				statusBarItem.show();
@@ -92,15 +120,18 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Update status bar on activation and workspace changes
 	updateStatusBar();
-	vscode.workspace.onDidChangeWorkspaceFolders(updateStatusBar);
+	vscode.workspace.onDidChangeWorkspaceFolders(() => {
+		detector = undefined; // Reset cached detector on folder change
+		updateStatusBar();
+	});
 
 	// Watch for manifest changes
 	const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
 	if (workspaceFolder) {
 		const watcher = createManifestWatcher(workspaceFolder, () => {
-			// Refresh the workbench panel if it's open
+			// Reload manifests in the panel if it's open
 			if (WorkbenchPanel.currentPanel) {
-				vscode.commands.executeCommand('spfx-local-workbench.openWorkbench');
+				WorkbenchPanel.currentPanel.refreshManifests();
 			}
 		});
 		context.subscriptions.push(watcher);

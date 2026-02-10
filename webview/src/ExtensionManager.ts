@@ -238,7 +238,7 @@ export class ExtensionManager {
                     // Verify it looks like a customizer (has onInit) and 
                     // not a web part (has render)
                     const proto = candidate.prototype;
-                    if (proto && typeof proto.onInit === 'function') {
+                    if (proto && typeof proto.onInit === 'function' && typeof proto.render !== 'function') {
                         extensionClass = candidate;
                         break;
                     }
@@ -276,10 +276,11 @@ export class ExtensionManager {
             }
         }
 
-        // Any class with onInit as last resort within this module
+        // Any class with onInit (but not render) as last resort within this module
         for (const [_key, value] of Object.entries(mod)) {
             if (typeof value === 'function' && (value as any).prototype) {
-                if (typeof (value as any).prototype.onInit === 'function') {
+                if (typeof (value as any).prototype.onInit === 'function' &&
+                    typeof (value as any).prototype.render !== 'function') {
                     return value;
                 }
             }

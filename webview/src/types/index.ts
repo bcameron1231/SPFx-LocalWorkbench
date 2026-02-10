@@ -83,6 +83,8 @@ export function isActiveExtension(ext: IExtensionConfig): ext is IActiveExtensio
 }
 
 export interface IThemeSettings {
+    preset?: 'teamSite' | 'communicationSite' | 'dark' | 'highContrast' | 'custom';
+    customColors?: Record<string, string>;
     primaryColor?: string;
     backgroundColor?: string;
     textColor?: string;

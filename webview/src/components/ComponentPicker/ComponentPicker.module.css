@@ -18,6 +18,12 @@
     }
 }
 
+/* Flip the popup above the + button when it would overflow the viewport */
+.popup.upward {
+    top: auto;
+    bottom: 100%;
+}
+
 .search {
     margin-bottom: 12px;
 }
