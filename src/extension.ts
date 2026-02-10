@@ -79,6 +79,11 @@ export function activate(context: vscode.ExtensionContext) {
 	const detectWebPartsCommand = vscode.commands.registerCommand(
 		'spfx-local-workbench.detectWebParts',
 		async () => {
+			if (WorkbenchPanel.currentPanel) {
+				WorkbenchPanel.currentPanel.postMessage({ command: 'refresh' });
+				return;
+			}
+
 			const det = getDetector();
 			if (!det) {
 				vscode.window.showWarningMessage('No workspace folder open');
@@ -93,6 +98,13 @@ export function activate(context: vscode.ExtensionContext) {
 				const webPartNames = manifests.map(m => m.alias || m.id).join(', ');
 				vscode.window.showInformationMessage(`Found ${manifests.length} web part(s): ${webPartNames}`);
 			}
+		}
+	);
+
+	const openDevToolsCommand = vscode.commands.registerCommand(
+		'spfx-local-workbench.openDevTools',
+		() => {
+			vscode.commands.executeCommand('workbench.action.webview.openDeveloperTools');
 		}
 	);
 
@@ -141,6 +153,7 @@ export function activate(context: vscode.ExtensionContext) {
 		openWorkbenchCommand,
 		startServeCommand,
 		detectWebPartsCommand,
+		openDevToolsCommand,
 		statusBarItem
 	);
 }

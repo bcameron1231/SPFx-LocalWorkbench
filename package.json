@@ -45,9 +45,21 @@
       },
       {
         "command": "spfx-local-workbench.detectWebParts",
-        "title": "Detect Web Parts",
+        "title": "Refresh Web Parts",
         "category": "SPFx",
-        "icon": "$(search)"
+        "icon": {
+          "light": "media/sync-light.svg",
+          "dark": "media/sync-dark.svg"
+        }
+      },
+      {
+        "command": "spfx-local-workbench.openDevTools",
+        "title": "Open Developer Tools",
+        "category": "SPFx",
+        "icon": {
+          "light": "media/devtools-light.svg",
+          "dark": "media/devtools-dark.svg"
+        }
       }
     ],
     "menus": {
@@ -55,6 +67,28 @@
         {
           "command": "spfx-local-workbench.openWorkbench",
           "when": "resourceFilename =~ /\\.manifest\\.json$/",
+          "group": "navigation"
+        },
+        {
+          "command": "spfx-local-workbench.detectWebParts",
+          "when": "spfxLocalWorkbench.isWorkbench",
+          "group": "navigation"
+        },
+        {
+          "command": "spfx-local-workbench.openDevTools",
+          "when": "spfxLocalWorkbench.isWorkbench",
+          "group": "navigation"
+        }
+      ],
+      "webview/title": [
+        {
+          "command": "spfx-local-workbench.detectWebParts",
+          "when": "webviewType == spfxWorkbench",
+          "group": "navigation"
+        },
+        {
+          "command": "spfx-local-workbench.openDevTools",
+          "when": "webviewType == spfxWorkbench",
           "group": "navigation"
         }
       ]

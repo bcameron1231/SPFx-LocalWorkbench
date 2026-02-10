@@ -56,6 +56,12 @@ export class WorkbenchPanel {
             }
         );
 
+        panel.iconPath = {
+            light: vscode.Uri.joinPath(extensionUri, 'media', 'workbench-light.svg'),
+            dark: vscode.Uri.joinPath(extensionUri, 'media', 'workbench-dark.svg'),
+        };
+
+
         WorkbenchPanel.currentPanel = new WorkbenchPanel(panel, extensionUri);
     }
 
@@ -69,12 +75,20 @@ export class WorkbenchPanel {
         this._panel = panel;
         this._extensionUri = extensionUri;
         this._settings = getWorkbenchSettings();
+        void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.isWorkbench', true);
 
         // Set initial content
         this._update();
 
         // Handle panel disposal
         this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
+        this._panel.onDidChangeViewState(
+            () => {
+                void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.isWorkbench', this._panel.active);
+            },
+            null,
+            this._disposables
+        );
 
         // Note: retainContextWhenHidden is enabled so re-setting HTML on
         // visibility change would destroy all webview state (active web parts,
@@ -196,6 +210,7 @@ export class WorkbenchPanel {
     // Disposes the panel and all resources
     public dispose(): void {
         WorkbenchPanel.currentPanel = undefined;
+        void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.isWorkbench', false);
 
         if (this._liveReloadDebounceTimer) {
             clearTimeout(this._liveReloadDebounceTimer);
@@ -238,5 +253,10 @@ export class WorkbenchPanel {
             contextSettings: this._settings.context,
             pageContextSettings: this._settings.pageContext
         });
+    }
+
+    // Sends a message to the webview
+    public postMessage(message: { command: string; [key: string]: any }): void {
+        void this._panel.webview.postMessage(message);
     }
 }
