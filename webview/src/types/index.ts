@@ -11,6 +11,7 @@ export interface IWorkbenchConfig {
     theme?: IThemeSettings;
     context?: IContextSettings;
     pageContext?: IPageContextSettings;
+    proxyEnabled?: boolean;
 }
 
 export interface IWebPartManifest {

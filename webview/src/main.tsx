@@ -25,10 +25,14 @@ function initialize() {
             throw new Error('Workbench configuration not found');
         }
 
-        // Initialize the API proxy bridge so HTTP client calls route through
-        // the extension host for configurable mock/passthrough responses
         const vscodeApi = window.acquireVsCodeApi();
-        initializeProxyBridge(vscodeApi);
+
+        // Only initialize the proxy bridge when the proxy is enabled.
+        // When disabled, HTTP clients use real fetch() calls so external
+        // tools like Dev Proxy can intercept network traffic.
+        if (config.proxyEnabled !== false) {
+            initializeProxyBridge(vscodeApi);
+        }
 
         // Create the workbench runtime (pass vscodeApi so it doesn't call acquireVsCodeApi again)
         const runtime = new WorkbenchRuntime(config, vscodeApi);

@@ -279,6 +279,7 @@ You can customize proxy behavior through VS Code settings:
 
 | Setting | Default | Description |
 |---|---|---|
+| `spfxLocalWorkbench.proxy.enabled` | `true` | Enable or disable the API proxy system. When disabled, HTTP client calls make real `fetch()` requests instead of routing through the mock rule engine, allowing external tools like Dev Proxy to handle them. **Requires closing and reopening the workbench to take effect.** |
 | `spfxLocalWorkbench.proxy.mockFile` | `.spfx-workbench/api-mocks.json` | Path to the mock config file (relative to workspace root). |
 | `spfxLocalWorkbench.proxy.defaultDelay` | `0` | Default delay (ms) for all mock responses. |
 | `spfxLocalWorkbench.proxy.fallbackStatus` | `404` | HTTP status returned when no mock rule matches a request. |
@@ -309,3 +310,4 @@ Your existing web part code like `response.json().then(data => ...)` works witho
 - **Use `bodyFile`** for large payloads to keep your mock config readable.
 - **Check the Output channel** ("SPFx API Proxy") to verify which rules are matching and debug unexpected 404s.
 - **Unmatched requests** return the `fallbackStatus` (default `404`) with a JSON body describing what was requested, making it easy to identify missing mock rules.
+- **Disable the proxy** entirely by setting `spfxLocalWorkbench.proxy.enabled` to `false`. When disabled, the built-in proxy clients are swapped out for passthrough clients that make **real `fetch()` calls** from the webview. This lets you use external tools like [Dev Proxy](https://learn.microsoft.com/en-us/microsoft-cloud/dev/dev-proxy/overview) to intercept and mock network traffic instead. The webview's Content-Security-Policy is also widened (`connect-src https: http:`) so requests can reach any endpoint. **You must close and reopen the workbench after changing this setting.**

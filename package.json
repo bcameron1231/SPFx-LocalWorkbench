@@ -171,6 +171,11 @@
           "default": true,
           "description": "Whether this is SharePoint Online (vs. on-premises)"
         },
+        "spfxLocalWorkbench.proxy.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the API proxy system. When disabled, HTTP client calls (SPHttpClient, HttpClient, AadHttpClient) make real fetch() requests instead of routing through the mock rule engine. This allows external tools like Dev Proxy to intercept network traffic. Requires closing and reopening the workbench to take effect."
+        },
         "spfxLocalWorkbench.proxy.mockFile": {
           "type": "string",
           "default": ".spfx-workbench/api-mocks.json",

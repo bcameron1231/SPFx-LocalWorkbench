@@ -29,6 +29,7 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 - **Client type filtering**: Target rules to specific client types (`spHttp`, `http`, `aadHttp`)
 - **Hot reload**: Edit your mock config and rules are reloaded instantly
 - **Request logging**: All proxied calls are logged to the "SPFx API Proxy" output channel
+- **Fully optional**: Disable the proxy to use real `fetch()` calls with external tools like Dev Proxy
 
 > 📖 **[Full proxy documentation →](PROXY.md)** — architecture, setup guide, mock rule reference, and examples.
 
@@ -116,6 +117,18 @@ Customize the mock SharePoint context:
 | `spfxLocalWorkbench.pageContext.webTitle` | `Local Workbench` | Title of the web |
 | `spfxLocalWorkbench.pageContext.webTemplate` | `STS#3` | Web template ID |
 | `spfxLocalWorkbench.pageContext.isSPO` | `true` | Whether this is SharePoint Online |
+
+### Proxy Settings
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `spfxLocalWorkbench.proxy.enabled` | `true` | Enable the API proxy. When `false`, HTTP clients make real `fetch()` calls so you can use external tools like [Dev Proxy](https://learn.microsoft.com/en-us/microsoft-cloud/dev/dev-proxy/overview). **Requires closing and reopening the workbench to take effect.** |
+| `spfxLocalWorkbench.proxy.mockFile` | `.spfx-workbench/api-mocks.json` | Path to the mock rules configuration file (relative to workspace root) |
+| `spfxLocalWorkbench.proxy.defaultDelay` | `0` | Default simulated latency (ms) for mock responses |
+| `spfxLocalWorkbench.proxy.fallbackStatus` | `404` | HTTP status returned when no mock rule matches |
+| `spfxLocalWorkbench.proxy.logRequests` | `true` | Log proxied requests to the "SPFx API Proxy" output channel |
+
+> See [PROXY.md](PROXY.md) for the full mock rule reference, architecture details, and examples.
 
 ## Troubleshooting
 

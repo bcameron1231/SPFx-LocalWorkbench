@@ -32,7 +32,7 @@ export class WorkbenchRuntime {
 
         // Initialize core components
         this.amdLoader = new AmdLoader();
-        this.contextProvider = new SpfxContext(config.context, config.pageContext);
+        this.contextProvider = new SpfxContext(config.context, config.pageContext, config.proxyEnabled !== false);
         this.themeProvider = new ThemeProvider(config.theme);
         this.webPartManager = new WebPartManager(
             this.vscode,

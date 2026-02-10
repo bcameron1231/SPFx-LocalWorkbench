@@ -1,6 +1,7 @@
 import { spPropertyPaneModule } from './PropertyPaneMocks';
 import { ProxyHttpClient } from '../proxy/ProxyHttpClient';
 import { ProxySPHttpClient } from '../proxy/ProxySPHttpClient';
+import { PassthroughHttpClient } from '../proxy/PassthroughHttpClient';
 
 // Deep recursive merge matching lodash merge behaviour
 function deepMerge(target: any, ...sources: any[]): any {
@@ -22,7 +23,7 @@ function deepMerge(target: any, ...sources: any[]): any {
     return target;
 }
 
-export function initializeSpfxMocks(): void {
+export function initializeSpfxMocks(proxyEnabled: boolean = true): void {
     const amdModules = window.__amdModules!;
 
     // Mock BaseClientSideWebPart - ES5-compatible constructor function
@@ -143,11 +144,15 @@ export function initializeSpfxMocks(): void {
     // Also make it globally available for direct imports
     (window as any)['@microsoft/sp-property-pane'] = spPropertyPaneModule;
     
-    // Proxy-aware HTTP clients: route API calls through the extension host
-    // via postMessage bridge for configurable mock/passthrough/record responses
+    // HTTP clients: when proxy is enabled, route through the extension host
+    // via postMessage bridge for configurable mock responses. When disabled,
+    // use passthrough clients that make real fetch() calls so external tools
+    // like Dev Proxy can intercept them.
+    const HttpClientImpl = proxyEnabled ? ProxyHttpClient : PassthroughHttpClient;
+    const SPHttpClientImpl = proxyEnabled ? ProxySPHttpClient : PassthroughHttpClient;
     amdModules['@microsoft/sp-http'] = {
-        HttpClient: ProxyHttpClient,
-        SPHttpClient: ProxySPHttpClient,
+        HttpClient: HttpClientImpl,
+        SPHttpClient: SPHttpClientImpl,
         SPHttpClientConfiguration: {},
         HttpClientConfiguration: {}
     };

@@ -2,6 +2,7 @@ import type { IContextSettings, IPageContextSettings } from '../types';
 import { ProxyHttpClient } from '../proxy/ProxyHttpClient';
 import { ProxySPHttpClient } from '../proxy/ProxySPHttpClient';
 import { ProxyAadHttpClient } from '../proxy/ProxyAadHttpClient';
+import { PassthroughHttpClient } from '../proxy/PassthroughHttpClient';
 
 const defaultContextSettings: IContextSettings = {
     siteUrl: 'https://contoso.sharepoint.com/sites/devsite',
@@ -25,13 +26,16 @@ const defaultPageContextSettings: IPageContextSettings = {
 export class SpfxContext {
     private contextSettings: IContextSettings;
     private pageContextSettings: IPageContextSettings;
+    private proxyEnabled: boolean;
 
     constructor(
         contextSettings?: Partial<IContextSettings>,
-        pageContextSettings?: Partial<IPageContextSettings>
+        pageContextSettings?: Partial<IPageContextSettings>,
+        proxyEnabled: boolean = true
     ) {
         this.contextSettings = { ...defaultContextSettings, ...contextSettings };
         this.pageContextSettings = { ...defaultPageContextSettings, ...pageContextSettings };
+        this.proxyEnabled = proxyEnabled;
     }
 
     createMockContext(webPartId: string, instanceId: string): any {
@@ -110,10 +114,12 @@ export class SpfxContext {
                 }),
                 finish: () => {}
             },
-            httpClient: new ProxyHttpClient(),
-            spHttpClient: new ProxySPHttpClient(),
+            httpClient: this.proxyEnabled ? new ProxyHttpClient() : new PassthroughHttpClient(),
+            spHttpClient: this.proxyEnabled ? new ProxySPHttpClient() : new PassthroughHttpClient(),
             aadHttpClientFactory: {
-                getClient: () => Promise.resolve(new ProxyAadHttpClient())
+                getClient: () => Promise.resolve(
+                    this.proxyEnabled ? new ProxyAadHttpClient() : new PassthroughHttpClient()
+                )
             },
             msGraphClientFactory: {
                 getClient: () => Promise.resolve({

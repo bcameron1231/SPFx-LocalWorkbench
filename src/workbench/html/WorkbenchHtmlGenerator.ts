@@ -26,6 +26,8 @@ export interface IHtmlGeneratorConfig {
     contextSettings?: Partial<IContextConfig>;
     // Page context settings from user configuration
     pageContextSettings?: Partial<IPageContextConfig>;
+    // Whether the API proxy is enabled (default true)
+    proxyEnabled?: boolean;
 }
 
 // Generates the Content Security Policy for the webview
@@ -36,7 +38,7 @@ function generateCsp(config: IHtmlGeneratorConfig): string {
         // Note: 'unsafe-eval' is still required for AMD module loader and SPFx bundles
         // 'nonce-${nonce}' allows our bundled script while blocking inline scripts
         `script-src 'nonce-${config.nonce}' 'unsafe-eval' ${config.cspSource} ${config.serveUrl}`,
-        `connect-src ${config.serveUrl} https://*.sharepoint.com https://login.windows.net`,
+        `connect-src ${config.serveUrl} ${config.proxyEnabled === false ? 'https: http:' : 'https://*.sharepoint.com https://login.windows.net'}`,
         `img-src ${config.cspSource} ${config.serveUrl} https: data:`,
         `font-src ${config.cspSource} ${config.serveUrl} https: data:`,
         `frame-src ${config.serveUrl}`
@@ -109,7 +111,8 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
         extensions: extensions,
         theme: config.themeSettings,
         context: config.contextSettings,
-        pageContext: config.pageContextSettings
+        pageContext: config.pageContextSettings,
+        proxyEnabled: config.proxyEnabled !== false
     };
     
     // Resolve local vendor UMD bundles shipped with the extension

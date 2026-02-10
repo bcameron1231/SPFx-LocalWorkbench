@@ -17,6 +17,7 @@ import type {
 
 // Default proxy settings when not configured in VS Code settings
 const defaultProxySettings: IProxySettings = {
+    enabled: true,
     mockFile: '.spfx-workbench/api-mocks.json',
     defaultDelay: 0,
     fallbackStatus: 404,
@@ -61,6 +62,7 @@ export class ApiProxyService implements vscode.Disposable {
     static readSettings(): IProxySettings {
         const config = vscode.workspace.getConfiguration('spfxLocalWorkbench.proxy');
         return {
+            enabled: config.get<boolean>('enabled', defaultProxySettings.enabled),
             mockFile: config.get<string>('mockFile', defaultProxySettings.mockFile),
             defaultDelay: config.get<number>('defaultDelay', defaultProxySettings.defaultDelay),
             fallbackStatus: config.get<number>('fallbackStatus', defaultProxySettings.fallbackStatus),
@@ -68,9 +70,13 @@ export class ApiProxyService implements vscode.Disposable {
         };
     }
 
+    // Whether the proxy is currently enabled
+    get enabled(): boolean {
+        return this._settings.enabled;
+    }
+
     // Handle an API request from the webview.
-    // This is the main entry point called by WorkbenchPanel when it receives
-    // an 'apiRequest' message.
+    // This is the main entry point called by WorkbenchPanel when it receives an 'apiRequest' message.
     async handleRequest(request: IProxyRequest): Promise<IProxyResponse> {
         this._log(`${request.method} ${request.url} [${request.clientType}]`);
 

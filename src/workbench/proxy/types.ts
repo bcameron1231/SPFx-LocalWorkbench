@@ -83,6 +83,8 @@ export interface IProxyResponse {
 
 // VS Code settings for proxy behavior
 export interface IProxySettings {
+    // Whether the API proxy system is enabled
+    enabled: boolean;
     // Path to the mock configuration file relative to workspace
     mockFile: string;
     // Default delay in ms when not specified by a rule
