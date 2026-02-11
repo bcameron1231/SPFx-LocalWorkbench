@@ -1,8 +1,6 @@
 // Proxy Bridge
 //
-// Shared infrastructure for routing API calls from the webview through the
-// VS Code extension host via postMessage. Manages request correlation so
-// each call gets back the correct response.
+// Shared infrastructure for routing API calls from the webview through the VS Code extension host via postMessage. Manages request correlation so each call gets back the correct response.
 
 import type { IVsCodeApi } from '../types';
 

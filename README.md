@@ -181,7 +181,6 @@ webview/
     types/                  # Webview-specific type definitions
 ```
 
-
 ## License
 
 MIT License - See LICENSE file for details.

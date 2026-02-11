@@ -12,8 +12,6 @@ function extractOptions(options?: any): { body?: string; headers?: Record<string
 }
 
 // Proxy-aware HttpClient replacement.
-// Subclasses can override `clientType` to tag requests differently
-// (e.g. 'spHttp', 'aadHttp') so mock rules can distinguish them.
 export class ProxyHttpClient {
     // The client type tag sent with every request for rule matching.
     protected readonly clientType: ApiClientType = 'http';
@@ -51,8 +49,7 @@ export class ProxyHttpClient {
     }
 
     // Generic fetch -- the method is read from options (defaults to GET).
-    // This is the catch-all that SPFx clients expose alongside the
-    // convenience methods above.
+    // This is the catch-all that SPFx clients expose alongside the convenience methods above.
     async fetch(url: string, _config?: any, options?: any): Promise<MockProxyResponse> {
         const method = options?.method || 'GET';
         const { body, headers } = extractOptions(options);

@@ -1,8 +1,6 @@
 // Passthrough HttpClient
 //
-// A simple HTTP client that makes real fetch() calls instead of routing
-// through the proxy bridge. Used when the API proxy is disabled, allowing
-// external tools like Dev Proxy to intercept network traffic.
+// A simple HTTP client that makes real fetch() calls instead of routing through the proxy bridge. Used when the API proxy is disabled, allowing external tools like Dev Proxy to intercept network traffic.
 
 // SPFx-compatible response wrapper that mirrors SPHttpClientResponse.
 class PassthroughResponse {
