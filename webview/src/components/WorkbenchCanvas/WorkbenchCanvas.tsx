@@ -1,8 +1,10 @@
-import React, { useState, Fragment, FC } from 'react';
+import React, { useState, Fragment, FC, useMemo } from 'react';
 import { IconButton, Text, Stack } from '@fluentui/react';
 import type { IWebPartManifest, IWebPartConfig } from '../../types';
-import { WebPartPicker } from '../WebPartPicker';
+//import { WebPartPicker } from '../WebPartPicker';
 import styles from './WorkbenchCanvas.module.css';
+import { ComponentPicker } from '../ComponentPicker';
+import { getLocalizedString } from '../../utilities';
 
 interface IWorkbenchCanvasProps {
     manifests: IWebPartManifest[];
@@ -10,6 +12,7 @@ interface IWorkbenchCanvasProps {
     onAddWebPart: (insertIndex: number, manifestIndex: number) => void;
     onEditWebPart: (index: number) => void;
     onDeleteWebPart: (index: number) => void;
+    locale?: string;
 }
 
 export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
@@ -17,7 +20,8 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
     activeWebParts,
     onAddWebPart,
     onEditWebPart,
-    onDeleteWebPart
+    onDeleteWebPart,
+    locale,
 }) => {
     const [openPickerIndex, setOpenPickerIndex] = useState<number | null>(null);
 
@@ -25,7 +29,7 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
         setOpenPickerIndex(openPickerIndex === insertIndex ? null : insertIndex);
     };
 
-    const handlePickerSelect = (insertIndex: number, manifestIndex: number) => {
+    const handlePickerSelect = (manifestIndex: number, insertIndex: number = 0) => {
         setOpenPickerIndex(null);
         onAddWebPart(insertIndex, manifestIndex);
     };
@@ -39,7 +43,7 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
             <div id="canvas">
                 <Stack horizontalAlign="center" styles={{ root: { padding: '24px' } }}>
                     <Text variant="large" styles={{ root: { color: '#a80000' } }}>
-                        No web parts found. Make sure your web part is served / running.
+                        No SPFx components found. Make sure your project is served / running.
                     </Text>
                 </Stack>
             </div>
@@ -72,6 +76,7 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
                             manifests={manifests}
                             onAddClick={handleAddClick}
                             onSelect={handlePickerSelect}
+                            locale={locale}
                         />
                     </Fragment>
                 ))}
@@ -94,7 +99,8 @@ interface IAddZoneProps {
     isOpen: boolean;
     manifests: IWebPartManifest[];
     onAddClick: (insertIndex: number) => void;
-    onSelect: (insertIndex: number, manifestIndex: number) => void;
+    onSelect: (manifestIndex: number, insertIndex?: number) => void;
+    locale?: string;
 }
 
 const AddZone: FC<IAddZoneProps> = ({
@@ -102,8 +108,18 @@ const AddZone: FC<IAddZoneProps> = ({
     isOpen,
     manifests,
     onAddClick,
-    onSelect
+    onSelect,
+    locale,
 }) => {
+    const availableWebParts = useMemo(() => {
+        return manifests.map((m,manifestIndex) => ({...m, manifestIndex})).filter(m => m.componentType === 'WebPart').map((wp, index) => {
+            const title = getLocalizedString(wp.preconfiguredEntries?.[0]?.title, locale) || wp.alias;
+            const description = getLocalizedString(wp.preconfiguredEntries?.[0]?.description, locale) || '';
+            const iconName = wp.preconfiguredEntries?.[0]?.officeFabricIconFontName;
+            const iconSrc = wp.preconfiguredEntries?.[0]?.iconImageUrl;
+            return { ...wp, title, description, iconName, iconSrc };
+        });
+    }, [manifests, locale]);
     return (
         <div className={styles.addZone} data-insert-index={insertIndex}>
             <div className={styles.addZoneLine} />
@@ -118,10 +134,12 @@ const AddZone: FC<IAddZoneProps> = ({
                 +
             </button>
             <div className={styles.addZoneLine} />
-            <WebPartPicker
-                insertIndex={insertIndex}
-                manifests={manifests}
+            <ComponentPicker
+                location={insertIndex}
+                components={availableWebParts}
                 isOpen={isOpen}
+                resultsLabel="Available web parts"
+                noResultsLabel="No web parts found"
                 onSelect={onSelect}
             />
         </div>

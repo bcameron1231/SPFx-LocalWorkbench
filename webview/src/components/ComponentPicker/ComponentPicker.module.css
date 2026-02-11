@@ -1,0 +1,71 @@
+.popup {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 1px solid #edebe9;
+    border-radius: 4px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    padding: 16px;
+    min-width: 300px;
+    max-width: 400px;
+    z-index: 100;
+    display: none;
+
+    &.open {
+        display: block;
+    }
+
+    /* Flip the popup above the + button when it would overflow the viewport */
+    &.upward {
+        top: auto;
+        bottom: 100%;
+    }
+}
+
+.search {
+    margin-bottom: 12px;
+}
+
+.resultsLabel {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.results {
+    max-height: 300px;
+    min-height: 52px;
+    overflow-y: auto;
+    color: #323130;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.1s;
+
+    &:hover {
+        background: #f3f2f1;
+    }
+}
+
+.itemIcon {
+    width: 28px;
+    height: 28px;
+    margin-right: 12px;
+    font-size: 28px;
+}
+
+.itemText {
+    font-size: 12px;
+}
+
+.noResults {
+    margin-top: 17px;
+    color: #605e5c;
+    font-style: italic;
+}

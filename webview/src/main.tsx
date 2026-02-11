@@ -80,8 +80,20 @@ function initialize() {
         // Listen for live reload messages from the extension
         window.addEventListener('message', (event: MessageEvent) => {
             const message = event.data;
-            if (message && message.command === 'liveReload') {
-                runtime.liveReload();
+            if (!message || !message.command) {
+                return;
+            }
+
+            switch (message.command) {
+                case 'liveReload':
+                    runtime.liveReload();
+                    return;
+                case 'refresh':
+                    runtime.handleRefresh();
+                    return;
+                case 'openDevTools':
+                    runtime.handleOpenDevTools();
+                    return;
             }
             if (message && message.command === 'settingsChanged' && message.settings) {
                 runtime.updateSettings(message.settings);

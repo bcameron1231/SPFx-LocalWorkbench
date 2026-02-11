@@ -1,0 +1,19 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "useGulp": false,
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "22.19.0",
+    "sdksVersions": {},
+    "version": "1.22.2",
+    "libraryName": "property-pane",
+    "libraryId": "4dd111d2-a13c-4a95-aa69-4ac06c50350e",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "PropertyPane",
+    "solutionShortDescription": "PropertyPane description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

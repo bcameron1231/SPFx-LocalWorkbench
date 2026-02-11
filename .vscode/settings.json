@@ -10,5 +10,8 @@
         "samples/**": true // exclude local SPFx sample projects from search
     },
     // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
-    "typescript.tsc.autoDetect": "off"
+    "typescript.tsc.autoDetect": "off",
+    "explorer.fileNesting.patterns": {
+        "*.module.css": "${capture}.module.css.d.ts"
+    }
 }

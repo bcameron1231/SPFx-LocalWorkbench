@@ -7,6 +7,7 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 ## Features
 
 ### Web Parts
+
 - **Automatic SPFx Detection**: Automatically detects SPFx projects in your workspace
 - **Web Part Discovery**: Parses all web part manifests from your project  
 - **SPFx Runtime Environment**: Custom-built workbench that simulates the SPFx runtime with AMD module loading
@@ -16,6 +17,7 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 - **Theme Support**: Choose from multiple SharePoint theme presets (Team Site, Communication Site, Dark Mode)
 
 ### Application Customizers
+
 - **Extension Discovery**: Automatically detects Application Customizer manifests alongside web parts
 - **Header & Footer Placeholders**: Simulated `Top` and `Bottom` placeholder zones, just like SharePoint
 - **Interactive Add/Remove**: Use the `+` button in the header zone to add extensions from a picker
@@ -58,6 +60,7 @@ There are several ways to open the workbench:
 ### Starting Development Server
 
 Use the command "SPFx: Start Serve & Open Workbench" to:
+
 1. Start `heft start` in a terminal
 2. Open the workbench after a short delay
 
@@ -132,28 +135,11 @@ Customize the mock SharePoint context:
 
 ## Troubleshooting
 
-### "Could not load manifests from serve URL"
-- Make sure `heft start` is running
-- Check that the serve URL matches your SPFx project's port (default: 4321)
-- Accept the self-signed certificate in your browser first: visit `https://localhost:4321`
-- This extension only supports SPFx 1.22+ (Heft-based projects)
+Having issues? See the [Troubleshooting Guide](TROUBLESHOOTING.md).
 
-### Web parts not rendering
-- Open DevTools in the workbench (click "DevTools" button) to see console errors
-- Verify your SPFx project builds successfully
-- Check that your web part bundle is being served correctly
+## Contributing
 
-### Application Customizer not rendering
-- Open DevTools and check for errors loading the extension bundle
-- Ensure your extension's `componentType` is set to `"Extension"` in the manifest
-- Verify the extension bundle is being served (check `internalModuleBaseUrls` in the manifest)
-- If the extension uses localized strings, a proxy mock is provided automatically
-
-### Certificate errors
-SPFx uses HTTPS with a self-signed certificate. You may need to:
-1. Visit `https://localhost:4321` in your browser
-2. Accept the security warning / add certificate exception
-3. Refresh the workbench
+Contributions are welcome! See the [Contributing Guide](CONTRIBUTING.md) for development setup, project structure, and more.
 
 ## Development
 
@@ -195,10 +181,7 @@ webview/
     types/                  # Webview-specific type definitions
 ```
 
+
 ## License
 
 MIT License - See LICENSE file for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit issues and pull requests.

@@ -1,9 +1,24 @@
 import * as vscode from 'vscode';
 import { WorkbenchPanel, SpfxProjectDetector, createManifestWatcher, getWorkbenchSettings, ApiProxyService } from './workbench';
+import * as net from 'net';
+
+function isPortReachable(host: string, port: number, timeout = 1000): Promise<boolean> {
+	return new Promise((resolve) => {
+		const socket = new net.Socket();
+		socket.setTimeout(timeout);
+		socket.once('connect', () => { socket.destroy(); resolve(true); });
+		socket.once('timeout', () => { socket.destroy(); resolve(false); });
+		socket.once('error', () => { socket.destroy(); resolve(false); });
+		socket.connect(port, host);
+	});
+}
+
+function delay(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
-	console.log('SPFx Local Workbench is now active!');
 
 	// Shared detector instance — workspace path rarely changes
 	let detector: SpfxProjectDetector | undefined;
@@ -46,32 +61,61 @@ export function activate(context: vscode.ExtensionContext) {
 			terminal.show();
 			terminal.sendText('heft start --clean --nobrowser');
 
-			// Poll the serve URL until it responds, then open the workbench
+			// Parse host/port from the configured serve URL
 			const settings = getWorkbenchSettings();
-			const serveUrl = settings.serveUrl;
-			const maxAttempts = 60; // up to ~60 seconds
-			let attempts = 0;
-			const pollTimer = setInterval(async () => {
-				attempts++;
-				try {
-					const response = await fetch(serveUrl, {
-						method: 'HEAD',
-						signal: AbortSignal.timeout(2000)
-					});
-					if (response.ok || response.status === 426) {
-						// Server is up (426 = HTTPS upgrade expected, still means it's running)
-						clearInterval(pollTimer);
-						WorkbenchPanel.createOrShow(context.extensionUri);
+			let serveHost = 'localhost';
+			let servePort = 4321;
+			try {
+				const url = new URL(settings.serveUrl);
+				serveHost = url.hostname;
+				servePort = parseInt(url.port, 10) || (url.protocol === 'https:' ? 443 : 80);
+			} catch {
+				// Fall back to defaults
+			}
+
+			// Wait for the serve port to accept connections, with a progress indicator
+			const serverReady = await vscode.window.withProgress(
+				{
+					location: vscode.ProgressLocation.Notification,
+					title: 'SPFx Serve',
+					cancellable: true
+				},
+				async (progress, cancellationToken) => {
+					const maxWaitMs = 120_000; // 2 minutes
+					const pollIntervalMs = 500;
+					const startTime = Date.now();
+
+					progress.report({ message: 'Waiting for serve to start…' });
+
+					while (Date.now() - startTime < maxWaitMs) {
+						if (cancellationToken.isCancellationRequested) {
+							return false;
+						}
+
+						if (await isPortReachable(serveHost, servePort)) {
+							return true;
+						}
+
+						const elapsed = Math.round((Date.now() - startTime) / 1000);
+						progress.report({ message: `Waiting for serve to start… (${elapsed}s)` });
+						await delay(pollIntervalMs);
 					}
-				} catch {
-					// Not ready yet
+
+					return false; // timed out
 				}
-				if (attempts >= maxAttempts) {
-					clearInterval(pollTimer);
-					// Open anyway — user can manually refresh
+			);
+
+			if (serverReady) {
+				WorkbenchPanel.createOrShow(context.extensionUri);
+			} else {
+				const choice = await vscode.window.showWarningMessage(
+					'SPFx serve did not start in time. Open workbench anyway?',
+					'Open', 'Cancel'
+				);
+				if (choice === 'Open') {
 					WorkbenchPanel.createOrShow(context.extensionUri);
 				}
-			}, 1000);
+			}
 		}
 	);
 
@@ -79,6 +123,11 @@ export function activate(context: vscode.ExtensionContext) {
 	const detectWebPartsCommand = vscode.commands.registerCommand(
 		'spfx-local-workbench.detectWebParts',
 		async () => {
+			if (WorkbenchPanel.currentPanel) {
+				WorkbenchPanel.currentPanel.postMessage({ command: 'refresh' });
+				return;
+			}
+
 			const det = getDetector();
 			if (!det) {
 				vscode.window.showWarningMessage('No workspace folder open');
@@ -109,6 +158,12 @@ export function activate(context: vscode.ExtensionContext) {
 			await proxy.scaffoldMockConfig();
 			proxy.dispose();
 			vscode.window.showInformationMessage('API mock configuration scaffolded at .spfx-workbench/api-mocks.json');
+	});
+	
+	const openDevToolsCommand = vscode.commands.registerCommand(
+		'spfx-local-workbench.openDevTools',
+		() => {
+			vscode.commands.executeCommand('workbench.action.webview.openDeveloperTools');
 		}
 	);
 
@@ -158,6 +213,7 @@ export function activate(context: vscode.ExtensionContext) {
 		startServeCommand,
 		detectWebPartsCommand,
 		scaffoldMockConfigCommand,
+		openDevToolsCommand,
 		statusBarItem
 	);
 }

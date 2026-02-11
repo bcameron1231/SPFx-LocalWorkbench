@@ -14,6 +14,11 @@ export interface IWorkbenchConfig {
     proxyEnabled?: boolean;
 }
 
+export interface ILocalizedString {
+    default: string;
+    [key: string]: string;
+}
+
 export interface IWebPartManifest {
     id: string;
     alias: string;
@@ -25,8 +30,12 @@ export interface IWebPartManifest {
         scriptResources?: Record<string, any>;
     };
     preconfiguredEntries?: Array<{
-        title?: { default?: string };
-        description?: { default?: string };
+        title: ILocalizedString;
+        description: ILocalizedString;
+        officeFabricIconFontName?: string;
+        iconImageUrl?: string;
+        groupId: string;
+        group?: ILocalizedString;
         properties?: Record<string, any>;
     }>;
 }

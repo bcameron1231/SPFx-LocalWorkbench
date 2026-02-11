@@ -184,16 +184,15 @@ export class WorkbenchRuntime {
         // Allow DOM to render
         await new Promise(r => setTimeout(r, 100));
 
-        // Instantiate the extension
+        // Instantiate the extensions
         const headerEl = document.getElementById(`ext-header-${config.instanceId}`) as HTMLDivElement;
+        const footerEl = document.getElementById(`ext-footer-${config.instanceId}`) as HTMLDivElement;
 
-        if (!headerEl) {
-            console.error('WorkbenchRuntime - Missing DOM element for extension', config.instanceId);
-            return;
+        if (!headerEl || !footerEl) {
+            console.error('WorkbenchRuntime - Missing DOM element(s) for extension', config.instanceId);
         }
 
-        // Pass the header element for both placeholders so all content renders in one place
-        const active = await this.extensionManager.instantiateExtension(config, headerEl, headerEl);
+        const active = await this.extensionManager.instantiateExtension(config, headerEl, footerEl);
         if (active) {
             const idx = this.activeExtensions.indexOf(config);
             if (idx !== -1) {

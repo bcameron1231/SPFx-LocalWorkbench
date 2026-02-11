@@ -25,10 +25,21 @@
     border-bottom: 1px dashed transparent;
     min-height: 0;
     transition: min-height 0.2s, border-color 0.2s;
+
+    &:not(:empty) {
+        min-height: 4px;
+    }
 }
 
-.appCustomizerHeader:not(:empty) {
-    min-height: 4px;
+.appCustomizerFooter {
+    border-top: 1px dashed transparent;
+    min-height: 0;
+    transition: min-height 0.2s, border-color 0.2s;
+    visibility: hidden; /* temp hide until it looks right */
+
+    &:not(:empty) {
+        min-height: 4px;
+    }
 }
 
 .appCustomizerExtensionWrapper {
@@ -69,7 +80,8 @@
     position: relative;
 }
 
-.appCustomizerHeader:hover::before {
+.appCustomizerHeader:hover::before,
+.appCustomizerFooter:hover::before {
     position: absolute;
     left: 8px;
     top: 0;
