@@ -31,6 +31,14 @@ export function activate(context: vscode.ExtensionContext) {
 		return detector;
 	}
 
+	// Register serializer to restore webview on reload
+	context.subscriptions.push(
+		vscode.window.registerWebviewPanelSerializer(
+			'spfxLocalWorkbench',
+			new WorkbenchPanelSerializer(context.extensionUri, getDetector)
+		)
+	);
+
 	// Register the Open Workbench command
 	const openWorkbenchCommand = vscode.commands.registerCommand(
 		'spfx-local-workbench.openWorkbench',
@@ -163,7 +171,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 			if (isSpfx) {
 				const version = await det.getSpfxVersion();
-				statusBarItem.text = `$(beaker) SPFx Workbench`;
+				statusBarItem.text = `$(fluentui-testbeaker) SPFx Workbench`;
 				statusBarItem.tooltip = `SPFx Project detected${version ? ` (${version})` : ''}\nClick to open local workbench`;
 				statusBarItem.show();
 			} else {
@@ -200,6 +208,34 @@ export function activate(context: vscode.ExtensionContext) {
 		openDevToolsCommand,
 		statusBarItem
 	);
+}
+
+// Serializer to restore webview panel state across VS Code restarts
+class WorkbenchPanelSerializer implements vscode.WebviewPanelSerializer {
+	constructor(
+		private readonly _extensionUri: vscode.Uri,
+		private readonly _getDetector: () => SpfxProjectDetector | undefined
+	) {}
+
+	async deserializeWebviewPanel(
+		webviewPanel: vscode.WebviewPanel,
+		_state: any
+	): Promise<void> {
+		// Check if current workspace is an SPFx project
+		const detector = this._getDetector();
+		if (detector) {
+			const isSpfx = await detector.isSpfxProject();
+			
+			if (isSpfx) {
+				// Revive the panel
+				WorkbenchPanel.revive(webviewPanel, this._extensionUri);
+				return;
+			}
+		}
+		
+		// Not an SPFx project - close the panel
+		webviewPanel.dispose();
+	}
 }
 
 // This method is called when your extension is deactivated

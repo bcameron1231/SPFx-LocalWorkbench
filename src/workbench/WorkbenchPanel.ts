@@ -19,7 +19,7 @@ function getNonce(): string {
 // WorkbenchPanel manages the webview that hosts the SPFx local workbench.
 export class WorkbenchPanel {
     public static currentPanel: WorkbenchPanel | undefined;
-    private static readonly viewType = 'spfxWorkbench';
+    private static readonly viewType = 'spfxLocalWorkbench';
 
     private readonly _panel: vscode.WebviewPanel;
     private readonly _extensionUri: vscode.Uri;
@@ -56,10 +56,7 @@ export class WorkbenchPanel {
             }
         );
 
-        panel.iconPath = {
-            light: vscode.Uri.joinPath(extensionUri, 'media', 'workbench-light.svg'),
-            dark: vscode.Uri.joinPath(extensionUri, 'media', 'workbench-dark.svg'),
-        };
+        panel.iconPath = new vscode.ThemeIcon('fluentui-testbeaker');
 
 
         WorkbenchPanel.currentPanel = new WorkbenchPanel(panel, extensionUri);
@@ -124,14 +121,14 @@ export class WorkbenchPanel {
         this._setupLiveReloadWatcher();
 
         // Load web parts
-        this._loadWebParts();
+        this._loadComponents();
     }
 
     // Handles messages from the webview
     private async _handleMessage(message: { command: string; url?: string; text?: string }): Promise<void> {
         switch (message.command) {
             case 'refresh':
-                await this._loadWebParts();
+                await this._loadComponents();
                 this._update();
                 return;
 
@@ -151,8 +148,8 @@ export class WorkbenchPanel {
         }
     }
 
-    // Loads web part manifests from the current workspace
-    private async _loadWebParts(): Promise<void> {
+    // Loads component manifests from the current workspace
+    private async _loadComponents(): Promise<void> {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
         if (!workspaceFolder) {
             vscode.window.showWarningMessage('No workspace folder open');
@@ -203,7 +200,7 @@ export class WorkbenchPanel {
 
     // Reloads manifests and updates the webview (called by manifest file watcher)
     public async refreshManifests(): Promise<void> {
-        await this._loadWebParts();
+        await this._loadComponents();
         this._update();
     }
 
@@ -245,6 +242,7 @@ export class WorkbenchPanel {
             webPartsJson,
             extensionsJson,
             cspSource: webview.cspSource,
+            locale: 'en-us', // TODO: Support override
             webPartCount: this._webParts.length,
             extensionCount: this._extensions.length,
             webview: webview,
