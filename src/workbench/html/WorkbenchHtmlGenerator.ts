@@ -16,6 +16,7 @@ export interface IHtmlGeneratorConfig {
     webPartsJson: string;
     extensionsJson?: string;
     cspSource: string;
+    locale: string;
     webPartCount: number;
     extensionCount?: number;
     webview: vscode.Webview;
@@ -74,7 +75,7 @@ function generateMainContent(): string {
 }
 
 // Generates the status bar HTML
-function generateStatusBar(webPartCount: number, extensionCount: number = 0): string {
+function generateStatusBar(webPartCount: number, extensionCount: number = 0, locale: string = 'en-us'): string {
     let countText = `${webPartCount} web part${webPartCount === 1 ? '' : 's'}`;
     if (extensionCount > 0) {
         countText += `, ${extensionCount} extension${extensionCount === 1 ? '' : 's'}`;
@@ -87,6 +88,8 @@ function generateStatusBar(webPartCount: number, extensionCount: number = 0): st
             <span id="status-text">Initializing...</span>
         </div>
         <span id="component-count">${countText}</span>
+        <div class="separator"></div>
+        <span id="locale-switcher">${locale.toLowerCase()}</span>
     </div>
     `;
 }
