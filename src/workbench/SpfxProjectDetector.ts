@@ -6,6 +6,36 @@ import type {
     ISpfxConfig,
 } from './types';
 
+//Describes an SPFx external dependency that the workbench needs to provide.
+export interface IExternalDependency {
+    /** AMD module name as it appears in the manifest (e.g. '@fluentui/react') */
+    moduleName: string;
+    /** Absolute path to the UMD/browser bundle on disk, if resolved */
+    bundlePath?: string;
+    /** Global variable name the UMD sets on window */
+    globalName?: string;
+}
+
+/**
+ * Maps known SPFx external packages to the location of their UMD bundle
+ * (relative to the package directory in node_modules) and the global variable
+ * the UMD assigns on window.
+ *
+ * Packages not in this map are either genuinely SharePoint-runtime-only
+ * (sp-webpart-base, sp-core-library, etc.) and must be mocked, or they
+ * don't ship a browser bundle and need special handling.
+ */
+const KNOWN_UMD_EXTERNALS: Record<string, { bundlePath: string; globalName: string }> = {
+    '@fluentui/react': {
+        bundlePath: 'dist/fluentui-react.js',
+        globalName: 'FluentUIReact',
+    },
+    'office-ui-fabric-react': {
+        bundlePath: 'dist/office-ui-fabric-react.js',
+        globalName: 'FluentUIReact',
+    },
+};
+
 export class SpfxProjectDetector {
     public readonly workspacePath: string;
 
@@ -150,6 +180,72 @@ export class SpfxProjectDetector {
         }
 
         return manifests;
+    }
+
+    /**
+     * Scans built manifests in release/manifests/ for external dependencies
+     * ("type": "component" entries in scriptResources) and resolves their
+     * UMD browser bundles from the project's node_modules.
+     * 
+     * Returns only externals that have a resolvable UMD bundle — packages
+     * like @microsoft/sp-webpart-base that must be mocked are excluded.
+     */
+    public async resolveExternalDependencies(): Promise<IExternalDependency[]> {
+        const resolved: IExternalDependency[] = [];
+        const seen = new Set<string>();
+
+        // Collect external module names from all built manifests
+        const manifestDir = path.join(this.workspacePath, 'release', 'manifests');
+        let manifestFiles: string[] = [];
+        try {
+            const entries = await fs.readdir(manifestDir);
+            manifestFiles = entries
+                .filter(f => f.endsWith('.manifest.json'))
+                .map(f => path.join(manifestDir, f));
+        } catch {
+            // release/manifests/ may not exist yet (project not built)
+            console.log('SpfxProjectDetector - release/manifests/ not found, skipping external resolution');
+            return resolved;
+        }
+
+        for (const manifestFile of manifestFiles) {
+            try {
+                const content = await fs.readFile(manifestFile, 'utf8');
+                const manifest = JSON.parse(content);
+                const scriptResources = manifest?.loaderConfig?.scriptResources;
+                if (!scriptResources) { continue; }
+
+                for (const [moduleName, resource] of Object.entries<any>(scriptResources)) {
+                    if (resource.type !== 'component' || seen.has(moduleName)) { continue; }
+                    seen.add(moduleName);
+
+                    // Check if we know how to resolve this package's UMD bundle
+                    const umdInfo = KNOWN_UMD_EXTERNALS[moduleName];
+                    if (!umdInfo) { continue; }
+
+                    // Look for the UMD bundle in the project's node_modules
+                    const bundleAbsPath = path.join(
+                        this.workspacePath, 'node_modules', moduleName, umdInfo.bundlePath
+                    );
+
+                    try {
+                        await fs.access(bundleAbsPath);
+                        resolved.push({
+                            moduleName,
+                            bundlePath: bundleAbsPath,
+                            globalName: umdInfo.globalName,
+                        });
+                        console.log(`SpfxProjectDetector - Resolved external: ${moduleName} -> ${bundleAbsPath}`);
+                    } catch {
+                        console.warn(`SpfxProjectDetector - UMD bundle not found for ${moduleName}: ${bundleAbsPath}`);
+                    }
+                }
+            } catch (error) {
+                console.error(`SpfxProjectDetector - Error reading manifest ${manifestFile}:`, error);
+            }
+        }
+
+        return resolved;
     }
 
     // Gets the serve configuration

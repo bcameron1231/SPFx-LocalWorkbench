@@ -164,7 +164,7 @@ export function initializeSpfxMocks(): void {
         SPHttpClientConfiguration: {},
         HttpClientConfiguration: {}
     };
-    
+
     amdModules['@microsoft/sp-lodash-subset'] = {
         escape: (s: string) => s,
         cloneDeep: (o: any) => JSON.parse(JSON.stringify(o)),
@@ -173,18 +173,23 @@ export function initializeSpfxMocks(): void {
         find: (arr: any[], pred: any) => arr.find(pred),
         findIndex: (arr: any[], pred: any) => arr.findIndex(pred)
     };
-    
-    amdModules['@fluentui/react'] = {
-        initializeIcons: () => {},
-        Stack: (props: any) => window.React.createElement('div', { className: 'ms-Stack' }, props.children),
-        Text: (props: any) => window.React.createElement('span', null, props.children),
-        Label: (props: any) => window.React.createElement('label', null, props.children),
-        TextField: (props: any) => window.React.createElement('input', { type: 'text', ...props }),
-        DefaultButton: (props: any) => window.React.createElement('button', props, props.text || props.children),
-        PrimaryButton: (props: any) => window.React.createElement('button', { ...props, style: { background: '#0078d4', color: 'white' } }, props.text || props.children)
-    };
-    
-    amdModules['office-ui-fabric-react'] = amdModules['@fluentui/react'];
+
+    // Register external dependencies resolved from the SPFx project's node_modules. These are libraries (like @fluentui/react) that SPFx marks as externals —
+    const externals = window.__workbenchConfig?.externalDependencies ?? [];
+    for (const dep of externals) {
+        const globalValue = (window as any)[dep.globalName];
+        if (globalValue) {
+            amdModules[dep.moduleName] = globalValue;
+            console.log(`SpfxMocks - Registered external "${dep.moduleName}" from SPFx project`);
+
+            // Also register common aliases
+            if (dep.moduleName === '@fluentui/react') {
+                amdModules['office-ui-fabric-react'] = globalValue;
+            }
+        } else {
+            console.warn(`SpfxMocks - External "${dep.moduleName}" expected at window.${dep.globalName} but not found`);
+        }
+    }
 
     // Mock @microsoft/sp-dialog - used by Application Customizers
     const MockDialog = {
