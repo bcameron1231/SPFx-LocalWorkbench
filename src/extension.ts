@@ -171,7 +171,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 			if (isSpfx) {
 				const version = await det.getSpfxVersion();
-				statusBarItem.text = `$(beaker) SPFx Workbench`;
+				statusBarItem.text = `$(fluentui-testbeaker) SPFx Workbench`;
 				statusBarItem.tooltip = `SPFx Project detected${version ? ` (${version})` : ''}\nClick to open local workbench`;
 				statusBarItem.show();
 			} else {
