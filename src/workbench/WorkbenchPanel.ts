@@ -19,7 +19,7 @@ function getNonce(): string {
 // WorkbenchPanel manages the webview that hosts the SPFx local workbench.
 export class WorkbenchPanel {
     public static currentPanel: WorkbenchPanel | undefined;
-    private static readonly viewType = 'spfxWorkbench';
+    private static readonly viewType = 'spfxLocalWorkbench';
 
     private readonly _panel: vscode.WebviewPanel;
     private readonly _extensionUri: vscode.Uri;

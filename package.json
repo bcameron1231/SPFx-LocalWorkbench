@@ -26,7 +26,8 @@
     "Local Development"
   ],
   "activationEvents": [
-    "workspaceContains:**/config/package-solution.json"
+    "workspaceContains:**/config/package-solution.json",
+    "onWebviewPanel:spfxLocalWorkbench"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -107,12 +108,12 @@
       "webview/title": [
         {
           "command": "spfx-local-workbench.detectWebParts",
-          "when": "webviewType == spfxWorkbench",
+          "when": "webviewType == spfxLocalWorkbench",
           "group": "navigation"
         },
         {
           "command": "spfx-local-workbench.openDevTools",
-          "when": "webviewType == spfxWorkbench",
+          "when": "webviewType == spfxLocalWorkbench",
           "group": "navigation"
         }
       ]
