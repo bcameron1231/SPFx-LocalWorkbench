@@ -3,6 +3,7 @@
 // This module handles reading and providing extension settings to the workbench.
 
 import * as vscode from 'vscode';
+import { DEFAULT_MICROSOFT_THEMES, type ITheme } from './DefaultThemes';
 
 // Context configuration for SharePoint mock
 export interface IContextConfig {
@@ -117,4 +118,57 @@ export async function openWorkbenchSettings(): Promise<void> {
 // Serializes the settings to JSON for passing to the webview
 export function serializeSettings(settings: IWorkbenchSettings): string {
     return JSON.stringify(settings);
+}
+
+// ============================================================================
+// Theme Management Functions
+// ============================================================================
+
+/**
+ * Gets all available themes (Microsoft default + custom)
+ * @returns Array of all themes
+ */
+export function getThemes(): ITheme[] {
+    const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
+    const customThemes = config.get<ITheme[]>('themes', []);
+    
+    // Merge Microsoft themes with custom themes
+    // Custom themes have isCustom: true
+    return [
+        ...DEFAULT_MICROSOFT_THEMES,
+        ...customThemes.map(theme => ({ ...theme, isCustom: true }))
+    ];
+}
+
+/**
+ * Gets the currently selected theme
+ * @returns Current theme (defaults to Teal if not set)
+ */
+export function getCurrentTheme(): ITheme {
+    const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
+    const currentThemeId = config.get<string>('currentThemeId', 'teal');
+    
+    const allThemes = getThemes();
+    const theme = allThemes.find(t => t.id === currentThemeId);
+    
+    // Default to Teal if theme not found
+    return theme || DEFAULT_MICROSOFT_THEMES[0];
+}
+
+/**
+ * Sets the current theme
+ * @param themeId ID of the theme to set as current
+ */
+export async function setCurrentTheme(themeId: string): Promise<void> {
+    const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
+    await config.update('currentThemeId', themeId, vscode.ConfigurationTarget.Workspace);
+}
+
+/**
+ * Gets custom themes from configuration
+ * @returns Array of custom themes only
+ */
+export function getCustomThemes(): ITheme[] {
+    const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
+    return config.get<ITheme[]>('themes', []).map(theme => ({ ...theme, isCustom: true }));
 }

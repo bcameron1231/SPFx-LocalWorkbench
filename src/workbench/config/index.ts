@@ -10,5 +10,15 @@ export {
     getWorkbenchSettings,
     onConfigurationChanged,
     openWorkbenchSettings,
-    serializeSettings
+    serializeSettings,
+    getThemes,
+    getCurrentTheme,
+    setCurrentTheme,
+    getCustomThemes
 } from './WorkbenchConfig';
+
+export {
+    IThemePalette,
+    ITheme,
+    DEFAULT_MICROSOFT_THEMES
+} from './DefaultThemes';

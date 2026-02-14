@@ -223,6 +223,86 @@
           "type": "boolean",
           "default": true,
           "description": "Whether this is SharePoint Online (vs. on-premises)"
+        },
+        "spfxLocalWorkbench.themes": {
+          "type": "array",
+          "default": [],
+          "description": "Custom themes in addition to the default Microsoft themes. Each theme should have id, name, and palette properties.",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "palette"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique identifier for the theme"
+              },
+              "name": {
+                "type": "string",
+                "description": "Display name for the theme"
+              },
+              "palette": {
+                "type": "object",
+                "description": "Fluent UI theme palette with color values",
+                "required": [
+                  "themePrimary",
+                  "themeLighterAlt",
+                  "themeLighter",
+                  "themeLight",
+                  "themeTertiary",
+                  "themeSecondary",
+                  "themeDarkAlt",
+                  "themeDark",
+                  "themeDarker",
+                  "neutralLighterAlt",
+                  "neutralLighter",
+                  "neutralLight",
+                  "neutralQuaternaryAlt",
+                  "neutralQuaternary",
+                  "neutralTertiaryAlt",
+                  "neutralTertiary",
+                  "neutralSecondary",
+                  "neutralPrimaryAlt",
+                  "neutralPrimary",
+                  "neutralDark",
+                  "black",
+                  "white"
+                ],
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "spfxLocalWorkbench.currentThemeId": {
+          "type": "string",
+          "default": "teal",
+          "description": "ID of the currently selected theme (from Microsoft themes or custom themes)"
+        },
+        "spfxLocalWorkbench.storybook.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable Storybook integration for visual testing of SPFx components"
+        },
+        "spfxLocalWorkbench.storybook.port": {
+          "type": "number",
+          "default": 6006,
+          "description": "Port for the Storybook dev server"
+        },
+        "spfxLocalWorkbench.storybook.autoGenerate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically generate stories from SPFx component manifests"
+        },
+        "spfxLocalWorkbench.storybook.storiesPattern": {
+          "type": "string",
+          "default": "src/**/*.stories.ts",
+          "description": "Glob pattern for discovering custom story files in the SPFx project"
+        },
+        "spfxLocalWorkbench.storybook.generateLocaleStories": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically generate story variants for each supported locale"
         }
       }
     }
