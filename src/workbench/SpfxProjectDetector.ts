@@ -4,7 +4,10 @@ import * as path from 'path';
 import type {
     IWebPartManifest,
     ISpfxConfig,
+    ILocaleInfo,
+    IComponentLocales,
 } from './types';
+import { normalizeLocaleCasing } from './types';
 
 export class SpfxProjectDetector {
     public readonly workspacePath: string;
@@ -217,11 +220,77 @@ export class SpfxProjectDetector {
         for (const file of matchedFiles) {
             const locale = this.extractLocaleFromPattern(file.filename, file.pattern);
             if (locale) {
-                locales.add(locale);
+                locales.add(normalizeLocaleCasing(locale));
             }
         }
 
         return Array.from(locales).sort();
+    }
+
+    // Gets locale information including default locale
+    public async getLocaleInfo(): Promise<ILocaleInfo> {
+        const locales = await this.getComponentLocales();
+        
+        // Determine default locale (first found or 'en-US')
+        const defaultLocale = locales.length > 0 ? locales[0] : 'en-US';
+        
+        // Ensure default is in the list
+        if (!locales.includes(defaultLocale)) {
+            locales.unshift(defaultLocale);
+        }
+        
+        return {
+            default: defaultLocale,
+            locales: locales.sort()
+        };
+    }
+
+    // Gets supported locales for each component
+    public async getLocalesByComponent(): Promise<IComponentLocales> {
+        const config = await this.getBundleConfig();
+        if (!config?.localizedResources) {
+            return {};
+        }
+
+        const componentLocales: IComponentLocales = {};
+        const allLocales = new Set<string>();
+
+        // First, collect all locales from all resources
+        for (const [resourceName, resourcePath] of Object.entries(config.localizedResources)) {
+            const pattern = resourcePath.replace('{locale}', '*');
+            const lastSlashIndex = pattern.lastIndexOf('/');
+            if (lastSlashIndex === -1) {
+                continue;
+            }
+            
+            const dirPath = path.join(this.workspacePath, pattern.substring(0, lastSlashIndex));
+            const filePattern = pattern.substring(lastSlashIndex + 1);
+            
+            try {
+                const entries = await fs.readdir(dirPath, { withFileTypes: true });
+                const locales: string[] = [];
+                
+                for (const entry of entries) {
+                    if (entry.isFile() && this.matchesPattern(entry.name, filePattern)) {
+                        const locale = this.extractLocaleFromPattern(entry.name, filePattern);
+                        if (locale) {
+                            const normalizedLocale = normalizeLocaleCasing(locale);
+                            locales.push(normalizedLocale);
+                            allLocales.add(normalizedLocale);
+                        }
+                    }
+                }
+                
+                if (locales.length > 0) {
+                    componentLocales[resourceName] = locales.sort();
+                }
+            } catch (error) {
+                // Directory might not exist
+                console.log(`Localization directory not found: ${dirPath}`);
+            }
+        }
+
+        return componentLocales;
     }
 
     // Processes localized resources and returns matched files with their patterns

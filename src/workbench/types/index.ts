@@ -1,5 +1,8 @@
 // Type definitions for SPFx Local Workbench
 
+// Export locale-related types and utilities
+export * from './LocaleTypes';
+
 // Web part manifest structure
 export interface IWebPartManifest {
     id: string;
