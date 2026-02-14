@@ -1,0 +1,69 @@
+.container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    cursor: default;
+    border-radius: 4px;
+    border: 2px solid;
+    transition: all 0.15s ease-in-out;
+}
+
+.container.clickable {
+    cursor: pointer;
+}
+
+.container.clickable:hover {
+    background-color: var(--vscode-list-hoverBackground, rgba(255, 255, 255, 0.1));
+}
+
+.container.selected {
+    /* Border color set via inline style */
+}
+
+.previewBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.largeSwatch {
+    width: 40px;
+    height: 24px;
+    border-radius: 2px;
+}
+
+.smallSwatchContainer {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    width: 40px;
+}
+
+.smallSwatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 1px;
+}
+
+.textPreview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 16px;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 2px;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
+}
+
+.label {
+    font-size: 14px;
+    font-weight: 400;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
+}
+
+.label.labelSelected {
+    font-weight: 600;
+}
