@@ -18,8 +18,8 @@
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Advanced
     "group": { "default": "Advanced" },
-    "title": { "default": "HelloWorld" },
-    "description": { "default": "HelloWorld description" },
+    "title": { "default": "HelloWorld", "fr-fr": "BonjourMonde", "qps-ploc": "[ĤéℓℓöŴöřℓð!!!!]" },
+    "description": { "default": "HelloWorld description", "fr-fr": "Description de BonjourMonde", "qps-ploc": "[ĤéℓℓöŴöřℓð ďéšçřîþţîöñ!!!!]" },
     "officeFabricIconFontName": "Page",
     "properties": {
       "description": "HelloWorld"

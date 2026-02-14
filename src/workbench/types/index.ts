@@ -40,17 +40,26 @@ export interface IScriptResource {
     paths?: Record<string, string>;
 }
 
-// SPFx project configuration
+// SPFx project configuration (version 2.0)
 export interface ISpfxConfig {
+    $schema?: string;
     version: string;
-    bundleEntries?: IBundleEntry[];
+    bundles: Record<string, IBundleConfig>;
+    externals?: Record<string, string | IExternalConfig>;
+    localizedResources?: Record<string, string>;
+    asyncComponents?: string[];
 }
 
-// Bundle entry configuration
-export interface IBundleEntry {
-    entrypoint: string;
-    outputFile: string;
+// Bundle configuration
+export interface IBundleConfig {
     components: IComponentEntry[];
+}
+
+// External bundle configuration (for non-AMD dependencies)
+export interface IExternalConfig {
+    path: string;
+    globalName: string;
+    globalDependencies?: string[];
 }
 
 // Component entry in bundle

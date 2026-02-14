@@ -203,6 +203,100 @@ export class SpfxProjectDetector {
         return files;
     }
 
+    // Finds all localization files based on config.json localizedResources
+    public async findLocalizationFiles(): Promise<string[]> {
+        const matchedFiles = await this.getMatchedLocalizationFiles();
+        return matchedFiles.map(file => file.filePath);
+    }
+
+    // Gets distinct locale values from localization files
+    public async getComponentLocales(): Promise<string[]> {
+        const matchedFiles = await this.getMatchedLocalizationFiles();
+        const locales = new Set<string>();
+        
+        for (const file of matchedFiles) {
+            const locale = this.extractLocaleFromPattern(file.filename, file.pattern);
+            if (locale) {
+                locales.add(locale);
+            }
+        }
+
+        return Array.from(locales).sort();
+    }
+
+    // Processes localized resources and returns matched files with their patterns
+    private async getMatchedLocalizationFiles(): Promise<Array<{ filePath: string; filename: string; pattern: string }>> {
+        const matchedFiles: Array<{ filePath: string; filename: string; pattern: string }> = [];
+        
+        // Get the bundle configuration
+        const config = await this.getBundleConfig();
+        if (!config?.localizedResources) {
+            return matchedFiles;
+        }
+
+        // Process each localized resource
+        for (const [resourceName, resourcePath] of Object.entries(config.localizedResources)) {
+            // Replace {locale} with * to create a glob pattern
+            // e.g., "lib/webparts/helloWorld/loc/{locale}.js" -> "lib/webparts/helloWorld/loc/*.js"
+            const pattern = resourcePath.replace('{locale}', '*');
+            
+            // Extract directory and file pattern
+            const lastSlashIndex = pattern.lastIndexOf('/');
+            if (lastSlashIndex === -1) {
+                continue;
+            }
+            
+            const dirPath = path.join(this.workspacePath, pattern.substring(0, lastSlashIndex));
+            const filePattern = pattern.substring(lastSlashIndex + 1);
+            
+            // Find all files matching the pattern
+            try {
+                const entries = await fs.readdir(dirPath, { withFileTypes: true });
+                for (const entry of entries) {
+                    if (entry.isFile() && this.matchesPattern(entry.name, filePattern)) {
+                        matchedFiles.push({
+                            filePath: path.join(dirPath, entry.name),
+                            filename: entry.name,
+                            pattern: filePattern
+                        });
+                    }
+                }
+            } catch (error) {
+                // Directory might not exist, continue
+                console.log(`Localization directory not found: ${dirPath}`);
+            }
+        }
+
+        return matchedFiles;
+    }
+
+    // Matches a filename against a simple glob pattern (supports * wildcard)
+    private matchesPattern(filename: string, pattern: string): boolean {
+        // Convert glob pattern to regex
+        // Escape special regex characters except *
+        const regexPattern = pattern
+            .replace(/[.+?^${}()|[\]\\]/g, '\\$&')  // Escape special chars
+            .replace(/\*/g, '.*');                    // Convert * to .*
+        
+        const regex = new RegExp(`^${regexPattern}$`);
+        return regex.test(filename);
+    }
+
+    // Extracts the locale value from a filename using a pattern (e.g., "en-us.js" from "*.js" -> "en-us")
+    private extractLocaleFromPattern(filename: string, pattern: string): string | null {
+        // Convert glob pattern to regex with a capture group for *
+        // Escape special regex characters except *
+        const regexPattern = pattern
+            .replace(/[.+?^${}()|[\]\\]/g, '\\$&')  // Escape special chars
+            .replace(/\*/g, '(.+)');                 // Convert * to capture group
+        
+        const regex = new RegExp(`^${regexPattern}$`);
+        const match = regex.exec(filename);
+        
+        // Return the first capture group (the locale value)
+        return match ? match[1] : null;
+    }
+
     // Removes JSON comments and control characters (SPFx config files often have comments)
     // This handles JSONC (JSON with Comments) format used by SPFx
     private removeJsonComments(json: string): string {

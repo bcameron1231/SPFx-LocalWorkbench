@@ -38,7 +38,7 @@ export class WebPartManager {
         }
 
         if (!bundlePath) {
-            bundlePath = 'dist/' + manifest.alias.toLowerCase() + '.js';
+            bundlePath = manifest.alias.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase() + '.js';
         }
 
         // Use internalModuleBaseUrls as the base (preserves /dist/ path)
@@ -61,12 +61,82 @@ export class WebPartManager {
         });
     }
 
-    async instantiateWebPart(config: IWebPartConfig, domElement: HTMLElement): Promise<IActiveWebPart | undefined> {
+    async loadWebPartStrings(manifest: IWebPartManifest, localeOverride?: string): Promise<void> {
+        const scriptResources = manifest.loaderConfig?.scriptResources;
+        if (!scriptResources) {
+            return;
+        }
+        console.log('Loading localized strings for', manifest.alias, 'with locale override:', localeOverride);
+        console.log('manifest:', manifest);
+
+        // Find the localized strings resource
+        let stringsModuleName: string | null = null;
+        let stringsPath: string | null = null;
+
+        for (const [moduleName, resource] of Object.entries(scriptResources)) {
+            // Case 1: Served without locale parameter - manifest has 'localizedPath' type
+            if (resource.type === 'localizedPath') {
+                stringsModuleName = moduleName;
+                if (localeOverride && resource.paths) {
+                    // Try to find the locale in the paths object (case-insensitive)
+                    const localeKey = Object.keys(resource.paths).find(
+                        key => key.toLowerCase() === localeOverride.toLowerCase()
+                    );
+                    stringsPath = localeKey ? resource.paths[localeKey] : resource.defaultPath;
+                } else {
+                    stringsPath = resource.defaultPath;
+                }
+                break;
+            }
+            // Case 2: Served with locale parameter - manifest has 'path' type for strings
+            if (resource.type === 'path' && moduleName !== manifest.loaderConfig?.entryModuleId) {
+                stringsModuleName = moduleName;
+                stringsPath = resource.path;
+                break;
+            }
+        }
+
+        if (!stringsModuleName || !stringsPath) {
+            return; // No localized strings found
+        }
+
+        const baseUrl = manifest.loaderConfig?.internalModuleBaseUrls?.[0] || (this.serveUrl + '/');
+        const fullUrl = baseUrl + stringsPath;
+        const cacheBustedUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + '_v=' + Date.now();
+
+        return new Promise((resolve, reject) => {
+            // Track the current module count to identify the newly loaded anonymous module
+            const amdModules = window.__amdModules!;
+            const existingModules = new Set(Object.keys(amdModules));
+
+            const script = document.createElement('script');
+            script.src = cacheBustedUrl;
+            script.onload = () => {
+                // Find the newly added anonymous module
+                const newModules = Object.keys(amdModules).filter(k => !existingModules.has(k));
+                const anonymousModule = newModules.find(k => k.startsWith('_anonymous_'));
+
+                if (anonymousModule && stringsModuleName) {
+                    // Register the anonymous module with the correct name
+                    amdModules[stringsModuleName] = amdModules[anonymousModule];
+                }
+
+                resolve();
+            };
+            script.onerror = () => {
+                reject(new Error('Failed to load ' + fullUrl));
+            };
+            document.head.appendChild(script);
+        });
+    }
+
+    async instantiateWebPart(config: IWebPartConfig, domElement: HTMLElement, localeOverride?: string): Promise<IActiveWebPart | undefined> {
         if (!domElement) {
             return;
         }
 
         try {
+            await this.loadWebPartStrings(config.manifest, localeOverride);
             await this.loadWebPartBundle(config.manifest);
             await new Promise(r => setTimeout(r, 100));
 
