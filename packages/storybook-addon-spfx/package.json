@@ -1,0 +1,63 @@
+{
+  "name": "storybook-addon-spfx",
+  "version": "1.0.0",
+  "description": "Storybook addon for SharePoint Framework components",
+  "author": {
+    "name": "Chris Kent",
+    "url": "https://github.com/thechriskent"
+  },
+  "contributors": [
+    {
+      "name": "Beau Cameron",
+      "url": "https://github.com/bcameron1231"
+    },
+    {
+      "name": "Hugo Bernier",
+      "url": "https://github.com/hugoabernier"
+    }
+  ],
+  "main": "dist/preset.js",
+  "types": "dist/preset.d.ts",
+  "keywords": [
+    "storybook",
+    "spfx",
+    "sharepoint",
+    "addon"
+  ],
+  "files": [
+    "dist/**/*",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "peerDependencies": {
+    "@storybook/addon-toolbars": "^7.0.0 || ^8.0.0",
+    "@storybook/blocks": "^7.0.0 || ^8.0.0",
+    "@storybook/components": "^7.0.0 || ^8.0.0",
+    "@storybook/manager-api": "^7.0.0 || ^8.0.0",
+    "@storybook/preview-api": "^7.0.0 || ^8.0.0",
+    "@storybook/theming": "^7.0.0 || ^8.0.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0"
+  },
+  "dependencies": {
+    "@spfx-local-workbench/shared": "file:../shared"
+  },
+  "devDependencies": {
+    "@storybook/addon-toolbars": "^8.0.0",
+    "@storybook/blocks": "^8.0.0",
+    "@storybook/components": "^8.0.0",
+    "@storybook/manager-api": "^8.0.0",
+    "@storybook/preview-api": "^8.0.0",
+    "@storybook/react": "^8.0.0",
+    "@storybook/theming": "^8.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "typescript": "^5.0.0"
+  }
+}
