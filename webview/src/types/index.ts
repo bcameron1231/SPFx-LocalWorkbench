@@ -1,4 +1,4 @@
-import type { IPageContextConfig } from '@spfx-local-workbench/shared';
+import type { IPageContextConfig, ILocalizedString } from '@spfx-local-workbench/shared';
 
 export interface IVsCodeApi {
     postMessage(message: any): void;
@@ -12,11 +12,6 @@ export interface IWorkbenchConfig {
     extensions?: IWebPartManifest[];
     theme?: IThemeSettings;
     context: IContextSettings; // Always provided by extension (from WorkbenchConfig defaults)
-}
-
-export interface ILocalizedString {
-    default: string;
-    [key: string]: string;
 }
 
 export interface IWebPartManifest {

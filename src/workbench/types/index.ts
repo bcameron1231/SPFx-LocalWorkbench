@@ -1,5 +1,7 @@
 // Type definitions for SPFx Local Workbench
 
+import type { ILocalizedString } from '@spfx-local-workbench/shared';
+
 // Export locale-related types and utilities
 export * from './LocaleTypes';
 
@@ -21,12 +23,6 @@ export interface IPreconfiguredEntry {
     title: ILocalizedString;
     description: ILocalizedString;
     properties: Record<string, unknown>;
-}
-
-// Localized string with default and locale-specific values
-export interface ILocalizedString {
-    default: string;
-    [locale: string]: string;
 }
 
 // Loader configuration for web part bundles
