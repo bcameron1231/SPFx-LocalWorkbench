@@ -149,7 +149,7 @@ export function generateWorkbenchHtml(config: IHtmlGeneratorConfig): string {
     const head = generateHead(config);
     // Toolbar is now part of React App component, not static HTML
     const mainContent = generateMainContent();
-    const statusBar = generateStatusBar(config.webPartCount, config.extensionCount || 0);
+    const statusBar = generateStatusBar(config.webPartCount, config.extensionCount || 0, config.locale);
     const scripts = generateScripts(config);
     
     return `<!DOCTYPE html>
