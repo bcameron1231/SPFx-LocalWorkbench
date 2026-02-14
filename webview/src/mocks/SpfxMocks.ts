@@ -1,4 +1,4 @@
-import { spPropertyPaneModule } from './PropertyPaneMocks';
+import { spPropertyPaneModule } from '@spfx-local-workbench/shared';
 
 // Deep recursive merge matching lodash merge behaviour
 function deepMerge(target: any, ...sources: any[]): any {

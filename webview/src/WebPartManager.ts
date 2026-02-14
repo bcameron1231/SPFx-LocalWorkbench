@@ -3,8 +3,7 @@
 // Handles loading, instantiation, and lifecycle of SPFx web parts
 
 import type { IWebPartManifest, IWebPartConfig, IActiveWebPart, IVsCodeApi } from './types';
-import { SpfxContext } from './mocks/SpfxContext';
-import { ThemeProvider } from './mocks/ThemeProvider';
+import { SpfxContext, ThemeProvider } from './mocks';
 
 export class WebPartManager {
     private vscode: IVsCodeApi;

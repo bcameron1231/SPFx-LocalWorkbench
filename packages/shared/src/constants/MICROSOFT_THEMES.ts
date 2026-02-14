@@ -1,49 +1,11 @@
-// Default Microsoft Themes for SPFx Local Workbench
-// Based on official Microsoft 365 theme colors
-
-export interface IThemePalette {
-    // Theme colors
-    themePrimary: string;
-    themeLighterAlt: string;
-    themeLighter: string;
-    themeLight: string;
-    themeTertiary: string;
-    themeSecondary: string;
-    themeDarkAlt: string;
-    themeDark: string;
-    themeDarker: string;
-    
-    // Neutral colors
-    neutralLighterAlt: string;
-    neutralLighter: string;
-    neutralLight: string;
-    neutralQuaternaryAlt: string;
-    neutralQuaternary: string;
-    neutralTertiaryAlt: string;
-    neutralTertiary: string;
-    neutralSecondary: string;
-    neutralPrimaryAlt: string;
-    neutralPrimary: string;
-    neutralDark: string;
-    black: string;
-    white: string;
-    
-    // Optional additional Fluent UI slots
-    [key: string]: string;
-}
-
-export interface ITheme {
-    id: string;
-    name: string;
-    isCustom: boolean;
-    palette: IThemePalette;
-}
-
 /**
- * Default Microsoft themes based on official Microsoft 365 color palettes
+ * Microsoft themes based on official Microsoft 365 color palettes
  * These match the SharePoint theme presets
  */
-export const DEFAULT_MICROSOFT_THEMES: ITheme[] = [
+
+import type { ITheme } from '../types';
+
+export const MICROSOFT_THEMES: ITheme[] = [
     {
         id: 'teal',
         name: 'Teal',

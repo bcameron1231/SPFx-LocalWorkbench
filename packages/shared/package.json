@@ -1,0 +1,38 @@
+{
+  "name": "@spfx-local-workbench/shared",
+  "version": "0.0.1",
+  "description": "Shared code for SPFx Local Workbench extension and Storybook addon",
+  "author": {
+    "name": "Chris Kent",
+    "url": "https://github.com/thechriskent"
+  },
+  "contributors": [
+    {
+      "name": "Beau Cameron",
+      "url": "https://github.com/bcameron1231"
+    },
+    {
+      "name": "Hugo Bernier",
+      "url": "https://github.com/hugoabernier"
+    }
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "keywords": [
+    "spfx",
+    "mock",
+    "testing"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^17.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.0",
+    "typescript": "^5.9.3"
+  }
+}

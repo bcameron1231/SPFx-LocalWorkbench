@@ -5,8 +5,7 @@
 import * as vscode from 'vscode';
 import type {
     IThemeConfig,
-    IContextConfig,
-    IPageContextConfig
+    IContextConfig
 } from '../config/WorkbenchConfig';
 
 // Configuration for generating the workbench HTML
@@ -25,8 +24,6 @@ export interface IHtmlGeneratorConfig {
     themeSettings?: IThemeConfig;
     // Context settings from user configuration
     contextSettings?: Partial<IContextConfig>;
-    // Page context settings from user configuration
-    pageContextSettings?: Partial<IPageContextConfig>;
 }
 
 // Generates the Content Security Policy for the webview
@@ -111,8 +108,7 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
         webParts: webParts,
         extensions: extensions,
         theme: config.themeSettings,
-        context: config.contextSettings,
-        pageContext: config.pageContextSettings
+        context: config.contextSettings
     };
     
     // Resolve local vendor UMD bundles shipped with the extension

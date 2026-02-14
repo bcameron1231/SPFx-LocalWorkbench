@@ -4,6 +4,20 @@
   "description": "A local workbench for testing SharePoint Framework (SPFx) web parts without deploying to SharePoint",
   "version": "0.0.1",
   "publisher": "BeauCameron",
+  "author": {
+    "name": "Beau Cameron",
+    "url": "https://github.com/bcameron1231"
+  },
+  "contributors": [
+    {
+      "name": "Chris Kent",
+      "url": "https://github.com/thechriskent"
+    },
+    {
+      "name": "Hugo Bernier",
+      "url": "https://github.com/hugoabernier"
+    }
+  ],
   "icon": "media/icon.png",
   "repository": {
     "type": "git",
@@ -131,98 +145,112 @@
           "default": false,
           "description": "Automatically open the workbench when starting serve"
         },
-        "spfxLocalWorkbench.context.siteUrl": {
-          "type": "string",
-          "default": "https://contoso.sharepoint.com/sites/devsite",
-          "description": "The SharePoint site URL to use in the mock context"
-        },
-        "spfxLocalWorkbench.context.webUrl": {
-          "type": "string",
-          "default": "https://contoso.sharepoint.com/sites/devsite",
-          "description": "The SharePoint web URL to use in the mock context"
-        },
-        "spfxLocalWorkbench.context.userDisplayName": {
-          "type": "string",
-          "default": "Local Workbench User",
-          "description": "The display name of the current user in the mock context"
-        },
-        "spfxLocalWorkbench.context.userEmail": {
-          "type": "string",
-          "default": "user@contoso.onmicrosoft.com",
-          "description": "The email address of the current user in the mock context"
-        },
-        "spfxLocalWorkbench.context.userLoginName": {
-          "type": "string",
-          "default": "i:0#.f|membership|user@contoso.onmicrosoft.com",
-          "description": "The login name of the current user in the mock context"
-        },
-        "spfxLocalWorkbench.context.culture": {
-          "type": "string",
-          "default": "en-US",
-          "description": "The culture/locale to use in the mock context (e.g., en-US, de-DE, fr-FR)"
-        },
-        "spfxLocalWorkbench.context.isAnonymousGuestUser": {
-          "type": "boolean",
-          "default": false,
-          "description": "Whether the user is an anonymous guest"
-        },
-        "spfxLocalWorkbench.context.customContext": {
+        "spfxLocalWorkbench.context.pageContext": {
           "type": "object",
-          "default": {},
-          "description": "Additional custom context properties to merge into the mock context (JSON object)",
+          "default": {
+            "site": {
+              "absoluteUrl": "https://contoso.sharepoint.com/sites/devsite",
+              "id": "00000000-0000-4000-b000-666666666666"
+            },
+            "web": {
+              "absoluteUrl": "https://contoso.sharepoint.com/sites/devsite",
+              "title": "Local Workbench",
+              "description": "Local development workbench for SPFx",
+              "templateName": "STS#3",
+              "id": "00000000-0000-4000-b000-777777777777"
+            },
+            "user": {
+              "displayName": "Local Workbench User",
+              "email": "user@contoso.onmicrosoft.com",
+              "loginName": "i:0#.f|membership|user@contoso.onmicrosoft.com",
+              "isAnonymousGuestUser": false
+            },
+            "cultureInfo": {
+              "currentCultureName": "en-US"
+            },
+            "isNoScriptEnabled": false,
+            "isSPO": true
+          },
+          "description": "SharePoint page context for the mock environment (mirrors SPFx context.pageContext structure). Additional properties can be added as needed.",
+          "properties": {
+            "site": {
+              "type": "object",
+              "description": "Site-level context information",
+              "properties": {
+                "absoluteUrl": {
+                  "type": "string",
+                  "description": "Absolute URL of the site collection"
+                }
+              },
+              "additionalProperties": true
+            },
+            "web": {
+              "type": "object",
+              "description": "Web-level context information",
+              "properties": {
+                "absoluteUrl": {
+                  "type": "string",
+                  "description": "Absolute URL of the web"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Title of the web"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Description of the web"
+                },
+                "templateName": {
+                  "type": "string",
+                  "description": "Web template name (e.g., STS#3, SITEPAGEPUBLISHING#0)"
+                }
+              },
+              "additionalProperties": true
+            },
+            "user": {
+              "type": "object",
+              "description": "Current user information",
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "description": "Display name of the user"
+                },
+                "email": {
+                  "type": "string",
+                  "description": "Email address of the user"
+                },
+                "loginName": {
+                  "type": "string",
+                  "description": "Login name of the user"
+                },
+                "isAnonymousGuestUser": {
+                  "type": "boolean",
+                  "description": "Whether the user is an anonymous guest"
+                }
+              },
+              "additionalProperties": true
+            },
+            "cultureInfo": {
+              "type": "object",
+              "description": "Culture/locale information",
+              "properties": {
+                "currentCultureName": {
+                  "type": "string",
+                  "description": "Current culture code (e.g., en-US, de-DE, fr-FR)"
+                }
+              },
+              "additionalProperties": true
+            },
+            "isNoScriptEnabled": {
+              "type": "boolean",
+              "description": "Whether NoScript is enabled on the site"
+            },
+            "isSPO": {
+              "type": "boolean",
+              "description": "Whether this is SharePoint Online (vs. on-premises)"
+            }
+          },
           "additionalProperties": true
-        },
-        "spfxLocalWorkbench.theme.preset": {
-          "type": "string",
-          "default": "teamSite",
-          "enum": [
-            "teamSite",
-            "communicationSite",
-            "dark",
-            "highContrast",
-            "custom"
-          ],
-          "enumDescriptions": [
-            "Default SharePoint Team Site theme (blue)",
-            "SharePoint Communication Site theme (teal)",
-            "Dark mode theme",
-            "High contrast theme for accessibility",
-            "Use custom theme colors defined in theme.customColors"
-          ],
-          "description": "The SharePoint theme preset to use"
-        },
-        "spfxLocalWorkbench.theme.customColors": {
-          "type": "object",
-          "default": {},
-          "description": "Custom theme colors when using 'custom' preset. Keys should be SharePoint theme slot names (e.g., themePrimary, themeDark, neutralPrimary)",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "spfxLocalWorkbench.pageContext.webTitle": {
-          "type": "string",
-          "default": "Local Workbench",
-          "description": "The title of the web in the page context"
-        },
-        "spfxLocalWorkbench.pageContext.webDescription": {
-          "type": "string",
-          "default": "Local development workbench for SPFx web parts",
-          "description": "The description of the web in the page context"
-        },
-        "spfxLocalWorkbench.pageContext.webTemplate": {
-          "type": "string",
-          "default": "STS#3",
-          "description": "The web template ID (e.g., STS#3 for Team Site, SITEPAGEPUBLISHING#0 for Communication Site)"
-        },
-        "spfxLocalWorkbench.pageContext.isNoScriptEnabled": {
-          "type": "boolean",
-          "default": false,
-          "description": "Whether NoScript is enabled on the site"
-        },
-        "spfxLocalWorkbench.pageContext.isSPO": {
-          "type": "boolean",
-          "default": true,
-          "description": "Whether this is SharePoint Online (vs. on-premises)"
         },
         "spfxLocalWorkbench.themes": {
           "type": "array",
@@ -309,7 +337,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
-    "compile": "npm run check-types && npm run lint && npm run generate:css-types && npm-run-all compile:*",
+    "compile": "npm run packages:build && npm run check-types && npm run lint && npm run generate:css-types && npm-run-all compile:*",
     "compile:extension": "node esbuild.js",
     "compile:webview": "node webview/esbuild.config.js",
     "generate:css-types": "tcm webview/src",
@@ -318,12 +346,23 @@
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
     "watch:webview": "node webview/esbuild.config.js --watch",
     "watch:css-types": "tcm webview/src --watch",
-    "package": "npm run check-types && npm run lint && npm-run-all package:*",
+    "package": "npm run packages:build && npm run check-types && npm run lint && npm-run-all package:*",
     "package:extension": "node esbuild.js --production",
     "package:webview": "node webview/esbuild.config.js --production",
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
-    "generate:icons": "node scripts/generateIcons.js"
+    "generate:icons": "node scripts/generateIcons.js",
+    "packages:build": "npm run packages:build:shared && npm run packages:build:addon",
+    "packages:build:shared": "cd packages/shared && npm run build",
+    "packages:build:addon": "cd packages/storybook-addon-spfx && npm run build",
+    "packages:watch": "npm-run-all -p packages:watch:*",
+    "packages:watch:shared": "cd packages/shared && npm run watch",
+    "packages:watch:addon": "cd packages/storybook-addon-spfx && npm run watch",
+    "packages:clean": "rm -rf packages/*/dist packages/*/node_modules",
+    "packages:install": "cd packages/shared && npm install && cd ../storybook-addon-spfx && npm install"
+  },
+  "dependencies": {
+    "@spfx-local-workbench/shared": "file:./packages/shared"
   },
   "devDependencies": {
     "@fluentui/react": "^8.110.10",

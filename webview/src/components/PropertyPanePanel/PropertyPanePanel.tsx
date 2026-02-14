@@ -6,7 +6,7 @@ import {
     IconButton
 } from '@fluentui/react';
 import type { IActiveWebPart } from '../../types';
-import { PropertyPaneFieldType } from '../../mocks/PropertyPaneMocks';
+import { PropertyPaneFieldType } from '@spfx-local-workbench/shared';
 import styles from './PropertyPanePanel.module.css';
 import {
     TextFieldComponent,

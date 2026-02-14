@@ -101,8 +101,7 @@ export class WorkbenchPanel {
                     settings: {
                         serveUrl: newSettings.serveUrl,
                         theme: newSettings.theme,
-                        context: newSettings.context,
-                        pageContext: newSettings.pageContext
+                        context: newSettings.context
                     }
                 });
             })
@@ -248,8 +247,7 @@ export class WorkbenchPanel {
             webview: webview,
             extensionUri: this._extensionUri,
             themeSettings: this._settings.theme,
-            contextSettings: this._settings.context,
-            pageContextSettings: this._settings.pageContext
+            contextSettings: this._settings.context
         });
     }
 

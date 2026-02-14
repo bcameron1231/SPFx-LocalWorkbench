@@ -5,8 +5,7 @@
 // placeholders on the page.
 
 import type { IWebPartManifest, IExtensionConfig, IActiveExtension, IVsCodeApi } from './types';
-import { SpfxContext } from './mocks/SpfxContext';
-import { ThemeProvider } from './mocks/ThemeProvider';
+import { SpfxContext, ThemeProvider } from './mocks';
 
 // PlaceholderName enum matching @microsoft/sp-application-base
 enum PlaceholderName {

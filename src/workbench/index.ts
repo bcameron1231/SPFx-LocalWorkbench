@@ -16,7 +16,6 @@ export {
     openWorkbenchSettings,
     IWorkbenchSettings,
     IContextConfig,
-    IPageContextConfig,
     IThemeConfig
 } from './config';
 

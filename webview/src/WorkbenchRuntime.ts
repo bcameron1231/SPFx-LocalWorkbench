@@ -6,10 +6,9 @@ import type { IWorkbenchConfig, IWebPartManifest, IWebPartConfig, IExtensionConf
 import { isActiveWebPart, isActiveExtension } from './types';
 import type { IAppHandlers } from './components/App';
 import { AmdLoader } from './amd/AmdLoader';
-import { SpfxContext } from './mocks/SpfxContext';
-import { ThemeProvider } from './mocks/ThemeProvider';
+import { SpfxContext, ThemeProvider } from './mocks';
 import { WebPartManager } from './WebPartManager';
-import { initializeSpfxMocks } from './mocks/SpfxMocks';
+import { initializeSpfxMocks } from './mocks';
 import { ExtensionManager } from './ExtensionManager';
 
 export class WorkbenchRuntime {
@@ -32,7 +31,7 @@ export class WorkbenchRuntime {
 
         // Initialize core components
         this.amdLoader = new AmdLoader();
-        this.contextProvider = new SpfxContext(config.context, config.pageContext);
+        this.contextProvider = new SpfxContext(config.context);
         this.themeProvider = new ThemeProvider(config.theme);
         this.webPartManager = new WebPartManager(
             this.vscode,
@@ -57,15 +56,15 @@ export class WorkbenchRuntime {
     }
 
     // Applies updated settings from the extension host without full reload
-    updateSettings(settings: { serveUrl?: string; theme?: any; context?: any; pageContext?: any }): void {
+    updateSettings(settings: { serveUrl?: string; theme?: any; context?: any }): void {
         if (settings.serveUrl) {
             this.config.serveUrl = settings.serveUrl;
         }
         if (settings.theme) {
             this.themeProvider = new ThemeProvider(settings.theme);
         }
-        if (settings.context || settings.pageContext) {
-            this.contextProvider = new SpfxContext(settings.context, settings.pageContext);
+        if (settings.context) {
+            this.contextProvider = new SpfxContext(settings.context);
         }
         console.log('[Workbench] Settings updated in-place');
     }

@@ -8,9 +8,12 @@
  */
 
 import * as React from 'react';
-import  type { ITheme } from '../../../src/workbench/config/DefaultThemes';
+import type { ITheme } from '../../types';
 import styles from './ThemePreview.module.css';
 
+/**
+ * Props for ThemePreview component
+ */
 export interface IThemePreviewProps {
     /** Theme to preview */
     theme: ITheme;

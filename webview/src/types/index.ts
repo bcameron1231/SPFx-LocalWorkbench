@@ -1,3 +1,5 @@
+import type { IPageContextConfig } from '@spfx-local-workbench/shared';
+
 export interface IVsCodeApi {
     postMessage(message: any): void;
     getState(): any;
@@ -9,8 +11,7 @@ export interface IWorkbenchConfig {
     webParts: IWebPartManifest[];
     extensions?: IWebPartManifest[];
     theme?: IThemeSettings;
-    context?: IContextSettings;
-    pageContext?: IPageContextSettings;
+    context: IContextSettings; // Always provided by extension (from WorkbenchConfig defaults)
 }
 
 export interface ILocalizedString {
@@ -91,22 +92,7 @@ export interface IThemeSettings {
 }
 
 export interface IContextSettings {
-    siteUrl: string;
-    webUrl: string;
-    userDisplayName: string;
-    userEmail: string;
-    userLoginName: string;
-    culture: string;
-    isAnonymousGuestUser: boolean;
-    customContext: Record<string, unknown>;
-}
-
-export interface IPageContextSettings {
-    webTitle: string;
-    webDescription: string;
-    webTemplate: string;
-    isNoScriptEnabled: boolean;
-    isSPO: boolean;
+    pageContext: IPageContextConfig;
 }
 
 export interface IPropertyPaneConfiguration {

@@ -3,27 +3,14 @@
 // This module handles reading and providing extension settings to the workbench.
 
 import * as vscode from 'vscode';
-import { DEFAULT_MICROSOFT_THEMES, type ITheme } from './DefaultThemes';
+import { MICROSOFT_THEMES, DEFAULT_PAGE_CONTEXT, type ITheme, type IPageContextConfig } from '@spfx-local-workbench/shared';
 
 // Context configuration for SharePoint mock
+// NOTE: Default values come from @spfx-local-workbench/shared package (DEFAULT_PAGE_CONTEXT).
+// This ensures consistency across extension, webview, and Storybook addon.
+// package.json still duplicates these for VS Code settings UI schema (JSON limitation).
 export interface IContextConfig {
-    siteUrl: string;
-    webUrl: string;
-    userDisplayName: string;
-    userEmail: string;
-    userLoginName: string;
-    culture: string;
-    isAnonymousGuestUser: boolean;
-    customContext: Record<string, unknown>;
-}
-
-// Page context configuration
-export interface IPageContextConfig {
-    webTitle: string;
-    webDescription: string;
-    webTemplate: string;
-    isNoScriptEnabled: boolean;
-    isSPO: boolean;
+    pageContext: IPageContextConfig;
 }
 
 // Theme configuration
@@ -37,33 +24,18 @@ export interface IWorkbenchSettings {
     serveUrl: string;
     autoOpenWorkbench: boolean;
     context: IContextConfig;
-    pageContext: IPageContextConfig;
     theme: IThemeConfig;
 }
 
 // Default configuration values
-const defaults: IWorkbenchSettings = {
+const defaults = {
     serveUrl: 'https://localhost:4321',
     autoOpenWorkbench: false,
     context: {
-        siteUrl: 'https://contoso.sharepoint.com/sites/devsite',
-        webUrl: 'https://contoso.sharepoint.com/sites/devsite',
-        userDisplayName: 'Local Workbench User',
-        userEmail: 'user@contoso.onmicrosoft.com',
-        userLoginName: 'i:0#.f|membership|user@contoso.onmicrosoft.com',
-        culture: 'en-US',
-        isAnonymousGuestUser: false,
-        customContext: {}
-    },
-    pageContext: {
-        webTitle: 'Local Workbench',
-        webDescription: 'Local development workbench for SPFx web parts',
-        webTemplate: 'STS#3',
-        isNoScriptEnabled: false,
-        isSPO: true
+        pageContext: DEFAULT_PAGE_CONTEXT
     },
     theme: {
-        preset: 'teamSite',
+        preset: 'teamSite' as const,
         customColors: {}
     }
 };
@@ -72,26 +44,13 @@ const defaults: IWorkbenchSettings = {
 export function getWorkbenchSettings(): IWorkbenchSettings {
     const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
 
+    // Get context with pageContext nested structure
+    const context = config.get<IContextConfig>('context', defaults.context);
+
     return {
         serveUrl: config.get<string>('serveUrl', defaults.serveUrl),
         autoOpenWorkbench: config.get<boolean>('autoOpenWorkbench', defaults.autoOpenWorkbench),
-        context: {
-            siteUrl: config.get<string>('context.siteUrl', defaults.context.siteUrl),
-            webUrl: config.get<string>('context.webUrl', defaults.context.webUrl),
-            userDisplayName: config.get<string>('context.userDisplayName', defaults.context.userDisplayName),
-            userEmail: config.get<string>('context.userEmail', defaults.context.userEmail),
-            userLoginName: config.get<string>('context.userLoginName', defaults.context.userLoginName),
-            culture: config.get<string>('context.culture', defaults.context.culture),
-            isAnonymousGuestUser: config.get<boolean>('context.isAnonymousGuestUser', defaults.context.isAnonymousGuestUser),
-            customContext: config.get<Record<string, unknown>>('context.customContext', defaults.context.customContext)
-        },
-        pageContext: {
-            webTitle: config.get<string>('pageContext.webTitle', defaults.pageContext.webTitle),
-            webDescription: config.get<string>('pageContext.webDescription', defaults.pageContext.webDescription),
-            webTemplate: config.get<string>('pageContext.webTemplate', defaults.pageContext.webTemplate),
-            isNoScriptEnabled: config.get<boolean>('pageContext.isNoScriptEnabled', defaults.pageContext.isNoScriptEnabled),
-            isSPO: config.get<boolean>('pageContext.isSPO', defaults.pageContext.isSPO)
-        },
+        context,
         theme: {
             preset: config.get<IThemeConfig['preset']>('theme.preset', defaults.theme.preset),
             customColors: config.get<Record<string, string>>('theme.customColors', defaults.theme.customColors)
@@ -135,7 +94,7 @@ export function getThemes(): ITheme[] {
     // Merge Microsoft themes with custom themes
     // Custom themes have isCustom: true
     return [
-        ...DEFAULT_MICROSOFT_THEMES,
+        ...MICROSOFT_THEMES,
         ...customThemes.map(theme => ({ ...theme, isCustom: true }))
     ];
 }
@@ -152,7 +111,7 @@ export function getCurrentTheme(): ITheme {
     const theme = allThemes.find(t => t.id === currentThemeId);
     
     // Default to Teal if theme not found
-    return theme || DEFAULT_MICROSOFT_THEMES[0];
+    return theme || MICROSOFT_THEMES[0];
 }
 
 /**
