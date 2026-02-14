@@ -56,10 +56,7 @@ export class WorkbenchPanel {
             }
         );
 
-        panel.iconPath = {
-            light: vscode.Uri.joinPath(extensionUri, 'media', 'workbench-light.svg'),
-            dark: vscode.Uri.joinPath(extensionUri, 'media', 'workbench-dark.svg'),
-        };
+        panel.iconPath = new vscode.ThemeIcon('fluentui-testbeaker');
 
 
         WorkbenchPanel.currentPanel = new WorkbenchPanel(panel, extensionUri);

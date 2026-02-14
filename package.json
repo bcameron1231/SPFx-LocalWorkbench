@@ -30,12 +30,42 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "icons": {
+      "fluentui-testbeaker": {
+        "description": "Test Beaker",
+        "default": {
+          "fontPath": "media/icons.woff",
+          "fontCharacter": "\\F3A5"
+        }
+      },
+      "fluentui-localelanguage": {
+        "description": "Locale Language",
+        "default": {
+          "fontPath": "media/icons.woff",
+          "fontCharacter": "\\F2B7"
+        }
+      },
+      "fluentui-sync": {
+        "description": "Sync",
+        "default": {
+          "fontPath": "media/icons.woff",
+          "fontCharacter": "\\E895"
+        }
+      },
+      "fluentui-developertools": {
+        "description": "Developer Tools",
+        "default": {
+          "fontPath": "media/icons.woff",
+          "fontCharacter": "\\EC7A"
+        }
+      }
+    },
     "commands": [
       {
         "command": "spfx-local-workbench.openWorkbench",
         "title": "Open Local Workbench",
         "category": "SPFx",
-        "icon": "$(beaker)"
+        "icon": "$(fluentui-testbeaker)"
       },
       {
         "command": "spfx-local-workbench.startServe",
@@ -47,19 +77,13 @@
         "command": "spfx-local-workbench.detectWebParts",
         "title": "Refresh Web Parts",
         "category": "SPFx",
-        "icon": {
-          "light": "media/sync-light.svg",
-          "dark": "media/sync-dark.svg"
-        }
+        "icon": "$(fluentui-sync)"
       },
       {
         "command": "spfx-local-workbench.openDevTools",
         "title": "Open Developer Tools",
         "category": "SPFx",
-        "icon": {
-          "light": "media/devtools-light.svg",
-          "dark": "media/devtools-dark.svg"
-        }
+        "icon": "$(fluentui-developertools)"
       }
     ],
     "menus": {
@@ -217,7 +241,8 @@
     "package:extension": "node esbuild.js --production",
     "package:webview": "node webview/esbuild.config.js --production",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "generate:icons": "node scripts/generateIcons.js"
   },
   "devDependencies": {
     "@fluentui/react": "^8.110.10",
@@ -230,6 +255,7 @@
     "npm-run-all": "^4.1.5",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "subset-font": "^1.4.10",
     "typed-css-modules": "^0.9.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.54.0"
