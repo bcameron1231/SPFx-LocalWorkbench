@@ -7,6 +7,7 @@
 import * as vscode from 'vscode';
 import { randomBytes } from 'crypto';
 import { SpfxProjectDetector } from './SpfxProjectDetector';
+import type { IExternalDependency } from './SpfxProjectDetector';
 import type { IWebPartManifest } from './types';
 import { generateWorkbenchHtml, generateErrorHtml } from './html';
 import { getWorkbenchSettings, onConfigurationChanged, IWorkbenchSettings } from './config';
@@ -27,6 +28,7 @@ export class WorkbenchPanel {
     private _disposables: vscode.Disposable[] = [];
     private _webParts: IWebPartManifest[] = [];
     private _extensions: IWebPartManifest[] = [];
+    private _externalDependencies: IExternalDependency[] = [];
     private _settings: IWorkbenchSettings;
     private _liveReloadDebounceTimer: ReturnType<typeof setTimeout> | undefined;
     private _apiProxyService: ApiProxyService | undefined;
@@ -46,6 +48,16 @@ export class WorkbenchPanel {
             return;
         }
 
+        // Build localResourceRoots: extension assets + workspace folder (for SPFx node_modules)
+        const resourceRoots: vscode.Uri[] = [
+            vscode.Uri.joinPath(extensionUri, 'media'),
+            vscode.Uri.joinPath(extensionUri, 'dist')
+        ];
+        const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+        if (workspaceFolder) {
+            resourceRoots.push(workspaceFolder.uri);
+        }
+
         // Otherwise, create a new panel
         const panel = vscode.window.createWebviewPanel(
             WorkbenchPanel.viewType,
@@ -54,10 +66,7 @@ export class WorkbenchPanel {
             {
                 enableScripts: true,
                 retainContextWhenHidden: true,
-                localResourceRoots: [
-                    vscode.Uri.joinPath(extensionUri, 'media'),
-                    vscode.Uri.joinPath(extensionUri, 'dist')
-                ]
+                localResourceRoots: resourceRoots
             }
         );
 
@@ -207,6 +216,9 @@ export class WorkbenchPanel {
         this._webParts = await detector.getWebPartManifests();
         this._extensions = await detector.getExtensionManifests();
 
+        // Resolve external dependencies (e.g. @fluentui/react) from the SPFx
+        this._externalDependencies = await detector.resolveExternalDependencies();
+
         if (this._webParts.length === 0 && this._extensions.length === 0) {
             vscode.window.showWarningMessage('No web parts or extensions found in this SPFx project.');
         }
@@ -290,7 +302,8 @@ export class WorkbenchPanel {
             themeSettings: this._settings.theme,
             contextSettings: this._settings.context,
             pageContextSettings: this._settings.pageContext,
-            proxyEnabled: this._apiProxyService?.enabled ?? true
+            proxyEnabled: this._apiProxyService?.enabled ?? true,
+            externalDependencies: this._externalDependencies
         });
     }
 

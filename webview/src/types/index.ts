@@ -12,6 +12,7 @@ export interface IWorkbenchConfig {
     context?: IContextSettings;
     pageContext?: IPageContextSettings;
     proxyEnabled?: boolean;
+    externalDependencies?: Array<{ moduleName: string; globalName: string }>;
 }
 
 export interface ILocalizedString {
