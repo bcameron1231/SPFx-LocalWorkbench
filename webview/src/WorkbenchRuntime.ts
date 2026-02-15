@@ -5,7 +5,7 @@
 import type { IWorkbenchConfig, IWebPartManifest, IWebPartConfig, IExtensionConfig, IVsCodeApi } from './types';
 import { isActiveWebPart, isActiveExtension } from './types';
 import type { IAppHandlers } from './components/App';
-import { AmdLoader } from '@spfx-local-workbench/shared';
+import { AmdLoader, ManifestLoader } from '@spfx-local-workbench/shared';
 import { SpfxContext, ThemeProvider } from './mocks';
 import { WebPartManager } from './WebPartManager';
 import { initializeSpfxMocks } from './mocks';
@@ -15,6 +15,7 @@ export class WorkbenchRuntime {
     private vscode: IVsCodeApi;
     private config: IWorkbenchConfig;
     private amdLoader: AmdLoader;
+    private manifestLoader: ManifestLoader;
     private contextProvider: SpfxContext;
     private themeProvider: ThemeProvider;
     private webPartManager: WebPartManager;
@@ -31,6 +32,7 @@ export class WorkbenchRuntime {
 
         // Initialize core components
         this.amdLoader = new AmdLoader();
+        this.manifestLoader = new ManifestLoader(config.serveUrl);
         this.contextProvider = new SpfxContext(config.context);
         this.themeProvider = new ThemeProvider(config.theme);
         this.webPartManager = new WebPartManager(
@@ -105,44 +107,12 @@ export class WorkbenchRuntime {
     }
 
     private async loadManifests(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = this.config.serveUrl + '/temp/build/manifests.js?_v=' + Date.now();
-            script.onload = () => {
-                if (window.debugManifests?.getManifests) {
-                    this.loadedManifests = window.debugManifests.getManifests();
-                    const componentCount = this.loadedManifests.length;
-                    const webPartCount = this.loadedManifests.filter(m => m.componentType === 'WebPart').length;
-                    const extCount = this.loadedManifests.filter(m => m.componentType === 'Extension').length;
-                    this.updateStatus('Loaded ' + componentCount + ' components (' + webPartCount + ' web parts, ' + extCount + ' extensions)');
-
-                    // Update internal module base URLs - rewrite host/port
-                    // but preserve the path (e.g. /dist/) so bundle paths resolve correctly
-                    this.loadedManifests.forEach(m => {
-                        if (m.loaderConfig?.internalModuleBaseUrls) {
-                            m.loaderConfig.internalModuleBaseUrls = m.loaderConfig.internalModuleBaseUrls.map(url => {
-                                try {
-                                    const original = new URL(url);
-                                    const serve = new URL(this.config.serveUrl);
-                                    original.protocol = serve.protocol;
-                                    original.hostname = serve.hostname;
-                                    original.port = serve.port;
-                                    return original.toString();
-                                } catch {
-                                    return this.config.serveUrl + '/';
-                                }
-                            });
-                        }
-                    });
-
-                    resolve();
-                } else {
-                    reject(new Error('debugManifests not available'));
-                }
-            };
-            script.onerror = () => reject(new Error('Failed to load manifests.js'));
-            document.head.appendChild(script);
-        });
+        this.loadedManifests = await this.manifestLoader.loadManifests();
+        
+        const componentCount = this.loadedManifests.length;
+        const webPartCount = this.loadedManifests.filter(m => m.componentType === 'WebPart').length;
+        const extCount = this.loadedManifests.filter(m => m.componentType === 'Extension').length;
+        this.updateStatus('Loaded ' + componentCount + ' components (' + webPartCount + ' web parts, ' + extCount + ' extensions)');
     }
 
     private async loadExtensions(): Promise<void> {

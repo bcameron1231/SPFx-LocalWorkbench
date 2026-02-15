@@ -5,6 +5,7 @@
 // placeholders on the page.
 
 import type { IWebPartManifest, IExtensionConfig, IActiveExtension, IVsCodeApi } from './types';
+import { BundleLoader, ComponentResolver } from '@spfx-local-workbench/shared';
 import { SpfxContext, ThemeProvider } from './mocks';
 
 // PlaceholderName enum matching @microsoft/sp-application-base
@@ -32,7 +33,8 @@ class MockPlaceholderContent {
 }
 
 export class ExtensionManager {
-    private serveUrl: string;
+    private bundleLoader: BundleLoader;
+    private componentResolver: ComponentResolver;
     private contextProvider: SpfxContext;
     private themeProvider: ThemeProvider;
 
@@ -42,47 +44,14 @@ export class ExtensionManager {
         contextProvider: SpfxContext,
         themeProvider: ThemeProvider
     ) {
-        this.serveUrl = serveUrl;
+        this.bundleLoader = new BundleLoader(serveUrl);
+        this.componentResolver = new ComponentResolver();
         this.contextProvider = contextProvider;
         this.themeProvider = themeProvider;
     }
 
     async loadExtensionBundle(manifest: IWebPartManifest): Promise<void> {
-        let bundlePath = '';
-
-        if (manifest.loaderConfig?.scriptResources) {
-            const entryId = manifest.loaderConfig.entryModuleId;
-            const entry = entryId ? manifest.loaderConfig.scriptResources[entryId] : null;
-            if (entry?.paths?.default) {
-                bundlePath = entry.paths.default;
-            } else if (entry?.path) {
-                bundlePath = entry.path;
-            }
-        }
-
-        if (!bundlePath) {
-            bundlePath = 'dist/' + manifest.alias.toLowerCase() + '.js';
-        }
-
-        // Use internalModuleBaseUrls as the base (preserves /dist/ path)
-        const baseUrl = manifest.loaderConfig?.internalModuleBaseUrls?.[0] || (this.serveUrl + '/');
-        const fullUrl = baseUrl + bundlePath;
-
-        // Cache-bust so live reload always fetches the freshly compiled bundle
-        const cacheBustedUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + '_v=' + Date.now();
-
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = cacheBustedUrl;
-            script.onload = () => {
-                resolve();
-            };
-            script.onerror = () => {
-                console.error('ExtensionManager - Failed to load bundle:', fullUrl);
-                reject(new Error('Failed to load ' + fullUrl));
-            };
-            document.head.appendChild(script);
-        });
+        return this.bundleLoader.loadBundle(manifest);
     }
 
     async instantiateExtension(
@@ -174,118 +143,7 @@ export class ExtensionManager {
     }
 
     private findExtensionClass(manifest: IWebPartManifest): any {
-        const amdModules = window.__amdModules!;
-        const alias = manifest.alias;
-        const manifestId = manifest.id;
-        const version = manifest.version || '0.0.1';
-        const entryModuleId = manifest.loaderConfig?.entryModuleId || alias;
-
-        let extensionClass = null;
-        let foundModule = null;
-
-        // Try various patterns to find the module
-        const idWithVersion = manifestId + '_' + version;
-        const searchPatterns = [
-            idWithVersion,
-            manifestId,
-            entryModuleId,
-            alias
-        ];
-
-        for (const pattern of searchPatterns) {
-            if (amdModules[pattern]) {
-                foundModule = amdModules[pattern];
-                break;
-            }
-        }
-
-        // Pattern match as fallback
-        if (!foundModule) {
-            for (const [name, mod] of Object.entries(amdModules)) {
-                if (name.includes(manifestId) || name.toLowerCase().includes(alias.toLowerCase())) {
-                    foundModule = mod;
-                    break;
-                }
-            }
-        }
-
-        // Extract the extension class from the module
-        if (foundModule) {
-            extensionClass = this.extractExtensionClass(foundModule, alias);
-        }
-
-        // Last resort: search all modules (including anonymous) for a class
-        // with onInit but NOT render (to distinguish from web parts).
-        // SPFx extension bundles use anonymous AMD define() calls, so the
-        // module gets registered with an _anonymous_ key.
-        if (!extensionClass) {
-            // Known mock/infrastructure module keys to skip
-            const skipModules = new Set([
-                'react', 'React', 'react-dom', 'ReactDOM',
-                '@microsoft/sp-webpart-base', '@microsoft/sp-application-base',
-                '@microsoft/sp-core-library', '@microsoft/sp-property-pane',
-                '@microsoft/sp-http', '@microsoft/sp-lodash-subset',
-                '@microsoft/sp-dialog', '@fluentui/react', 'office-ui-fabric-react'
-            ]);
-
-            for (const [name, mod] of Object.entries(amdModules)) {
-                if (skipModules.has(name)) continue;
-                if (!mod) continue;
-
-                const candidate = this.extractExtensionClass(mod, alias);
-                if (candidate) {
-                    // Verify it looks like a customizer (has onInit) and 
-                    // not a web part (has render)
-                    const proto = candidate.prototype;
-                    if (proto && typeof proto.onInit === 'function' && typeof proto.render !== 'function') {
-                        extensionClass = candidate;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return extensionClass;
-    }
-
-    // Extracts an extension class from a module export
-    private extractExtensionClass(mod: any, alias: string): any {
-        if (!mod) return null;
-
-        if (typeof mod === 'function' && mod.prototype?.onInit) {
-            return mod;
-        }
-        if (mod.default && typeof mod.default === 'function') {
-            return mod.default;
-        }
-        if (mod[alias + 'ApplicationCustomizer'] && typeof mod[alias + 'ApplicationCustomizer'] === 'function') {
-            return mod[alias + 'ApplicationCustomizer'];
-        }
-
-        // Search for a class with onInit method
-        for (const [key, value] of Object.entries(mod)) {
-            if (typeof value === 'function' && (value as any).prototype) {
-                if (typeof (value as any).prototype.onInit === 'function' &&
-                    (key.toLowerCase().includes('customizer') ||
-                     key.toLowerCase().includes('extension') ||
-                     key.toLowerCase().includes('application') ||
-                     key === 'default')) {
-                    return value;
-                }
-            }
-        }
-
-        // Any class with onInit (but not render) as last resort within this module
-        for (const [_key, value] of Object.entries(mod)) {
-            if (typeof value === 'function' && (value as any).prototype) {
-                if (typeof (value as any).prototype.onInit === 'function' &&
-                    typeof (value as any).prototype.render !== 'function') {
-                    return value;
-                }
-            }
-        }
-
-        return null;
+        return this.componentResolver.findComponentClass(manifest);
     }
 
     private async renderExtensionFromClass(
@@ -379,14 +237,16 @@ export class ExtensionManager {
     }
 
     private showDebugInfo(domElement: HTMLElement, manifest: IWebPartManifest): void {
-        const amdModules = window.__amdModules!;
         let debugHtml = '<div style="padding:12px;color:#605e5c;font-size:13px;">';
         debugHtml += '<p><strong>' + manifest.alias + '</strong> extension bundle loaded.</p>';
         debugHtml += '<p style="color:#a80000;">Could not find Application Customizer class.</p>';
         debugHtml += '<p><strong>Manifest ID:</strong> ' + manifest.id + '</p>';
         debugHtml += '<p><strong>Available modules:</strong></p>';
         debugHtml += '<ul style="font-size:11px;max-height:150px;overflow:auto;">';
-        for (const [name, mod] of Object.entries(amdModules)) {
+        
+        const moduleNames = this.componentResolver.getModuleNames();
+        for (const name of moduleNames) {
+            const mod = this.componentResolver.getModule(name);
             const modType = typeof mod;
             const modKeys = mod ? Object.keys(mod).slice(0, 5).join(', ') : 'null';
             debugHtml += '<li><strong>' + name + '</strong>: ' + modType + ' [' + modKeys + ']</li>';
