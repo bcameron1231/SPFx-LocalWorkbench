@@ -53,6 +53,20 @@
           "fontCharacter": "\\F3A5"
         }
       },
+      "fluentui-testbeakersolid": {
+        "description": "Test Beaker Solid",
+        "default": {
+          "fontPath": "media/icons.woff",
+          "fontCharacter": "\\F3A6"
+        }
+      },
+      "fluentui-teststep": {
+        "description": "Test Step",
+        "default": {
+          "fontPath": "media/icons.woff",
+          "fontCharacter": "\\F3AC"
+        }
+       },
       "fluentui-localelanguage": {
         "description": "Locale Language",
         "default": {
@@ -73,6 +87,13 @@
           "fontPath": "media/icons.woff",
           "fontCharacter": "\\EC7A"
         }
+      },
+      "fluentui-broom": {
+        "description": "Broom",
+        "default": {
+          "fontPath": "media/icons.woff",
+          "fontCharacter": "\\EA99"
+        }
       }
     },
     "commands": [
@@ -86,7 +107,7 @@
         "command": "spfx-local-workbench.startServe",
         "title": "Start Serve & Open Workbench",
         "category": "SPFx",
-        "icon": "$(play)"
+        "icon": "$(fluentui-testbeakersolid)"
       },
       {
         "command": "spfx-local-workbench.detectWebParts",
@@ -99,6 +120,24 @@
         "title": "Open Developer Tools",
         "category": "SPFx",
         "icon": "$(fluentui-developertools)"
+      },
+      {
+        "command": "spfx-local-workbench.openStorybook",
+        "title": "Open Storybook",
+        "category": "SPFx",
+        "icon": "$(fluentui-teststep)"
+      },
+      {
+        "command": "spfx-local-workbench.generateStories",
+        "title": "Generate Storybook Stories",
+        "category": "SPFx",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "spfx-local-workbench.cleanStorybook",
+        "title": "Clean Storybook",
+        "category": "SPFx",
+        "icon": "$(fluentui-broom)"
       }
     ],
     "menus": {
@@ -302,10 +341,41 @@
             }
           }
         },
-        "spfxLocalWorkbench.currentThemeId": {
+        "spfxLocalWorkbench.theme": {
           "type": "string",
+          "enum": [
+            "teal",
+            "blue",
+            "orange",
+            "red",
+            "purple",
+            "green",
+            "periwinkle",
+            "cobalt",
+            "dark-teal",
+            "dark-blue",
+            "custom"
+          ],
+          "enumDescriptions": [
+            "Teal - Microsoft's teal theme",
+            "Blue - Microsoft's blue theme",
+            "Orange - Microsoft's orange theme",
+            "Red - Microsoft's red theme",
+            "Purple - Microsoft's purple theme",
+            "Green - Microsoft's green theme",
+            "Periwinkle - Microsoft's periwinkle theme",
+            "Cobalt - Microsoft's cobalt theme",
+            "Dark Teal - Microsoft's dark teal theme",
+            "Dark Blue - Microsoft's dark blue theme",
+            "Custom - Use a custom theme Id"
+          ],
           "default": "teal",
-          "description": "ID of the currently selected theme (from Microsoft themes or custom themes)"
+          "description": "Select the theme for the workbench."
+        },
+        "spfxLocalWorkbench.customTheme": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Custom theme Id when `#spfxLocalWorkbench.theme#` is set to `custom`. Must match an Id defined in `#spfxLocalWorkbench.themes#`."
         },
         "spfxLocalWorkbench.storybook.enabled": {
           "type": "boolean",
@@ -331,6 +401,21 @@
           "type": "boolean",
           "default": true,
           "description": "Automatically generate story variants for each supported locale"
+        },
+        "spfxLocalWorkbench.statusBarAction": {
+          "type": "string",
+          "enum": [
+            "openWorkbench",
+            "startServe",
+            "openStorybook"
+          ],
+          "enumDescriptions": [
+            "Open the Local Workbench panel",
+            "Start serve and open the Local Workbench panel",
+            "Open Storybook for visual component testing"
+          ],
+          "default": "openWorkbench",
+          "description": "Action to perform when clicking the SPFx status bar item"
         }
       }
     }

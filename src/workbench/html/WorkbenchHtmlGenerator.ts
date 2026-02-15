@@ -3,8 +3,8 @@
 // This module generates the complete HTML for the workbench webview.
 
 import * as vscode from 'vscode';
+import type { ITheme } from '@spfx-local-workbench/shared';
 import type {
-    IThemeConfig,
     IContextConfig
 } from '../config/WorkbenchConfig';
 
@@ -20,8 +20,8 @@ export interface IHtmlGeneratorConfig {
     extensionCount?: number;
     webview: vscode.Webview;
     extensionUri: vscode.Uri;
-    // Theme settings from user configuration
-    themeSettings?: IThemeConfig;
+    // Current theme (from getCurrentTheme())
+    currentTheme?: ITheme;
     // Context settings from user configuration
     contextSettings?: Partial<IContextConfig>;
 }
@@ -107,7 +107,7 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
         serveUrl: config.serveUrl,
         webParts: webParts,
         extensions: extensions,
-        theme: config.themeSettings,
+        theme: config.currentTheme,
         context: config.contextSettings
     };
     

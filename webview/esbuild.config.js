@@ -77,7 +77,8 @@ async function build() {
         alias: {
             'react': './webview/react-shim.js',
             'react-dom': './webview/react-dom-shim.js',
-            '@fluentui/react': './webview/fluent-shim.js'
+            '@fluentui/react': './webview/fluent-shim.js',
+            '@spfx-local-workbench/shared': './packages/shared/src/index.ts'
         },
         define: {
             'process.env.NODE_ENV': production ? '"production"' : '"development"'

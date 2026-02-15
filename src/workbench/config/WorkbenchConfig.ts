@@ -13,18 +13,11 @@ export interface IContextConfig {
     pageContext: IPageContextConfig;
 }
 
-// Theme configuration
-export interface IThemeConfig {
-    preset: 'teamSite' | 'communicationSite' | 'dark' | 'highContrast' | 'custom';
-    customColors: Record<string, string>;
-}
-
 // Complete workbench configuration
 export interface IWorkbenchSettings {
     serveUrl: string;
     autoOpenWorkbench: boolean;
     context: IContextConfig;
-    theme: IThemeConfig;
 }
 
 // Default configuration values
@@ -33,10 +26,6 @@ const defaults = {
     autoOpenWorkbench: false,
     context: {
         pageContext: DEFAULT_PAGE_CONTEXT
-    },
-    theme: {
-        preset: 'teamSite' as const,
-        customColors: {}
     }
 };
 
@@ -50,11 +39,7 @@ export function getWorkbenchSettings(): IWorkbenchSettings {
     return {
         serveUrl: config.get<string>('serveUrl', defaults.serveUrl),
         autoOpenWorkbench: config.get<boolean>('autoOpenWorkbench', defaults.autoOpenWorkbench),
-        context,
-        theme: {
-            preset: config.get<IThemeConfig['preset']>('theme.preset', defaults.theme.preset),
-            customColors: config.get<Record<string, string>>('theme.customColors', defaults.theme.customColors)
-        }
+        context
     };
 }
 
@@ -105,13 +90,17 @@ export function getThemes(): ITheme[] {
  */
 export function getCurrentTheme(): ITheme {
     const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
-    const currentThemeId = config.get<string>('currentThemeId', 'teal');
+    const theme = config.get<string>('theme', 'teal');
+    const customTheme = config.get<string>('customTheme', '');
+    
+    // Use custom theme ID if theme is set to 'custom'
+    const currentThemeId = theme === 'custom' ? customTheme : theme;
     
     const allThemes = getThemes();
-    const theme = allThemes.find(t => t.id === currentThemeId);
+    const foundTheme = allThemes.find(t => t.id === currentThemeId);
     
     // Default to Teal if theme not found
-    return theme || MICROSOFT_THEMES[0];
+    return foundTheme || MICROSOFT_THEMES[0];
 }
 
 /**
@@ -120,7 +109,18 @@ export function getCurrentTheme(): ITheme {
  */
 export async function setCurrentTheme(themeId: string): Promise<void> {
     const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
-    await config.update('currentThemeId', themeId, vscode.ConfigurationTarget.Workspace);
+    
+    // Check if this is a Microsoft theme
+    const isMicrosoftTheme = MICROSOFT_THEMES.some(t => t.id === themeId);
+    
+    if (isMicrosoftTheme) {
+        // Set theme to the Microsoft theme ID
+        await config.update('theme', themeId, vscode.ConfigurationTarget.Workspace);
+    } else {
+        // Set theme to 'custom' and store the ID in customTheme
+        await config.update('theme', 'custom', vscode.ConfigurationTarget.Workspace);
+        await config.update('customTheme', themeId, vscode.ConfigurationTarget.Workspace);
+    }
 }
 
 /**

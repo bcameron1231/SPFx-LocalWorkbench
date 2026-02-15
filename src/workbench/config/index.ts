@@ -1,7 +1,6 @@
 export {
     IWorkbenchSettings,
     IContextConfig,
-    IThemeConfig,
     getWorkbenchSettings,
     onConfigurationChanged,
     openWorkbenchSettings,

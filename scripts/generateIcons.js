@@ -19,9 +19,12 @@ const path = require('path');
 // You can copy these from flicon.io 
 const REQUIRED_GLYPHS = [
     0xF3A5, // TestBeaker icon
+    0xF3A6, // TestBeakerSolid icon
+    0xF3AC, // TestStep icon
     0xF2B7, // LocaleLanguage icon
     0xE895, // Sync icon
     0xEC7A, // DeveloperTools icon
+    0xEA99, // Broom icon
 ];
 
 const INPUT_FONT = path.join(__dirname, 'FabExMDL2.3.36.woff');

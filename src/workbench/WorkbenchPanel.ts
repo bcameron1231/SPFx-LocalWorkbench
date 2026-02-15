@@ -9,7 +9,7 @@ import { randomBytes } from 'crypto';
 import { SpfxProjectDetector } from './SpfxProjectDetector';
 import type { IWebPartManifest } from './types';
 import { generateWorkbenchHtml, generateErrorHtml } from './html';
-import { getWorkbenchSettings, onConfigurationChanged, IWorkbenchSettings } from './config';
+import { getWorkbenchSettings, onConfigurationChanged, getCurrentTheme, IWorkbenchSettings } from './config';
 
 // Generates a cryptographic nonce for CSP
 function getNonce(): string {
@@ -96,11 +96,12 @@ export class WorkbenchPanel {
         this._disposables.push(
             onConfigurationChanged((newSettings) => {
                 this._settings = newSettings;
+                const currentTheme = getCurrentTheme();
                 this._panel.webview.postMessage({
                     command: 'settingsChanged',
                     settings: {
                         serveUrl: newSettings.serveUrl,
-                        theme: newSettings.theme,
+                        theme: currentTheme,
                         context: newSettings.context
                     }
                 });
@@ -234,6 +235,7 @@ export class WorkbenchPanel {
         const nonce = getNonce();
         const webPartsJson = JSON.stringify(this._webParts);
         const extensionsJson = JSON.stringify(this._extensions);
+        const currentTheme = getCurrentTheme();
 
         return generateWorkbenchHtml({
             nonce,
@@ -246,7 +248,7 @@ export class WorkbenchPanel {
             extensionCount: this._extensions.length,
             webview: webview,
             extensionUri: this._extensionUri,
-            themeSettings: this._settings.theme,
+            currentTheme: currentTheme,
             contextSettings: this._settings.context
         });
     }
