@@ -6,22 +6,45 @@
 import type { IAmdLoader } from '../types';
 
 /**
+ * Promise that tracks RequireJS loading state
+ */
+let requireJsLoadingPromise: Promise<void> | null = null;
+
+/**
  * Initializes the AMD loader if not already present
  */
-function initAmdLoader(): void {
-  if (typeof window.require === 'undefined' || typeof window.define === 'undefined') {
-    // Load RequireJS if not already loaded
+async function initAmdLoader(): Promise<void> {
+  // If already loaded, return immediately
+  if (typeof window.require !== 'undefined' && typeof window.define !== 'undefined') {
+    return;
+  }
+
+  // If already loading, wait for the existing load to complete
+  if (requireJsLoadingPromise) {
+    return requireJsLoadingPromise;
+  }
+
+  // Load RequireJS and wait for it to be ready
+  requireJsLoadingPromise = new Promise<void>((resolve, reject) => {
     const script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js';
+    script.onload = () => {
+      resolve();
+    };
+    script.onerror = () => {
+      reject(new Error('Failed to load RequireJS'));
+    };
     document.head.appendChild(script);
-  }
+  });
+
+  return requireJsLoadingPromise;
 }
 
 /**
  * Configures the AMD loader for SPFx bundles
  */
-export function configureAmdLoader(serveUrl: string): void {
-  initAmdLoader();
+export async function configureAmdLoader(serveUrl: string): Promise<void> {
+  await initAmdLoader();
   
   if (window.require) {
     (window.require as any).config({
@@ -42,11 +65,11 @@ export function configureAmdLoader(serveUrl: string): void {
 /**
  * Loads an AMD module and returns it as a Promise
  */
-export function loadAmdModule<T = any>(
+export async function loadAmdModule<T = any>(
   moduleId: string,
   serveUrl: string
 ): Promise<T> {
-  configureAmdLoader(serveUrl);
+  await configureAmdLoader(serveUrl);
 
   return new Promise((resolve, reject) => {
     if (!window.require) {
@@ -71,7 +94,7 @@ export async function preloadSpfxDependencies(serveUrl: string): Promise<void> {
     '@microsoft/sp-lodash-subset',
   ];
 
-  configureAmdLoader(serveUrl);
+  await configureAmdLoader(serveUrl);
 
   await Promise.all(
     dependencies.map(dep => loadAmdModule(dep, serveUrl))
