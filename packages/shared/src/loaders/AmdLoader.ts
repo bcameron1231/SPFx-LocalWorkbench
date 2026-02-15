@@ -3,7 +3,18 @@
 // This module provides an AMD (Asynchronous Module Definition) loader shim
 // that allows SPFx bundles to load and register their modules.
 
-import { initializeSpfxMocks } from '../mocks/SpfxMocks';
+// Extend Window interface for AMD globals
+declare global {
+  interface Window {
+    __amdModules?: Record<string, any>;
+    __amdPending?: Record<string, Array<(module: any) => void>>;
+    define?: any;
+    require?: any;
+    requirejs?: any;
+    React?: any;
+    ReactDOM?: any;
+  }
+}
 
 export class AmdLoader {
     private amdModules: Record<string, any>;
@@ -25,9 +36,6 @@ export class AmdLoader {
             console.error('AmdLoader - React/ReactDOM globals not found. The workbench UI requires React to render.');
             return;
         }
-
-        // Initialize SPFx mocks
-        initializeSpfxMocks();
 
         // Set up AMD define function
         this.setupDefine();
@@ -160,3 +168,8 @@ export class AmdLoader {
         return this.amdModules;
     }
 }
+
+/**
+ * Singleton instance for shared use across workbench and Storybook
+ */
+export const amdLoader = new AmdLoader();

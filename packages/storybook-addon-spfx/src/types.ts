@@ -90,9 +90,4 @@ export interface IAmdLoader {
   config: (config: any) => void;
 }
 
-declare global {
-  interface Window {
-    require?: IAmdLoader['require'];
-    define?: IAmdLoader['define'];
-  }
-}
+// Note: Window interface extensions for require/define are declared in @spfx-local-workbench/shared

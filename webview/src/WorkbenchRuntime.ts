@@ -5,7 +5,7 @@
 import type { IWorkbenchConfig, IWebPartManifest, IWebPartConfig, IExtensionConfig, IVsCodeApi } from './types';
 import { isActiveWebPart, isActiveExtension } from './types';
 import type { IAppHandlers } from './components/App';
-import { AmdLoader } from './amd/AmdLoader';
+import { AmdLoader } from '@spfx-local-workbench/shared';
 import { SpfxContext, ThemeProvider } from './mocks';
 import { WebPartManager } from './WebPartManager';
 import { initializeSpfxMocks } from './mocks';
@@ -71,6 +71,9 @@ export class WorkbenchRuntime {
 
     async initialize(): Promise<void> {
         try {
+            
+            // Initialize SPFx mocks (must be before AMD loader)
+            initializeSpfxMocks();
             
             // Initialize AMD loader
             this.amdLoader.initialize();
