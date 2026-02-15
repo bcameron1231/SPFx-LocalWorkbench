@@ -1,24 +1,25 @@
 import type { IWebPartManifest } from '../types';
 import type { IAmdModules } from '../types/amd';
 
-declare global {
-  interface Window {
-    __amdModules?: IAmdModules;
-  }
-}
-
 /**
  * ComponentResolver
  * Resolves SPFx component classes from the AMD module registry
+ * 
+ * NOTE: This class requires browser environment (window)
  */
 export class ComponentResolver {
   /**
    * Find a component class in the AMD module registry
    * @param manifest - Component manifest
+   * @param candidateModules - Optional array of module names to search (from bundle loading)
    * @returns Component class constructor or null if not found
    */
-  findComponentClass(manifest: IWebPartManifest): any {
-    const amdModules = window.__amdModules;
+  findComponentClass(manifest: IWebPartManifest, candidateModules?: string[]): any {
+    if (typeof window === 'undefined') {
+      throw new Error('ComponentResolver requires browser environment');
+    }
+
+    const amdModules = (window as any).__amdModules;
     if (!amdModules) {
       return null;
     }
@@ -63,9 +64,9 @@ export class ComponentResolver {
       componentClass = this.extractClassFromModule(foundModule, alias, componentType);
     }
 
-    // Step 4: Last resort - search all modules for lifecycle methods
+    // Step 4: Last resort - search for lifecycle methods
     if (!componentClass) {
-      componentClass = this.searchAllModulesForComponent(amdModules, componentType);
+      componentClass = this.searchModulesForComponent(amdModules, componentType, candidateModules);
     }
 
     return componentClass;
@@ -117,17 +118,19 @@ export class ComponentResolver {
   }
 
   /**
-   * Search all AMD modules for a component class
+   * Search AMD modules for a component class
    * @param amdModules - AMD module registry
    * @param componentType - 'WebPart' or 'Extension'
+   * @param candidateModules - Optional array of module names to limit search
    * @returns Component class or null
    */
-  private searchAllModulesForComponent(amdModules: IAmdModules, componentType: string): any {
-    for (const [name, mod] of Object.entries(amdModules)) {
-      // Skip anonymous modules
-      if (name.startsWith('_anonymous_')) {
-        continue;
-      }
+  private searchModulesForComponent(amdModules: IAmdModules, componentType: string, candidateModules?: string[]): any {
+    // If candidateModules provided, search only those; otherwise search all
+    const modulesToSearch = candidateModules || Object.keys(amdModules);
+
+    for (const name of modulesToSearch) {
+      const mod = amdModules[name];
+      if (!mod) continue;
 
       const candidates = [mod, mod?.default];
       for (const candidate of candidates) {
@@ -156,7 +159,10 @@ export class ComponentResolver {
    * @returns Array of module names
    */
   getModuleNames(): string[] {
-    const amdModules = window.__amdModules;
+    if (typeof window === 'undefined') {
+      return [];
+    }
+    const amdModules = (window as any).__amdModules;
     return amdModules ? Object.keys(amdModules) : [];
   }
 
@@ -166,7 +172,10 @@ export class ComponentResolver {
    * @returns Module object or undefined
    */
   getModule(moduleName: string): any {
-    const amdModules = window.__amdModules;
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+    const amdModules = (window as any).__amdModules;
     return amdModules ? amdModules[moduleName] : undefined;
   }
 }

@@ -50,7 +50,7 @@ export class ExtensionManager {
         this.themeProvider = themeProvider;
     }
 
-    async loadExtensionBundle(manifest: IWebPartManifest): Promise<void> {
+    async loadExtensionBundle(manifest: IWebPartManifest): Promise<string[]> {
         return this.bundleLoader.loadBundle(manifest);
     }
 
@@ -60,7 +60,7 @@ export class ExtensionManager {
         footerElement: HTMLDivElement
     ): Promise<IActiveExtension | undefined> {
         try {
-            await this.loadExtensionBundle(config.manifest);
+            const newModules = await this.loadExtensionBundle(config.manifest);
             await new Promise(r => setTimeout(r, 100));
 
             const context = this.createExtensionContext(
@@ -70,7 +70,7 @@ export class ExtensionManager {
                 footerElement
             );
 
-            const ExtensionClass = this.findExtensionClass(config.manifest);
+            const ExtensionClass = this.findExtensionClass(config.manifest, newModules);
 
             if (ExtensionClass && typeof ExtensionClass === 'function') {
                 return await this.renderExtensionFromClass(ExtensionClass, config, context, headerElement, footerElement);
@@ -142,8 +142,8 @@ export class ExtensionManager {
         };
     }
 
-    private findExtensionClass(manifest: IWebPartManifest): any {
-        return this.componentResolver.findComponentClass(manifest);
+    private findExtensionClass(manifest: IWebPartManifest, candidateModules?: string[]): any {
+        return this.componentResolver.findComponentClass(manifest, candidateModules);
     }
 
     private async renderExtensionFromClass(

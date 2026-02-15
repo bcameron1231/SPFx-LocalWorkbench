@@ -28,7 +28,7 @@ export class WebPartManager {
         this.themeProvider = themeProvider;
     }
 
-    async loadWebPartBundle(manifest: IWebPartManifest): Promise<void> {
+    async loadWebPartBundle(manifest: IWebPartManifest): Promise<string[]> {
         return this.bundleLoader.loadBundle(manifest);
     }
 
@@ -43,7 +43,7 @@ export class WebPartManager {
 
         try {
             await this.loadWebPartStrings(config.manifest, localeOverride);
-            await this.loadWebPartBundle(config.manifest);
+            const newModules = await this.loadWebPartBundle(config.manifest);
             await new Promise(r => setTimeout(r, 100));
 
             const context = this.contextProvider.createMockContext(
@@ -52,7 +52,7 @@ export class WebPartManager {
             );
             context.domElement = domElement;
 
-            const WebPartClass = this.findWebPartClass(config.manifest);
+            const WebPartClass = this.findWebPartClass(config.manifest, newModules);
 
             if (WebPartClass && typeof WebPartClass === 'function') {
                 return await this.renderWebPartFromClass(WebPartClass, config, context, domElement);
@@ -68,8 +68,8 @@ export class WebPartManager {
         }
     }
 
-    private findWebPartClass(manifest: IWebPartManifest): any {
-        return this.componentResolver.findComponentClass(manifest);
+    private findWebPartClass(manifest: IWebPartManifest, candidateModules?: string[]): any {
+        return this.componentResolver.findComponentClass(manifest, candidateModules);
     }
 
     private async renderWebPartFromClass(

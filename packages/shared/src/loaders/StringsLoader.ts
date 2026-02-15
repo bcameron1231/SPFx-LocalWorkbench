@@ -1,14 +1,10 @@
 import type { IWebPartManifest } from '../types';
 
-declare global {
-  interface Window {
-    __amdModules?: Record<string, any>;
-  }
-}
-
 /**
  * StringsLoader
  * Loads localized string resources for SPFx components
+ * 
+ * NOTE: This class requires browser environment (window, document)
  */
 export class StringsLoader {
   private serveUrl: string;
@@ -24,6 +20,10 @@ export class StringsLoader {
    * @returns Promise that resolves when strings are loaded
    */
   async loadStrings(manifest: IWebPartManifest, localeOverride?: string): Promise<void> {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      throw new Error('StringsLoader requires browser environment');
+    }
+
     const scriptResources = manifest.loaderConfig?.scriptResources;
     if (!scriptResources) {
       return;
@@ -46,7 +46,7 @@ export class StringsLoader {
 
     return new Promise((resolve, reject) => {
       // Track existing modules to identify newly loaded anonymous module
-      const amdModules = window.__amdModules || {};
+      const amdModules = (window as any).__amdModules || {};
       const existingModules = new Set(Object.keys(amdModules));
 
       const script = document.createElement('script');

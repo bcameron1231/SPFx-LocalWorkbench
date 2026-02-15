@@ -100,8 +100,10 @@ function initialize() {
             React.createElement(App, {
                 config: config,
                 onInitialized: (handlers: IAppHandlers) => {
+                    console.log('[Workbench] React app initialized, handlers received');
                     runtime.setAppHandlers(handlers);
                     // Initialize the runtime after React app is ready
+                    console.log('[Workbench] Calling runtime.initialize()');
                     runtime.initialize().catch(error => {
                         console.error('Workbench - Initialization error:', error);
                     });

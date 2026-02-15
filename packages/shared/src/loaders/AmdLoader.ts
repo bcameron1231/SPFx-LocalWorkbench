@@ -6,6 +6,7 @@
 import type { IAmdModules, IAmdPending } from '../types';
 
 // Extend Window interface for AMD globals
+// NOTE: These declarations are safe in Node.js - they only extend type definitions
 declare global {
   interface Window {
     __amdModules?: IAmdModules;
@@ -21,15 +22,26 @@ declare global {
 export class AmdLoader {
     private amdModules: IAmdModules;
     private amdPending: IAmdPending;
+    private initialized: boolean = false;
 
     constructor() {
         this.amdModules = {};
         this.amdPending = {};
-        window.__amdModules = this.amdModules;
-        window.__amdPending = this.amdPending;
     }
 
     initialize(): void {
+        if (this.initialized) {
+            return; // Already initialized
+        }
+
+        if (typeof window === 'undefined') {
+            throw new Error('AmdLoader requires browser environment');
+        }
+
+        // Attach to window
+        window.__amdModules = this.amdModules;
+        window.__amdPending = this.amdPending;
+
         // React is required for the workbench UI itself (App, Canvas, Toolbar, etc.).
         // It is also registered as an AMD module so React-based SPFx web parts can
         // resolve require('react') — mirroring how SharePoint provides React as a
@@ -44,10 +56,13 @@ export class AmdLoader {
 
         // Set up AMD require function
         this.setupRequire();
+
+        this.initialized = true;
     }
 
     private setupDefine(): void {
-        window.define = (name: any, deps?: any, factory?: any) => {
+        const win = window as any;
+        win.define = (name: any, deps?: any, factory?: any) => {
             // Handle different call signatures
             if (typeof name !== 'string') {
                 factory = deps || name;
@@ -102,13 +117,14 @@ export class AmdLoader {
     }
 
     private setupRequire(): void {
-        window.require = (deps: any, callback?: any) => {
+        const win = window as any;
+        win.require = (deps: any, callback?: any) => {
             if (typeof deps === 'string') {
-                return this.amdModules[deps] || (window as any)[deps] || {};
+                return this.amdModules[deps] || win[deps] || {};
             }
 
             const resolved = (deps as string[]).map(dep => 
-                this.amdModules[dep] || (window as any)[dep] || {}
+                this.amdModules[dep] || win[dep] || {}
             );
             
             if (callback) {
@@ -117,13 +133,14 @@ export class AmdLoader {
             return resolved[0];
         };
 
-        (window.require as any).config = function() {};
-        window.requirejs = window.require;
+        win.require.config = function() {};
+        win.requirejs = win.require;
     }
 
     private resolveDependency(dep: string): any {
+        const win = window as any;
         if (dep === 'exports') return {};
-        if (dep === 'require') return window.require;
+        if (dep === 'require') return win.require;
         if (dep === 'module') return { exports: {} };
 
         // Try to find the module
@@ -142,7 +159,7 @@ export class AmdLoader {
                 }
             }
         }
-        if (!mod) mod = (window as any)[dep];
+        if (!mod) mod = win[dep];
         // Handle localized strings modules (e.g. 'HeaderApplicationCustomizerStrings')
         // SPFx generates these as AMD modules; provide a Proxy that returns the key name
         // for any property access so the extension can still render.
@@ -173,5 +190,21 @@ export class AmdLoader {
 
 /**
  * Singleton instance for shared use across workbench and Storybook
+ * Safe to import in Node.js - only accesses window when initialize() is called
  */
-export const amdLoader = new AmdLoader();
+let _amdLoaderInstance: AmdLoader | null = null;
+
+export const amdLoader = {
+  get instance(): AmdLoader {
+    if (!_amdLoaderInstance) {
+      _amdLoaderInstance = new AmdLoader();
+    }
+    return _amdLoaderInstance;
+  },
+  initialize(): void {
+    this.instance.initialize();
+  },
+  getModules(): IAmdModules {
+    return this.instance.getModules();
+  }
+};

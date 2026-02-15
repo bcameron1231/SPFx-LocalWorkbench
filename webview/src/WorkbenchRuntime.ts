@@ -5,7 +5,7 @@
 import type { IWorkbenchConfig, IWebPartManifest, IWebPartConfig, IExtensionConfig, IVsCodeApi } from './types';
 import { isActiveWebPart, isActiveExtension } from './types';
 import type { IAppHandlers } from './components/App';
-import { AmdLoader, ManifestLoader } from '@spfx-local-workbench/shared';
+import { amdLoader, ManifestLoader } from '@spfx-local-workbench/shared';
 import { SpfxContext, ThemeProvider } from './mocks';
 import { WebPartManager } from './WebPartManager';
 import { initializeSpfxMocks } from './mocks';
@@ -14,7 +14,6 @@ import { ExtensionManager } from './ExtensionManager';
 export class WorkbenchRuntime {
     private vscode: IVsCodeApi;
     private config: IWorkbenchConfig;
-    private amdLoader: AmdLoader;
     private manifestLoader: ManifestLoader;
     private contextProvider: SpfxContext;
     private themeProvider: ThemeProvider;
@@ -31,7 +30,6 @@ export class WorkbenchRuntime {
         this.config = config;
 
         // Initialize core components
-        this.amdLoader = new AmdLoader();
         this.manifestLoader = new ManifestLoader(config.serveUrl);
         this.contextProvider = new SpfxContext(config.context);
         this.themeProvider = new ThemeProvider(config.theme);
@@ -73,18 +71,23 @@ export class WorkbenchRuntime {
 
     async initialize(): Promise<void> {
         try {
+            console.log('[Workbench] Starting initialization...');
             
-            // Initialize SPFx mocks (must be before AMD loader)
+            // Initialize AMD loader (must be before SPFx mocks)
+            amdLoader.initialize();
+            console.log('[Workbench] AMD loader initialized');
+            
+            // Initialize SPFx mocks
             initializeSpfxMocks();
-            
-            // Initialize AMD loader
-            this.amdLoader.initialize();
+            console.log('[Workbench] SPFx mocks initialized');
 
             // Update status
             this.updateStatus('Connecting to serve at ' + this.config.serveUrl + '...');
 
             // Load manifests from serve
+            console.log('[Workbench] Loading manifests from', this.config.serveUrl);
             await this.loadManifests();
+            console.log('[Workbench] Manifests loaded:', this.loadedManifests.length);
 
             this.updateStatus('Connected');
             this.updateConnectionStatus(true);
@@ -101,8 +104,9 @@ export class WorkbenchRuntime {
             }
 
         } catch (error: any) {
+            console.error('[Workbench] Initialization failed:', error);
             this.updateConnectionStatus(false);
-            // Error will be displayed by React component
+            this.updateStatus('Failed to connect: ' + (error.message || String(error)));
         }
     }
 

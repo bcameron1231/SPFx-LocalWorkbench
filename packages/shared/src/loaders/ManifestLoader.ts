@@ -1,16 +1,10 @@
 import type { IWebPartManifest } from '../types';
 
-declare global {
-  interface Window {
-    debugManifests?: {
-      getManifests(): IWebPartManifest[];
-    };
-  }
-}
-
 /**
  * ManifestLoader
  * Loads SPFx component manifests from the build output
+ * 
+ * NOTE: This class requires browser environment (window, document)
  */
 export class ManifestLoader {
   private serveUrl: string;
@@ -24,20 +18,25 @@ export class ManifestLoader {
    * @returns Array of manifests for all components (web parts + extensions)
    */
   async loadManifests(): Promise<IWebPartManifest[]> {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      throw new Error('ManifestLoader requires browser environment');
+    }
+
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
       script.src = this.serveUrl + '/temp/build/manifests.js?_v=' + Date.now();
       
       script.onload = () => {
-        if (window.debugManifests?.getManifests) {
-          const manifests = window.debugManifests.getManifests();
+        const win = window as any;
+        if (win.debugManifests?.getManifests) {
+          const manifests = win.debugManifests.getManifests();
           
           // Update internal module base URLs to match serve URL
           // Preserves the path (e.g., /dist/) so bundle paths resolve correctly
-          manifests.forEach(manifest => {
+          manifests.forEach((manifest: IWebPartManifest) => {
             if (manifest.loaderConfig?.internalModuleBaseUrls) {
               manifest.loaderConfig.internalModuleBaseUrls = 
-                manifest.loaderConfig.internalModuleBaseUrls.map(url => {
+                manifest.loaderConfig.internalModuleBaseUrls.map((url: string) => {
                   try {
                     const original = new URL(url);
                     const serve = new URL(this.serveUrl);

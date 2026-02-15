@@ -3,6 +3,8 @@ import type { IWebPartManifest } from '../types';
 /**
  * BundleLoader
  * Loads SPFx component JavaScript bundles
+ * 
+ * NOTE: This class requires browser environment (window, document)
  */
 export class BundleLoader {
   private serveUrl: string;
@@ -14,9 +16,13 @@ export class BundleLoader {
   /**
    * Load a component's JavaScript bundle
    * @param manifest - Component manifest containing loader config
-   * @returns Promise that resolves when bundle is loaded
+   * @returns Promise that resolves with array of newly added module names
    */
-  async loadBundle(manifest: IWebPartManifest): Promise<void> {
+  async loadBundle(manifest: IWebPartManifest): Promise<string[]> {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      throw new Error('BundleLoader requires browser environment');
+    }
+
     const bundlePath = this.getBundlePath(manifest);
     const baseUrl = manifest.loaderConfig?.internalModuleBaseUrls?.[0] || (this.serveUrl + '/');
     const fullUrl = baseUrl + bundlePath;
@@ -24,10 +30,18 @@ export class BundleLoader {
     // Cache-bust so live reload always fetches the freshly compiled bundle
     const cacheBustedUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + '_v=' + Date.now();
 
+    // Track existing modules before loading
+    const amdModules = (window as any).__amdModules || {};
+    const existingModules = new Set(Object.keys(amdModules));
+
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
       script.src = cacheBustedUrl;
-      script.onload = () => resolve();
+      script.onload = () => {
+        // Find newly added modules
+        const newModules = Object.keys(amdModules).filter(k => !existingModules.has(k));
+        resolve(newModules);
+      };
       script.onerror = () => reject(new Error('Failed to load ' + fullUrl));
       document.head.appendChild(script);
     });

@@ -26,13 +26,14 @@ export async function loadSpfxManifests(serveUrl: string): Promise<IWebPartManif
  * Load a component bundle
  * @param manifest - Component manifest
  * @param serveUrl - Base URL for the dev server
+ * @returns Array of newly added module names
  */
 export async function loadComponentBundle(
   manifest: IWebPartManifest,
   serveUrl: string
-): Promise<void> {
+): Promise<string[]> {
   const loader = new BundleLoader(serveUrl);
-  await loader.loadBundle(manifest);
+  return loader.loadBundle(manifest);
 }
 
 /**
@@ -53,11 +54,12 @@ export async function loadComponentStrings(
 /**
  * Find and instantiate a component class
  * @param manifest - Component manifest
+ * @param candidateModules - Optional array of module names to search (from bundle loading)
  * @returns Component class constructor
  */
-export function findComponentClass(manifest: IWebPartManifest): any {
+export function findComponentClass(manifest: IWebPartManifest, candidateModules?: string[]): any {
   const resolver = new ComponentResolver();
-  return resolver.findComponentClass(manifest);
+  return resolver.findComponentClass(manifest, candidateModules);
 }
 
 /**
@@ -89,13 +91,13 @@ export async function loadComponent(
 
   // Load strings and bundle
   await loadComponentStrings(manifest, serveUrl, locale);
-  await loadComponentBundle(manifest, serveUrl);
+  const newModules = await loadComponentBundle(manifest, serveUrl);
 
   // Wait a bit for AMD registration
   await new Promise(resolve => setTimeout(resolve, 100));
 
   // Find and return the component class
-  const componentClass = findComponentClass(manifest);
+  const componentClass = findComponentClass(manifest, newModules);
 
   if (!componentClass) {
     throw new Error(`Component class not found for ${componentId}`);
