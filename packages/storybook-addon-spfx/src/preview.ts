@@ -3,9 +3,9 @@
  * This file is loaded in the preview iframe and provides decorators
  */
 
-export { withSpfx } from './decorators/withSpfx';
+import { withSpfx } from './decorators/withSpfx';
 
-export const decorators = [];
+export const decorators = [withSpfx];
 
 export const parameters = {
   spfx: {

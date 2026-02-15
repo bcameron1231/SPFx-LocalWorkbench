@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as net from 'net';
-import { WorkbenchPanel, SpfxProjectDetector, createManifestWatcher, getWorkbenchSettings } from './workbench';
+import * as path from 'path';
+import { WorkbenchPanel, SpfxProjectDetector, createManifestWatcher, getWorkbenchSettings, StorybookPanel, StorybookPanelSerializer, StoryGenerator } from './workbench';
 
 function isPortReachable(host: string, port: number, timeout = 1000): Promise<boolean> {
 	return new Promise((resolve) => {
@@ -31,11 +32,15 @@ export function activate(context: vscode.ExtensionContext) {
 		return detector;
 	}
 
-	// Register serializer to restore webview on reload
+	// Register serializers to restore webviews on reload
 	context.subscriptions.push(
 		vscode.window.registerWebviewPanelSerializer(
 			'spfxLocalWorkbench',
 			new WorkbenchPanelSerializer(context.extensionUri, getDetector)
+		),
+		vscode.window.registerWebviewPanelSerializer(
+			'spfxStorybook',
+			new StorybookPanelSerializer(context.extensionUri, getDetector)
 		)
 	);
 
@@ -160,9 +165,103 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	);
 
+	// Register the Open Storybook command
+	const openStorybookCommand = vscode.commands.registerCommand(
+		'spfx-local-workbench.openStorybook',
+		async () => {
+			const det = getDetector();
+			if (!det) {
+				vscode.window.showErrorMessage('No workspace folder open');
+				return;
+			}
+
+			const isSpfx = await det.isSpfxProject();
+			if (!isSpfx) {
+				vscode.window.showErrorMessage('This does not appear to be an SPFx project');
+				return;
+			}
+
+			await StorybookPanel.createOrShow(context.extensionUri, det);
+		}
+	);
+
+	// Register the Generate Stories command
+	const generateStoriesCommand = vscode.commands.registerCommand(
+		'spfx-local-workbench.generateStories',
+		async () => {
+			const det = getDetector();
+			if (!det) {
+				vscode.window.showErrorMessage('No workspace folder open');
+				return;
+			}
+
+			const isSpfx = await det.isSpfxProject();
+			if (!isSpfx) {
+				vscode.window.showErrorMessage('This does not appear to be an SPFx project');
+				return;
+			}
+
+			try {
+				const generator = new StoryGenerator(det);
+				const stories = await generator.generateStories();
+				vscode.window.showInformationMessage(
+					`Generated ${stories.length} Storybook story file(s)`
+				);
+			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : String(error);
+				vscode.window.showErrorMessage(`Failed to generate stories: ${errorMessage}`);
+			}
+		}
+	);
+
+	// Register the Clean Storybook command
+	const cleanStorybookCommand = vscode.commands.registerCommand(
+		'spfx-local-workbench.cleanStorybook',
+		async () => {
+			const det = getDetector();
+			if (!det) {
+				vscode.window.showErrorMessage('No workspace folder open');
+				return;
+			}
+
+			const isSpfx = await det.isSpfxProject();
+			if (!isSpfx) {
+				vscode.window.showErrorMessage('This does not appear to be an SPFx project');
+				return;
+			}
+
+			try {
+				// If panel is open, dispose it (stops server and cleans up)
+				const panel = StorybookPanel.currentPanel;
+				if (panel) {
+					await panel.dispose();
+				}
+
+				// Delete the temp/storybook directory
+				const storybookDir = path.join(det.workspacePath, 'temp', 'storybook');
+				try {
+					await vscode.workspace.fs.delete(
+						vscode.Uri.file(storybookDir),
+						{ recursive: true, useTrash: false }
+					);
+				} catch (deleteError) {
+					// Directory might not exist, which is fine
+					const errorMessage = deleteError instanceof Error ? deleteError.message : String(deleteError);
+					if (!errorMessage.includes('ENOENT') && !errorMessage.includes('FileNotFound')) {
+						throw deleteError;
+					}
+				}
+
+				vscode.window.setStatusBarMessage('$(fluentui-broom) Storybook installation cleaned successfully', 7000);
+			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : String(error);
+				vscode.window.showErrorMessage(`Failed to clean Storybook: ${errorMessage}`);
+			}
+		}
+	);
+
 	// Auto-detect SPFx projects and show status bar item
 	const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-	statusBarItem.command = 'spfx-local-workbench.openWorkbench';
 
 	async function updateStatusBar() {
 		const det = getDetector();
@@ -171,8 +270,32 @@ export function activate(context: vscode.ExtensionContext) {
 
 			if (isSpfx) {
 				const version = await det.getSpfxVersion();
-				statusBarItem.text = `$(fluentui-testbeaker) SPFx Workbench`;
-				statusBarItem.tooltip = `SPFx Project detected${version ? ` (${version})` : ''}\nClick to open local workbench`;
+				const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
+				const action = config.get<string>('statusBarAction', 'openWorkbench');
+
+				// Set command, tooltip, and icon based on configuration
+				const versionString = `SPFx Project detected${version ? ` (${version})` : ''}`;
+				let icon = 'fluentui-testbeaker';
+				switch (action) {
+					case 'startServe':
+						statusBarItem.command = 'spfx-local-workbench.startServe';
+						statusBarItem.tooltip = `${versionString}\nClick to start serve and open workbench`;
+						icon = 'fluentui-testbeakersolid';
+						break;
+					case 'openStorybook':
+						statusBarItem.command = 'spfx-local-workbench.openStorybook';
+						statusBarItem.tooltip = `${versionString}\nClick to open Storybook`;
+						icon = 'fluentui-teststep';
+						break;
+					case 'openWorkbench':
+					default:
+						statusBarItem.command = 'spfx-local-workbench.openWorkbench';
+						statusBarItem.tooltip = `${versionString}\nClick to open local workbench`;
+						icon = 'fluentui-testbeaker';
+						break;
+				}
+
+				statusBarItem.text = `$(${icon}) SPFx Workbench`;
 				statusBarItem.show();
 			} else {
 				statusBarItem.hide();
@@ -187,6 +310,13 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.onDidChangeWorkspaceFolders(() => {
 		detector = undefined; // Reset cached detector on folder change
 		updateStatusBar();
+	});
+
+	// Update status bar when configuration changes
+	vscode.workspace.onDidChangeConfiguration((e) => {
+		if (e.affectsConfiguration('spfxLocalWorkbench.statusBarAction')) {
+			updateStatusBar();
+		}
 	});
 
 	// Watch for manifest changes
@@ -206,6 +336,9 @@ export function activate(context: vscode.ExtensionContext) {
 		startServeCommand,
 		detectWebPartsCommand,
 		openDevToolsCommand,
+		openStorybookCommand,
+		generateStoriesCommand,
+		cleanStorybookCommand,
 		statusBarItem
 	);
 }

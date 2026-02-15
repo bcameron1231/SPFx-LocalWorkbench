@@ -5,3 +5,5 @@
  */
 
 export * from './StoryGenerator';
+export * from './StorybookServerManager';
+export * from './StorybookPanel';

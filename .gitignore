@@ -4,6 +4,10 @@ node_modules
 *.vsix
 # Generated CSS type declarations
 *.css.d.ts
+# TypeScript build artifacts in source directories
+packages/*/src/**/*.d.ts
+packages/*/src/**/*.d.ts.map
+packages/*/src/**/*.js
 # SPFx sample project artifacts
 samples/**/node_modules/
 samples/**/lib/

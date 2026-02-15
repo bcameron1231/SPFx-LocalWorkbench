@@ -14,13 +14,20 @@ export {
     getWorkbenchSettings, 
     onConfigurationChanged, 
     openWorkbenchSettings,
+    getThemes,
+    getCurrentTheme,
+    setCurrentTheme,
+    getCustomThemes,
     IWorkbenchSettings,
-    IContextConfig,
-    IThemeConfig
+    IContextConfig
 } from './config';
 
 // Types
 export * from './types';
+
+// Storybook
+export { StoryGenerator, StorybookServerManager, StorybookPanel, StorybookPanelSerializer } from './storybook';
+export type { IStorybookServerOptions, ServerStatus } from './storybook/StorybookServerManager';
 
 // HTML generation (for advanced usage)
 export { generateWorkbenchHtml, generateErrorHtml } from './html';

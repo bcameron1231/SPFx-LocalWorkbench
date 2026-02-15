@@ -16,8 +16,8 @@
       "url": "https://github.com/hugoabernier"
     }
   ],
-  "main": "dist/preset.js",
-  "types": "dist/preset.d.ts",
+  "main": "dist/storybook-addon-spfx/src/preset.js",
+  "types": "dist/storybook-addon-spfx/src/preset.d.ts",
   "keywords": [
     "storybook",
     "spfx",
