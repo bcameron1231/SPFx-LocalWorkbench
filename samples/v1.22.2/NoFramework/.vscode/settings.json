@@ -32,5 +32,6 @@
   },
   "peacock.color": "#40587C",
   "editor.tabSize": 2,
-  "editor.detectIndentation": false
+  "editor.detectIndentation": false,
+  "spfxLocalWorkbench.statusBarAction": "openStorybook"
 }

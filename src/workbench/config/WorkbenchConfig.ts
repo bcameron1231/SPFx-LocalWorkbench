@@ -33,13 +33,15 @@ const defaults = {
 export function getWorkbenchSettings(): IWorkbenchSettings {
     const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
 
-    // Get context with pageContext nested structure
-    const context = config.get<IContextConfig>('context', defaults.context);
+    // Get pageContext and wrap it in context object structure
+    const pageContext = config.get<IPageContextConfig>('context.pageContext', defaults.context.pageContext);
 
     return {
         serveUrl: config.get<string>('serveUrl', defaults.serveUrl),
         autoOpenWorkbench: config.get<boolean>('autoOpenWorkbench', defaults.autoOpenWorkbench),
-        context
+        context: {
+            pageContext
+        }
     };
 }
 
@@ -74,7 +76,7 @@ export function serializeSettings(settings: IWorkbenchSettings): string {
  */
 export function getThemes(): ITheme[] {
     const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
-    const customThemes = config.get<ITheme[]>('themes', []);
+    const customThemes = config.get<ITheme[]>('theme.custom', []);
     
     // Merge Microsoft themes with custom themes
     // Custom themes have isCustom: true
@@ -90,8 +92,8 @@ export function getThemes(): ITheme[] {
  */
 export function getCurrentTheme(): ITheme {
     const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
-    const theme = config.get<string>('theme', 'teal');
-    const customTheme = config.get<string>('customTheme', '');
+    const theme = config.get<string>('theme.current', 'teal');
+    const customTheme = config.get<string>('theme.customId', '');
     
     // Use custom theme ID if theme is set to 'custom'
     const currentThemeId = theme === 'custom' ? customTheme : theme;
@@ -115,11 +117,11 @@ export async function setCurrentTheme(themeId: string): Promise<void> {
     
     if (isMicrosoftTheme) {
         // Set theme to the Microsoft theme ID
-        await config.update('theme', themeId, vscode.ConfigurationTarget.Workspace);
+        await config.update('theme.current', themeId, vscode.ConfigurationTarget.Workspace);
     } else {
-        // Set theme to 'custom' and store the ID in customTheme
-        await config.update('theme', 'custom', vscode.ConfigurationTarget.Workspace);
-        await config.update('customTheme', themeId, vscode.ConfigurationTarget.Workspace);
+        // Set theme to 'custom' and store the ID in customId
+        await config.update('theme.current', 'custom', vscode.ConfigurationTarget.Workspace);
+        await config.update('theme.customId', themeId, vscode.ConfigurationTarget.Workspace);
     }
 }
 
@@ -129,5 +131,5 @@ export async function setCurrentTheme(themeId: string): Promise<void> {
  */
 export function getCustomThemes(): ITheme[] {
     const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
-    return config.get<ITheme[]>('themes', []).map(theme => ({ ...theme, isCustom: true }));
+    return config.get<ITheme[]>('theme.custom', []).map(theme => ({ ...theme, isCustom: true }));
 }

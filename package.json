@@ -171,254 +171,266 @@
         }
       ]
     },
-    "configuration": {
-      "title": "SPFx Local Workbench",
-      "properties": {
-        "spfxLocalWorkbench.serveUrl": {
-          "type": "string",
-          "default": "https://localhost:4321",
-          "description": "The URL where the SPFx serve is running"
-        },
-        "spfxLocalWorkbench.autoOpenWorkbench": {
-          "type": "boolean",
-          "default": false,
-          "description": "Automatically open the workbench when starting serve"
-        },
-        "spfxLocalWorkbench.context.pageContext": {
-          "type": "object",
-          "default": {
-            "site": {
-              "absoluteUrl": "https://contoso.sharepoint.com/sites/devsite",
-              "id": "00000000-0000-4000-b000-666666666666"
-            },
-            "web": {
-              "absoluteUrl": "https://contoso.sharepoint.com/sites/devsite",
-              "title": "Local Workbench",
-              "description": "Local development workbench for SPFx",
-              "templateName": "STS#3",
-              "id": "00000000-0000-4000-b000-777777777777"
-            },
-            "user": {
-              "displayName": "Local Workbench User",
-              "email": "user@contoso.onmicrosoft.com",
-              "loginName": "i:0#.f|membership|user@contoso.onmicrosoft.com",
-              "isAnonymousGuestUser": false
-            },
-            "cultureInfo": {
-              "currentCultureName": "en-US"
-            },
-            "isNoScriptEnabled": false,
-            "isSPO": true
+    "configuration": [
+      {
+        "title": "General",
+        "properties": {
+          "spfxLocalWorkbench.serveUrl": {
+            "type": "string",
+            "default": "https://localhost:4321",
+            "description": "The URL where the SPFx serve is running"
           },
-          "description": "SharePoint page context for the mock environment (mirrors SPFx context.pageContext structure). Additional properties can be added as needed.",
-          "properties": {
-            "site": {
-              "type": "object",
-              "description": "Site-level context information",
-              "properties": {
-                "absoluteUrl": {
-                  "type": "string",
-                  "description": "Absolute URL of the site collection"
-                }
-              },
-              "additionalProperties": true
-            },
-            "web": {
-              "type": "object",
-              "description": "Web-level context information",
-              "properties": {
-                "absoluteUrl": {
-                  "type": "string",
-                  "description": "Absolute URL of the web"
-                },
-                "title": {
-                  "type": "string",
-                  "description": "Title of the web"
-                },
-                "description": {
-                  "type": "string",
-                  "description": "Description of the web"
-                },
-                "templateName": {
-                  "type": "string",
-                  "description": "Web template name (e.g., STS#3, SITEPAGEPUBLISHING#0)"
-                }
-              },
-              "additionalProperties": true
-            },
-            "user": {
-              "type": "object",
-              "description": "Current user information",
-              "properties": {
-                "displayName": {
-                  "type": "string",
-                  "description": "Display name of the user"
-                },
-                "email": {
-                  "type": "string",
-                  "description": "Email address of the user"
-                },
-                "loginName": {
-                  "type": "string",
-                  "description": "Login name of the user"
-                },
-                "isAnonymousGuestUser": {
-                  "type": "boolean",
-                  "description": "Whether the user is an anonymous guest"
-                }
-              },
-              "additionalProperties": true
-            },
-            "cultureInfo": {
-              "type": "object",
-              "description": "Culture/locale information",
-              "properties": {
-                "currentCultureName": {
-                  "type": "string",
-                  "description": "Current culture code (e.g., en-US, de-DE, fr-FR)"
-                }
-              },
-              "additionalProperties": true
-            },
-            "isNoScriptEnabled": {
-              "type": "boolean",
-              "description": "Whether NoScript is enabled on the site"
-            },
-            "isSPO": {
-              "type": "boolean",
-              "description": "Whether this is SharePoint Online (vs. on-premises)"
-            }
+          "spfxLocalWorkbench.autoOpenWorkbench": {
+            "type": "boolean",
+            "default": false,
+            "description": "Automatically open the workbench when starting serve"
           },
-          "additionalProperties": true
-        },
-        "spfxLocalWorkbench.themes": {
-          "type": "array",
-          "default": [],
-          "description": "Custom themes in addition to the default Microsoft themes. Each theme should have id, name, and palette properties.",
-          "items": {
-            "type": "object",
-            "required": ["id", "name", "palette"],
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "Unique identifier for the theme"
-              },
-              "name": {
-                "type": "string",
-                "description": "Display name for the theme"
-              },
-              "palette": {
-                "type": "object",
-                "description": "Fluent UI theme palette with color values",
-                "required": [
-                  "themePrimary",
-                  "themeLighterAlt",
-                  "themeLighter",
-                  "themeLight",
-                  "themeTertiary",
-                  "themeSecondary",
-                  "themeDarkAlt",
-                  "themeDark",
-                  "themeDarker",
-                  "neutralLighterAlt",
-                  "neutralLighter",
-                  "neutralLight",
-                  "neutralQuaternaryAlt",
-                  "neutralQuaternary",
-                  "neutralTertiaryAlt",
-                  "neutralTertiary",
-                  "neutralSecondary",
-                  "neutralPrimaryAlt",
-                  "neutralPrimary",
-                  "neutralDark",
-                  "black",
-                  "white"
-                ],
-                "additionalProperties": {
-                  "type": "string"
+          "spfxLocalWorkbench.statusBarAction": {
+            "type": "string",
+            "enum": [
+              "openWorkbench",
+              "startServe",
+              "openStorybook"
+            ],
+            "markdownEnumDescriptions": [
+              "$(fluentui-testbeaker) Open the Local Workbench panel",
+              "$(fluentui-testbeakersolid) Start serve and open the Local Workbench panel",
+              "$(fluentui-teststep) Open Storybook for visual component testing"
+            ],
+            "default": "openWorkbench",
+            "description": "Action to perform when clicking the SPFx status bar item"
+          }
+        }
+      },
+      {
+        "title": "Theme",
+        "properties": {
+          "spfxLocalWorkbench.theme.current": {
+            "type": "string",
+            "enum": [
+              "teal",
+              "blue",
+              "orange",
+              "red",
+              "purple",
+              "green",
+              "periwinkle",
+              "cobalt",
+              "dark-teal",
+              "dark-blue",
+              "custom"
+            ],
+            "enumDescriptions": [
+              "Teal - Microsoft's teal theme",
+              "Blue - Microsoft's blue theme",
+              "Orange - Microsoft's orange theme",
+              "Red - Microsoft's red theme",
+              "Purple - Microsoft's purple theme",
+              "Green - Microsoft's green theme",
+              "Periwinkle - Microsoft's periwinkle theme",
+              "Cobalt - Microsoft's cobalt theme",
+              "Dark Teal - Microsoft's dark teal theme",
+              "Dark Blue - Microsoft's dark blue theme",
+              "Custom - Use a custom theme ID"
+            ],
+            "default": "teal",
+            "description": "Select the theme for the workbench"
+          },
+          "spfxLocalWorkbench.theme.customId": {
+            "type": "string",
+            "default": "",
+            "markdownDescription": "Custom theme ID when `#spfxLocalWorkbench.theme.current#` is set to `custom`. Must match an ID defined in `#spfxLocalWorkbench.theme.custom#`"
+          },
+          "spfxLocalWorkbench.theme.custom": {
+            "type": "array",
+            "default": [],
+            "markdownDescription": "Custom themes in addition to the default Microsoft themes. Each theme should have `id`, `name`, and `palette` properties",
+            "items": {
+              "type": "object",
+              "required": ["id", "name", "palette"],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier for the theme"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Display name for the theme"
+                },
+                "palette": {
+                  "type": "object",
+                  "description": "Fluent UI theme palette with color values",
+                  "required": [
+                    "themePrimary",
+                    "themeLighterAlt",
+                    "themeLighter",
+                    "themeLight",
+                    "themeTertiary",
+                    "themeSecondary",
+                    "themeDarkAlt",
+                    "themeDark",
+                    "themeDarker",
+                    "neutralLighterAlt",
+                    "neutralLighter",
+                    "neutralLight",
+                    "neutralQuaternaryAlt",
+                    "neutralQuaternary",
+                    "neutralTertiaryAlt",
+                    "neutralTertiary",
+                    "neutralSecondary",
+                    "neutralPrimaryAlt",
+                    "neutralPrimary",
+                    "neutralDark",
+                    "black",
+                    "white"
+                  ],
+                  "additionalProperties": {
+                    "type": "string"
+                  }
                 }
               }
             }
           }
-        },
-        "spfxLocalWorkbench.theme": {
-          "type": "string",
-          "enum": [
-            "teal",
-            "blue",
-            "orange",
-            "red",
-            "purple",
-            "green",
-            "periwinkle",
-            "cobalt",
-            "dark-teal",
-            "dark-blue",
-            "custom"
-          ],
-          "enumDescriptions": [
-            "Teal - Microsoft's teal theme",
-            "Blue - Microsoft's blue theme",
-            "Orange - Microsoft's orange theme",
-            "Red - Microsoft's red theme",
-            "Purple - Microsoft's purple theme",
-            "Green - Microsoft's green theme",
-            "Periwinkle - Microsoft's periwinkle theme",
-            "Cobalt - Microsoft's cobalt theme",
-            "Dark Teal - Microsoft's dark teal theme",
-            "Dark Blue - Microsoft's dark blue theme",
-            "Custom - Use a custom theme Id"
-          ],
-          "default": "teal",
-          "description": "Select the theme for the workbench."
-        },
-        "spfxLocalWorkbench.customTheme": {
-          "type": "string",
-          "default": "",
-          "markdownDescription": "Custom theme Id when `#spfxLocalWorkbench.theme#` is set to `custom`. Must match an Id defined in `#spfxLocalWorkbench.themes#`."
-        },
-        "spfxLocalWorkbench.storybook.enabled": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enable Storybook integration for visual testing of SPFx components"
-        },
-        "spfxLocalWorkbench.storybook.port": {
-          "type": "number",
-          "default": 6006,
-          "description": "Port for the Storybook dev server"
-        },
-        "spfxLocalWorkbench.storybook.autoGenerate": {
-          "type": "boolean",
-          "default": true,
-          "description": "Automatically generate stories from SPFx component manifests"
-        },
-        "spfxLocalWorkbench.storybook.storiesPattern": {
-          "type": "string",
-          "default": "src/**/*.stories.ts",
-          "description": "Glob pattern for discovering custom story files in the SPFx project"
-        },
-        "spfxLocalWorkbench.storybook.generateLocaleStories": {
-          "type": "boolean",
-          "default": true,
-          "description": "Automatically generate story variants for each supported locale"
-        },
-        "spfxLocalWorkbench.statusBarAction": {
-          "type": "string",
-          "enum": [
-            "openWorkbench",
-            "startServe",
-            "openStorybook"
-          ],
-          "enumDescriptions": [
-            "Open the Local Workbench panel",
-            "Start serve and open the Local Workbench panel",
-            "Open Storybook for visual component testing"
-          ],
-          "default": "openWorkbench",
-          "description": "Action to perform when clicking the SPFx status bar item"
+        }
+      },
+      {
+        "title": "Context",
+        "properties": {
+          "spfxLocalWorkbench.context.pageContext": {
+            "type": "object",
+            "default": {
+              "site": {
+                "absoluteUrl": "https://contoso.sharepoint.com/sites/devsite",
+                "id": "00000000-0000-4000-b000-666666666666"
+              },
+              "web": {
+                "absoluteUrl": "https://contoso.sharepoint.com/sites/devsite",
+                "title": "Local Workbench",
+                "description": "Local development workbench for SPFx",
+                "templateName": "STS#3",
+                "id": "00000000-0000-4000-b000-777777777777"
+              },
+              "user": {
+                "displayName": "Local Workbench User",
+                "email": "user@contoso.onmicrosoft.com",
+                "loginName": "i:0#.f|membership|user@contoso.onmicrosoft.com",
+                "isAnonymousGuestUser": false
+              },
+              "cultureInfo": {
+                "currentCultureName": "en-US"
+              },
+              "isNoScriptEnabled": false,
+              "isSPO": true
+            },
+            "markdownDescription": "SharePoint page context for the mock environment (mirrors SPFx `context.pageContext` structure). Additional properties can be added as needed",
+            "properties": {
+              "site": {
+                "type": "object",
+                "description": "Site-level context information",
+                "properties": {
+                  "absoluteUrl": {
+                    "type": "string",
+                    "description": "Absolute URL of the site collection"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "web": {
+                "type": "object",
+                "description": "Web-level context information",
+                "properties": {
+                  "absoluteUrl": {
+                    "type": "string",
+                    "description": "Absolute URL of the web"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Title of the web"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Description of the web"
+                  },
+                  "templateName": {
+                    "type": "string",
+                    "description": "Web template name (e.g., STS#3, SITEPAGEPUBLISHING#0)"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "user": {
+                "type": "object",
+                "description": "Current user information",
+                "properties": {
+                  "displayName": {
+                    "type": "string",
+                    "description": "Display name of the user"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the user"
+                  },
+                  "loginName": {
+                    "type": "string",
+                    "description": "Login name of the user"
+                  },
+                  "isAnonymousGuestUser": {
+                    "type": "boolean",
+                    "description": "Whether the user is an anonymous guest"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "cultureInfo": {
+                "type": "object",
+                "description": "Culture/locale information",
+                "properties": {
+                  "currentCultureName": {
+                    "type": "string",
+                    "description": "Current culture code (e.g., en-US, de-DE, fr-FR)"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "isNoScriptEnabled": {
+                "type": "boolean",
+                "description": "Whether NoScript is enabled on the site"
+              },
+              "isSPO": {
+                "type": "boolean",
+                "description": "Whether this is SharePoint Online (vs. on-premises)"
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      {
+        "title": "Storybook",
+        "properties": {
+          "spfxLocalWorkbench.storybook.port": {
+            "type": "number",
+            "default": 6006,
+            "description": "Port for the Storybook dev server"
+          },
+          "spfxLocalWorkbench.storybook.autoGenerate": {
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically generate stories from SPFx component manifests"
+          },
+          "spfxLocalWorkbench.storybook.storiesPattern": {
+            "type": "string",
+            "default": "src/**/*.stories.ts",
+            "description": "Glob pattern for discovering custom story files in the SPFx project"
+          },
+          "spfxLocalWorkbench.storybook.generateLocaleStories": {
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically generate story variants for each supported locale"
+          }
         }
       }
-    }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

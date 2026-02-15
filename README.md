@@ -24,6 +24,14 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 - **Property Editing**: Click the edit (pencil) icon on a loaded extension to modify its `ClientSideComponentProperties` and re-render
 - **PlaceholderProvider Mock**: Full mock of `context.placeholderProvider` including `tryCreateContent()` and `changedEvent`
 
+### Storybook Integration (Beta)
+
+- **Auto-Generated Stories**: Automatically generates Storybook stories from your SPFx component manifests
+- **Locale Variants**: Creates story variants for each locale defined in your component
+- **SPFx Context**: Custom Storybook addon provides full SPFx context and theme switching
+- **Visual Testing**: Test components in isolation with different themes and contexts
+- **Live Development**: Run Storybook alongside your SPFx project for component development
+
 ## Requirements
 
 - VS Code 1.100.0 or higher
@@ -65,6 +73,39 @@ This extension provides a **custom-built workbench environment** that simulates 
 6. Your web parts render in a simulated SharePoint environment
 7. Application Customizers are loaded the same way, with mocked `Top`/`Bottom` placeholder zones rendered above and below the canvas
 
+### Using Storybook for Component Development
+
+The extension includes **Storybook integration** for visual testing and component development:
+
+1. **Generate Stories**: Run "SPFx: Generate Storybook Stories" from the Command Palette
+   - Stories are auto-generated from your component manifests
+   - Each localized variant gets its own story
+   - Stories are created in `src/**/*.stories.ts` next to your components
+
+2. **Open Storybook**: Run "SPFx: Open Storybook" to launch the Storybook dev server
+   - Server runs at `http://localhost:6006` by default
+   - View opens in a VS Code webview panel
+   - Includes toolbar for theme switching and context customization
+
+3. **SPFx Addon**: The custom `@spfx-local-workbench/storybook-addon-spfx` addon provides:
+   - Full SPFx context mock (same as workbench)
+   - Theme switcher with 10 Microsoft 365 themes
+   - Hot reload support during development
+
+4. **Story Structure**: Auto-generated stories follow CSF 3.0 format:
+   ```typescript
+   import type { Meta, StoryObj } from '@storybook/react';
+   import HelloWorldWebPart from './HelloWorldWebPart';
+   
+   const meta: Meta<typeof HelloWorldWebPart> = {
+     title: 'WebParts/HelloWorld',
+     component: HelloWorldWebPart,
+     parameters: { spfxContext: { /* ... */ } }
+   };
+   
+   export const Default: StoryObj = {};
+   ```
+
 ## Commands
 
 | Command | Description |
@@ -72,15 +113,29 @@ This extension provides a **custom-built workbench environment** that simulates 
 | `SPFx: Open Local Workbench` | Opens the local workbench panel |
 | `SPFx: Start Serve & Open Workbench` | Starts serve and opens workbench |
 | `SPFx: Detect Web Parts` | Shows detected web parts in the project |
+| `SPFx: Open Storybook` | Starts Storybook dev server and opens panel |
+| `SPFx: Generate Storybook Stories` | Generates stories from SPFx manifests |
+| `SPFx: Open Developer Tools` | Opens webview developer tools |
 
 ## Configuration
 
-### Basic Settings
+### General Settings
 
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `spfxLocalWorkbench.serveUrl` | `https://localhost:4321` | The URL where SPFx serve is running |
 | `spfxLocalWorkbench.autoOpenWorkbench` | `false` | Auto-open workbench when starting serve |
+| `spfxLocalWorkbench.statusBarAction` | `openWorkbench` | Action when clicking the SPFx status bar item: `openWorkbench`, `startServe`, or `openStorybook` |
+
+### Theme Settings
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `spfxLocalWorkbench.theme.current` | `teal` | Select a Microsoft theme or `custom` to use a custom theme |
+| `spfxLocalWorkbench.theme.customId` | `""` | Custom theme ID when `theme.current` is set to `custom`. Must match an ID defined in `theme.custom` |
+| `spfxLocalWorkbench.theme.custom` | `[]` | Custom themes to add alongside the default Microsoft themes. Each theme should have `id`, `name`, and `palette` properties |
+
+> **Note**: The extension includes 10 default Microsoft 365 themes (`teal`, `blue`, `orange`, `red`, `purple`, `green`, `periwinkle`, `cobalt`, `dark-teal`, `dark-blue`). You can switch between them using the `theme.current` setting or add your own custom themes using the `theme.custom` array setting.
 
 ### Context Settings
 
@@ -88,27 +143,26 @@ Customize the mock SharePoint context:
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `spfxLocalWorkbench.context.siteUrl` | `https://contoso.sharepoint.com/sites/devsite` | SharePoint site URL |
-| `spfxLocalWorkbench.context.webUrl` | `https://contoso.sharepoint.com/sites/devsite` | SharePoint web URL |
-| `spfxLocalWorkbench.context.userDisplayName` | `Local Workbench User` | Display name of the current user |
-| `spfxLocalWorkbench.context.userEmail` | `user@contoso.onmicrosoft.com` | Email address of the current user |
-| `spfxLocalWorkbench.context.culture` | `en-US` | Culture/locale (e.g., en-US, de-DE, fr-FR) |
-| `spfxLocalWorkbench.context.customContext` | `{}` | Additional custom context properties (JSON object) |
+| `spfxLocalWorkbench.context.pageContext` | See below | SharePoint page context object (mirrors SPFx `context.pageContext` structure) |
 
-### Theme Settings
+The `pageContext` object includes:
+- `site`: Site collection information (absoluteUrl, id)
+- `web`: Web information (absoluteUrl, title, description, templateName, id)
+- `user`: User information (displayName, email, loginName, isAnonymousGuestUser)
+- `cultureInfo`: Culture/locale information (currentCultureName)
+- `isNoScriptEnabled`: Whether NoScript is enabled
+- `isSPO`: Whether this is SharePoint Online
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `spfxLocalWorkbench.theme.preset` | `teamSite` | Theme preset: `teamSite`, `communicationSite`, `dark`, `highContrast`, or `custom` |
-| `spfxLocalWorkbench.theme.customColors` | `{}` | Custom theme colors when using `custom` preset |
+You can add additional properties as needed to match your SPFx solution requirements.
 
-### Page Context Settings
+### Storybook Settings
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `spfxLocalWorkbench.pageContext.webTitle` | `Local Workbench` | Title of the web |
-| `spfxLocalWorkbench.pageContext.webTemplate` | `STS#3` | Web template ID |
-| `spfxLocalWorkbench.pageContext.isSPO` | `true` | Whether this is SharePoint Online |
+| `spfxLocalWorkbench.storybook.port` | `6006` | Port for the Storybook dev server |
+| `spfxLocalWorkbench.storybook.autoGenerate` | `true` | Automatically generate stories from SPFx manifests |
+| `spfxLocalWorkbench.storybook.generateLocaleStories` | `true` | Generate story variants for each locale |
+| `spfxLocalWorkbench.storybook.storiesPattern` | `src/**/*.stories.ts` | Glob pattern for custom story files |
 
 ## Troubleshooting
 
