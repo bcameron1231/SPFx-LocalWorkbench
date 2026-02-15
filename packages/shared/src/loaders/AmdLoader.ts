@@ -3,11 +3,13 @@
 // This module provides an AMD (Asynchronous Module Definition) loader shim
 // that allows SPFx bundles to load and register their modules.
 
+import type { IAmdModules, IAmdPending } from '../types';
+
 // Extend Window interface for AMD globals
 declare global {
   interface Window {
-    __amdModules?: Record<string, any>;
-    __amdPending?: Record<string, Array<(module: any) => void>>;
+    __amdModules?: IAmdModules;
+    __amdPending?: IAmdPending;
     define?: any;
     require?: any;
     requirejs?: any;
@@ -17,8 +19,8 @@ declare global {
 }
 
 export class AmdLoader {
-    private amdModules: Record<string, any>;
-    private amdPending: Record<string, Array<(module: any) => void>>;
+    private amdModules: IAmdModules;
+    private amdPending: IAmdPending;
 
     constructor() {
         this.amdModules = {};
@@ -164,7 +166,7 @@ export class AmdLoader {
         return mod;
     }
 
-    getModules(): Record<string, any> {
+    getModules(): IAmdModules {
         return this.amdModules;
     }
 }
