@@ -8,7 +8,7 @@ import React from 'react';
 
 import { MICROSOFT_THEMES } from '@spfx-local-workbench/shared';
 
-import { EVENTS, TOOLBAR_IDS } from '../constants';
+import { EVENTS, TOOLBAR_IDS } from '../../constants';
 import styles from './ThemeToolbar.module.css';
 
 export const ThemeToolbar: React.FC = () => {

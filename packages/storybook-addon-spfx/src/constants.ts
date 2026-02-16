@@ -4,7 +4,6 @@
 
 export const ADDON_ID = 'spfx-addon';
 export const PANEL_ID = `${ADDON_ID}/property-pane`;
-export const BREAKOUT_PANEL_ID = `${ADDON_ID}/breakout`;
 
 export const PARAM_KEY = 'spfx';
 

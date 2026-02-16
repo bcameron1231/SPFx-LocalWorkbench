@@ -6,7 +6,7 @@ import { AddonPanel } from '@storybook/components';
 import { useChannel } from '@storybook/manager-api';
 import React, { useState } from 'react';
 
-import { EVENTS } from '../constants';
+import { EVENTS } from '../../constants';
 import styles from './PropertyPanePanel.module.css';
 
 export const PropertyPanePanel: React.FC<{ active: boolean }> = ({ active }) => {

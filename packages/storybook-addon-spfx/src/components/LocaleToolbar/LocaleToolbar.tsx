@@ -6,7 +6,7 @@ import { IconButton, TooltipLinkList, WithTooltip } from '@storybook/components'
 import { useGlobals } from '@storybook/manager-api';
 import React from 'react';
 
-import { EVENTS, TOOLBAR_IDS } from '../constants';
+import { EVENTS, TOOLBAR_IDS } from '../../constants';
 import styles from './LocaleToolbar.module.css';
 
 const COMMON_LOCALES = [

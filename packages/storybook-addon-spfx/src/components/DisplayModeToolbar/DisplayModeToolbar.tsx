@@ -6,7 +6,7 @@ import { IconButton } from '@storybook/components';
 import { useGlobals } from '@storybook/manager-api';
 import React from 'react';
 
-import { DisplayMode, EVENTS, TOOLBAR_IDS } from '../constants';
+import { DisplayMode, EVENTS, TOOLBAR_IDS } from '../../constants';
 import styles from './DisplayModeToolbar.module.css';
 
 export const DisplayModeToolbar: React.FC = () => {

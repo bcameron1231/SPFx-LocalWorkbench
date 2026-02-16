@@ -5,12 +5,8 @@
 import { addons, types } from '@storybook/manager-api';
 import React from 'react';
 
-import { ADDON_ID, BREAKOUT_PANEL_ID, PANEL_ID, TOOLBAR_IDS } from './constants';
-import { BreakOutPanel } from './manager/BreakOutPanel';
-import { DisplayModeToolbar } from './manager/DisplayModeToolbar';
-import { LocaleToolbar } from './manager/LocaleToolbar';
-import { PropertyPanePanel } from './manager/PropertyPanePanel';
-import { ThemeToolbar } from './manager/ThemeToolbar';
+import { DisplayModeToolbar, LocaleToolbar, PropertyPanePanel, ThemeToolbar } from './components';
+import { ADDON_ID, PANEL_ID, TOOLBAR_IDS } from './constants';
 
 // Register the addon
 addons.register(ADDON_ID, () => {
@@ -44,13 +40,5 @@ addons.register(ADDON_ID, () => {
     title: 'Property Pane',
     match: ({ viewMode }) => viewMode === 'story',
     render: ({ active }) => <PropertyPanePanel active={!!active} />,
-  });
-
-  // Register break out panel
-  addons.add(BREAKOUT_PANEL_ID, {
-    type: types.PANEL,
-    title: 'Break Out',
-    match: ({ viewMode }) => viewMode === 'story',
-    render: ({ active }) => <BreakOutPanel active={!!active} />,
   });
 });
