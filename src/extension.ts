@@ -234,7 +234,15 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       try {
-        const generator = new StoryGenerator(det);
+        // Read storybook configuration from VS Code settings
+        const config = vscode.workspace.getConfiguration('spfxLocalWorkbench.storybook');
+        const generateLocaleStories = config.get<boolean>('generateLocaleStories', true);
+        const autoDocs = config.get<boolean>('autoDocs', false);
+
+        const generator = new StoryGenerator(det, {
+          generateLocaleStories,
+          autoDocs,
+        });
         const stories = await generator.generateStories();
         vscode.window.showInformationMessage(`Generated ${stories.length} Storybook story file(s)`);
       } catch (error: unknown) {

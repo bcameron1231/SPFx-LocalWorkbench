@@ -55,7 +55,16 @@ export class StorybookServerManager {
   ) {
     this.outputChannel = outputChannel || vscode.window.createOutputChannel('SPFx Storybook');
     this.storybookDir = path.join(workspacePath, 'temp', 'storybook');
-    this.storyGenerator = new StoryGenerator(detector);
+
+    // Read storybook configuration from VS Code settings
+    const config = vscode.workspace.getConfiguration('spfxLocalWorkbench.storybook');
+    const generateLocaleStories = config.get<boolean>('generateLocaleStories', true);
+    const autoDocs = config.get<boolean>('autoDocs', false);
+
+    this.storyGenerator = new StoryGenerator(detector, {
+      generateLocaleStories,
+      autoDocs,
+    });
   }
 
   /**

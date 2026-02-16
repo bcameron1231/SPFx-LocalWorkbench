@@ -22,6 +22,8 @@ export interface IStoryGeneratorConfig {
   generateLocaleStories?: boolean;
   /** Page context configuration to inject */
   pageContext?: typeof DEFAULT_PAGE_CONTEXT;
+  /** Whether to enable auto-generated docs pages (default: false) */
+  autoDocs?: boolean;
 }
 
 export interface IGeneratedStory {
@@ -40,6 +42,7 @@ export class StoryGenerator {
   private readonly outputDir: string;
   private readonly generateLocaleStories: boolean;
   private readonly pageContext: typeof DEFAULT_PAGE_CONTEXT;
+  private readonly autoDocs: boolean;
   private readonly detector: SpfxProjectDetector;
 
   constructor(detector: SpfxProjectDetector, config?: Partial<IStoryGeneratorConfig>) {
@@ -49,6 +52,7 @@ export class StoryGenerator {
       config?.outputDir || path.join(this.workspacePath, 'temp', 'storybook', 'generated');
     this.generateLocaleStories = config?.generateLocaleStories ?? true;
     this.pageContext = config?.pageContext || DEFAULT_PAGE_CONTEXT;
+    this.autoDocs = config?.autoDocs ?? false;
   }
 
   /**
@@ -113,6 +117,7 @@ export class StoryGenerator {
       defaultLocale: localeInfo.default,
       locales: localeInfo.locales,
       properties,
+      autoDocs: this.autoDocs,
     });
 
     // Write story file
@@ -135,8 +140,9 @@ export class StoryGenerator {
     defaultLocale: string;
     locales: string[];
     properties: Record<string, unknown>;
+    autoDocs: boolean;
   }): string {
-    const { componentId, alias, title, defaultLocale, locales, properties } = options;
+    const { componentId, alias, title, defaultLocale, locales, properties, autoDocs } = options;
 
     // Create the shared parameters object
     const pageContextForDefault = {
@@ -175,8 +181,7 @@ const sharedParameters = ${JSON.stringify(sharedParameters, null, 2)};
 // Component metadata
 const meta = {
   title: 'Web Parts/${title}',
-  parameters: sharedParameters,
-  tags: ['autodocs']
+  parameters: sharedParameters,${autoDocs ? "\n  tags: ['autodocs']" : ''}
 } satisfies Meta;
 
 export default meta;

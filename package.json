@@ -437,6 +437,11 @@
             "type": "boolean",
             "default": true,
             "description": "Automatically generate story variants for each supported locale"
+          },
+          "spfxLocalWorkbench.storybook.autoDocs": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable auto-generated documentation pages for stories in Storybook"
           }
         }
       }
