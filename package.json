@@ -185,6 +185,11 @@
             "default": false,
             "description": "Automatically open the workbench when starting serve"
           },
+          "spfxLocalWorkbench.serveCommand": {
+            "type": "string",
+            "default": "heft start --clean --nobrowser",
+            "markdownDescription": "The command to run when starting the SPFx serve from the extension. Common options:\n- `heft start --clean --nobrowser`, `heft start --clean --nobrowser --locales=fr-fr`, `npm run start`"
+          },
           "spfxLocalWorkbench.statusBarAction": {
             "type": "string",
             "enum": [

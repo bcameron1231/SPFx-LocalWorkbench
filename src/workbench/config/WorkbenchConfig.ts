@@ -17,6 +17,7 @@ export interface IContextConfig {
 export interface IWorkbenchSettings {
     serveUrl: string;
     autoOpenWorkbench: boolean;
+    serveCommand: string;
     context: IContextConfig;
 }
 
@@ -24,6 +25,7 @@ export interface IWorkbenchSettings {
 const defaults = {
     serveUrl: 'https://localhost:4321',
     autoOpenWorkbench: false,
+    serveCommand: 'heft start --clean --nobrowser',
     context: {
         pageContext: DEFAULT_PAGE_CONTEXT
     }
@@ -39,6 +41,7 @@ export function getWorkbenchSettings(): IWorkbenchSettings {
     return {
         serveUrl: config.get<string>('serveUrl', defaults.serveUrl),
         autoOpenWorkbench: config.get<boolean>('autoOpenWorkbench', defaults.autoOpenWorkbench),
+        serveCommand: config.get<string>('serveCommand', defaults.serveCommand),
         context: {
             pageContext
         }

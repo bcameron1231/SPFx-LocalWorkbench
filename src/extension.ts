@@ -69,13 +69,15 @@ export function activate(context: vscode.ExtensionContext) {
 				return;
 			}
 
-			// Create a terminal and run heft start
+			// Get workbench settings
+			const settings = getWorkbenchSettings();
+
+			// Create a terminal and run the configured serve command
 			const terminal = vscode.window.createTerminal('SPFx Serve');
 			terminal.show();
-			terminal.sendText('heft start --clean --nobrowser');
+			terminal.sendText(settings.serveCommand);
 
 			// Parse host/port from the configured serve URL
-			const settings = getWorkbenchSettings();
 			let serveHost = 'localhost';
 			let servePort = 4321;
 			try {
