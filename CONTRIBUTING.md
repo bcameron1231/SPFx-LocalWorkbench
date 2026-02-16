@@ -49,6 +49,20 @@ packages/
 
 The `@spfx-local-workbench/shared` package contains code shared between the VS Code extension and the Storybook addon.
 
+### Constants
+
+**Application constants** (timing values, port numbers, etc.) are defined in `packages/shared/src/constants/`:
+- `timing.ts` - Delays, timeouts, and debounce intervals
+- `ports.ts` - Default port numbers for development servers
+- `DEFAULT_PAGE_CONTEXT.ts` - Default SPFx page context values
+- `MICROSOFT_THEMES.ts` - Built-in SharePoint themes
+
+When adding magic numbers or hardcoded values:
+1. Extract to an appropriately named constant in the relevant file
+2. Add JSDoc comments explaining the constant's purpose
+3. Export from `constants/index.ts`
+4. Rebuild packages: `npm run packages:build`
+
 ### Important: Default Value Synchronization
 
 **Default pageContext values** are defined in `packages/shared/src/constants/DEFAULT_PAGE_CONTEXT.ts` (`DEFAULT_PAGE_CONTEXT`).

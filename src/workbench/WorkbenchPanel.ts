@@ -6,6 +6,7 @@
 
 import * as vscode from 'vscode';
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
+import { LIVE_RELOAD_DEBOUNCE_MS } from '@spfx-local-workbench/shared';
 import { SpfxProjectDetector } from './SpfxProjectDetector';
 
 const log = logger.createChild('WorkbenchPanel');
@@ -188,7 +189,7 @@ export class WorkbenchPanel {
             }
             this._liveReloadDebounceTimer = setTimeout(() => {
                 this._panel.webview.postMessage({ command: 'liveReload' });
-            }, 500);
+            }, LIVE_RELOAD_DEBOUNCE_MS);
         };
 
         distWatcher.onDidChange(onBundleChanged);

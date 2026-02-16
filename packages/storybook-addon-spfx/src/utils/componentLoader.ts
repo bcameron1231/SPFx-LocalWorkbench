@@ -12,6 +12,7 @@ import {
   ManifestLoader, 
   ComponentResolver,
   initializeSpfxMocks,
+  AMD_REGISTRATION_DELAY_MS,
   type IWebPartManifest 
 } from '@spfx-local-workbench/shared';
 
@@ -154,8 +155,8 @@ export async function loadComponent(
   await loadComponentStrings(manifest, serveUrl, locale);
   const newModules = await loadComponentBundle(manifest, serveUrl);
 
-  // Wait a bit for AMD registration
-  await new Promise(resolve => setTimeout(resolve, 100));
+  // Wait for AMD registration
+  await new Promise(resolve => setTimeout(resolve, AMD_REGISTRATION_DELAY_MS));
 
   // Find and return the component class
   const componentClass = findComponentClass(manifest, newModules);

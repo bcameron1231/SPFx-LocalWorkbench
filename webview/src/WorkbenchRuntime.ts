@@ -5,7 +5,7 @@
 import type { IWorkbenchConfig, IWebPartManifest, IWebPartConfig, IExtensionConfig, IVsCodeApi } from './types';
 import { isActiveWebPart, isActiveExtension } from './types';
 import type { IAppHandlers } from './components/App';
-import { amdLoader, ManifestLoader, initializeSpfxMocks, logger, getErrorMessage } from '@spfx-local-workbench/shared';
+import { amdLoader, ManifestLoader, initializeSpfxMocks, logger, getErrorMessage, DOM_RENDER_DELAY_MS, COMPONENT_REMOVAL_DELAY_MS } from '@spfx-local-workbench/shared';
 import { SpfxContext, ThemeProvider } from './mocks';
 import { WebPartManager } from './WebPartManager';
 import { ExtensionManager } from './ExtensionManager';
@@ -145,7 +145,7 @@ export class WorkbenchRuntime {
         }
 
         // Allow DOM to render
-        await new Promise(r => setTimeout(r, 100));
+        await new Promise(r => setTimeout(r, DOM_RENDER_DELAY_MS));
 
         // Instantiate the extensions
         const headerEl = document.getElementById(`ext-header-${config.instanceId}`) as HTMLDivElement;
@@ -227,7 +227,7 @@ export class WorkbenchRuntime {
         }
 
         // Allow DOM to update
-        await new Promise(r => setTimeout(r, 50));
+        await new Promise(r => setTimeout(r, COMPONENT_REMOVAL_DELAY_MS));
 
         // Instantiate the web part
         await this.instantiateWebPart(config);
@@ -351,7 +351,7 @@ export class WorkbenchRuntime {
         }
 
         // Allow DOM to render
-        await new Promise(r => setTimeout(r, 100));
+        await new Promise(r => setTimeout(r, DOM_RENDER_DELAY_MS));
 
         // Re-instantiate with new properties
         const headerEl = document.getElementById(`ext-header-${config.instanceId}`) as HTMLDivElement;

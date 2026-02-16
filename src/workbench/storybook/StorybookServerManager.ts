@@ -6,6 +6,7 @@ import { StoryGenerator } from './StoryGenerator';
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
 import { getErrorMessage } from '@spfx-local-workbench/shared/utils/errorUtils';
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
+import { PROCESS_FORCE_KILL_TIMEOUT_MS, STORYBOOK_STARTUP_TIMEOUT_MS, DEFAULT_STORYBOOK_PORT } from '@spfx-local-workbench/shared';
 
 /**
  * Configuration options for the Storybook server
@@ -33,7 +34,7 @@ export class StorybookServerManager {
     private log = logger.createChild('StorybookServer');
     private process: ChildProcess | null = null;
     private status: ServerStatus = 'stopped';
-    private port: number = 6006;
+    private port: number = DEFAULT_STORYBOOK_PORT;
     private host: string = 'localhost';
     private outputChannel: vscode.OutputChannel;
     private readyPromise: Promise<void> | null = null;
@@ -60,9 +61,9 @@ export class StorybookServerManager {
             return this.readyPromise || Promise.resolve();
         }
 
-        this.port = options.port || 6006;
+        this.port = options.port || DEFAULT_STORYBOOK_PORT;
         this.host = options.host || 'localhost';
-        const startupTimeout = options.startupTimeout || 60000;
+        const startupTimeout = options.startupTimeout || STORYBOOK_STARTUP_TIMEOUT_MS;
 
         // Check if port is already in use
         const portAvailable = await this.isPortAvailable(this.port);
@@ -120,13 +121,13 @@ export class StorybookServerManager {
 
             this.outputChannel.appendLine('Stopping Storybook server...');
 
-            // Force kill after 5 seconds if still running
+            // Force kill after timeout if still running
             const forceKillTimeout = setTimeout(() => {
                 if (this.process) {
                     this.outputChannel.appendLine('Force killing Storybook process...');
                     this.process.kill('SIGKILL');
                 }
-            }, 5000);
+            }, PROCESS_FORCE_KILL_TIMEOUT_MS);
 
             this.process.once('exit', () => {
                 clearTimeout(forceKillTimeout);

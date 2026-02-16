@@ -4,6 +4,7 @@ import { WorkbenchPanel, SpfxProjectDetector, createManifestWatcher, getWorkbenc
 import { isPortReachable } from '@spfx-local-workbench/shared/utils/networkUtils';
 import { getErrorMessage, isFileNotFoundError } from '@spfx-local-workbench/shared/utils/errorUtils';
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
+import { DEFAULT_SPFX_SERVE_PORT } from '@spfx-local-workbench/shared';
 
 function delay(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -41,7 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
 		// Get the SPFx project's serve configuration
 		const serveConfig = await det.getServeConfig();
 		const serveHost = 'localhost';
-		const servePort = serveConfig.port || 4321;
+		const servePort = serveConfig.port || DEFAULT_SPFX_SERVE_PORT;
 
 		// Check if serve is already running
 		const alreadyRunning = await isPortReachable(serveHost, servePort);

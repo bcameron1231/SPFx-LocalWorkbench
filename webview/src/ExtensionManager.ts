@@ -5,7 +5,7 @@
 // placeholders on the page.
 
 import type { IWebPartManifest, IExtensionConfig, IActiveExtension, IVsCodeApi } from './types';
-import { BundleLoader, ComponentResolver, setupProperty, logger, getErrorMessage } from '@spfx-local-workbench/shared';
+import { BundleLoader, ComponentResolver, setupProperty, logger, getErrorMessage, DOM_RENDER_DELAY_MS, CHANGED_EVENT_DELAY_MS, CONTENT_CHECK_DELAY_MS } from '@spfx-local-workbench/shared';
 import { SpfxContext, ThemeProvider } from './mocks';
 
 // PlaceholderName enum matching @microsoft/sp-application-base
@@ -62,7 +62,7 @@ export class ExtensionManager {
     ): Promise<IActiveExtension | undefined> {
         try {
             const newModules = await this.loadExtensionBundle(config.manifest);
-            await new Promise(r => setTimeout(r, 100));
+            await new Promise(r => setTimeout(r, DOM_RENDER_DELAY_MS));
 
             const context = this.createExtensionContext(
                 config.manifest.id,
@@ -136,7 +136,7 @@ export class ExtensionManager {
                     this.log.warn('Error in changedEvent handler:', error);
                 }
             });
-        }, 50);
+        }, CHANGED_EVENT_DELAY_MS);
 
         return {
             ...baseContext,
@@ -207,7 +207,7 @@ export class ExtensionManager {
                     // Extension rendered but no placeholder content was created.
                     // This is normal if the extension uses conditional rendering.
                 }
-            }, 500);
+            }, CONTENT_CHECK_DELAY_MS);
 
             return active;
         } catch (error: unknown) {
