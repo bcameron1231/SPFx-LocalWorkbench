@@ -14,41 +14,41 @@
     display: flex;
     align-items: center;
     gap: 16px;
-}
 
-.left button {
-    background: none;
-    border: none;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-size: 14px;
-    color: #323130;
-    border-radius: 2px;
-}
+    button {
+        background: none;
+        border: none;
+        padding: 6px 12px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #323130;
+        border-radius: 2px;
 
-.left button:hover {
-    background: #f3f2f1;
+        &:hover {
+            background: #f3f2f1;
+        }
+    }
 }
 
 .right {
     display: flex;
     align-items: center;
     gap: 8px;
-}
 
-.right button {
-    background: none;
-    border: none;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-size: 13px;
-    color: #605e5c;
-    border-radius: 2px;
-}
+    button {
+        background: none;
+        border: none;
+        padding: 6px 12px;
+        cursor: pointer;
+        font-size: 13px;
+        color: #605e5c;
+        border-radius: 2px;
 
-.right button:hover {
-    background: #f3f2f1;
-    color: #323130;
+        &:hover {
+            background: #f3f2f1;
+            color: #323130;
+        }
+    }
 }
 
 .serveUrlInput {
@@ -58,9 +58,9 @@
     font-size: 12px;
     width: 200px;
     color: #605e5c;
-}
 
-.serveUrlInput:focus {
-    outline: none;
-    border-color: #0078d4;
+    &:focus {
+        outline: none;
+        border-color: #0078d4;
+    }
 }

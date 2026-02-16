@@ -1,5 +1,6 @@
 import React, { FC, useRef, useEffect } from 'react';
 import { logger } from '@spfx-local-workbench/shared';
+import styles from './CustomFieldComponent.module.css';
 
 interface ICustomFieldComponentProps {
     field: any;
@@ -32,7 +33,7 @@ export const CustomFieldComponent: FC<ICustomFieldComponentProps> = ({
     // Fallback for custom fields without onRender
     return (
         <div className="pp-field">
-            <div style={{ color: '#605e5c', fontStyle: 'italic' }}>
+            <div className={styles.customFieldFallback}>
                 Custom Field {field.properties.key || ''}
             </div>
         </div>

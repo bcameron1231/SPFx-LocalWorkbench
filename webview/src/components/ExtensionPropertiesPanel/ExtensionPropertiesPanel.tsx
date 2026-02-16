@@ -66,7 +66,7 @@ export const ExtensionPropertiesPanel: FC<IExtensionPropertiesPanelProps> = ({
                     onClick={onClose}
                 />
             </Stack>
-            <div style={{ padding: '16px', overflowY: 'auto', height: 'calc(100vh - 52px)' }}>
+            <div className={styles.content}>
                 {extension ? (
                     <Stack tokens={{ childrenGap: 16 }}>
                         <Text variant="small" styles={{ root: { color: '#605e5c' } }}>

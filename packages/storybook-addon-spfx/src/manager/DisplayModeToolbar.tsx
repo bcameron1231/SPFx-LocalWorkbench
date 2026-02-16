@@ -7,6 +7,7 @@ import React from 'react';
 import { useGlobals } from '@storybook/manager-api';
 import { IconButton } from '@storybook/components';
 import { TOOLBAR_IDS, DisplayMode, EVENTS } from '../constants';
+import styles from './DisplayModeToolbar.module.css';
 
 export const DisplayModeToolbar: React.FC = () => {
   const [globals, updateGlobals] = useGlobals();
@@ -30,7 +31,7 @@ export const DisplayModeToolbar: React.FC = () => {
       onClick={toggleDisplayMode}
     >
       {displayMode === DisplayMode.Edit ? '✏️' : '👁️'}
-      <span style={{ marginLeft: '4px', fontSize: '12px' }}>
+      <span className={styles.modeLabel}>
         {displayMode === DisplayMode.Edit ? 'Edit' : 'Read'}
       </span>
     </IconButton>

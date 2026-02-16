@@ -44,10 +44,10 @@
 
 .appCustomizerExtensionWrapper {
     position: relative;
-}
 
-.appCustomizerExtensionWrapper:hover .appCustomizerExtensionToolbar {
-    opacity: 1;
+    &:hover .appCustomizerExtensionToolbar {
+        opacity: 1;
+    }
 }
 
 .appCustomizerExtensionToolbar {
@@ -78,22 +78,12 @@
     align-items: center;
     padding: 8px 20px;
     position: relative;
+
+    &:hover .addZoneLine {
+        background: #0078d4;
+    }
 }
 
-.appCustomizerHeader:hover::before,
-.appCustomizerFooter:hover::before {
-    position: absolute;
-    left: 8px;
-    top: 0;
-    font-size: 10px;
-    color: #fff;
-    background: #0078d4;
-    padding: 2px 6px;
-    border-radius: 2px;
-    z-index: 5;
-    pointer-events: none;
-    content: 'Application Customizer';
-}
 
 /* Picker overlay */
 .pickerOverlay {
@@ -114,10 +104,6 @@
     transition: background 0.2s;
 }
 
-.appCustomizerAddZone:hover .addZoneLine {
-    background: #0078d4;
-}
-
 .addZoneButton {
     width: 28px;
     height: 28px;
@@ -133,11 +119,11 @@
     transition: all 0.2s;
     position: relative;
     z-index: 1;
-}
 
-.addZoneButton:hover {
-    border-color: #0078d4;
-    background: #0078d4;
-    color: #fff;
-    box-shadow: 0 2px 4px rgba(0,120,212,0.3);
+    &:hover {
+        border-color: #0078d4;
+        background: #0078d4;
+        color: #fff;
+        box-shadow: 0 2px 4px rgba(0,120,212,0.3);
+    }
 }

@@ -1,5 +1,6 @@
 import React, { Component, ReactNode } from 'react';
 import { logger } from '@spfx-local-workbench/shared';
+import styles from './ErrorBoundary.module.css';
 
 interface IErrorBoundaryProps {
     children: ReactNode;
@@ -27,11 +28,11 @@ export class ErrorBoundary extends Component<IErrorBoundaryProps, IErrorBoundary
     render(): React.ReactNode {
         if (this.state.hasError) {
             return (
-                <div style={{ padding: '20px' }}>
+                <div className={styles.errorContainer}>
                     <div className="error-message">
                         <strong>Application Error:</strong> {this.state.error?.message || 'Unknown error'}
                     </div>
-                    <p style={{ padding: '16px' }}>
+                    <p className={styles.errorDetails}>
                         Check the browser console for more details.
                     </p>
                     <button 

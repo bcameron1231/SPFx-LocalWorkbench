@@ -7,6 +7,7 @@ import React from 'react';
 import { useGlobals } from '@storybook/manager-api';
 import { IconButton, WithTooltip, TooltipLinkList } from '@storybook/components';
 import { TOOLBAR_IDS, EVENTS } from '../constants';
+import styles from './LocaleToolbar.module.css';
 
 const COMMON_LOCALES = [
   { code: 'en-US', name: 'English (US)' },
@@ -52,7 +53,7 @@ export const LocaleToolbar: React.FC = () => {
       tooltip={<TooltipLinkList links={links} />}
     >
       <IconButton key={TOOLBAR_IDS.LOCALE} title="Select Locale">
-        🌐 <span style={{ marginLeft: '4px', fontSize: '12px' }}>{currentLocaleName}</span>
+        🌐 <span className={styles.localeLabel}>{currentLocaleName}</span>
       </IconButton>
     </WithTooltip>
   );

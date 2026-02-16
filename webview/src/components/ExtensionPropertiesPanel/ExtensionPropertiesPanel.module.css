@@ -11,10 +11,10 @@
     transform: translateX(100%);
     transition: transform 0.3s ease;
     z-index: 1000;
-}
 
-.panel.open {
-    transform: translateX(0);
+    &.open {
+        transform: translateX(0);
+    }
 }
 
 .content {
@@ -44,11 +44,11 @@
     font-family: inherit;
     background: #fff;
     color: #323130;
-}
 
-.input:focus {
-    outline: none;
-    border-color: #0078d4;
+    &:focus {
+        outline: none;
+        border-color: #0078d4;
+    }
 }
 
 .toggleContainer {
@@ -70,10 +70,18 @@
 
 .toggleOff {
     background-color: #c8c6c4;
+
+    .toggleThumb {
+        left: 2px;
+    }
 }
 
 .toggleOn {
     background-color: #0078d4;
+
+    .toggleThumb {
+        left: 22px;
+    }
 }
 
 .toggleThumb {
@@ -85,14 +93,6 @@
     border-radius: 50%;
     transition: left 0.2s;
     box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-.toggleOff .toggleThumb {
-    left: 2px;
-}
-
-.toggleOn .toggleThumb {
-    left: 22px;
 }
 
 .actions {
@@ -111,18 +111,18 @@
     font-size: 14px;
     cursor: pointer;
     transition: background-color 0.2s;
-}
 
-.button:hover {
-    background: #f3f2f1;
+    &:hover {
+        background: #f3f2f1;
+    }
 }
 
 .buttonPrimary {
     background: #0078d4;
     border-color: #0078d4;
     color: #fff;
-}
 
-.buttonPrimary:hover {
-    background: #106ebe;
+    &:hover {
+        background: #106ebe;
+    }
 }

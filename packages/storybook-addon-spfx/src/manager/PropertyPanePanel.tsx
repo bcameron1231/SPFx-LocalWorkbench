@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { useChannel } from '@storybook/manager-api';
 import { AddonPanel } from '@storybook/components';
 import { EVENTS } from '../constants';
+import styles from './PropertyPanePanel.module.css';
 
 export const PropertyPanePanel: React.FC<{ active: boolean }> = ({ active }) => {
   const [properties, setProperties] = useState<Record<string, any>>({});
@@ -36,32 +37,26 @@ export const PropertyPanePanel: React.FC<{ active: boolean }> = ({ active }) => 
 
   return (
     <AddonPanel active={active}>
-      <div style={{ padding: '16px', fontFamily: 'sans-serif' }}>
-        <h3 style={{ margin: '0 0 16px 0', fontSize: '14px', fontWeight: 600 }}>
+      <div className={styles.container}>
+        <h3 className={styles.heading}>
           Property Pane
         </h3>
         {Object.keys(properties).length === 0 ? (
-          <p style={{ fontSize: '12px', color: '#666' }}>
+          <p className={styles.emptyMessage}>
             No properties available. The web part will expose its property pane configuration here.
           </p>
         ) : (
-          <div style={{ fontSize: '12px' }}>
+          <div className={styles.propertiesContainer}>
             {Object.entries(properties).map(([key, value]) => (
-              <div key={key} style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
+              <div key={key} className={styles.propertyItem}>
+                <label className={styles.propertyLabel}>
                   {key}
                 </label>
                 <input
                   type="text"
                   value={String(value)}
                   onChange={(e) => handlePropertyChange(key, e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '6px 8px',
-                    border: '1px solid #ccc',
-                    borderRadius: '3px',
-                    fontSize: '12px',
-                  }}
+                  className={styles.propertyInput}
                 />
               </div>
             ))}

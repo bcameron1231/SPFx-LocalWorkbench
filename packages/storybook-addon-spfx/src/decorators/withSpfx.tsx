@@ -7,6 +7,7 @@ import { SpfxContextProvider } from '../context/SpfxContext';
 import { loadComponent as loadSpfxComponent } from '../utils/componentLoader';
 import { mergePageContext } from '../defaults';
 import { buildMockPageContext } from '@spfx-local-workbench/shared';
+import styles from './withSpfx.module.css';
 
 /**
  * Create a mock HTTP client for SPFx context
@@ -63,10 +64,10 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
   
   if (!parameters?.componentId) {
     return (
-      <div style={{ padding: '20px', color: '#d13438' }}>
+      <div className={styles.errorContainer}>
         <h3>SPFx Configuration Required</h3>
         <p>This story requires SPFx parameters. Add them to your story:</p>
-        <pre style={{ background: '#f5f5f5', padding: '10px', borderRadius: '4px' }}>
+        <pre className={styles.codeBlock}>
 {`parameters: {
   spfx: {
     componentId: 'your-component-id',
@@ -283,11 +284,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     >
       <div
         ref={containerRef}
-        style={{
-          width: '100%',
-          height: '100%',
-          minHeight: '200px',
-        }}
+        className={styles.componentContainer}
       />
     </SpfxContextProvider>
   );

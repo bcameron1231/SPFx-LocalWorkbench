@@ -5,20 +5,21 @@
     padding: 8px 12px;
     cursor: default;
     border-radius: 4px;
-    border: 2px solid;
+    border: 2px solid var(--theme-border-color, transparent);
+    background-color: var(--theme-background-color, transparent);
     transition: all 0.15s ease-in-out;
-}
 
-.container.clickable {
-    cursor: pointer;
-}
+    &.clickable {
+        cursor: pointer;
 
-.container.clickable:hover {
-    background-color: var(--vscode-list-hoverBackground, rgba(255, 255, 255, 0.1));
-}
+        &:hover {
+            background-color: var(--vscode-list-hoverBackground, rgba(255, 255, 255, 0.1));
+        }
+    }
 
-.container.selected {
-    /* Border color set via inline style */
+    &.selected {
+        /* Border and background colors set via CSS custom properties */
+    }
 }
 
 .previewBlock {
@@ -31,6 +32,7 @@
     width: 40px;
     height: 24px;
     border-radius: 2px;
+    background-color: var(--theme-primary);
 }
 
 .smallSwatchContainer {
@@ -44,6 +46,22 @@
     width: 8px;
     height: 8px;
     border-radius: 1px;
+
+    &:nth-child(1) {
+        background-color: var(--theme-secondary);
+    }
+
+    &:nth-child(2) {
+        background-color: var(--theme-dark);
+    }
+
+    &:nth-child(3) {
+        background-color: var(--theme-neutral-primary);
+    }
+
+    &:nth-child(4) {
+        background-color: var(--theme-neutral-secondary);
+    }
 }
 
 .textPreview {
@@ -56,14 +74,17 @@
     font-weight: 600;
     border-radius: 2px;
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
+    background-color: var(--theme-neutral-lighter);
+    color: var(--theme-text-color);
 }
 
 .label {
     font-size: 14px;
     font-weight: 400;
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
-}
+    color: var(--theme-label-color);
 
-.label.labelSelected {
-    font-weight: 600;
+    &.labelSelected {
+        font-weight: 600;
+    }
 }

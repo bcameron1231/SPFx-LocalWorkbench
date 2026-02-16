@@ -62,8 +62,10 @@
     gap: 16px;
 }
 
-.groupCollapsed .groupFields {
-    display: none;
+.groupCollapsed {
+    .groupFields {
+        display: none;
+    }
 }
 
 .field {
@@ -111,21 +113,17 @@
     font-family: inherit;
     background: #fff;
     color: #323130;
-}
 
-.input:focus,
-.textarea:focus,
-.select:focus {
-    outline: none;
-    border-color: #0078d4;
-}
+    &:focus {
+        outline: none;
+        border-color: #0078d4;
+    }
 
-.input:disabled,
-.textarea:disabled,
-.select:disabled {
-    background: #f3f2f1;
-    color: #a19f9d;
-    cursor: not-allowed;
+    &:disabled {
+        background: #f3f2f1;
+        color: #a19f9d;
+        cursor: not-allowed;
+    }
 }
 
 .textarea {
@@ -157,10 +155,10 @@
     height: 18px;
     cursor: pointer;
     accent-color: #0078d4;
-}
 
-.checkbox:disabled {
-    cursor: not-allowed;
+    &:disabled {
+        cursor: not-allowed;
+    }
 }
 
 /* Toggle styles */
@@ -187,19 +185,27 @@
     cursor: pointer;
     transition: background-color 0.2s;
     padding: 0;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 }
 
 .toggleOff {
     background-color: #c8c6c4;
+
+    .toggleThumb {
+        left: 2px;
+    }
 }
 
 .toggleOn {
     background-color: #0078d4;
-}
 
-.toggle:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    .toggleThumb {
+        left: 22px;
+    }
 }
 
 .toggleThumb {
@@ -211,14 +217,6 @@
     border-radius: 50%;
     transition: left 0.2s;
     box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-.toggleOff .toggleThumb {
-    left: 2px;
-}
-
-.toggleOn .toggleThumb {
-    left: 22px;
 }
 
 .toggleText {
@@ -266,19 +264,19 @@
     border-radius: 2px;
     cursor: pointer;
     transition: border-color 0.2s, background-color 0.2s;
-}
 
-.choiceOption:hover {
-    background: #f3f2f1;
+    &:hover {
+        background: #f3f2f1;
+    }
+
+    input[type="radio"] {
+        accent-color: #0078d4;
+    }
 }
 
 .choiceSelected {
     border-color: #0078d4;
     background: #f0f6fc;
-}
-
-.choiceOption input[type="radio"] {
-    accent-color: #0078d4;
 }
 
 .choiceImage {
@@ -306,29 +304,29 @@
     background: #c8c6c4;
     border-radius: 2px;
     outline: none;
-}
 
-.slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    background: #0078d4;
-    border-radius: 50%;
-    cursor: pointer;
-}
+    &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        background: #0078d4;
+        border-radius: 50%;
+        cursor: pointer;
+    }
 
-.slider::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    background: #0078d4;
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-}
+    &::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        background: #0078d4;
+        border-radius: 50%;
+        cursor: pointer;
+        border: none;
+    }
 
-.slider:disabled {
-    opacity: 0.5;
+    &:disabled {
+        opacity: 0.5;
+    }
 }
 
 .sliderValue {
@@ -352,25 +350,25 @@
     align-items: center;
     gap: 8px;
     transition: background-color 0.2s;
-}
 
-.button:hover {
-    background: #f3f2f1;
+    &:hover {
+        background: #f3f2f1;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 }
 
 .buttonPrimary {
     background: #0078d4;
     border-color: #0078d4;
     color: #fff;
-}
 
-.buttonPrimary:hover {
-    background: #106ebe;
-}
-
-.button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    &:hover {
+        background: #106ebe;
+    }
 }
 
 .buttonIcon {
@@ -382,11 +380,11 @@
     color: #0078d4;
     text-decoration: none;
     font-size: 14px;
-}
 
-.link:hover {
-    text-decoration: underline;
-    color: #004578;
+    &:hover {
+        text-decoration: underline;
+        color: #004578;
+    }
 }
 
 /* Horizontal rule */

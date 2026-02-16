@@ -38,9 +38,17 @@ export const ThemePreview: React.FC<IThemePreviewProps> = ({
         <div
             className={`${styles.container} ${isSelected ? styles.selected : ''} ${onClick ? styles.clickable : ''}`}
             style={{
-                borderColor: isSelected ? palette.themePrimary : 'transparent',
-                backgroundColor: isSelected ? palette.neutralLighter : 'transparent'
-            }}
+                '--theme-border-color': isSelected ? palette.themePrimary : 'transparent',
+                '--theme-background-color': isSelected ? palette.neutralLighter : 'transparent',
+                '--theme-primary': palette.themePrimary,
+                '--theme-secondary': palette.themeSecondary,
+                '--theme-dark': palette.themeDark,
+                '--theme-neutral-primary': palette.neutralPrimary,
+                '--theme-neutral-secondary': palette.neutralSecondary,
+                '--theme-neutral-lighter': palette.neutralLighter,
+                '--theme-text-color': palette.neutralPrimary,
+                '--theme-label-color': palette.neutralPrimary
+            } as React.CSSProperties}
             onClick={onClick}
             role={onClick ? 'button' : undefined}
             tabIndex={onClick ? 0 : undefined}
@@ -57,7 +65,6 @@ export const ThemePreview: React.FC<IThemePreviewProps> = ({
                 {/* Large primary color swatch */}
                 <div 
                     className={styles.largeSwatch}
-                    style={{ backgroundColor: palette.themePrimary }}
                     title={`Primary: ${palette.themePrimary}`}
                 />
                 
@@ -65,43 +72,30 @@ export const ThemePreview: React.FC<IThemePreviewProps> = ({
                 <div className={styles.smallSwatchContainer}>
                     <div 
                         className={styles.smallSwatch}
-                        style={{ backgroundColor: palette.themeSecondary }}
                         title={`Secondary: ${palette.themeSecondary}`}
                     />
                     <div 
                         className={styles.smallSwatch}
-                        style={{ backgroundColor: palette.themeDark }}
                         title={`Dark: ${palette.themeDark}`}
                     />
                     <div 
                         className={styles.smallSwatch}
-                        style={{ backgroundColor: palette.neutralPrimary }}
                         title={`Neutral Primary: ${palette.neutralPrimary}`}
                     />
                     <div 
                         className={styles.smallSwatch}
-                        style={{ backgroundColor: palette.neutralSecondary }}
                         title={`Neutral Secondary: ${palette.neutralSecondary}`}
                     />
                 </div>
 
                 {/* Text preview */}
-                <div 
-                    className={styles.textPreview}
-                    style={{
-                        backgroundColor: palette.neutralLighter,
-                        color: palette.neutralPrimary
-                    }}
-                >
+                <div className={styles.textPreview}>
                     Abc
                 </div>
             </div>
 
             {/* Theme name label */}
-            <div 
-                className={`${styles.label} ${isSelected ? styles.labelSelected : ''}`}
-                style={{ color: palette.neutralPrimary }}
-            >
+            <div className={`${styles.label} ${isSelected ? styles.labelSelected : ''}`}>
                 {theme.name}
             </div>
         </div>

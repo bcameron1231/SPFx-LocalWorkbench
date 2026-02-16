@@ -8,6 +8,7 @@ import { useGlobals } from '@storybook/manager-api';
 import { IconButton, WithTooltip, TooltipLinkList } from '@storybook/components';
 import { TOOLBAR_IDS, EVENTS } from '../constants';
 import { MICROSOFT_THEMES } from '@spfx-local-workbench/shared';
+import styles from './ThemeToolbar.module.css';
 
 export const ThemeToolbar: React.FC = () => {
   const [globals, updateGlobals] = useGlobals();
@@ -32,13 +33,10 @@ export const ThemeToolbar: React.FC = () => {
     onClick: () => handleThemeChange(theme.id),
     left: (
       <div
+        className={styles.themeSwatch}
         style={{
-          width: '16px',
-          height: '16px',
-          borderRadius: '2px',
-          backgroundColor: theme.palette.themePrimary,
-          border: '1px solid #e1e1e1',
-        }}
+          '--theme-primary': theme.palette.themePrimary
+        } as React.CSSProperties}
       />
     ),
   }));
@@ -51,7 +49,7 @@ export const ThemeToolbar: React.FC = () => {
       tooltip={<TooltipLinkList links={links} />}
     >
       <IconButton key={TOOLBAR_IDS.THEME} title="Select Theme">
-        🎨 <span style={{ marginLeft: '4px', fontSize: '12px' }}>{currentTheme.name}</span>
+        🎨 <span className={styles.themeLabel}>{currentTheme.name}</span>
       </IconButton>
     </WithTooltip>
   );
