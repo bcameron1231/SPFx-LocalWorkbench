@@ -3,14 +3,45 @@
  * Provides high-level APIs for loading SPFx components
  */
 
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { 
   amdLoader, 
   BundleLoader, 
   StringsLoader, 
   ManifestLoader, 
   ComponentResolver,
+  initializeSpfxMocks,
   type IWebPartManifest 
 } from '@spfx-local-workbench/shared';
+
+// Debug: Log what we imported at module load time
+console.log('[ComponentLoader] Module imports:', {
+  amdLoader: {
+    type: typeof amdLoader,
+    value: amdLoader,
+    hasInitialize: amdLoader && typeof amdLoader.initialize === 'function',
+    hasInstance: amdLoader && 'instance' in amdLoader,
+    keys: amdLoader ? Object.keys(amdLoader) : []
+  },
+  BundleLoader: typeof BundleLoader,
+  initializeSpfxMocks: typeof initializeSpfxMocks
+});
+
+/**
+ * Interface for web part component class
+ */
+
+/**
+ * Ensure React is available as window globals for SPFx components
+ * Storybook uses ES modules, but SPFx expects window.React/ReactDOM
+ */
+function ensureReactGlobals(): void {
+  if (typeof window !== 'undefined') {
+    (window as any).React = React;
+    (window as any).ReactDOM = ReactDOM;
+  }
+}
 
 /**
  * Load SPFx manifests from the dev server
@@ -18,6 +49,7 @@ import {
  * @returns Array of component manifests
  */
 export async function loadSpfxManifests(serveUrl: string): Promise<IWebPartManifest[]> {
+  ensureReactGlobals();
   const loader = new ManifestLoader(serveUrl);
   return loader.loadManifests();
 }
@@ -32,6 +64,7 @@ export async function loadComponentBundle(
   manifest: IWebPartManifest,
   serveUrl: string
 ): Promise<string[]> {
+  ensureReactGlobals();
   const loader = new BundleLoader(serveUrl);
   return loader.loadBundle(manifest);
 }
@@ -74,8 +107,36 @@ export async function loadComponent(
   serveUrl: string,
   locale?: string
 ): Promise<{ manifest: IWebPartManifest; componentClass: any }> {
+  // Ensure React is available as window globals for SPFx
+  ensureReactGlobals();
+  
   // Initialize AMD loader
+  console.log('[ComponentLoader.loadComponent] Checking amdLoader:', {
+    exists: !!amdLoader,
+    type: typeof amdLoader,
+    hasInitialize: amdLoader && typeof amdLoader.initialize === 'function',
+    value: amdLoader
+  });
+  
+  if (!amdLoader || typeof amdLoader.initialize !== 'function') {
+    console.error('[ComponentLoader.loadComponent] AMD loader validation failed:', {
+      amdLoader,
+      type: typeof amdLoader,
+      hasProperty: amdLoader && 'initialize' in amdLoader,
+      initializeType: amdLoader && typeof amdLoader.initialize
+    });
+    throw new Error('AMD loader not available');
+  }
+  
+  console.log('[ComponentLoader.loadComponent] Initializing AMD loader...');
   amdLoader.initialize();
+  console.log('[ComponentLoader.loadComponent] AMD loader initialized successfully');
+  
+  // Initialize SPFx mocks (base classes, property pane, etc.)
+  if (!initializeSpfxMocks || typeof initializeSpfxMocks !== 'function') {
+    throw new Error('SpfxMocks initializer not available');
+  }
+  initializeSpfxMocks();
 
   // Load manifests
   const manifests = await loadSpfxManifests(serveUrl);

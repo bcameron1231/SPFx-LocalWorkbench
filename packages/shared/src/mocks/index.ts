@@ -5,3 +5,4 @@ export {
     getLanguageCodeFromCulture,
 } from './contextBuilder';
 export * from './PropertyPaneMocks';
+export { initializeSpfxMocks } from './SpfxMocks';

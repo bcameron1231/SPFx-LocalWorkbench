@@ -198,13 +198,25 @@ export const amdLoader = {
   get instance(): AmdLoader {
     if (!_amdLoaderInstance) {
       _amdLoaderInstance = new AmdLoader();
+      console.log('[amdLoader] Created singleton instance');
     }
     return _amdLoaderInstance;
   },
   initialize(): void {
+    console.log('[amdLoader.initialize] Called');
     this.instance.initialize();
   },
   getModules(): IAmdModules {
+    console.log('[amdLoader.getModules] Called');
     return this.instance.getModules();
   }
 };
+
+// Debug: Log at module load time
+if (typeof window !== 'undefined') {
+  console.log('[AmdLoader Module] Loaded in browser, amdLoader exported:', {
+    type: typeof amdLoader,
+    hasInitialize: typeof amdLoader.initialize === 'function',
+    keys: Object.keys(amdLoader)
+  });
+}

@@ -4,9 +4,56 @@ import { useChannel } from '@storybook/preview-api';
 import { PARAM_KEY, EVENTS, DisplayMode } from '../constants';
 import type { ISpfxParameters } from '../types';
 import { SpfxContextProvider } from '../context/SpfxContext';
-import { loadAmdModule } from '../utils/amdLoader';
+import { loadComponent as loadSpfxComponent } from '../utils/componentLoader';
 import { mergePageContext } from '../defaults';
 import { buildMockPageContext } from '@spfx-local-workbench/shared';
+
+/**
+ * Create a mock HTTP client for SPFx context
+ */
+function createMockHttpClient(): any {
+  return {
+    get: (_url: string, _config?: any) => Promise.resolve({ 
+      ok: true, 
+      json: () => Promise.resolve({}) 
+    }),
+    post: (_url: string, _config?: any, _options?: any) => Promise.resolve({ 
+      ok: true, 
+      json: () => Promise.resolve({}) 
+    }),
+    fetch: (_url: string, _config?: any, _options?: any) => Promise.resolve({ 
+      ok: true, 
+      json: () => Promise.resolve({}) 
+    })
+  };
+}
+
+/**
+ * Create a mock SharePoint HTTP client for SPFx context
+ */
+function createMockSpHttpClient(): any {
+  const configurations = {
+    v1: { flags: {} }
+  };
+  return {
+    configurations: configurations,
+    get: (_url: string, _config?: any) => Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ d: {} })
+    }),
+    post: (_url: string, _config?: any, _options?: any) => Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ d: {} })
+    }),
+    fetch: (_url: string, _config?: any, _options?: any) => Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ d: {} })
+    })
+  };
+}
 
 /**
  * SPFx decorator that wraps stories with SPFx context
@@ -75,29 +122,107 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         // Build mock pageContext with all computed properties (uses shared builder)
         const mockPageContext = buildMockPageContext(contextConfig);
         
-        // Load the component module via AMD
-        const ComponentClass = await loadAmdModule(
+        // Load the component using the proper component loader
+        const { manifest, componentClass: ComponentClass } = await loadSpfxComponent(
           parameters.componentId,
-          serveUrl
+          serveUrl,
+          locale
         );
 
         // Create component instance
         const instance = new ComponentClass();
         componentInstanceRef.current = instance;
 
+        // Set up the component with getters (similar to WebPartManager)
+        instance._context = undefined;
+        instance._domElement = containerRef.current;
+        instance._properties = properties;
+        instance._displayMode = displayMode;
+
+        // Define property getters
+        Object.defineProperty(instance, 'context', {
+          get: () => instance._context,
+          set: (val: any) => { instance._context = val; },
+          configurable: true,
+          enumerable: true
+        });
+
+        Object.defineProperty(instance, 'domElement', {
+          get: () => instance._domElement,
+          configurable: true,
+          enumerable: true
+        });
+
+        Object.defineProperty(instance, 'properties', {
+          get: () => instance._properties,
+          set: (val: any) => { instance._properties = val; },
+          configurable: true,
+          enumerable: true
+        });
+
+        Object.defineProperty(instance, 'displayMode', {
+          get: () => instance._displayMode,
+          configurable: true,
+          enumerable: true
+        });
+
         // Set up the component context (mock SPFx context)
-        instance.context = {
+        // Match the structure from webview/src/mocks/SpfxContext.ts
+        instance._context = {
           pageContext: mockPageContext,
           manifest: {
-            id: parameters.componentId,
-            alias: context.title,
+            id: manifest.id,
+            alias: manifest.alias,
           },
           domElement: containerRef.current,
           displayMode: displayMode,
+          sdks: {
+            microsoftTeams: undefined // Not running in Teams context
+          },
+          serviceScope: {
+            consume: () => ({}),
+            createChildScope: () => ({
+              consume: () => ({}),
+              finish: () => {}
+            }),
+            finish: () => {}
+          },
+          httpClient: createMockHttpClient(),
+          spHttpClient: createMockSpHttpClient(),
+          aadHttpClientFactory: {
+            getClient: () => Promise.resolve(createMockHttpClient())
+          },
+          msGraphClientFactory: {
+            getClient: () => Promise.resolve({
+              api: () => ({
+                get: () => Promise.resolve({}),
+                post: () => Promise.resolve({}),
+                patch: () => Promise.resolve({}),
+                delete: () => Promise.resolve({})
+              })
+            })
+          },
+          isServedFromLocalhost: true,
+          propertyPane: {
+            refresh: () => {},
+            open: () => {},
+            close: () => {},
+            isRenderedByWebPart: () => true,
+            isPropertyPaneOpen: () => false
+          }
         };
 
-        // Set properties
-        instance.properties = properties;
+        // Call onInit if it exists
+        if (typeof instance.onInit === 'function') {
+          try {
+            const initResult = instance.onInit();
+            if (initResult && typeof initResult.then === 'function') {
+              await initResult;
+            }
+          } catch (e: any) {
+            console.error('onInit error:', e);
+          }
+        }
 
         // Render the component
         instance.render();
@@ -139,9 +264,10 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
   // Update component when properties, display mode, theme, or locale change
   useEffect(() => {
     if (componentInstanceRef.current) {
-      componentInstanceRef.current.properties = properties;
-      if (componentInstanceRef.current.context) {
-        componentInstanceRef.current.context.displayMode = displayMode;
+      componentInstanceRef.current._properties = properties;
+      componentInstanceRef.current._displayMode = displayMode;
+      if (componentInstanceRef.current._context) {
+        componentInstanceRef.current._context.displayMode = displayMode;
       }
       componentInstanceRef.current.render();
     }

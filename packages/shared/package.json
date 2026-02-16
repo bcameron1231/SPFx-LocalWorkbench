@@ -18,6 +18,16 @@
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*/index.d.ts",
+      "default": "./dist/*/index.js"
+    }
+  },
   "scripts": {
     "build": "npm run generate:css-types && tsc && npm run copy-assets",
     "generate:css-types": "tcm src",

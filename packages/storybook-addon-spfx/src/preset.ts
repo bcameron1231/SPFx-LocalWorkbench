@@ -4,9 +4,9 @@
  */
 
 export function managerEntries(entry: string[] = []): string[] {
-  return [...entry, require.resolve('./manager')];
+  return [...entry, '@spfx-local-workbench/storybook-addon-spfx/manager'];
 }
 
 export function previewAnnotations(entry: string[] = []): string[] {
-  return [...entry, require.resolve('./preview')];
+  return [...entry, '@spfx-local-workbench/storybook-addon-spfx/preview'];
 }

@@ -81,13 +81,4 @@ export interface ISpfxManifest {
   }>;
 }
 
-/**
- * AMD module loader interface
- */
-export interface IAmdLoader {
-  require: (moduleIds: string[], callback: (...modules: any[]) => void, errorCallback?: (error: any) => void) => void;
-  define: (moduleId: string, dependencies: string[], factory: (...deps: any[]) => any) => void;
-  config: (config: any) => void;
-}
 
-// Note: Window interface extensions for require/define are declared in @spfx-local-workbench/shared

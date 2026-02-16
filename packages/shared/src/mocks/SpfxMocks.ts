@@ -1,4 +1,4 @@
-import { spPropertyPaneModule } from '@spfx-local-workbench/shared';
+import { spPropertyPaneModule } from './PropertyPaneMocks';
 
 // Deep recursive merge matching lodash merge behaviour
 function deepMerge(target: any, ...sources: any[]): any {
@@ -48,6 +48,7 @@ export function initializeSpfxMocks(): void {
     // Ensure the prototype chain is correct for ES5 inheritance patterns
     Object.defineProperty(MockBaseClientSideWebPart.prototype, 'context', {
         get: function() { return this._context; },
+        set: function(val) { this._context = val; },
         enumerable: true,
         configurable: true
     });
@@ -81,6 +82,7 @@ export function initializeSpfxMocks(): void {
 
     Object.defineProperty(MockBaseApplicationCustomizer.prototype, 'context', {
         get: function() { return this._context; },
+        set: function(val) { this._context = val; },
         enumerable: true,
         configurable: true
     });

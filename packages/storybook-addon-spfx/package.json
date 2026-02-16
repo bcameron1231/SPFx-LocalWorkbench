@@ -18,6 +18,12 @@
   ],
   "main": "dist/storybook-addon-spfx/src/preset.js",
   "types": "dist/storybook-addon-spfx/src/preset.d.ts",
+  "exports": {
+    ".": "./dist/storybook-addon-spfx/src/preset.js",
+    "./manager": "./dist/storybook-addon-spfx/src/manager.js",
+    "./preview": "./dist/storybook-addon-spfx/src/preview.js",
+    "./package.json": "./package.json"
+  },
   "keywords": [
     "storybook",
     "spfx",

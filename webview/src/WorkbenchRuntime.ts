@@ -5,10 +5,9 @@
 import type { IWorkbenchConfig, IWebPartManifest, IWebPartConfig, IExtensionConfig, IVsCodeApi } from './types';
 import { isActiveWebPart, isActiveExtension } from './types';
 import type { IAppHandlers } from './components/App';
-import { amdLoader, ManifestLoader } from '@spfx-local-workbench/shared';
+import { amdLoader, ManifestLoader, initializeSpfxMocks } from '@spfx-local-workbench/shared';
 import { SpfxContext, ThemeProvider } from './mocks';
 import { WebPartManager } from './WebPartManager';
-import { initializeSpfxMocks } from './mocks';
 import { ExtensionManager } from './ExtensionManager';
 
 export class WorkbenchRuntime {
