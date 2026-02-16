@@ -100,8 +100,7 @@ export class ExtensionManager {
       return;
     } catch (error: unknown) {
       this.log.error('Failed to load extension:', error);
-      headerElement.innerHTML =
-        '<div class="error-message">Failed to load extension: ' + getErrorMessage(error) + '</div>';
+      headerElement.innerHTML = `<div class="error-message">Failed to load extension: ${getErrorMessage(error)}</div>`;
       return;
     }
   }
@@ -233,17 +232,16 @@ export class ExtensionManager {
       return active;
     } catch (error: unknown) {
       this.log.error('Setup error:', error);
-      headerElement.innerHTML =
-        '<div class="error-message">Extension setup error: ' + getErrorMessage(error) + '</div>';
+      headerElement.innerHTML = `<div class="error-message">Extension setup error: ${getErrorMessage(error)}</div>`;
       throw error;
     }
   }
 
   private showDebugInfo(domElement: HTMLElement, manifest: IWebPartManifest): void {
     let debugHtml = '<div style="padding:12px;color:#605e5c;font-size:13px;">';
-    debugHtml += '<p><strong>' + manifest.alias + '</strong> extension bundle loaded.</p>';
+    debugHtml += `<p><strong>${manifest.alias}</strong> extension bundle loaded.</p>`;
     debugHtml += '<p style="color:#a80000;">Could not find Application Customizer class.</p>';
-    debugHtml += '<p><strong>Manifest ID:</strong> ' + manifest.id + '</p>';
+    debugHtml += `<p><strong>Manifest ID:</strong> ${manifest.id}</p>`;
     debugHtml += '<p><strong>Available modules:</strong></p>';
     debugHtml += '<ul style="font-size:11px;max-height:150px;overflow:auto;">';
 
@@ -252,7 +250,7 @@ export class ExtensionManager {
       const mod = this.componentResolver.getModule(name);
       const modType = typeof mod;
       const modKeys = mod ? Object.keys(mod).slice(0, 5).join(', ') : 'null';
-      debugHtml += '<li><strong>' + name + '</strong>: ' + modType + ' [' + modKeys + ']</li>';
+      debugHtml += `<li><strong>${name}</strong>: ${modType} [${modKeys}]</li>`;
     }
     debugHtml += '</ul>';
     debugHtml += '</div>';

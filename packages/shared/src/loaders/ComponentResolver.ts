@@ -34,7 +34,7 @@ export class ComponentResolver {
     let foundModule = null;
 
     // Step 1: Try exact pattern matches
-    const idWithVersion = manifestId + '_' + version;
+    const idWithVersion = `${manifestId}_${version}`;
     const searchPatterns = [idWithVersion, manifestId, entryModuleId, alias];
 
     for (const pattern of searchPatterns) {

@@ -40,9 +40,9 @@ export class StringsLoader {
       return; // No localized strings found
     }
 
-    const baseUrl = manifest.loaderConfig?.internalModuleBaseUrls?.[0] || this.serveUrl + '/';
+    const baseUrl = manifest.loaderConfig?.internalModuleBaseUrls?.[0] || `${this.serveUrl}/`;
     const fullUrl = baseUrl + path;
-    const cacheBustedUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + '_v=' + Date.now();
+    const cacheBustedUrl = `${fullUrl + (fullUrl.includes('?') ? '&' : '?')}_v=${Date.now()}`;
 
     return new Promise((resolve, reject) => {
       // Track existing modules to identify newly loaded anonymous module
@@ -66,7 +66,7 @@ export class StringsLoader {
       };
 
       script.onerror = () => {
-        reject(new Error('Failed to load ' + fullUrl));
+        reject(new Error(`Failed to load ${fullUrl}`));
       };
 
       document.head.appendChild(script);

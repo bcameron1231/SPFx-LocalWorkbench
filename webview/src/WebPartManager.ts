@@ -72,8 +72,7 @@ export class WebPartManager {
       return;
     } catch (error: unknown) {
       this.log.error('Failed to load web part:', error);
-      domElement.innerHTML =
-        '<div class="error-message">Failed to load: ' + getErrorMessage(error) + '</div>';
+      domElement.innerHTML = `<div class="error-message">Failed to load: ${getErrorMessage(error)}</div>`;
       return;
     }
   }
@@ -159,8 +158,7 @@ export class WebPartManager {
           }
         } catch (error: unknown) {
           this.log.error('Render error:', error);
-          domElement.innerHTML =
-            '<div class="error-message">Render error: ' + getErrorMessage(error) + '</div>';
+          domElement.innerHTML = `<div class="error-message">Render error: ${getErrorMessage(error)}</div>`;
         }
       } else {
         domElement.innerHTML = '<div class="error-message">Web part has no render method</div>';
@@ -169,8 +167,7 @@ export class WebPartManager {
       return active;
     } catch (error: unknown) {
       this.log.error('Setup error:', error);
-      domElement.innerHTML =
-        '<div class="error-message">Setup error: ' + getErrorMessage(error) + '</div>';
+      domElement.innerHTML = `<div class="error-message">Setup error: ${getErrorMessage(error)}</div>`;
       throw error;
     }
   }
@@ -181,9 +178,9 @@ export class WebPartManager {
     _properties: any,
   ): void {
     let debugHtml = '<div style="padding:20px;color:#605e5c;">';
-    debugHtml += '<p><strong>' + manifest.alias + '</strong> bundle loaded.</p>';
+    debugHtml += `<p><strong>${manifest.alias}</strong> bundle loaded.</p>`;
     debugHtml += '<p style="font-size:12px;color:#a80000;">Could not find web part class.</p>';
-    debugHtml += '<p style="font-size:12px;"><strong>Manifest ID:</strong> ' + manifest.id + '</p>';
+    debugHtml += `<p style="font-size:12px;"><strong>Manifest ID:</strong> ${manifest.id}</p>`;
     debugHtml += '<p style="font-size:12px;"><strong>Available modules:</strong></p>';
     debugHtml += '<ul style="font-size:11px;max-height:200px;overflow:auto;">';
 
@@ -192,7 +189,7 @@ export class WebPartManager {
       const mod = this.componentResolver.getModule(name);
       const modType = typeof mod;
       const modKeys = mod ? Object.keys(mod).slice(0, 5).join(', ') : 'null';
-      debugHtml += '<li><strong>' + name + '</strong>: ' + modType + ' [' + modKeys + ']</li>';
+      debugHtml += `<li><strong>${name}</strong>: ${modType} [${modKeys}]</li>`;
     }
     debugHtml += '</ul>';
     debugHtml += '</div>';

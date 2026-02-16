@@ -24,7 +24,7 @@ export class ManifestLoader {
 
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = this.serveUrl + '/temp/build/manifests.js?_v=' + Date.now();
+      script.src = `${this.serveUrl}/temp/build/manifests.js?_v=${Date.now()}`;
 
       script.onload = () => {
         const win = window as any;
@@ -45,7 +45,7 @@ export class ManifestLoader {
                     original.port = serve.port;
                     return original.toString();
                   } catch {
-                    return this.serveUrl + '/';
+                    return `${this.serveUrl}/`;
                   }
                 });
             }

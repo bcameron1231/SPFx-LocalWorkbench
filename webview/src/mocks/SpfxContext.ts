@@ -23,7 +23,7 @@ export class SpfxContext {
       manifest: { id: webPartId },
       pageContext: mockPageContext,
       serviceScope: {
-        consume: (key: any) => {
+        consume: (_key: any) => {
           return {};
         },
         createChildScope: () => ({

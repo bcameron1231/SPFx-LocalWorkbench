@@ -69,7 +69,7 @@ export class AmdLoader {
       if (typeof name !== 'string') {
         factory = deps || name;
         deps = Array.isArray(name) ? name : [];
-        name = '_anonymous_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        name = `_anonymous_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
       }
       if (typeof deps === 'function') {
         factory = deps;

@@ -4,7 +4,7 @@
  */
 import { IconButton, TooltipLinkList, WithTooltip } from '@storybook/components';
 import { useGlobals } from '@storybook/manager-api';
-import React, { useState } from 'react';
+import React from 'react';
 
 import { MICROSOFT_THEMES } from '@spfx-local-workbench/shared';
 

@@ -457,7 +457,7 @@
     "package:extension": "node esbuild.js --production",
     "package:webview": "node webview/esbuild.config.js --production",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src",
+    "lint": "eslint src webview/src packages/*/src",
     "format": "prettier --write \"src/**/*.ts\" \"webview/src/**/*.{ts,tsx}\" \"packages/*/src/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"webview/src/**/*.{ts,tsx}\" \"packages/*/src/**/*.{ts,tsx}\"",
     "generate:icons": "node scripts/generateIcons.js",

@@ -4,14 +4,13 @@
  */
 import { AddonPanel } from '@storybook/components';
 import { useChannel } from '@storybook/manager-api';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { EVENTS } from '../constants';
 import styles from './PropertyPanePanel.module.css';
 
 export const PropertyPanePanel: React.FC<{ active: boolean }> = ({ active }) => {
   const [properties, setProperties] = useState<Record<string, any>>({});
-  const [propertyPaneConfig, setPropertyPaneConfig] = useState<any>(null);
 
   const emit = useChannel({
     [EVENTS.PROPERTY_CHANGED]: ({ propertyPath, newValue }: any) => {

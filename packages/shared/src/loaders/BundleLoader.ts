@@ -24,11 +24,11 @@ export class BundleLoader {
     }
 
     const bundlePath = this.getBundlePath(manifest);
-    const baseUrl = manifest.loaderConfig?.internalModuleBaseUrls?.[0] || this.serveUrl + '/';
+    const baseUrl = manifest.loaderConfig?.internalModuleBaseUrls?.[0] || `${this.serveUrl}/`;
     const fullUrl = baseUrl + bundlePath;
 
     // Cache-bust so live reload always fetches the freshly compiled bundle
-    const cacheBustedUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + '_v=' + Date.now();
+    const cacheBustedUrl = `${fullUrl + (fullUrl.includes('?') ? '&' : '?')}_v=${Date.now()}`;
 
     // Track existing modules before loading
     const amdModules = (window as any).__amdModules || {};
@@ -42,7 +42,7 @@ export class BundleLoader {
         const newModules = Object.keys(amdModules).filter((k) => !existingModules.has(k));
         resolve(newModules);
       };
-      script.onerror = () => reject(new Error('Failed to load ' + fullUrl));
+      script.onerror = () => reject(new Error(`Failed to load ${fullUrl}`));
       document.head.appendChild(script);
     });
   }
@@ -67,9 +67,9 @@ export class BundleLoader {
     // Fallback to convention-based path
     const componentType = manifest.componentType || 'WebPart';
     if (componentType === 'Extension') {
-      return 'dist/' + manifest.alias.toLowerCase() + '.js';
+      return `dist/${manifest.alias.toLowerCase()}.js`;
     } else {
-      return manifest.alias.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase() + '.js';
+      return `${manifest.alias.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}.js`;
     }
   }
 }

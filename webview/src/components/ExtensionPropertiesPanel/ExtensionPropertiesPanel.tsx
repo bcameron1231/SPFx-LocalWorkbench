@@ -173,7 +173,7 @@ const PropertyField: FC<IPropertyFieldProps> = ({ name, value, onChange }) => {
   return (
     <TextField
       label={name}
-      value={value != null ? String(value) : ''}
+      value={value !== null && value !== undefined ? String(value) : ''}
       onChange={(_, newValue) => onChange(newValue || '')}
     />
   );

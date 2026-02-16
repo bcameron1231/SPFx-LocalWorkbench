@@ -3,7 +3,7 @@ import { spPropertyPaneModule } from './PropertyPaneMocks';
 // Deep recursive merge matching lodash merge behaviour
 function deepMerge(target: any, ...sources: any[]): any {
   for (const source of sources) {
-    if (source == null) {
+    if (source === null || source === undefined) {
       continue;
     }
     for (const key of Object.keys(source)) {
@@ -175,7 +175,7 @@ export function initializeSpfxMocks(): void {
     },
     Guid: {
       newGuid: () => ({
-        toString: () => 'guid-' + Math.random().toString(36).substr(2, 9),
+        toString: () => `guid-${Math.random().toString(36).substr(2, 9)}`,
       }),
     },
     DisplayMode: { Read: 1, Edit: 2 },

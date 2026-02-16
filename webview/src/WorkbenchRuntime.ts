@@ -96,7 +96,7 @@ export class WorkbenchRuntime {
       this.log.debug('SPFx mocks initialized');
 
       // Update status
-      this.updateStatus('Connecting to serve at ' + this.config.serveUrl + '...');
+      this.updateStatus(`Connecting to serve at ${this.config.serveUrl}...`);
 
       // Load manifests from serve
       this.log.debug('Loading manifests from', this.config.serveUrl);
@@ -121,7 +121,7 @@ export class WorkbenchRuntime {
     } catch (error: unknown) {
       this.log.error('Initialization failed:', error);
       this.updateConnectionStatus(false);
-      this.updateStatus('Failed to connect: ' + getErrorMessage(error));
+      this.updateStatus(`Failed to connect: ${getErrorMessage(error)}`);
     }
   }
 
@@ -132,13 +132,7 @@ export class WorkbenchRuntime {
     const webPartCount = this.loadedManifests.filter((m) => m.componentType === 'WebPart').length;
     const extCount = this.loadedManifests.filter((m) => m.componentType === 'Extension').length;
     this.updateStatus(
-      'Loaded ' +
-        componentCount +
-        ' components (' +
-        webPartCount +
-        ' web parts, ' +
-        extCount +
-        ' extensions)',
+      `Loaded ${componentCount} components (${webPartCount} web parts, ${extCount} extensions)`,
     );
   }
 
@@ -151,7 +145,7 @@ export class WorkbenchRuntime {
       return;
     }
 
-    const instanceId = 'ext-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    const instanceId = `ext-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const properties = manifest.preconfiguredEntries?.[0]?.properties || {};
 
     const config: IExtensionConfig = {
@@ -235,7 +229,7 @@ export class WorkbenchRuntime {
       return;
     }
 
-    const instanceId = 'wp-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    const instanceId = `wp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const properties = manifest.preconfiguredEntries?.[0]?.properties || {};
 
     const config: IWebPartConfig = {
@@ -287,7 +281,7 @@ export class WorkbenchRuntime {
   }
 
   private async instantiateWebPart(config: IWebPartConfig): Promise<void> {
-    const domElement = document.getElementById('webpart-' + config.instanceId);
+    const domElement = document.getElementById(`webpart-${config.instanceId}`);
     if (!domElement) {
       return;
     }
@@ -446,13 +440,13 @@ export class WorkbenchRuntime {
       }
     } catch (error: unknown) {
       this.log.error('Live reload — failed to load manifests:', error);
-      this.updateStatus('Reload failed: ' + getErrorMessage(error));
+      this.updateStatus(`Reload failed: ${getErrorMessage(error)}`);
       return;
     }
 
     for (let i = 0; i < this.activeWebParts.length; i++) {
       const wp = this.activeWebParts[i];
-      const domElement = document.getElementById('webpart-' + wp.instanceId);
+      const domElement = document.getElementById(`webpart-${wp.instanceId}`);
       if (domElement) {
         const active = await this.webPartManager.instantiateWebPart(wp, domElement);
         if (active) {

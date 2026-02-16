@@ -32,7 +32,7 @@ export interface IAppHandlers {
   updateWebPartProperties: (instanceId: string, properties: any) => void;
 }
 
-export const App: FC<IAppProps> = ({ config, onInitialized }) => {
+export const App: FC<IAppProps> = ({ config: _config, onInitialized }) => {
   const [manifests, setManifests] = useState<IWebPartManifest[]>([]);
   const [activeWebParts, setActiveWebParts] = useState<IWebPartConfig[]>([]);
   const [activeExtensions, setActiveExtensions] = useState<IExtensionConfig[]>([]);
@@ -77,7 +77,7 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
           className={css(styles.appCustomizerZone, styles.appCustomizerHeader)}
         >
           {activeExtensions.map((ext) => (
-            <div key={ext.instanceId + '-header'} className={styles.appCustomizerExtensionWrapper}>
+            <div key={`${ext.instanceId}-header`} className={styles.appCustomizerExtensionWrapper}>
               <div className={styles.appCustomizerExtensionToolbar}>
                 <span className={styles.appCustomizerExtensionLabel}>{ext.manifest.alias}</span>
                 <IconButton
@@ -175,7 +175,7 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
         >
           {activeExtensions.map((ext) => (
             <div
-              key={ext.instanceId + '-footer'}
+              key={`${ext.instanceId}-footer`}
               className="app-customizer-footer-content"
               id={`ext-footer-${ext.instanceId}`}
             >

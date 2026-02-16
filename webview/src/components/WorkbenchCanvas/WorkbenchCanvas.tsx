@@ -112,7 +112,7 @@ const AddZone: FC<IAddZoneProps> = ({
     return manifests
       .map((m, manifestIndex) => ({ ...m, manifestIndex }))
       .filter((m) => m.componentType === 'WebPart')
-      .map((wp, index) => {
+      .map((wp, _index) => {
         const title = getLocalizedString(wp.preconfiguredEntries?.[0]?.title, locale) || wp.alias;
         const description =
           getLocalizedString(wp.preconfiguredEntries?.[0]?.description, locale) || '';
