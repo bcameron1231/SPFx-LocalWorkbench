@@ -13,5 +13,45 @@
     "typescript.tsc.autoDetect": "off",
     "explorer.fileNesting.patterns": {
         "*.module.css": "${capture}.module.css.d.ts"
-    }
+    },
+    
+    // Prettier integration
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false, // Optional: enable if you want paste formatting
+    
+    // Language-specific formatter settings
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    
+    // Editor settings that align with Prettier config
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false, // Use consistent tabSize
+    
+    // Code actions on save - let Prettier handle import organization
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit" // Auto-fix ESLint issues on save
+    },
+    
+    // Disable VS Code's built-in import organization (Prettier plugin handles this)
+    "typescript.preferences.organizeImportsOnSave": false,
+    "javascript.preferences.organizeImportsOnSave": false
 }
+

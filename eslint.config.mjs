@@ -1,4 +1,5 @@
 import typescriptEslint from "typescript-eslint";
+import eslintConfigPrettier from "eslint-config-prettier";
 
 export default [{
     files: ["**/*.ts"],
@@ -19,9 +20,16 @@ export default [{
             format: ["camelCase", "PascalCase"],
         }],
 
+        "@typescript-eslint/no-unused-vars": ["warn", {
+            argsIgnorePattern: "^_",
+            varsIgnorePattern: "^_",
+            caughtErrors: "none",
+        }],
+
         curly: "warn",
         eqeqeq: "warn",
         "no-throw-literal": "warn",
+        "prefer-template": "warn",
         semi: "warn",
     },
-}];
+}, eslintConfigPrettier];
