@@ -2,11 +2,11 @@
  * Locale selector toolbar control
  * Allows switching between different locales
  */
-
-import React from 'react';
+import { IconButton, TooltipLinkList, WithTooltip } from '@storybook/components';
 import { useGlobals } from '@storybook/manager-api';
-import { IconButton, WithTooltip, TooltipLinkList } from '@storybook/components';
-import { TOOLBAR_IDS, EVENTS } from '../constants';
+import React from 'react';
+
+import { EVENTS, TOOLBAR_IDS } from '../constants';
 import styles from './LocaleToolbar.module.css';
 
 const COMMON_LOCALES = [
@@ -25,12 +25,13 @@ const COMMON_LOCALES = [
 export const LocaleToolbar: React.FC = () => {
   const [globals, updateGlobals] = useGlobals();
   const currentLocale = globals.spfxLocale || 'en-US';
-  
-  const currentLocaleName = COMMON_LOCALES.find(l => l.code === currentLocale)?.name || currentLocale;
+
+  const currentLocaleName =
+    COMMON_LOCALES.find((l) => l.code === currentLocale)?.name || currentLocale;
 
   const handleLocaleChange = (locale: string) => {
     updateGlobals({ spfxLocale: locale });
-    
+
     // Emit event for the preview
     const channel = (window as any).__STORYBOOK_ADDONS_CHANNEL__;
     if (channel) {
@@ -38,7 +39,7 @@ export const LocaleToolbar: React.FC = () => {
     }
   };
 
-  const links = COMMON_LOCALES.map(locale => ({
+  const links = COMMON_LOCALES.map((locale) => ({
     id: locale.code,
     title: locale.name,
     active: locale.code === currentLocale,

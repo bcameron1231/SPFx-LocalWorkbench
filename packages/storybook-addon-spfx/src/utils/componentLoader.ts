@@ -2,18 +2,18 @@
  * Component loader utilities for Storybook stories
  * Provides high-level APIs for loading SPFx components
  */
-
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { 
-  amdLoader, 
-  BundleLoader, 
-  StringsLoader, 
-  ManifestLoader, 
-  ComponentResolver,
-  initializeSpfxMocks,
+
+import {
   AMD_REGISTRATION_DELAY_MS,
-  type IWebPartManifest 
+  BundleLoader,
+  ComponentResolver,
+  type IWebPartManifest,
+  ManifestLoader,
+  StringsLoader,
+  amdLoader,
+  initializeSpfxMocks,
 } from '@spfx-local-workbench/shared';
 
 // Debug: Log what we imported at module load time
@@ -23,10 +23,10 @@ console.log('[ComponentLoader] Module imports:', {
     value: amdLoader,
     hasInitialize: amdLoader && typeof amdLoader.initialize === 'function',
     hasInstance: amdLoader && 'instance' in amdLoader,
-    keys: amdLoader ? Object.keys(amdLoader) : []
+    keys: amdLoader ? Object.keys(amdLoader) : [],
   },
   BundleLoader: typeof BundleLoader,
-  initializeSpfxMocks: typeof initializeSpfxMocks
+  initializeSpfxMocks: typeof initializeSpfxMocks,
 });
 
 /**
@@ -63,7 +63,7 @@ export async function loadSpfxManifests(serveUrl: string): Promise<IWebPartManif
  */
 export async function loadComponentBundle(
   manifest: IWebPartManifest,
-  serveUrl: string
+  serveUrl: string,
 ): Promise<string[]> {
   ensureReactGlobals();
   const loader = new BundleLoader(serveUrl);
@@ -79,7 +79,7 @@ export async function loadComponentBundle(
 export async function loadComponentStrings(
   manifest: IWebPartManifest,
   serveUrl: string,
-  locale?: string
+  locale?: string,
 ): Promise<void> {
   const loader = new StringsLoader(serveUrl);
   await loader.loadStrings(manifest, locale);
@@ -106,33 +106,33 @@ export function findComponentClass(manifest: IWebPartManifest, candidateModules?
 export async function loadComponent(
   componentId: string,
   serveUrl: string,
-  locale?: string
+  locale?: string,
 ): Promise<{ manifest: IWebPartManifest; componentClass: any }> {
   // Ensure React is available as window globals for SPFx
   ensureReactGlobals();
-  
+
   // Initialize AMD loader
   console.log('[ComponentLoader.loadComponent] Checking amdLoader:', {
     exists: !!amdLoader,
     type: typeof amdLoader,
     hasInitialize: amdLoader && typeof amdLoader.initialize === 'function',
-    value: amdLoader
+    value: amdLoader,
   });
-  
+
   if (!amdLoader || typeof amdLoader.initialize !== 'function') {
     console.error('[ComponentLoader.loadComponent] AMD loader validation failed:', {
       amdLoader,
       type: typeof amdLoader,
       hasProperty: amdLoader && 'initialize' in amdLoader,
-      initializeType: amdLoader && typeof amdLoader.initialize
+      initializeType: amdLoader && typeof amdLoader.initialize,
     });
     throw new Error('AMD loader not available');
   }
-  
+
   console.log('[ComponentLoader.loadComponent] Initializing AMD loader...');
   amdLoader.initialize();
   console.log('[ComponentLoader.loadComponent] AMD loader initialized successfully');
-  
+
   // Initialize SPFx mocks (base classes, property pane, etc.)
   if (!initializeSpfxMocks || typeof initializeSpfxMocks !== 'function') {
     throw new Error('SpfxMocks initializer not available');
@@ -141,11 +141,9 @@ export async function loadComponent(
 
   // Load manifests
   const manifests = await loadSpfxManifests(serveUrl);
-  
+
   // Find the requested component
-  const manifest = manifests.find(
-    m => m.id === componentId || m.alias === componentId
-  );
+  const manifest = manifests.find((m) => m.id === componentId || m.alias === componentId);
 
   if (!manifest) {
     throw new Error(`Component ${componentId} not found in manifests`);
@@ -156,7 +154,7 @@ export async function loadComponent(
   const newModules = await loadComponentBundle(manifest, serveUrl);
 
   // Wait for AMD registration
-  await new Promise(resolve => setTimeout(resolve, AMD_REGISTRATION_DELAY_MS));
+  await new Promise((resolve) => setTimeout(resolve, AMD_REGISTRATION_DELAY_MS));
 
   // Find and return the component class
   const componentClass = findComponentClass(manifest, newModules);

@@ -4,7 +4,7 @@ import type { IAmdModules } from '../types/amd';
 /**
  * ComponentResolver
  * Resolves SPFx component classes from the AMD module registry
- * 
+ *
  * NOTE: This class requires browser environment (window)
  */
 export class ComponentResolver {
@@ -35,12 +35,7 @@ export class ComponentResolver {
 
     // Step 1: Try exact pattern matches
     const idWithVersion = manifestId + '_' + version;
-    const searchPatterns = [
-      idWithVersion,
-      manifestId,
-      entryModuleId,
-      alias
-    ];
+    const searchPatterns = [idWithVersion, manifestId, entryModuleId, alias];
 
     for (const pattern of searchPatterns) {
       if (amdModules[pattern]) {
@@ -100,14 +95,18 @@ export class ComponentResolver {
     for (const [key, value] of Object.entries(mod)) {
       if (typeof value === 'function' && (value as any).prototype) {
         const proto = (value as any).prototype;
-        
+
         // Check for component lifecycle methods
         if (componentType === 'WebPart') {
           if (typeof proto.render === 'function' || key.toLowerCase().includes('webpart')) {
             return value;
           }
         } else if (componentType === 'Extension') {
-          if (typeof proto.onInit === 'function' || key.toLowerCase().includes('extension') || key.toLowerCase().includes('customizer')) {
+          if (
+            typeof proto.onInit === 'function' ||
+            key.toLowerCase().includes('extension') ||
+            key.toLowerCase().includes('customizer')
+          ) {
             return value;
           }
         }
@@ -124,7 +123,11 @@ export class ComponentResolver {
    * @param candidateModules - Optional array of module names to limit search
    * @returns Component class or null
    */
-  private searchModulesForComponent(amdModules: IAmdModules, componentType: string, candidateModules?: string[]): any {
+  private searchModulesForComponent(
+    amdModules: IAmdModules,
+    componentType: string,
+    candidateModules?: string[],
+  ): any {
     // If candidateModules provided, search only those; otherwise search all
     const modulesToSearch = candidateModules || Object.keys(amdModules);
 
@@ -136,7 +139,7 @@ export class ComponentResolver {
       for (const candidate of candidates) {
         if (candidate && typeof candidate === 'function' && candidate.prototype) {
           const proto = candidate.prototype;
-          
+
           if (componentType === 'WebPart') {
             if (typeof proto.render === 'function') {
               return candidate;

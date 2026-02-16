@@ -1,4 +1,5 @@
 import * as net from 'net';
+
 import { PORT_CHECK_TIMEOUT_MS } from '../constants';
 
 /**
@@ -9,16 +10,25 @@ import { PORT_CHECK_TIMEOUT_MS } from '../constants';
  * @returns Promise that resolves to true if port is reachable
  */
 export function isPortReachable(
-    host: string, 
-    port: number, 
-    timeout = PORT_CHECK_TIMEOUT_MS
+  host: string,
+  port: number,
+  timeout = PORT_CHECK_TIMEOUT_MS,
 ): Promise<boolean> {
-    return new Promise((resolve) => {
-        const socket = new net.Socket();
-        socket.setTimeout(timeout);
-        socket.once('connect', () => { socket.destroy(); resolve(true); });
-        socket.once('timeout', () => { socket.destroy(); resolve(false); });
-        socket.once('error', () => { socket.destroy(); resolve(false); });
-        socket.connect(port, host);
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+    socket.setTimeout(timeout);
+    socket.once('connect', () => {
+      socket.destroy();
+      resolve(true);
     });
+    socket.once('timeout', () => {
+      socket.destroy();
+      resolve(false);
+    });
+    socket.once('error', () => {
+      socket.destroy();
+      resolve(false);
+    });
+    socket.connect(port, host);
+  });
 }

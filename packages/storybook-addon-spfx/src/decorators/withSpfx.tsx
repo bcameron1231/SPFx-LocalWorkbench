@@ -1,12 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
-import type { Decorator, StoryContext } from '@storybook/react';
 import { useChannel } from '@storybook/preview-api';
-import { PARAM_KEY, EVENTS, DisplayMode } from '../constants';
-import type { ISpfxParameters } from '../types';
-import { SpfxContextProvider } from '../context/SpfxContext';
-import { loadComponent as loadSpfxComponent } from '../utils/componentLoader';
-import { mergePageContext } from '../defaults';
+import type { Decorator, StoryContext } from '@storybook/react';
+import React, { useEffect, useRef, useState } from 'react';
+
 import { buildMockPageContext } from '@spfx-local-workbench/shared';
+
+import { DisplayMode, EVENTS, PARAM_KEY } from '../constants';
+import { SpfxContextProvider } from '../context/SpfxContext';
+import { mergePageContext } from '../defaults';
+import type { ISpfxParameters } from '../types';
+import { loadComponent as loadSpfxComponent } from '../utils/componentLoader';
 import styles from './withSpfx.module.css';
 
 /**
@@ -14,18 +16,21 @@ import styles from './withSpfx.module.css';
  */
 function createMockHttpClient(): any {
   return {
-    get: (_url: string, _config?: any) => Promise.resolve({ 
-      ok: true, 
-      json: () => Promise.resolve({}) 
-    }),
-    post: (_url: string, _config?: any, _options?: any) => Promise.resolve({ 
-      ok: true, 
-      json: () => Promise.resolve({}) 
-    }),
-    fetch: (_url: string, _config?: any, _options?: any) => Promise.resolve({ 
-      ok: true, 
-      json: () => Promise.resolve({}) 
-    })
+    get: (_url: string, _config?: any) =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({}),
+      }),
+    post: (_url: string, _config?: any, _options?: any) =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({}),
+      }),
+    fetch: (_url: string, _config?: any, _options?: any) =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({}),
+      }),
   };
 }
 
@@ -34,25 +39,28 @@ function createMockHttpClient(): any {
  */
 function createMockSpHttpClient(): any {
   const configurations = {
-    v1: { flags: {} }
+    v1: { flags: {} },
   };
   return {
     configurations: configurations,
-    get: (_url: string, _config?: any) => Promise.resolve({
-      ok: true,
-      status: 200,
-      json: () => Promise.resolve({ d: {} })
-    }),
-    post: (_url: string, _config?: any, _options?: any) => Promise.resolve({
-      ok: true,
-      status: 200,
-      json: () => Promise.resolve({ d: {} })
-    }),
-    fetch: (_url: string, _config?: any, _options?: any) => Promise.resolve({
-      ok: true,
-      status: 200,
-      json: () => Promise.resolve({ d: {} })
-    })
+    get: (_url: string, _config?: any) =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ d: {} }),
+      }),
+    post: (_url: string, _config?: any, _options?: any) =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ d: {} }),
+      }),
+    fetch: (_url: string, _config?: any, _options?: any) =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ d: {} }),
+      }),
   };
 }
 
@@ -61,14 +69,14 @@ function createMockSpHttpClient(): any {
  */
 export const withSpfx: Decorator = (Story, context: StoryContext) => {
   const parameters = context.parameters[PARAM_KEY] as ISpfxParameters | undefined;
-  
+
   if (!parameters?.componentId) {
     return (
       <div className={styles.errorContainer}>
         <h3>SPFx Configuration Required</h3>
         <p>This story requires SPFx parameters. Add them to your story:</p>
         <pre className={styles.codeBlock}>
-{`parameters: {
+          {`parameters: {
   spfx: {
     componentId: 'your-component-id',
     properties: { /* initial props */ }
@@ -80,13 +88,11 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
   }
 
   const [displayMode, setDisplayMode] = useState<DisplayMode>(
-    parameters.displayMode || DisplayMode.Edit
+    parameters.displayMode || DisplayMode.Edit,
   );
   const [themeId, setThemeId] = useState<string>(parameters.themeId || 'teal');
   const [locale, setLocale] = useState<string>(parameters.locale || 'en-US');
-  const [properties, setProperties] = useState<Record<string, any>>(
-    parameters.properties || {}
-  );
+  const [properties, setProperties] = useState<Record<string, any>>(parameters.properties || {});
 
   const containerRef = useRef<HTMLDivElement>(null);
   const componentInstanceRef = useRef<any>(null);
@@ -116,18 +122,18 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     const loadComponent = async () => {
       try {
         const serveUrl = parameters.serveUrl || 'https://localhost:4321';
-        
+
         // Merge provided context with defaults (uses shared defaults from defaults.ts)
         const contextConfig = mergePageContext(parameters.context?.pageContext, locale);
-        
+
         // Build mock pageContext with all computed properties (uses shared builder)
         const mockPageContext = buildMockPageContext(contextConfig);
-        
+
         // Load the component using the proper component loader
         const { manifest, componentClass: ComponentClass } = await loadSpfxComponent(
           parameters.componentId,
           serveUrl,
-          locale
+          locale,
         );
 
         // Create component instance
@@ -143,28 +149,32 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         // Define property getters
         Object.defineProperty(instance, 'context', {
           get: () => instance._context,
-          set: (val: any) => { instance._context = val; },
+          set: (val: any) => {
+            instance._context = val;
+          },
           configurable: true,
-          enumerable: true
+          enumerable: true,
         });
 
         Object.defineProperty(instance, 'domElement', {
           get: () => instance._domElement,
           configurable: true,
-          enumerable: true
+          enumerable: true,
         });
 
         Object.defineProperty(instance, 'properties', {
           get: () => instance._properties,
-          set: (val: any) => { instance._properties = val; },
+          set: (val: any) => {
+            instance._properties = val;
+          },
           configurable: true,
-          enumerable: true
+          enumerable: true,
         });
 
         Object.defineProperty(instance, 'displayMode', {
           get: () => instance._displayMode,
           configurable: true,
-          enumerable: true
+          enumerable: true,
         });
 
         // Set up the component context (mock SPFx context)
@@ -178,30 +188,31 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
           domElement: containerRef.current,
           displayMode: displayMode,
           sdks: {
-            microsoftTeams: undefined // Not running in Teams context
+            microsoftTeams: undefined, // Not running in Teams context
           },
           serviceScope: {
             consume: () => ({}),
             createChildScope: () => ({
               consume: () => ({}),
-              finish: () => {}
+              finish: () => {},
             }),
-            finish: () => {}
+            finish: () => {},
           },
           httpClient: createMockHttpClient(),
           spHttpClient: createMockSpHttpClient(),
           aadHttpClientFactory: {
-            getClient: () => Promise.resolve(createMockHttpClient())
+            getClient: () => Promise.resolve(createMockHttpClient()),
           },
           msGraphClientFactory: {
-            getClient: () => Promise.resolve({
-              api: () => ({
-                get: () => Promise.resolve({}),
-                post: () => Promise.resolve({}),
-                patch: () => Promise.resolve({}),
-                delete: () => Promise.resolve({})
-              })
-            })
+            getClient: () =>
+              Promise.resolve({
+                api: () => ({
+                  get: () => Promise.resolve({}),
+                  post: () => Promise.resolve({}),
+                  patch: () => Promise.resolve({}),
+                  delete: () => Promise.resolve({}),
+                }),
+              }),
           },
           isServedFromLocalhost: true,
           propertyPane: {
@@ -209,8 +220,8 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
             open: () => {},
             close: () => {},
             isRenderedByWebPart: () => true,
-            isPropertyPaneOpen: () => false
-          }
+            isPropertyPaneOpen: () => false,
+          },
         };
 
         // Call onInit if it exists
@@ -231,7 +242,11 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         // Emit property changes when they happen
         if (instance.onPropertyPaneFieldChanged) {
           const originalHandler = instance.onPropertyPaneFieldChanged.bind(instance);
-          instance.onPropertyPaneFieldChanged = (propertyPath: string, oldValue: any, newValue: any) => {
+          instance.onPropertyPaneFieldChanged = (
+            propertyPath: string,
+            oldValue: any,
+            newValue: any,
+          ) => {
             originalHandler(propertyPath, oldValue, newValue);
             emit(EVENTS.PROPERTY_CHANGED, { propertyPath, oldValue, newValue });
           };
@@ -282,10 +297,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
       locale={locale}
       properties={properties}
     >
-      <div
-        ref={containerRef}
-        className={styles.componentContainer}
-      />
+      <div ref={containerRef} className={styles.componentContainer} />
     </SpfxContextProvider>
   );
 };

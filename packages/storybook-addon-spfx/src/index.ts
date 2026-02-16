@@ -13,5 +13,5 @@ export {
   findComponentClass,
   loadComponent,
   getAmdModules,
-  getAmdModule
+  getAmdModule,
 } from './utils/componentLoader';

@@ -5,5 +5,5 @@ import { randomBytes } from 'crypto';
  * @returns A base64url-encoded random string
  */
 export function getNonce(): string {
-    return randomBytes(16).toString('base64url');
+  return randomBytes(16).toString('base64url');
 }

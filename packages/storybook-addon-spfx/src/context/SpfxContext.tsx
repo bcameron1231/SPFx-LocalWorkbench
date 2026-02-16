@@ -1,8 +1,8 @@
 /**
  * React context for SPFx story state
  */
+import React, { ReactNode, createContext, useContext } from 'react';
 
-import React, { createContext, useContext, ReactNode } from 'react';
 import { DisplayMode } from '../constants';
 
 interface ISpfxContextValue {

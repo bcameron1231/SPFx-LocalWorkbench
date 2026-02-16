@@ -8,7 +8,7 @@ import type { IWebPartConfig } from './IWebPartConfig';
 export interface IActiveWebPart extends IWebPartConfig {
   /** SPFx runtime context (pageContext, etc.) */
   context: any;
-  
+
   /** Component instance */
   instance: IBaseClientSideWebPart;
 }

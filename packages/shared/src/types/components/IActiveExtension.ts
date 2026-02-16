@@ -8,13 +8,13 @@ import type { IExtensionConfig } from './IExtensionConfig';
 export interface IActiveExtension extends IExtensionConfig {
   /** SPFx runtime context */
   context: any;
-  
+
   /** Extension instance */
   instance: IBaseApplicationCustomizer;
-  
+
   /** Optional header placeholder element */
   headerDomElement?: HTMLDivElement;
-  
+
   /** Optional footer placeholder element */
   footerDomElement?: HTMLDivElement;
 }

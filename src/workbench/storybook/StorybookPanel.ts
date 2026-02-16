@@ -1,198 +1,204 @@
 import * as vscode from 'vscode';
-import { StorybookServerManager, IStorybookServerOptions } from './StorybookServerManager';
-import { SpfxProjectDetector } from '../SpfxProjectDetector';
-import { getNonce } from '@spfx-local-workbench/shared/utils/securityUtils';
+
 import { escapeHtml, getErrorMessage } from '@spfx-local-workbench/shared';
+import { getNonce } from '@spfx-local-workbench/shared/utils/securityUtils';
+
+import { SpfxProjectDetector } from '../SpfxProjectDetector';
+import { IStorybookServerOptions, StorybookServerManager } from './StorybookServerManager';
 
 /**
  * Manages the Storybook webview panel
  */
 export class StorybookPanel {
-    public static currentPanel: StorybookPanel | undefined;
-    private static readonly viewType = 'spfxStorybook';
+  public static currentPanel: StorybookPanel | undefined;
+  private static readonly viewType = 'spfxStorybook';
 
-    private readonly panel: vscode.WebviewPanel;
-    private readonly serverManager: StorybookServerManager;
-    private disposables: vscode.Disposable[] = [];
+  private readonly panel: vscode.WebviewPanel;
+  private readonly serverManager: StorybookServerManager;
+  private disposables: vscode.Disposable[] = [];
 
-    /**
-     * Create or show the Storybook panel
-     */
-    public static async createOrShow(
-        extensionUri: vscode.Uri,
-        detector: SpfxProjectDetector,
-        options?: IStorybookServerOptions
-    ): Promise<StorybookPanel> {
-        const column = vscode.window.activeTextEditor
-            ? vscode.window.activeTextEditor.viewColumn
-            : undefined;
+  /**
+   * Create or show the Storybook panel
+   */
+  public static async createOrShow(
+    extensionUri: vscode.Uri,
+    detector: SpfxProjectDetector,
+    options?: IStorybookServerOptions,
+  ): Promise<StorybookPanel> {
+    const column = vscode.window.activeTextEditor
+      ? vscode.window.activeTextEditor.viewColumn
+      : undefined;
 
-        // If we already have a panel, show it
-        if (StorybookPanel.currentPanel) {
-            StorybookPanel.currentPanel.panel.reveal(column);
-            // Restart server with new options if provided
-            if (options) {
-                await StorybookPanel.currentPanel.serverManager.restart(options);
-                StorybookPanel.currentPanel.refresh();
-            }
-            return StorybookPanel.currentPanel;
+    // If we already have a panel, show it
+    if (StorybookPanel.currentPanel) {
+      StorybookPanel.currentPanel.panel.reveal(column);
+      // Restart server with new options if provided
+      if (options) {
+        await StorybookPanel.currentPanel.serverManager.restart(options);
+        StorybookPanel.currentPanel.refresh();
+      }
+      return StorybookPanel.currentPanel;
+    }
+
+    // Otherwise, create a new panel
+    const panel = vscode.window.createWebviewPanel(
+      StorybookPanel.viewType,
+      'SPFx Storybook',
+      column || vscode.ViewColumn.One,
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true,
+        localResourceRoots: [extensionUri],
+      },
+    );
+
+    panel.iconPath = {
+      light: vscode.Uri.joinPath(extensionUri, 'media', 'icon.png'),
+      dark: vscode.Uri.joinPath(extensionUri, 'media', 'icon.png'),
+    };
+
+    StorybookPanel.currentPanel = new StorybookPanel(panel, extensionUri, detector, options);
+    return StorybookPanel.currentPanel;
+  }
+
+  /**
+   * Revive panel from serialized state
+   */
+  public static async revive(
+    panel: vscode.WebviewPanel,
+    extensionUri: vscode.Uri,
+    detector: SpfxProjectDetector,
+  ): Promise<void> {
+    StorybookPanel.currentPanel = new StorybookPanel(panel, extensionUri, detector);
+  }
+
+  private constructor(
+    panel: vscode.WebviewPanel,
+    private readonly extensionUri: vscode.Uri,
+    detector: SpfxProjectDetector,
+    options?: IStorybookServerOptions,
+  ) {
+    this.panel = panel;
+
+    // Create server manager
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    if (!workspaceFolder) {
+      throw new Error('No workspace folder found');
+    }
+
+    this.serverManager = new StorybookServerManager(
+      workspaceFolder.uri.fsPath,
+      detector,
+      extensionUri,
+    );
+
+    // Set context for menu visibility
+    void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.isStorybook', true);
+
+    // Set the webview's initial html content
+    this.panel.webview.html = this.getLoadingHtml();
+
+    // Start the server and update content when ready
+    this.startServer(options);
+
+    // Handle messages from the webview
+    this.panel.webview.onDidReceiveMessage(
+      (message) => {
+        switch (message.type) {
+          case 'refresh':
+            this.refresh();
+            break;
+          case 'restart':
+            this.restart();
+            break;
         }
+      },
+      null,
+      this.disposables,
+    );
 
-        // Otherwise, create a new panel
-        const panel = vscode.window.createWebviewPanel(
-            StorybookPanel.viewType,
-            'SPFx Storybook',
-            column || vscode.ViewColumn.One,
-            {
-                enableScripts: true,
-                retainContextWhenHidden: true,
-                localResourceRoots: [extensionUri],
-            }
+    // Handle panel disposal
+    this.panel.onDidDispose(() => void this.dispose(), null, this.disposables);
+
+    // Handle visibility changes
+    this.panel.onDidChangeViewState(
+      () => {
+        void vscode.commands.executeCommand(
+          'setContext',
+          'spfxLocalWorkbench.isStorybook',
+          this.panel.active,
         );
-
-        panel.iconPath = {
-            light: vscode.Uri.joinPath(extensionUri, 'media', 'icon.png'),
-            dark: vscode.Uri.joinPath(extensionUri, 'media', 'icon.png'),
-        };
-
-        StorybookPanel.currentPanel = new StorybookPanel(panel, extensionUri, detector, options);
-        return StorybookPanel.currentPanel;
-    }
-
-    /**
-     * Revive panel from serialized state
-     */
-    public static async revive(
-        panel: vscode.WebviewPanel,
-        extensionUri: vscode.Uri,
-        detector: SpfxProjectDetector
-    ): Promise<void> {
-        StorybookPanel.currentPanel = new StorybookPanel(panel, extensionUri, detector);
-    }
-
-    private constructor(
-        panel: vscode.WebviewPanel,
-        private readonly extensionUri: vscode.Uri,
-        detector: SpfxProjectDetector,
-        options?: IStorybookServerOptions
-    ) {
-        this.panel = panel;
-        
-        // Create server manager
-        const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-        if (!workspaceFolder) {
-            throw new Error('No workspace folder found');
+        if (this.panel.visible) {
+          this.refresh();
         }
-        
-        this.serverManager = new StorybookServerManager(
-            workspaceFolder.uri.fsPath,
-            detector,
-            extensionUri
-        );
+      },
+      null,
+      this.disposables,
+    );
+  }
 
-        // Set context for menu visibility
-        void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.isStorybook', true);
-
-        // Set the webview's initial html content
-        this.panel.webview.html = this.getLoadingHtml();
-
-        // Start the server and update content when ready
-        this.startServer(options);
-
-        // Handle messages from the webview
-        this.panel.webview.onDidReceiveMessage(
-            message => {
-                switch (message.type) {
-                    case 'refresh':
-                        this.refresh();
-                        break;
-                    case 'restart':
-                        this.restart();
-                        break;
-                }
-            },
-            null,
-            this.disposables
-        );
-
-        // Handle panel disposal
-        this.panel.onDidDispose(() => void this.dispose(), null, this.disposables);
-
-        // Handle visibility changes
-        this.panel.onDidChangeViewState(
-            () => {
-                void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.isStorybook', this.panel.active);
-                if (this.panel.visible) {
-                    this.refresh();
-                }
-            },
-            null,
-            this.disposables
-        );
+  /**
+   * Start the Storybook server
+   */
+  private async startServer(options?: IStorybookServerOptions): Promise<void> {
+    try {
+      await this.serverManager.start(options);
+      this.panel.webview.html = this.getStorybookHtml();
+    } catch (error: unknown) {
+      this.panel.webview.html = this.getErrorHtml(getErrorMessage(error));
     }
+  }
 
-    /**
-     * Start the Storybook server
-     */
-    private async startServer(options?: IStorybookServerOptions): Promise<void> {
-        try {
-            await this.serverManager.start(options);
-            this.panel.webview.html = this.getStorybookHtml();
-        } catch (error: unknown) {
-            this.panel.webview.html = this.getErrorHtml(getErrorMessage(error));
-        }
+  /**
+   * Refresh the Storybook iframe
+   */
+  public refresh(): void {
+    if (this.serverManager.isRunning()) {
+      this.panel.webview.html = this.getStorybookHtml();
     }
+  }
 
-    /**
-     * Refresh the Storybook iframe
-     */
-    public refresh(): void {
-        if (this.serverManager.isRunning()) {
-            this.panel.webview.html = this.getStorybookHtml();
-        }
+  /**
+   * Restart the Storybook server
+   */
+  public async restart(): Promise<void> {
+    this.panel.webview.html = this.getLoadingHtml();
+    try {
+      await this.serverManager.restart();
+      this.panel.webview.html = this.getStorybookHtml();
+    } catch (error: unknown) {
+      this.panel.webview.html = this.getErrorHtml(getErrorMessage(error));
     }
+  }
 
-    /**
-     * Restart the Storybook server
-     */
-    public async restart(): Promise<void> {
-        this.panel.webview.html = this.getLoadingHtml();
-        try {
-            await this.serverManager.restart();
-            this.panel.webview.html = this.getStorybookHtml();
-        } catch (error: unknown) {
-            this.panel.webview.html = this.getErrorHtml(getErrorMessage(error));
-        }
+  /**
+   * Dispose of the panel and server
+   */
+  public async dispose(): Promise<void> {
+    StorybookPanel.currentPanel = undefined;
+
+    // Clear context
+    void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.isStorybook', false);
+
+    // Stop and dispose the server (this now handles cleanup properly)
+    await this.serverManager.dispose();
+
+    // Clean up resources
+    this.panel.dispose();
+
+    while (this.disposables.length) {
+      const disposable = this.disposables.pop();
+      if (disposable) {
+        disposable.dispose();
+      }
     }
+  }
 
-    /**
-     * Dispose of the panel and server
-     */
-    public async dispose(): Promise<void> {
-        StorybookPanel.currentPanel = undefined;
-
-        // Clear context
-        void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.isStorybook', false);
-
-        // Stop and dispose the server (this now handles cleanup properly)
-        await this.serverManager.dispose();
-
-        // Clean up resources
-        this.panel.dispose();
-
-        while (this.disposables.length) {
-            const disposable = this.disposables.pop();
-            if (disposable) {
-                disposable.dispose();
-            }
-        }
-    }
-
-    /**
-     * Get the HTML for the loading state
-     */
-    private getLoadingHtml(): string {
-        return `<!DOCTYPE html>
+  /**
+   * Get the HTML for the loading state
+   */
+  private getLoadingHtml(): string {
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -246,16 +252,16 @@ export class StorybookPanel {
     </div>
 </body>
 </html>`;
-    }
+  }
 
-    /**
-     * Get the HTML for displaying Storybook in an iframe
-     */
-    private getStorybookHtml(): string {
-        const storybookUrl = this.serverManager.getUrl();
-        const nonce = getNonce();
+  /**
+   * Get the HTML for displaying Storybook in an iframe
+   */
+  private getStorybookHtml(): string {
+    const storybookUrl = this.serverManager.getUrl();
+    const nonce = getNonce();
 
-        return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -345,13 +351,13 @@ export class StorybookPanel {
     </script>
 </body>
 </html>`;
-    }
+  }
 
-    /**
-     * Get the HTML for displaying an error
-     */
-    private getErrorHtml(error: string): string {
-        return `<!DOCTYPE html>
+  /**
+   * Get the HTML for displaying an error
+   */
+  private getErrorHtml(error: string): string {
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -402,29 +408,25 @@ export class StorybookPanel {
     </div>
 </body>
 </html>`;
-    }
-
+  }
 }
 
 /**
  * Serializer for restoring Storybook panels on reload
  */
 export class StorybookPanelSerializer implements vscode.WebviewPanelSerializer {
-    constructor(
-        private readonly extensionUri: vscode.Uri,
-        private readonly getDetector: () => SpfxProjectDetector | undefined
-    ) {}
+  constructor(
+    private readonly extensionUri: vscode.Uri,
+    private readonly getDetector: () => SpfxProjectDetector | undefined,
+  ) {}
 
-    async deserializeWebviewPanel(
-        webviewPanel: vscode.WebviewPanel,
-        _state: unknown
-    ): Promise<void> {
-        const detector = this.getDetector();
-        if (!detector) {
-            webviewPanel.dispose();
-            return;
-        }
-        
-        await StorybookPanel.revive(webviewPanel, this.extensionUri, detector);
+  async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, _state: unknown): Promise<void> {
+    const detector = this.getDetector();
+    if (!detector) {
+      webviewPanel.dispose();
+      return;
     }
+
+    await StorybookPanel.revive(webviewPanel, this.extensionUri, detector);
+  }
 }

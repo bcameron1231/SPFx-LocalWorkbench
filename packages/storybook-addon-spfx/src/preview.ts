@@ -2,7 +2,6 @@
  * Storybook preview configuration for SPFx addon
  * This file is loaded in the preview iframe and provides decorators
  */
-
 import { withSpfx } from './decorators/withSpfx';
 
 export const decorators = [withSpfx];

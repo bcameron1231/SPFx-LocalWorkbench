@@ -3,7 +3,7 @@ import type { IWebPartManifest } from '../types';
 /**
  * StringsLoader
  * Loads localized string resources for SPFx components
- * 
+ *
  * NOTE: This class requires browser environment (window, document)
  */
 export class StringsLoader {
@@ -33,14 +33,14 @@ export class StringsLoader {
     const { moduleName, path } = this.findStringsResource(
       scriptResources,
       manifest.loaderConfig?.entryModuleId,
-      localeOverride
+      localeOverride,
     );
 
     if (!moduleName || !path) {
       return; // No localized strings found
     }
 
-    const baseUrl = manifest.loaderConfig?.internalModuleBaseUrls?.[0] || (this.serveUrl + '/');
+    const baseUrl = manifest.loaderConfig?.internalModuleBaseUrls?.[0] || this.serveUrl + '/';
     const fullUrl = baseUrl + path;
     const cacheBustedUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + '_v=' + Date.now();
 
@@ -51,11 +51,11 @@ export class StringsLoader {
 
       const script = document.createElement('script');
       script.src = cacheBustedUrl;
-      
+
       script.onload = () => {
         // Find the newly added anonymous module
-        const newModules = Object.keys(amdModules).filter(k => !existingModules.has(k));
-        const anonymousModule = newModules.find(k => k.startsWith('_anonymous_'));
+        const newModules = Object.keys(amdModules).filter((k) => !existingModules.has(k));
+        const anonymousModule = newModules.find((k) => k.startsWith('_anonymous_'));
 
         if (anonymousModule && moduleName) {
           // Register the anonymous module with the correct name
@@ -83,7 +83,7 @@ export class StringsLoader {
   private findStringsResource(
     scriptResources: Record<string, any>,
     entryModuleId?: string,
-    localeOverride?: string
+    localeOverride?: string,
   ): { moduleName: string | null; path: string | null } {
     let moduleName: string | null = null;
     let path: string | null = null;
@@ -95,7 +95,7 @@ export class StringsLoader {
         if (localeOverride && resource.paths) {
           // Try to find the locale in the paths object (case-insensitive)
           const localeKey = Object.keys(resource.paths).find(
-            key => key.toLowerCase() === localeOverride.toLowerCase()
+            (key) => key.toLowerCase() === localeOverride.toLowerCase(),
           );
           path = localeKey ? resource.paths[localeKey] : resource.defaultPath;
         } else {

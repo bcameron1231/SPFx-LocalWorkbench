@@ -8,22 +8,22 @@ import type { IPreconfiguredEntry } from './IPreconfiguredEntry';
 export interface IWebPartManifest {
   /** Unique component identifier (GUID) */
   id: string;
-  
+
   /** Component alias used for bundle naming */
   alias: string;
-  
+
   /** Component type */
   componentType: 'WebPart' | 'Extension' | string;
-  
+
   /** Semantic version */
   version?: string;
-  
+
   /** Manifest schema version */
   manifestVersion?: number;
-  
+
   /** Bundle loader configuration */
   loaderConfig?: ILoaderConfig;
-  
+
   /** Preconfigured entries for property pane */
   preconfiguredEntries?: IPreconfiguredEntry[];
 }

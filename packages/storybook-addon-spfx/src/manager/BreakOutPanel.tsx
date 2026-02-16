@@ -2,9 +2,9 @@
  * Break Out panel
  * Allows viewing the component in isolation
  */
-
-import React from 'react';
 import { AddonPanel } from '@storybook/components';
+import React from 'react';
+
 import styles from './BreakOutPanel.module.css';
 
 export const BreakOutPanel: React.FC<{ active: boolean }> = ({ active }) => {
@@ -23,16 +23,11 @@ export const BreakOutPanel: React.FC<{ active: boolean }> = ({ active }) => {
   return (
     <AddonPanel active={active}>
       <div className={styles.container}>
-        <h3 className={styles.heading}>
-          Break Out Component
-        </h3>
+        <h3 className={styles.heading}>Break Out Component</h3>
         <p className={styles.description}>
           View this component in a separate window for isolated testing.
         </p>
-        <button
-          onClick={handleBreakOut}
-          className={styles.button}
-        >
+        <button onClick={handleBreakOut} className={styles.button}>
           Open in New Window
         </button>
       </div>

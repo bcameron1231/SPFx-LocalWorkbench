@@ -3,7 +3,7 @@ import type { IWebPartManifest } from '../types';
 /**
  * BundleLoader
  * Loads SPFx component JavaScript bundles
- * 
+ *
  * NOTE: This class requires browser environment (window, document)
  */
 export class BundleLoader {
@@ -24,9 +24,9 @@ export class BundleLoader {
     }
 
     const bundlePath = this.getBundlePath(manifest);
-    const baseUrl = manifest.loaderConfig?.internalModuleBaseUrls?.[0] || (this.serveUrl + '/');
+    const baseUrl = manifest.loaderConfig?.internalModuleBaseUrls?.[0] || this.serveUrl + '/';
     const fullUrl = baseUrl + bundlePath;
-    
+
     // Cache-bust so live reload always fetches the freshly compiled bundle
     const cacheBustedUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + '_v=' + Date.now();
 
@@ -39,7 +39,7 @@ export class BundleLoader {
       script.src = cacheBustedUrl;
       script.onload = () => {
         // Find newly added modules
-        const newModules = Object.keys(amdModules).filter(k => !existingModules.has(k));
+        const newModules = Object.keys(amdModules).filter((k) => !existingModules.has(k));
         resolve(newModules);
       };
       script.onerror = () => reject(new Error('Failed to load ' + fullUrl));
@@ -56,7 +56,7 @@ export class BundleLoader {
     if (manifest.loaderConfig?.scriptResources) {
       const entryId = manifest.loaderConfig.entryModuleId;
       const entry = entryId ? manifest.loaderConfig.scriptResources[entryId] : null;
-      
+
       if (entry?.paths?.default) {
         return entry.paths.default;
       } else if (entry?.path) {

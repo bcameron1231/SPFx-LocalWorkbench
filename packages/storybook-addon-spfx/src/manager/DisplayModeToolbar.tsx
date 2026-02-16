@@ -2,11 +2,11 @@
  * Display Mode toolbar control
  * Allows switching between Edit and Read display modes
  */
-
-import React from 'react';
-import { useGlobals } from '@storybook/manager-api';
 import { IconButton } from '@storybook/components';
-import { TOOLBAR_IDS, DisplayMode, EVENTS } from '../constants';
+import { useGlobals } from '@storybook/manager-api';
+import React from 'react';
+
+import { DisplayMode, EVENTS, TOOLBAR_IDS } from '../constants';
 import styles from './DisplayModeToolbar.module.css';
 
 export const DisplayModeToolbar: React.FC = () => {
@@ -16,7 +16,7 @@ export const DisplayModeToolbar: React.FC = () => {
   const toggleDisplayMode = () => {
     const newMode = displayMode === DisplayMode.Edit ? DisplayMode.Read : DisplayMode.Edit;
     updateGlobals({ spfxDisplayMode: newMode });
-    
+
     // Emit event for the preview
     const channel = (window as any).__STORYBOOK_ADDONS_CHANNEL__;
     if (channel) {
@@ -31,9 +31,7 @@ export const DisplayModeToolbar: React.FC = () => {
       onClick={toggleDisplayMode}
     >
       {displayMode === DisplayMode.Edit ? '✏️' : '👁️'}
-      <span className={styles.modeLabel}>
-        {displayMode === DisplayMode.Edit ? 'Edit' : 'Read'}
-      </span>
+      <span className={styles.modeLabel}>{displayMode === DisplayMode.Edit ? 'Edit' : 'Read'}</span>
     </IconButton>
   );
 };

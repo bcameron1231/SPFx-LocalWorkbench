@@ -2,15 +2,15 @@
  * Storybook manager configuration for SPFx addon
  * This file is loaded in the Storybook manager and registers toolbar controls and panels
  */
-
-import React from 'react';
 import { addons, types } from '@storybook/manager-api';
-import { ADDON_ID, PANEL_ID, BREAKOUT_PANEL_ID, TOOLBAR_IDS } from './constants';
+import React from 'react';
+
+import { ADDON_ID, BREAKOUT_PANEL_ID, PANEL_ID, TOOLBAR_IDS } from './constants';
+import { BreakOutPanel } from './manager/BreakOutPanel';
 import { DisplayModeToolbar } from './manager/DisplayModeToolbar';
-import { ThemeToolbar } from './manager/ThemeToolbar';
 import { LocaleToolbar } from './manager/LocaleToolbar';
 import { PropertyPanePanel } from './manager/PropertyPanePanel';
-import { BreakOutPanel } from './manager/BreakOutPanel';
+import { ThemeToolbar } from './manager/ThemeToolbar';
 
 // Register the addon
 addons.register(ADDON_ID, () => {

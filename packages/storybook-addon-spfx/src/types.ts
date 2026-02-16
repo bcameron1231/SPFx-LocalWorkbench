@@ -1,9 +1,9 @@
 /**
  * Type definitions for the SPFx Storybook addon
  */
+import type { IPageContextConfig, ITheme, IThemePalette } from '@spfx-local-workbench/shared';
 
 import { DisplayMode } from './constants';
-import type { IPageContextConfig, ITheme, IThemePalette } from '@spfx-local-workbench/shared';
 
 /**
  * SPFx story parameters
@@ -11,28 +11,28 @@ import type { IPageContextConfig, ITheme, IThemePalette } from '@spfx-local-work
 export interface ISpfxParameters {
   /** Component ID from manifest */
   componentId: string;
-  
+
   /** Initial property values */
   properties?: Record<string, any>;
-  
+
   /** Initial display mode */
   displayMode?: DisplayMode;
-  
+
   /** Initial theme ID */
   themeId?: string;
-  
+
   /** Initial locale */
   locale?: string;
-  
+
   /** Serve URL for loading bundles */
   serveUrl?: string;
-  
+
   /** Whether to show property pane by default */
   showPropertyPane?: boolean;
-  
+
   /** SharePoint context configuration */
   context?: ISpfxContextConfig;
-  
+
   /** SharePoint page context configuration */
   pageContext?: ISpfxPageContextConfig;
 }
@@ -80,5 +80,3 @@ export interface ISpfxManifest {
     properties?: Record<string, any>;
   }>;
 }
-
-

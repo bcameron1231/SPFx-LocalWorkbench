@@ -2,10 +2,10 @@
  * Property Pane panel
  * Shows the SPFx property pane for the active web part
  */
-
-import React, { useState, useEffect } from 'react';
-import { useChannel } from '@storybook/manager-api';
 import { AddonPanel } from '@storybook/components';
+import { useChannel } from '@storybook/manager-api';
+import React, { useEffect, useState } from 'react';
+
 import { EVENTS } from '../constants';
 import styles from './PropertyPanePanel.module.css';
 
@@ -15,7 +15,7 @@ export const PropertyPanePanel: React.FC<{ active: boolean }> = ({ active }) => 
 
   const emit = useChannel({
     [EVENTS.PROPERTY_CHANGED]: ({ propertyPath, newValue }: any) => {
-      setProperties(prev => ({
+      setProperties((prev) => ({
         ...prev,
         [propertyPath]: newValue,
       }));
@@ -38,9 +38,7 @@ export const PropertyPanePanel: React.FC<{ active: boolean }> = ({ active }) => 
   return (
     <AddonPanel active={active}>
       <div className={styles.container}>
-        <h3 className={styles.heading}>
-          Property Pane
-        </h3>
+        <h3 className={styles.heading}>Property Pane</h3>
         {Object.keys(properties).length === 0 ? (
           <p className={styles.emptyMessage}>
             No properties available. The web part will expose its property pane configuration here.
@@ -49,9 +47,7 @@ export const PropertyPanePanel: React.FC<{ active: boolean }> = ({ active }) => 
           <div className={styles.propertiesContainer}>
             {Object.entries(properties).map(([key, value]) => (
               <div key={key} className={styles.propertyItem}>
-                <label className={styles.propertyLabel}>
-                  {key}
-                </label>
+                <label className={styles.propertyLabel}>{key}</label>
                 <input
                   type="text"
                   value={String(value)}

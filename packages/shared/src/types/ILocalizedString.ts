@@ -3,6 +3,6 @@
  * Used by SPFx component manifests for titles, descriptions, etc.
  */
 export interface ILocalizedString {
-    default: string;
-    [locale: string]: string;
+  default: string;
+  [locale: string]: string;
 }

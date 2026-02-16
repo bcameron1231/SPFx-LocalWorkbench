@@ -8,7 +8,7 @@
  * @returns true if the value is an Error instance
  */
 export function isError(error: unknown): error is Error {
-    return error instanceof Error;
+  return error instanceof Error;
 }
 
 /**
@@ -17,20 +17,23 @@ export function isError(error: unknown): error is Error {
  * @param fallbackMessage - Message to use if error message cannot be extracted
  * @returns A string error message
  */
-export function getErrorMessage(error: unknown, fallbackMessage: string = 'An unknown error occurred'): string {
-    if (isError(error)) {
-        return error.message;
-    }
-    
-    if (typeof error === 'string') {
-        return error;
-    }
-    
-    if (error && typeof error === 'object' && 'message' in error) {
-        return String(error.message);
-    }
-    
-    return fallbackMessage;
+export function getErrorMessage(
+  error: unknown,
+  fallbackMessage: string = 'An unknown error occurred',
+): string {
+  if (isError(error)) {
+    return error.message;
+  }
+
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String(error.message);
+  }
+
+  return fallbackMessage;
 }
 
 /**
@@ -39,12 +42,7 @@ export function getErrorMessage(error: unknown, fallbackMessage: string = 'An un
  * @returns true if the error is an ENOENT error
  */
 export function isFileNotFoundError(error: unknown): boolean {
-    return (
-        error !== null && 
-        typeof error === 'object' && 
-        'code' in error && 
-        error.code === 'ENOENT'
-    );
+  return error !== null && typeof error === 'object' && 'code' in error && error.code === 'ENOENT';
 }
 
 /**
@@ -54,6 +52,6 @@ export function isFileNotFoundError(error: unknown): boolean {
  * @returns Formatted error string
  */
 export function formatError(error: unknown, context?: string): string {
-    const message = getErrorMessage(error);
-    return context ? `${context}: ${message}` : message;
+  const message = getErrorMessage(error);
+  return context ? `${context}: ${message}` : message;
 }

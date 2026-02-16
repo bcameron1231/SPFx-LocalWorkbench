@@ -7,10 +7,10 @@ import type { IWebPartManifest } from '../manifests';
 export interface IWebPartConfig {
   /** Component manifest */
   manifest: IWebPartManifest;
-  
+
   /** Unique instance identifier */
   instanceId: string;
-  
+
   /** Component properties */
   properties: Record<string, any>;
 }
