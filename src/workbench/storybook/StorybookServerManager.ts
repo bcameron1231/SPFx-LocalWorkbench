@@ -294,6 +294,7 @@ const config: StorybookConfig = {
   ],
   addons: [
     '@storybook/addon-essentials',
+    '@storybook/addon-a11y',
     '@spfx-local-workbench/storybook-addon-spfx'
   ],
   framework: {
@@ -392,7 +393,8 @@ export default preview;
             const required = [
                 'storybook',
                 '@storybook/react-vite',
-                '@storybook/addon-essentials'
+                '@storybook/addon-essentials',
+                '@storybook/addon-a11y'
             ];
             
             return required.every(dep => dep in allDeps);
@@ -412,7 +414,8 @@ export default preview;
         await this.runNpmInstall([
             'storybook@^8.0.0',
             '@storybook/react-vite@^8.0.0',
-            '@storybook/addon-essentials@^8.0.0'
+            '@storybook/addon-essentials@^8.0.0',
+            '@storybook/addon-a11y@^8.0.0'
         ]);
         
         // Then link the addon from the extension
