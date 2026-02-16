@@ -328,6 +328,13 @@ const preview: Preview = {
         color: /(background|color)$/i,
         date: /Date$/i
       }
+    },
+    backgrounds: {
+      disable: true
+    },
+    toolbar: {
+      copy: { hidden: true },
+      eject: { hidden: true }
     }
   }
 };
