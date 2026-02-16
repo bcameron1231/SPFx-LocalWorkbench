@@ -460,8 +460,11 @@
     "packages:watch": "npm-run-all -p packages:watch:*",
     "packages:watch:shared": "cd packages/shared && npm run watch",
     "packages:watch:addon": "cd packages/storybook-addon-spfx && npm run watch",
-    "packages:clean": "rm -rf packages/*/dist packages/*/node_modules",
-    "packages:install": "cd packages/shared && npm install && cd ../storybook-addon-spfx && npm install"
+    "packages:clean": "rm -rf packages/*/dist packages/*/temp",
+    "packages:install": "cd packages/shared && npm install && cd ../storybook-addon-spfx && npm install",
+    "clean": "rm -rf dist temp && npm run packages:clean",
+    "clean:full": "npm run clean && rm -rf node_modules packages/*/node_modules",
+    "install": "npm install && npm run packages:install"
   },
   "dependencies": {
     "@spfx-local-workbench/shared": "file:./packages/shared"
