@@ -74,21 +74,10 @@ export class StoryGenerator {
             ? await this.detector.getLocaleInfo() 
             : { default: 'en-US', locales: ['en-US'] };
 
-        // Generate story files for each web part
+        // Generate a single story file for each web part containing all locale variants
         for (const webPart of webParts) {
-            // Generate default story
-            const defaultStory = await this.generateWebPartStory(webPart, localeInfo.default, true);
-            generatedStories.push(defaultStory);
-
-            // Generate separate files for each locale
-            if (this.generateLocaleStories && localeInfo.locales.length > 1) {
-                for (const locale of localeInfo.locales) {
-                    if (locale !== localeInfo.default) {
-                        const localeStory = await this.generateWebPartStory(webPart, locale, false);
-                        generatedStories.push(localeStory);
-                    }
-                }
-            }
+            const story = await this.generateWebPartStory(webPart, localeInfo);
+            generatedStories.push(story);
         }
 
         // Generate index file
@@ -98,35 +87,30 @@ export class StoryGenerator {
     }
 
     /**
-     * Generates a single story file for a web part
+     * Generates a single story file for a web part with all locale variants
      */
     private async generateWebPartStory(
         manifest: IWebPartManifest,
-        locale: string,
-        isDefault: boolean
+        localeInfo: { default: string; locales: string[] }
     ): Promise<IGeneratedStory> {
         const alias = manifest.alias;
         const componentId = manifest.id;
-        const fileName = isDefault 
-            ? `${alias}.stories.ts`
-            : `${alias}.${locale}.stories.ts`;
+        const fileName = `${alias}.stories.ts`;
         const filePath = path.join(this.outputDir, fileName);
 
         // Get display name from preconfigured entries
-        // ALWAYS use default locale for title to maintain hierarchy
         const preconfiguredEntry = manifest.preconfiguredEntries?.[0];
-        const defaultTitle = getLocalizedString(preconfiguredEntry?.title, this.pageContext.cultureInfo.currentCultureName) || alias;
-        const description = getLocalizedString(preconfiguredEntry?.description, locale) || '';
+        const defaultTitle = getLocalizedString(preconfiguredEntry?.title, localeInfo.default) || alias;
+        const properties = preconfiguredEntry?.properties || {};
 
-        // Generate story content
+        // Generate story content with all locale variants
         const storyContent = this.generateStoryContent({
             componentId,
             alias,
-            title: defaultTitle,  // Use default locale title for all stories
-            description,
-            locale,
-            isDefault,
-            properties: preconfiguredEntry?.properties || {}
+            title: defaultTitle,
+            defaultLocale: localeInfo.default,
+            locales: localeInfo.locales,
+            properties
         });
 
         // Write story file
@@ -135,42 +119,48 @@ export class StoryGenerator {
         return {
             filePath,
             componentId,
-            alias,
-            locale: isDefault ? undefined : locale
+            alias
         };
     }
 
     /**
-     * Generates the TypeScript content for a story file
+     * Generates the TypeScript content for a story file with all locale variants
      */
     private generateStoryContent(options: {
         componentId: string;
         alias: string;
         title: string;
-        description: string;
-        locale: string;
-        isDefault: boolean;
+        defaultLocale: string;
+        locales: string[];
         properties: Record<string, unknown>;
     }): string {
-        const { componentId, alias, title, locale, isDefault, properties } = options;
+        const { componentId, alias, title, defaultLocale, locales, properties } = options;
 
-        // Create hierarchical title
-        const storyTitle = isDefault 
-            ? `Web Parts/${title}`
-            : `Web Parts/${title}/Localization/${locale}`;
-
-        const pageContextJson = JSON.stringify({
+        // Create the shared parameters object
+        const pageContextForDefault = {
             ...this.pageContext,
             cultureInfo: {
                 ...this.pageContext.cultureInfo,
-                currentCultureName: locale
+                currentCultureName: defaultLocale
             }
-        }, null, 2);
+        };
 
-        return `/**
+        const sharedParameters = {
+            spfx: {
+                componentId: componentId,
+                locale: defaultLocale,
+                properties: properties,
+                context: {
+                    pageContext: pageContextForDefault
+                }
+            }
+        };
+
+        // Header comment
+        let content = `/**
  * Auto-generated Storybook story for ${alias}
  * Component ID: ${componentId}
- * Locale: ${locale}
+ * Default Locale: ${defaultLocale}
  * 
  * This file is automatically generated. Do not edit directly.
  * To customize, create manual stories in your src directory.
@@ -178,19 +168,12 @@ export class StoryGenerator {
 
 import type { Meta, StoryObj } from '@storybook/react';
 
+const sharedParameters = ${JSON.stringify(sharedParameters, null, 2)};
+
 // Component metadata
 const meta = {
-  title: '${storyTitle}',
-  parameters: {
-    spfx: {
-      componentId: '${componentId}',
-      locale: '${locale}',
-      properties: ${JSON.stringify(properties, null, 6).replace(/\n/g, '\n      ')},
-      context: {
-        pageContext: ${pageContextJson.replace(/\n/g, '\n          ')}
-      }
-    }
-  },
+  title: 'Web Parts/${title}',
+  parameters: sharedParameters,
   tags: ['autodocs']
 } satisfies Meta;
 
@@ -202,6 +185,28 @@ type Story = StoryObj<typeof meta>;
  */
 export const Default: Story = {};
 `;
+
+        // Generate additional locale stories
+        const additionalLocales = locales.filter(locale => locale !== defaultLocale);
+        additionalLocales.forEach((locale, index) => {
+            content += `
+/**
+ * Locale${index + 1} story: ${locale}
+ */
+export const Locale${index + 1}: Story = {
+  name: '${locale}',
+  parameters: {
+    ...sharedParameters,
+    spfx: {
+      ...sharedParameters.spfx,
+      locale: '${locale}',
+    }
+  }
+};
+`;
+        });
+
+        return content;
     }
 
     /**
