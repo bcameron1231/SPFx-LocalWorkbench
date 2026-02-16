@@ -3,7 +3,7 @@
 // Handles loading, instantiation, and lifecycle of SPFx web parts
 
 import type { IWebPartManifest, IWebPartConfig, IActiveWebPart, IVsCodeApi } from './types';
-import { BundleLoader, StringsLoader, ComponentResolver, setupProperty } from '@spfx-local-workbench/shared';
+import { BundleLoader, StringsLoader, ComponentResolver, setupProperty, logger } from '@spfx-local-workbench/shared';
 import { SpfxContext, ThemeProvider } from './mocks';
 
 export class WebPartManager {
@@ -143,7 +143,7 @@ export class WebPartManager {
                         }, 500);
                     }
                 } catch (e: any) {
-                    console.error('WebPartManager - Render error:', e);
+                    logger.error('WebPartManager - Render error:', e);
                     domElement.innerHTML = '<div class="error-message">Render error: ' + e.message + '</div>';
                 }
             } else {
@@ -152,7 +152,7 @@ export class WebPartManager {
 
             return active;
         } catch (e: any) {
-            console.error('Setup error:', e);
+            logger.error('WebPartManager - Setup error:', e);
             domElement.innerHTML = '<div class="error-message">Setup error: ' + e.message + '</div>';
             throw e;
         }

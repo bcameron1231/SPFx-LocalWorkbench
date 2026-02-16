@@ -10,3 +10,4 @@ export { getLocalizedString } from './utilities';  // Explicit re-export
 // Export browser-compatible utilities only (Node.js-specific utils are in utils/ but not exported here)
 export { setupProperty } from './utils/componentUtils';
 export { escapeHtml } from './utils/htmlUtils';
+export { logger, LogLevel } from './utils/logger';

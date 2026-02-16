@@ -5,7 +5,7 @@
 // placeholders on the page.
 
 import type { IWebPartManifest, IExtensionConfig, IActiveExtension, IVsCodeApi } from './types';
-import { BundleLoader, ComponentResolver, setupProperty } from '@spfx-local-workbench/shared';
+import { BundleLoader, ComponentResolver, setupProperty, logger } from '@spfx-local-workbench/shared';
 import { SpfxContext, ThemeProvider } from './mocks';
 
 // PlaceholderName enum matching @microsoft/sp-application-base
@@ -131,7 +131,7 @@ export class ExtensionManager {
                 try {
                     handler.call(thisArg);
                 } catch (e: any) {
-                    console.error('ExtensionManager - Error in changedEvent handler:', e);
+                    logger.error('ExtensionManager - Error in changedEvent handler:', e);
                 }
             });
         }, 50);
@@ -188,7 +188,7 @@ export class ExtensionManager {
                         await initResult;
                     }
                 } catch (e: any) {
-                    console.error('ExtensionManager - Error in onInit:', e);
+                    logger.error('ExtensionManager - Error in onInit:', e);
                 }
             }
 
@@ -209,7 +209,7 @@ export class ExtensionManager {
 
             return active;
         } catch (e: any) {
-            console.error('ExtensionManager - Setup error:', e);
+            logger.error('ExtensionManager - Setup error:', e);
             headerElement.innerHTML = '<div class="error-message">Extension setup error: ' + e.message + '</div>';
             throw e;
         }

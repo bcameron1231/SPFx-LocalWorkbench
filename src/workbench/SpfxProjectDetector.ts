@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { logger } from '@spfx-local-workbench/shared/utils/logger';
 import type {
     IWebPartManifest,
     ISpfxConfig,
@@ -91,17 +92,17 @@ export class SpfxProjectDetector {
         
         // Look for manifest files in src directory
         const srcPath = path.join(this.workspacePath, 'src');
-        console.log('Looking for manifests in:', srcPath);
+        logger.debug('SpfxProjectDetector - Looking for manifests in:', srcPath);
 
         try {
             await fs.access(srcPath);
         } catch {
-            console.log('src directory does not exist');
+            logger.debug('SpfxProjectDetector - src directory does not exist');
             return manifests;
         }
 
         const manifestFiles = await this.findManifestFiles(srcPath);
-        console.log('Found manifest files:', manifestFiles);
+        logger.debug('SpfxProjectDetector - Found manifest files:', manifestFiles);
         
         for (const manifestFile of manifestFiles) {
             try {
@@ -110,7 +111,7 @@ export class SpfxProjectDetector {
                 const cleanContent = this.removeJsonComments(content.replace(/^\uFEFF/, ''));
                 const manifest = JSON.parse(cleanContent) as IWebPartManifest;
                 
-                console.log('Parsed manifest:', manifest.alias, 'componentType:', manifest.componentType);
+                logger.debug('SpfxProjectDetector - Parsed manifest:', manifest.alias, 'componentType:', manifest.componentType);
                 
                 // Only include WebPart manifests
                 if (manifest.componentType === 'WebPart') {
@@ -148,7 +149,7 @@ export class SpfxProjectDetector {
                     manifests.push(manifest);
                 }
             } catch (error) {
-                console.error(`Error parsing manifest ${manifestFile}:`, error);
+                logger.error(`SpfxProjectDetector - Error parsing manifest ${manifestFile}:`, error);
             }
         }
 
@@ -286,7 +287,7 @@ export class SpfxProjectDetector {
                 }
             } catch (error) {
                 // Directory might not exist
-                console.log(`Localization directory not found: ${dirPath}`);
+                logger.debug(`SpfxProjectDetector - Localization directory not found: ${dirPath}`);
             }
         }
 
@@ -332,7 +333,7 @@ export class SpfxProjectDetector {
                 }
             } catch (error) {
                 // Directory might not exist, continue
-                console.log(`Localization directory not found: ${dirPath}`);
+                logger.debug(`SpfxProjectDetector - Localization directory not found: ${dirPath}`);
             }
         }
 

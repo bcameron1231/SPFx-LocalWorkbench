@@ -5,6 +5,7 @@
 // extension and the webview.
 
 import * as vscode from 'vscode';
+import { logger } from '@spfx-local-workbench/shared/utils/logger';
 import { SpfxProjectDetector } from './SpfxProjectDetector';
 import type { IWebPartManifest } from './types';
 import { generateWorkbenchHtml, generateErrorHtml } from './html';
@@ -135,7 +136,7 @@ export class WorkbenchPanel {
                 return;
 
             case 'error':
-                console.error('Workbench - ' + message.text);
+                logger.error('Workbench -', message.text);
                 if (message.text) {
                     vscode.window.showErrorMessage(message.text);
                 }

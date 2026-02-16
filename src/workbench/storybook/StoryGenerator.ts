@@ -8,6 +8,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { logger } from '@spfx-local-workbench/shared/utils/logger';
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
 import type { IWebPartManifest } from '../types';
 import { DEFAULT_PAGE_CONTEXT, getLocalizedString, type ILocalizedString } from '@spfx-local-workbench/shared';
@@ -65,7 +66,7 @@ export class StoryGenerator {
         // Get web part manifests
         const webParts = await this.detector.getWebPartManifests();
         if (webParts.length === 0) {
-            console.log('No web parts found');
+            logger.info('StoryGenerator - No web parts found');
             return generatedStories;
         }
 
@@ -247,7 +248,7 @@ export { ${exports} };
         try {
             await fs.rm(this.outputDir, { recursive: true, force: true });
         } catch (error) {
-            console.error('Error cleaning generated stories:', error);
+            logger.error('StoryGenerator - Error cleaning generated stories:', error);
         }
     }
 }
