@@ -104,7 +104,7 @@
         "icon": "$(fluentui-testbeaker)"
       },
       {
-        "command": "spfx-local-workbench.startServe",
+        "command": "spfx-local-workbench.startServeWorkbench",
         "title": "Start Serve & Open Workbench",
         "category": "SPFx",
         "icon": "$(fluentui-testbeakersolid)"
@@ -124,6 +124,12 @@
       {
         "command": "spfx-local-workbench.openStorybook",
         "title": "Open Storybook",
+        "category": "SPFx",
+        "icon": "$(fluentui-teststep)"
+      },
+      {
+        "command": "spfx-local-workbench.startServeStorybook",
+        "title": "Start Serve & Open Storybook",
         "category": "SPFx",
         "icon": "$(fluentui-teststep)"
       },
@@ -194,13 +200,15 @@
             "type": "string",
             "enum": [
               "openWorkbench",
-              "startServe",
-              "openStorybook"
+              "startServeWorkbench",
+              "openStorybook",
+              "startServeStorybook"
             ],
             "markdownEnumDescriptions": [
               "$(fluentui-testbeaker) Open the Local Workbench panel",
               "$(fluentui-testbeakersolid) Start serve and open the Local Workbench panel",
-              "$(fluentui-teststep) Open Storybook for visual component testing"
+              "$(fluentui-teststep) Open the SPFx Storybook panel",
+              "$(fluentui-teststep) Start serve and open the SPFx Storybook panel"
             ],
             "default": "openWorkbench",
             "description": "Action to perform when clicking the SPFx status bar item"

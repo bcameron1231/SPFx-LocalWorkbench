@@ -32,6 +32,82 @@ export function activate(context: vscode.ExtensionContext) {
 		return detector;
 	}
 
+	// Helper function to start serve if needed and wait for it to be ready
+	async function startServeIfNeeded(): Promise<boolean> {
+		const det = getDetector();
+		if (!det) {
+			vscode.window.showErrorMessage('No workspace folder open');
+			return false;
+		}
+
+		const isSpfx = await det.isSpfxProject();
+		if (!isSpfx) {
+			vscode.window.showErrorMessage('This does not appear to be an SPFx project');
+			return false;
+		}
+
+		// Get the SPFx project's serve configuration
+		const serveConfig = await det.getServeConfig();
+		const serveHost = 'localhost';
+		const servePort = serveConfig.port || 4321;
+
+		// Check if serve is already running
+		const alreadyRunning = await isPortReachable(serveHost, servePort);
+		if (alreadyRunning) {
+			return true;
+		}
+
+		// Get workbench settings for the serve command
+		const settings = getWorkbenchSettings();
+
+		// Create a terminal and run the configured serve command
+		const terminal = vscode.window.createTerminal('SPFx Serve');
+		terminal.show();
+		terminal.sendText(settings.serveCommand);
+
+		// Wait for the serve port to accept connections, with a progress indicator
+		const serverReady = await vscode.window.withProgress(
+			{
+				location: vscode.ProgressLocation.Notification,
+				title: 'SPFx Serve',
+				cancellable: true
+			},
+			async (progress, cancellationToken) => {
+				const maxWaitMs = 120_000; // 2 minutes
+				const pollIntervalMs = 500;
+				const startTime = Date.now();
+
+				progress.report({ message: 'Waiting for serve to start…' });
+
+				while (Date.now() - startTime < maxWaitMs) {
+					if (cancellationToken.isCancellationRequested) {
+						return false;
+					}
+
+					if (await isPortReachable(serveHost, servePort)) {
+						return true;
+					}
+
+					const elapsed = Math.round((Date.now() - startTime) / 1000);
+					progress.report({ message: `Waiting for serve to start… (${elapsed}s)` });
+					await delay(pollIntervalMs);
+				}
+
+				return false; // timed out
+			}
+		);
+
+		if (!serverReady) {
+			const choice = await vscode.window.showWarningMessage(
+				'SPFx serve did not start in time. Continue anyway?',
+				'Continue', 'Cancel'
+			);
+			return choice === 'Continue';
+		}
+
+		return true;
+	}
+
 	// Register serializers to restore webviews on reload
 	context.subscriptions.push(
 		vscode.window.registerWebviewPanelSerializer(
@@ -53,83 +129,12 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	// Register the Start Serve command
-	const startServeCommand = vscode.commands.registerCommand(
-		'spfx-local-workbench.startServe',
+	const startServeWorkbenchCommand = vscode.commands.registerCommand(
+		'spfx-local-workbench.startServeWorkbench',
 		async () => {
-			const det = getDetector();
-			if (!det) {
-				vscode.window.showErrorMessage('No workspace folder open');
-				return;
-			}
-
-			const isSpfx = await det.isSpfxProject();
-
-			if (!isSpfx) {
-				vscode.window.showErrorMessage('This does not appear to be an SPFx project');
-				return;
-			}
-
-			// Get workbench settings
-			const settings = getWorkbenchSettings();
-
-			// Create a terminal and run the configured serve command
-			const terminal = vscode.window.createTerminal('SPFx Serve');
-			terminal.show();
-			terminal.sendText(settings.serveCommand);
-
-			// Parse host/port from the configured serve URL
-			let serveHost = 'localhost';
-			let servePort = 4321;
-			try {
-				const url = new URL(settings.serveUrl);
-				serveHost = url.hostname;
-				servePort = parseInt(url.port, 10) || (url.protocol === 'https:' ? 443 : 80);
-			} catch {
-				// Fall back to defaults
-			}
-
-			// Wait for the serve port to accept connections, with a progress indicator
-			const serverReady = await vscode.window.withProgress(
-				{
-					location: vscode.ProgressLocation.Notification,
-					title: 'SPFx Serve',
-					cancellable: true
-				},
-				async (progress, cancellationToken) => {
-					const maxWaitMs = 120_000; // 2 minutes
-					const pollIntervalMs = 500;
-					const startTime = Date.now();
-
-					progress.report({ message: 'Waiting for serve to start…' });
-
-					while (Date.now() - startTime < maxWaitMs) {
-						if (cancellationToken.isCancellationRequested) {
-							return false;
-						}
-
-						if (await isPortReachable(serveHost, servePort)) {
-							return true;
-						}
-
-						const elapsed = Math.round((Date.now() - startTime) / 1000);
-						progress.report({ message: `Waiting for serve to start… (${elapsed}s)` });
-						await delay(pollIntervalMs);
-					}
-
-					return false; // timed out
-				}
-			);
-
-			if (serverReady) {
+			const ready = await startServeIfNeeded();
+			if (ready) {
 				WorkbenchPanel.createOrShow(context.extensionUri);
-			} else {
-				const choice = await vscode.window.showWarningMessage(
-					'SPFx serve did not start in time. Open workbench anyway?',
-					'Open', 'Cancel'
-				);
-				if (choice === 'Open') {
-					WorkbenchPanel.createOrShow(context.extensionUri);
-				}
 			}
 		}
 	);
@@ -184,6 +189,20 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 
 			await StorybookPanel.createOrShow(context.extensionUri, det);
+		}
+	);
+
+	// Register the Start Serve & Open Storybook command
+	const startServeStorybookCommand = vscode.commands.registerCommand(
+		'spfx-local-workbench.startServeStorybook',
+		async () => {
+			const ready = await startServeIfNeeded();
+			if (ready) {
+				const det = getDetector();
+				if (det) {
+					await StorybookPanel.createOrShow(context.extensionUri, det);
+				}
+			}
 		}
 	);
 
@@ -279,20 +298,25 @@ export function activate(context: vscode.ExtensionContext) {
 				const versionString = `SPFx Project detected${version ? ` (${version})` : ''}`;
 				let icon = 'fluentui-testbeaker';
 				switch (action) {
-					case 'startServe':
-						statusBarItem.command = 'spfx-local-workbench.startServe';
-						statusBarItem.tooltip = `${versionString}\nClick to start serve and open workbench`;
+					case 'startServeWorkbench':
+						statusBarItem.command = 'spfx-local-workbench.startServeWorkbench';
+						statusBarItem.tooltip = `${versionString}\nClick to start serve and open the Local Workbench panel`;
 						icon = 'fluentui-testbeakersolid';
+						break;
+					case 'startServeStorybook':
+						statusBarItem.command = 'spfx-local-workbench.startServeStorybook';
+						statusBarItem.tooltip = `${versionString}\nClick to start serve and open the SPFx Storybook panel`;
+						icon = 'fluentui-teststep';
 						break;
 					case 'openStorybook':
 						statusBarItem.command = 'spfx-local-workbench.openStorybook';
-						statusBarItem.tooltip = `${versionString}\nClick to open Storybook`;
+						statusBarItem.tooltip = `${versionString}\nClick to open the SPFx Storybook panel`;
 						icon = 'fluentui-teststep';
 						break;
 					case 'openWorkbench':
 					default:
 						statusBarItem.command = 'spfx-local-workbench.openWorkbench';
-						statusBarItem.tooltip = `${versionString}\nClick to open local workbench`;
+						statusBarItem.tooltip = `${versionString}\nClick to open the Local Workbench panel`;
 						icon = 'fluentui-testbeaker';
 						break;
 				}
@@ -335,7 +359,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		openWorkbenchCommand,
-		startServeCommand,
+		startServeWorkbenchCommand,
+		startServeStorybookCommand,
 		detectWebPartsCommand,
 		openDevToolsCommand,
 		openStorybookCommand,
