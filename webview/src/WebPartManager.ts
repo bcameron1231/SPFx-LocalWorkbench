@@ -2,6 +2,7 @@
 //
 // Handles loading, instantiation, and lifecycle of SPFx web parts
 import {
+  AMD_REGISTRATION_DELAY_MS,
   BundleLoader,
   ComponentResolver,
   StringsLoader,
@@ -56,7 +57,7 @@ export class WebPartManager {
     try {
       await this.loadWebPartStrings(config.manifest, localeOverride);
       const newModules = await this.loadWebPartBundle(config.manifest);
-      await new Promise((r) => setTimeout(r, 100));
+      await new Promise((r) => setTimeout(r, AMD_REGISTRATION_DELAY_MS));
 
       const context = this.contextProvider.createMockContext(config.manifest.id, config.instanceId);
       context.domElement = domElement;

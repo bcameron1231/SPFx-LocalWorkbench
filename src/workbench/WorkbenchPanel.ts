@@ -255,7 +255,7 @@ export class WorkbenchPanel {
       webPartsJson,
       extensionsJson,
       cspSource: webview.cspSource,
-      locale: 'en-us', // TODO: Support override
+      locale: 'en-us', // TODO: Add UI control for interactive locale override (dropdown/selector in workbench toolbar)
       webPartCount: this._webParts.length,
       extensionCount: this._extensions.length,
       webview: webview,
