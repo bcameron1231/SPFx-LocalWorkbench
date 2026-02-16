@@ -34,7 +34,7 @@ webview/
     amd/                    # AMD module loader for SPFx bundles
     components/             # React components (App, Canvas, PropertyPane, ExtensionPicker, etc.)
     mocks/                  # SharePoint API mocks (Context, Theme, sp-application-base)
-    ui/                     # UI utilities (CanvasRenderer)
+    ui/                     # UI utilities
     types/                  # Webview-specific type definitions
 packages/
   shared/                   # Shared code between extension and Storybook addon

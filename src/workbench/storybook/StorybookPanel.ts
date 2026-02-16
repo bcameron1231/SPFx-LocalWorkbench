@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import { StorybookServerManager, IStorybookServerOptions } from './StorybookServerManager';
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
+import { getNonce } from '@spfx-local-workbench/shared/utils/securityUtils';
+import { escapeHtml } from '@spfx-local-workbench/shared';
 
 /**
  * Manages the Storybook webview panel
@@ -253,7 +255,7 @@ export class StorybookPanel {
      */
     private getStorybookHtml(): string {
         const storybookUrl = this.serverManager.getUrl();
-        const nonce = this.getNonce();
+        const nonce = getNonce();
 
         return `<!DOCTYPE html>
 <html lang="en">
@@ -397,36 +399,13 @@ export class StorybookPanel {
     <div class="error">
         <h2>Failed to Start Storybook</h2>
         <p>An error occurred while starting the Storybook server:</p>
-        <pre>${this.escapeHtml(error)}</pre>
+        <pre>${escapeHtml(error)}</pre>
         <p>Please check the output panel for more details.</p>
     </div>
 </body>
 </html>`;
     }
 
-    /**
-     * Escape HTML entities
-     */
-    private escapeHtml(text: string): string {
-        return text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    }
-
-    /**
-     * Generate a random nonce for CSP
-     */
-    private getNonce(): string {
-        let text = '';
-        const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (let i = 0; i < 32; i++) {
-            text += possible.charAt(Math.floor(Math.random() * possible.length));
-        }
-        return text;
-    }
 }
 
 /**

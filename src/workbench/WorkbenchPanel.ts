@@ -5,16 +5,11 @@
 // extension and the webview.
 
 import * as vscode from 'vscode';
-import { randomBytes } from 'crypto';
 import { SpfxProjectDetector } from './SpfxProjectDetector';
 import type { IWebPartManifest } from './types';
 import { generateWorkbenchHtml, generateErrorHtml } from './html';
 import { getWorkbenchSettings, onConfigurationChanged, getCurrentTheme, IWorkbenchSettings } from './config';
-
-// Generates a cryptographic nonce for CSP
-function getNonce(): string {
-    return randomBytes(16).toString('base64url');
-}
+import { getNonce } from '@spfx-local-workbench/shared/utils/securityUtils';
 
 // WorkbenchPanel manages the webview that hosts the SPFx local workbench.
 export class WorkbenchPanel {

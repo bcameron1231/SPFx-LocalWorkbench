@@ -1,18 +1,7 @@
 import * as vscode from 'vscode';
-import * as net from 'net';
 import * as path from 'path';
 import { WorkbenchPanel, SpfxProjectDetector, createManifestWatcher, getWorkbenchSettings, StorybookPanel, StorybookPanelSerializer, StoryGenerator } from './workbench';
-
-function isPortReachable(host: string, port: number, timeout = 1000): Promise<boolean> {
-	return new Promise((resolve) => {
-		const socket = new net.Socket();
-		socket.setTimeout(timeout);
-		socket.once('connect', () => { socket.destroy(); resolve(true); });
-		socket.once('timeout', () => { socket.destroy(); resolve(false); });
-		socket.once('error', () => { socket.destroy(); resolve(false); });
-		socket.connect(port, host);
-	});
-}
+import { isPortReachable } from '@spfx-local-workbench/shared/utils/networkUtils';
 
 function delay(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));

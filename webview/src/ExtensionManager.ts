@@ -5,7 +5,7 @@
 // placeholders on the page.
 
 import type { IWebPartManifest, IExtensionConfig, IActiveExtension, IVsCodeApi } from './types';
-import { BundleLoader, ComponentResolver } from '@spfx-local-workbench/shared';
+import { BundleLoader, ComponentResolver, setupProperty } from '@spfx-local-workbench/shared';
 import { SpfxContext, ThemeProvider } from './mocks';
 
 // PlaceholderName enum matching @microsoft/sp-application-base
@@ -165,10 +165,10 @@ export class ExtensionManager {
 
             // Set up the instance with our mock context
             instance._context = active.context;
-            this.setupProperty(instance, 'context', () => active.context);
+            setupProperty(instance, 'context', () => active.context);
 
             instance._properties = active.properties;
-            this.setupProperty(
+            setupProperty(
                 instance,
                 'properties',
                 () => active.properties,
@@ -212,27 +212,6 @@ export class ExtensionManager {
             console.error('ExtensionManager - Setup error:', e);
             headerElement.innerHTML = '<div class="error-message">Extension setup error: ' + e.message + '</div>';
             throw e;
-        }
-    }
-
-    private setupProperty(
-        instance: any,
-        propName: string,
-        getter: () => any,
-        setter?: (val: any) => void
-    ): void {
-        try {
-            const descriptor: PropertyDescriptor = {
-                get: getter,
-                configurable: true,
-                enumerable: true
-            };
-            if (setter) {
-                descriptor.set = setter;
-            }
-            Object.defineProperty(instance, propName, descriptor);
-        } catch (e: any) {
-            // Silently fail - some properties might be non-configurable
         }
     }
 

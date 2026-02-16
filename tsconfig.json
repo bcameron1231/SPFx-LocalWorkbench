@@ -9,8 +9,10 @@
 		"jsx": "react",
 		"sourceMap": true,
 		"strict": true,   /* enable all strict type-checking options */
+		"forceConsistentCasingInFileNames": true,
 		"paths": {
-			"@spfx-local-workbench/shared": ["./packages/shared/src"]
+			"@spfx-local-workbench/shared": ["./packages/shared/src"],
+			"@spfx-local-workbench/shared/*": ["./packages/shared/src/*"]
 		},
 		/* Additional Checks */
 		// "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */

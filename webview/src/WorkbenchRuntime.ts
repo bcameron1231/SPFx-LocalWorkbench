@@ -118,19 +118,6 @@ export class WorkbenchRuntime {
         this.updateStatus('Loaded ' + componentCount + ' components (' + webPartCount + ' web parts, ' + extCount + ' extensions)');
     }
 
-    private async loadExtensions(): Promise<void> {
-        const extensionManifests = this.loadedManifests.filter(m => m.componentType === 'Extension');
-        
-        if (extensionManifests.length === 0) {
-            return;
-        }
-
-        // Create active extension instances for each manifest
-        for (const manifest of extensionManifests) {
-            await this.addExtension(extensionManifests.indexOf(manifest));
-        }
-    }
-
     async addExtension(manifestIndex: number): Promise<void> {
         const extensions = this.loadedManifests.filter(m => m.componentType === 'Extension');
         const manifest = extensions[manifestIndex];

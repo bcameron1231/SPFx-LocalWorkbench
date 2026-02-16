@@ -3,7 +3,7 @@
 // Handles loading, instantiation, and lifecycle of SPFx web parts
 
 import type { IWebPartManifest, IWebPartConfig, IActiveWebPart, IVsCodeApi } from './types';
-import { BundleLoader, StringsLoader, ComponentResolver } from '@spfx-local-workbench/shared';
+import { BundleLoader, StringsLoader, ComponentResolver, setupProperty } from '@spfx-local-workbench/shared';
 import { SpfxContext, ThemeProvider } from './mocks';
 
 export class WebPartManager {
@@ -88,13 +88,13 @@ export class WebPartManager {
 
             // Set up the instance with our mock context
             instance._context = active.context;
-            this.setupProperty(instance, 'context', () => active.context);
+            setupProperty(instance, 'context', () => active.context);
 
             instance._domElement = domElement;
-            this.setupProperty(instance, 'domElement', () => domElement);
+            setupProperty(instance, 'domElement', () => domElement);
 
             instance._properties = active.properties;
-            this.setupProperty(
+            setupProperty(
                 instance,
                 'properties',
                 () => active.properties,
@@ -105,7 +105,7 @@ export class WebPartManager {
             );
 
             instance._displayMode = 2; // Edit mode
-            this.setupProperty(instance, 'displayMode', () => 2);
+            setupProperty(instance, 'displayMode', () => 2);
 
             // Call onInit if available
             if (typeof instance.onInit === 'function') {
@@ -155,26 +155,6 @@ export class WebPartManager {
             console.error('Setup error:', e);
             domElement.innerHTML = '<div class="error-message">Setup error: ' + e.message + '</div>';
             throw e;
-        }
-    }
-
-    private setupProperty(
-        instance: any,
-        propName: string,
-        getter: () => any,
-        setter?: (val: any) => void
-    ): void {
-        try {
-            const descriptor: PropertyDescriptor = {
-                get: getter,
-                configurable: true,
-                enumerable: true
-            };
-            if (setter) {
-                descriptor.set = setter;
-            }
-            Object.defineProperty(instance, propName, descriptor);
-        } catch (e: any) {
         }
     }
 
