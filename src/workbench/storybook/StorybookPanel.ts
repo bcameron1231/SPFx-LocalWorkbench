@@ -88,6 +88,9 @@ export class StorybookPanel {
             extensionUri
         );
 
+        // Set context for menu visibility
+        void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.isStorybook', true);
+
         // Set the webview's initial html content
         this.panel.webview.html = this.getLoadingHtml();
 
@@ -116,6 +119,7 @@ export class StorybookPanel {
         // Handle visibility changes
         this.panel.onDidChangeViewState(
             () => {
+                void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.isStorybook', this.panel.active);
                 if (this.panel.visible) {
                     this.refresh();
                 }
@@ -166,6 +170,9 @@ export class StorybookPanel {
      */
     public async dispose(): Promise<void> {
         StorybookPanel.currentPanel = undefined;
+
+        // Clear context
+        void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.isStorybook', false);
 
         // Stop and dispose the server (this now handles cleanup properly)
         await this.serverManager.dispose();

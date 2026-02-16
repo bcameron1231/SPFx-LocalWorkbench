@@ -159,20 +159,13 @@
           "group": "navigation"
         },
         {
-          "command": "spfx-local-workbench.openDevTools",
-          "when": "spfxLocalWorkbench.isWorkbench",
-          "group": "navigation"
-        }
-      ],
-      "webview/title": [
-        {
-          "command": "spfx-local-workbench.detectWebParts",
-          "when": "webviewType == spfxLocalWorkbench",
+          "command": "spfx-local-workbench.generateStories",
+          "when": "spfxLocalWorkbench.isStorybook",
           "group": "navigation"
         },
         {
           "command": "spfx-local-workbench.openDevTools",
-          "when": "webviewType == spfxLocalWorkbench",
+          "when": "spfxLocalWorkbench.isWorkbench || spfxLocalWorkbench.isStorybook",
           "group": "navigation"
         }
       ]
