@@ -21,7 +21,7 @@ export function setupProperty(
             descriptor.set = setter;
         }
         Object.defineProperty(instance, propName, descriptor);
-    } catch (e: any) {
+    } catch (error: unknown) {
         // Property may already be defined or object sealed, ignore
     }
 }

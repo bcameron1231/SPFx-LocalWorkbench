@@ -3,10 +3,11 @@
 // Handles loading, instantiation, and lifecycle of SPFx web parts
 
 import type { IWebPartManifest, IWebPartConfig, IActiveWebPart, IVsCodeApi } from './types';
-import { BundleLoader, StringsLoader, ComponentResolver, setupProperty, logger } from '@spfx-local-workbench/shared';
+import { BundleLoader, StringsLoader, ComponentResolver, setupProperty, logger, getErrorMessage } from '@spfx-local-workbench/shared';
 import { SpfxContext, ThemeProvider } from './mocks';
 
 export class WebPartManager {
+    private log = logger.createChild('WebPartManager');
     private vscode: IVsCodeApi;
     private bundleLoader: BundleLoader;
     private stringsLoader: StringsLoader;
@@ -62,8 +63,9 @@ export class WebPartManager {
             this.showDebugInfo(domElement, config.manifest, config.properties);
             return;
 
-        } catch (error: any) {
-            domElement.innerHTML = '<div class="error-message">Failed to load: ' + error.message + '</div>';
+        } catch (error: unknown) {
+            this.log.error('Failed to load web part:', error);
+            domElement.innerHTML = '<div class="error-message">Failed to load: ' + getErrorMessage(error) + '</div>';
             return;
         }
     }
@@ -115,7 +117,9 @@ export class WebPartManager {
                         await initResult;
                     } else {
                     }
-                } catch (e: any) {
+                } catch (error: unknown) {
+                    // onInit error - log but continue
+                    this.log.warn('Error in onInit:', error);
                 }
             }
 
@@ -126,7 +130,9 @@ export class WebPartManager {
             if (typeof instance.onThemeChanged === 'function') {
                 try {
                     instance.onThemeChanged(this.themeProvider.getTheme());
-                } catch (e: any) {
+                } catch (error: unknown) {
+                    // onThemeChanged error - log but continue
+                    this.log.warn('Error in onThemeChanged:', error);
                 }
             }
 
@@ -142,19 +148,19 @@ export class WebPartManager {
                             }
                         }, 500);
                     }
-                } catch (e: any) {
-                    logger.error('WebPartManager - Render error:', e);
-                    domElement.innerHTML = '<div class="error-message">Render error: ' + e.message + '</div>';
+                } catch (error: unknown) {
+                    this.log.error('Render error:', error);
+                    domElement.innerHTML = '<div class="error-message">Render error: ' + getErrorMessage(error) + '</div>';
                 }
             } else {
                 domElement.innerHTML = '<div class="error-message">Web part has no render method</div>';
             }
 
             return active;
-        } catch (e: any) {
-            logger.error('WebPartManager - Setup error:', e);
-            domElement.innerHTML = '<div class="error-message">Setup error: ' + e.message + '</div>';
-            throw e;
+        } catch (error: unknown) {
+            this.log.error('Setup error:', error);
+            domElement.innerHTML = '<div class="error-message">Setup error: ' + getErrorMessage(error) + '</div>';
+            throw error;
         }
     }
 

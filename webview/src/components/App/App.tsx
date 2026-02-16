@@ -1,6 +1,7 @@
 import React, { useState, useEffect, FC } from 'react';
 import type { IWorkbenchConfig, IWebPartManifest, IWebPartConfig, IActiveWebPart, IExtensionConfig } from '../../types';
 import { isActiveWebPart } from '../../types';
+import { logger } from '@spfx-local-workbench/shared';
 import { WorkbenchCanvas } from '../WorkbenchCanvas';
 import { PropertyPanePanel } from '../PropertyPanePanel';
 import { ErrorBoundary } from '../ErrorBoundary';
@@ -132,11 +133,11 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
                     }}
                     onEditWebPart={(index) => {
                         const webPart = activeWebParts[index];
-                        console.log('Selected web part for editing:', webPart);
+                        logger.debug('Selected web part for editing:', webPart);
                         if (webPart && isActiveWebPart(webPart)) {
                             setSelectedWebPart(webPart);
                         } else {
-                            console.warn(`Web part at index ${index} is not active or does not exist.`);
+                            logger.warn(`Web part at index ${index} is not active or does not exist.`);
                         }
                     }}
                     onDeleteWebPart={(index) => {

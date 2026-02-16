@@ -247,7 +247,7 @@ export { ${exports} };
     public async cleanGeneratedStories(): Promise<void> {
         try {
             await fs.rm(this.outputDir, { recursive: true, force: true });
-        } catch (error) {
+        } catch (error: unknown) {
             logger.error('StoryGenerator - Error cleaning generated stories:', error);
         }
     }

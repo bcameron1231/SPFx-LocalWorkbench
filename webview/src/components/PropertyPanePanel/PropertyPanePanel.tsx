@@ -6,7 +6,7 @@ import {
     IconButton
 } from '@fluentui/react';
 import type { IActiveWebPart } from '../../types';
-import { PropertyPaneFieldType } from '@spfx-local-workbench/shared';
+import { PropertyPaneFieldType, logger } from '@spfx-local-workbench/shared';
 import styles from './PropertyPanePanel.module.css';
 import {
     TextFieldComponent,
@@ -40,8 +40,8 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
             try {
                 const paneConfig = webPart.instance.getPropertyPaneConfiguration();
                 setConfig(paneConfig);
-            } catch (e: any) {
-                console.error('PropertyPane - Error getting configuration:', e);
+            } catch (error: unknown) {
+                logger.warn('Error getting property pane configuration:', error);
                 setConfig(null);
             }
         } else {

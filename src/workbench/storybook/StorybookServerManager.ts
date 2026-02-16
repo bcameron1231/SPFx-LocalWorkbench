@@ -4,6 +4,8 @@ import * as vscode from 'vscode';
 import * as net from 'net';
 import { StoryGenerator } from './StoryGenerator';
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
+import { getErrorMessage } from '@spfx-local-workbench/shared/utils/errorUtils';
+import { logger } from '@spfx-local-workbench/shared/utils/logger';
 
 /**
  * Configuration options for the Storybook server
@@ -28,6 +30,7 @@ export type ServerStatus = 'stopped' | 'starting' | 'running' | 'error';
  * Manages the Storybook development server lifecycle
  */
 export class StorybookServerManager {
+    private log = logger.createChild('StorybookServer');
     private process: ChildProcess | null = null;
     private status: ServerStatus = 'stopped';
     private port: number = 6006;
@@ -91,10 +94,10 @@ export class StorybookServerManager {
             
             this.status = 'running';
             this.outputChannel.appendLine(`✓ Storybook is ready at ${this.getUrl()}`);
-        } catch (error) {
+        } catch (error: unknown) {
             this.status = 'error';
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            this.outputChannel.appendLine(`ERROR: Failed to start Storybook: ${errorMessage}`);
+            this.log.error('Failed to start Storybook:', error);
+            this.outputChannel.appendLine(`ERROR: Failed to start Storybook: ${getErrorMessage(error)}`);
             throw error;
         }
     }
@@ -181,9 +184,9 @@ export class StorybookServerManager {
             for (const story of stories) {
                 this.outputChannel.appendLine(`  - ${path.basename(story.filePath)}`);
             }
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            this.outputChannel.appendLine(`WARNING: Failed to generate stories: ${errorMessage}`);
+        } catch (error: unknown) {
+            this.log.warn('Failed to generate stories:', error);
+            this.outputChannel.appendLine(`WARNING: Failed to generate stories: ${getErrorMessage(error)}`);
             // Don't throw - allow server to start even if story generation fails
         }
     }
@@ -496,8 +499,9 @@ export default preview;
             await this.runNpmInstall([]);
             
             this.outputChannel.appendLine('✓ Addon linked successfully');
-        } catch (error) {
-            this.outputChannel.appendLine(`Warning: Could not link addon: ${error}`);
+        } catch (error: unknown) {
+            this.log.warn('Could not link addon:', error);
+            this.outputChannel.appendLine(`Warning: Could not link addon: ${getErrorMessage(error)}`);
             this.outputChannel.appendLine('You may need to install @spfx-local-workbench/storybook-addon-spfx manually');
         }
     }

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
+import { isFileNotFoundError } from '@spfx-local-workbench/shared/utils/errorUtils';
 import type {
     IWebPartManifest,
     ISpfxConfig,
@@ -35,9 +36,9 @@ export class SpfxProjectDetector {
                 dependencies['@microsoft/sp-application-base'] ||
                 dependencies['@microsoft/generator-sharepoint']
             );
-        } catch (error) {
-            if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-                console.error('SpfxProjectDetector - Error reading package.json:', error);
+        } catch (error: unknown) {
+            if (!isFileNotFoundError(error)) {
+                logger.error('SpfxProjectDetector - Error reading package.json:', error);
             }
             return false;
         }
@@ -55,7 +56,7 @@ export class SpfxProjectDetector {
             };
             return dependencies['@microsoft/sp-core-library'] || 
                    dependencies['@microsoft/sp-webpart-base'];
-        } catch (error) {
+        } catch (error: unknown) {
             return undefined;
         }
     }
@@ -81,7 +82,7 @@ export class SpfxProjectDetector {
             const hasServeScript = !!(packageJson.scripts?.serve);
 
             return hasHeft || hasServeScript;
-        } catch (error) {
+        } catch (error: unknown) {
             return false;
         }
     }
@@ -117,8 +118,8 @@ export class SpfxProjectDetector {
                 if (manifest.componentType === 'WebPart') {
                     manifests.push(manifest);
                 }
-            } catch (error) {
-                console.error(`Error parsing manifest ${manifestFile}:`, error);
+            } catch (error: unknown) {
+                logger.error(`SpfxProjectDetector - Error parsing manifest ${manifestFile}:`, error);
             }
         }
 
@@ -148,7 +149,7 @@ export class SpfxProjectDetector {
                 if (manifest.componentType === 'Extension') {
                     manifests.push(manifest);
                 }
-            } catch (error) {
+            } catch (error: unknown) {
                 logger.error(`SpfxProjectDetector - Error parsing manifest ${manifestFile}:`, error);
             }
         }
@@ -169,7 +170,7 @@ export class SpfxProjectDetector {
                 initialPage: config.initialPage,
                 port: config.port || 4321
             };
-        } catch (error) {
+        } catch (error: unknown) {
             return { port: 4321 };
         }
     }
@@ -182,7 +183,7 @@ export class SpfxProjectDetector {
             const content = await fs.readFile(configPath, 'utf8');
             const cleanContent = this.removeJsonComments(content);
             return JSON.parse(cleanContent);
-        } catch (error) {
+        } catch (error: unknown) {
             return undefined;
         }
     }
@@ -285,7 +286,7 @@ export class SpfxProjectDetector {
                 if (locales.length > 0) {
                     componentLocales[resourceName] = locales.sort();
                 }
-            } catch (error) {
+            } catch (error: unknown) {
                 // Directory might not exist
                 logger.debug(`SpfxProjectDetector - Localization directory not found: ${dirPath}`);
             }
@@ -331,7 +332,7 @@ export class SpfxProjectDetector {
                         });
                     }
                 }
-            } catch (error) {
+            } catch (error: unknown) {
                 // Directory might not exist, continue
                 logger.debug(`SpfxProjectDetector - Localization directory not found: ${dirPath}`);
             }

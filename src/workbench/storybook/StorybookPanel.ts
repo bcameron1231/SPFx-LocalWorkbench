@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { StorybookServerManager, IStorybookServerOptions } from './StorybookServerManager';
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
 import { getNonce } from '@spfx-local-workbench/shared/utils/securityUtils';
-import { escapeHtml } from '@spfx-local-workbench/shared';
+import { escapeHtml, getErrorMessage } from '@spfx-local-workbench/shared';
 
 /**
  * Manages the Storybook webview panel
@@ -138,9 +138,8 @@ export class StorybookPanel {
         try {
             await this.serverManager.start(options);
             this.panel.webview.html = this.getStorybookHtml();
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            this.panel.webview.html = this.getErrorHtml(errorMessage);
+        } catch (error: unknown) {
+            this.panel.webview.html = this.getErrorHtml(getErrorMessage(error));
         }
     }
 
@@ -161,9 +160,8 @@ export class StorybookPanel {
         try {
             await this.serverManager.restart();
             this.panel.webview.html = this.getStorybookHtml();
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            this.panel.webview.html = this.getErrorHtml(errorMessage);
+        } catch (error: unknown) {
+            this.panel.webview.html = this.getErrorHtml(getErrorMessage(error));
         }
     }
 

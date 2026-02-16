@@ -4,6 +4,7 @@
 // that allows SPFx bundles to load and register their modules.
 
 import type { IAmdModules, IAmdPending } from '../types';
+import { logger } from '../utils/logger';
 
 // Extend Window interface for AMD globals
 // NOTE: These declarations are safe in Node.js - they only extend type definitions
@@ -47,7 +48,7 @@ export class AmdLoader {
         // resolve require('react') — mirroring how SharePoint provides React as a
         // page-level global. Non-React web parts simply ignore it.
         if (!window.React || !window.ReactDOM) {
-            console.error('AmdLoader - React/ReactDOM globals not found. The workbench UI requires React to render.');
+            logger.error('AmdLoader - React/ReactDOM globals not found. The workbench UI requires React to render.');
             return;
         }
 
@@ -84,8 +85,8 @@ export class AmdLoader {
 
                 try {
                     moduleExports = factory.apply(null, resolvedDeps);
-                } catch (e: any) {
-                    console.error('AmdLoader - Error executing factory for', name, e);
+                } catch (error: unknown) {
+                    logger.error('AmdLoader - Error executing factory for', name, error);
                 }
 
                 if (moduleExports === undefined && exportsIndex >= 0) {
@@ -177,7 +178,7 @@ export class AmdLoader {
         }
 
         if (!mod) {
-            console.warn('AmdLoader - Missing dependency:', dep);
+            logger.warn('AmdLoader - Missing dependency:', dep);
             mod = {};
         }
         return mod;
@@ -198,23 +199,23 @@ export const amdLoader = {
   get instance(): AmdLoader {
     if (!_amdLoaderInstance) {
       _amdLoaderInstance = new AmdLoader();
-      console.log('[amdLoader] Created singleton instance');
+      logger.debug('[amdLoader] Created singleton instance');
     }
     return _amdLoaderInstance;
   },
   initialize(): void {
-    console.log('[amdLoader.initialize] Called');
+    logger.debug('[amdLoader.initialize] Called');
     this.instance.initialize();
   },
   getModules(): IAmdModules {
-    console.log('[amdLoader.getModules] Called');
+    logger.debug('[amdLoader.getModules] Called');
     return this.instance.getModules();
   }
 };
 
 // Debug: Log at module load time
 if (typeof window !== 'undefined') {
-  console.log('[AmdLoader Module] Loaded in browser, amdLoader exported:', {
+  logger.debug('[AmdLoader Module] Loaded in browser, amdLoader exported:', {
     type: typeof amdLoader,
     hasInitialize: typeof amdLoader.initialize === 'function',
     keys: Object.keys(amdLoader)

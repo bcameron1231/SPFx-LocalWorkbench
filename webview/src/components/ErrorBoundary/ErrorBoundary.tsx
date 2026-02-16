@@ -1,4 +1,5 @@
 import React, { Component, ReactNode } from 'react';
+import { logger } from '@spfx-local-workbench/shared';
 
 interface IErrorBoundaryProps {
     children: ReactNode;
@@ -20,7 +21,7 @@ export class ErrorBoundary extends Component<IErrorBoundaryProps, IErrorBoundary
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-        console.error('ErrorBoundary - Caught error:', error, errorInfo);
+        logger.error('ErrorBoundary - Caught error:', error, errorInfo);
     }
 
     render(): React.ReactNode {

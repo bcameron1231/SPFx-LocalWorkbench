@@ -5,12 +5,13 @@
 import type { IWorkbenchConfig, IWebPartManifest, IWebPartConfig, IExtensionConfig, IVsCodeApi } from './types';
 import { isActiveWebPart, isActiveExtension } from './types';
 import type { IAppHandlers } from './components/App';
-import { amdLoader, ManifestLoader, initializeSpfxMocks, logger } from '@spfx-local-workbench/shared';
+import { amdLoader, ManifestLoader, initializeSpfxMocks, logger, getErrorMessage } from '@spfx-local-workbench/shared';
 import { SpfxContext, ThemeProvider } from './mocks';
 import { WebPartManager } from './WebPartManager';
 import { ExtensionManager } from './ExtensionManager';
 
 export class WorkbenchRuntime {
+    private log = logger.createChild('Workbench');
     private vscode: IVsCodeApi;
     private config: IWorkbenchConfig;
     private manifestLoader: ManifestLoader;
@@ -65,28 +66,28 @@ export class WorkbenchRuntime {
         if (settings.context) {
             this.contextProvider = new SpfxContext(settings.context);
         }
-        logger.debug('Workbench - Settings updated in-place');
+        this.log.debug('Settings updated in-place');
     }
 
     async initialize(): Promise<void> {
         try {
-            logger.info('Workbench - Starting initialization...');
+            this.log.info('Starting initialization...');
             
             // Initialize AMD loader (must be before SPFx mocks)
             amdLoader.initialize();
-            logger.debug('Workbench - AMD loader initialized');
+            this.log.debug('AMD loader initialized');
             
             // Initialize SPFx mocks
             initializeSpfxMocks();
-            logger.debug('Workbench - SPFx mocks initialized');
+            this.log.debug('SPFx mocks initialized');
 
             // Update status
             this.updateStatus('Connecting to serve at ' + this.config.serveUrl + '...');
 
             // Load manifests from serve
-            logger.debug('Workbench - Loading manifests from', this.config.serveUrl);
+            this.log.debug('Loading manifests from', this.config.serveUrl);
             await this.loadManifests();
-            logger.info('Workbench - Manifests loaded:', this.loadedManifests.length);
+            this.log.info('Manifests loaded:', this.loadedManifests.length);
 
             this.updateStatus('Connected');
             this.updateConnectionStatus(true);
@@ -102,10 +103,10 @@ export class WorkbenchRuntime {
                 this.appHandlers.setActiveExtensions(this.activeExtensions);
             }
 
-        } catch (error: any) {
-            logger.error('Workbench - Initialization failed:', error);
+        } catch (error: unknown) {
+            this.log.error('Initialization failed:', error);
             this.updateConnectionStatus(false);
-            this.updateStatus('Failed to connect: ' + (error.message || String(error)));
+            this.updateStatus('Failed to connect: ' + getErrorMessage(error));
         }
     }
 
@@ -178,9 +179,9 @@ export class WorkbenchRuntime {
             if (extension.instance?.onDispose) {
                 try {
                     extension.instance.onDispose();
-                } catch (e: any) {
-                    // Error disposing
-                    logger.error('Workbench - Error disposing extension:', e);
+                } catch (error: unknown) {
+                    // Error disposing - log but don't fail
+                    this.log.warn('Error disposing extension:', error);
                 }
             }
 
@@ -245,9 +246,9 @@ export class WorkbenchRuntime {
             if (typeof webPart.instance.onDispose === 'function') {
                 try {
                     webPart.instance.onDispose();
-                } catch (e: any) {
-                    // Error disposing
-                    logger.error('Workbench - Error disposing web part:', e);
+                } catch (error: unknown) {
+                    // Error disposing - log but don't fail
+                    this.log.warn('Error disposing web part:', error);
                 }
             }
         }
@@ -291,16 +292,16 @@ export class WorkbenchRuntime {
             if (typeof webPart.instance.onPropertyPaneFieldChanged === 'function') {
                 try {
                     webPart.instance.onPropertyPaneFieldChanged(targetProperty, null, newValue);
-                } catch (e: any) {
-                    logger.error('Workbench - Error calling onPropertyPaneFieldChanged:', e);
+                } catch (error: unknown) {
+                    this.log.warn('Error calling onPropertyPaneFieldChanged:', error);
                 }
             }
 
             if (typeof webPart.instance.render === 'function') {
                 try {
                     webPart.instance.render();
-                } catch (e: any) {
-                    logger.error('Workbench - Error rendering web part:', e);
+                } catch (error: unknown) {
+                    this.log.warn('Error rendering web part:', error);
                 }
             }
         }
@@ -322,8 +323,8 @@ export class WorkbenchRuntime {
             if (extension.instance?.onDispose) {
                 try {
                     extension.instance.onDispose();
-                } catch (e: any) {
-                    logger.error('Workbench - Error disposing extension:', e);
+                } catch (error: unknown) {
+                    this.log.warn('Error disposing extension:', error);
                 }
             }
 
@@ -365,7 +366,7 @@ export class WorkbenchRuntime {
     }
 
     async liveReload(): Promise<void> {
-        logger.info('Workbench - Live reload triggered — reloading bundles...');
+        this.log.info('Live reload triggered — reloading bundles...');
         this.updateStatus('Reloading...');
 
         // Strip runtime state back to configs
@@ -407,9 +408,9 @@ export class WorkbenchRuntime {
             if (this.appHandlers) {
                 this.appHandlers.setManifests(this.loadedManifests);
             }
-        } catch (error: any) {
-            logger.error('Workbench - Live reload — failed to load manifests:', error);
-            this.updateStatus('Reload failed: ' + (error.message || error));
+        } catch (error: unknown) {
+            this.log.error('Live reload — failed to load manifests:', error);
+            this.updateStatus('Reload failed: ' + getErrorMessage(error));
             return;
         }
 
@@ -443,7 +444,7 @@ export class WorkbenchRuntime {
 
         this.updateStatus('Reloaded');
         this.updateConnectionStatus(true);
-        logger.info('Workbench - Live reload complete');
+        this.log.info('Live reload complete');
     }
 
     handleRefresh(): void {

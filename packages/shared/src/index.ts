@@ -11,3 +11,4 @@ export { getLocalizedString } from './utilities';  // Explicit re-export
 export { setupProperty } from './utils/componentUtils';
 export { escapeHtml } from './utils/htmlUtils';
 export { logger, LogLevel } from './utils/logger';
+export { getErrorMessage, isFileNotFoundError, isError, formatError } from './utils/errorUtils';

@@ -7,6 +7,8 @@
 import * as vscode from 'vscode';
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
 import { SpfxProjectDetector } from './SpfxProjectDetector';
+
+const log = logger.createChild('WorkbenchPanel');
 import type { IWebPartManifest } from './types';
 import { generateWorkbenchHtml, generateErrorHtml } from './html';
 import { getWorkbenchSettings, onConfigurationChanged, getCurrentTheme, IWorkbenchSettings } from './config';
@@ -136,7 +138,7 @@ export class WorkbenchPanel {
                 return;
 
             case 'error':
-                logger.error('Workbench -', message.text);
+                log.error('Webview error:', message.text);
                 if (message.text) {
                     vscode.window.showErrorMessage(message.text);
                 }

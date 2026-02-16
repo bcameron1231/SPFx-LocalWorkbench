@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { WorkbenchPanel, SpfxProjectDetector, createManifestWatcher, getWorkbenchSettings, StorybookPanel, StorybookPanelSerializer, StoryGenerator } from './workbench';
 import { isPortReachable } from '@spfx-local-workbench/shared/utils/networkUtils';
+import { getErrorMessage, isFileNotFoundError } from '@spfx-local-workbench/shared/utils/errorUtils';
+import { logger } from '@spfx-local-workbench/shared/utils/logger';
 
 function delay(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -9,6 +11,7 @@ function delay(ms: number): Promise<void> {
 
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
+	const log = logger.createChild('Extension');
 
 	// Shared detector instance — workspace path rarely changes
 	let detector: SpfxProjectDetector | undefined;
@@ -217,9 +220,9 @@ export function activate(context: vscode.ExtensionContext) {
 				vscode.window.showInformationMessage(
 					`Generated ${stories.length} Storybook story file(s)`
 				);
-			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : String(error);
-				vscode.window.showErrorMessage(`Failed to generate stories: ${errorMessage}`);
+			} catch (error: unknown) {
+				log.error('Failed to generate stories:', error);
+				vscode.window.showErrorMessage(`Failed to generate stories: ${getErrorMessage(error)}`);
 			}
 		}
 	);
@@ -254,18 +257,17 @@ export function activate(context: vscode.ExtensionContext) {
 						vscode.Uri.file(storybookDir),
 						{ recursive: true, useTrash: false }
 					);
-				} catch (deleteError) {
+				} catch (deleteError: unknown) {
 					// Directory might not exist, which is fine
-					const errorMessage = deleteError instanceof Error ? deleteError.message : String(deleteError);
-					if (!errorMessage.includes('ENOENT') && !errorMessage.includes('FileNotFound')) {
+					if (!isFileNotFoundError(deleteError)) {
 						throw deleteError;
 					}
 				}
 
 				vscode.window.setStatusBarMessage('$(fluentui-broom) Storybook installation cleaned successfully', 7000);
-			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : String(error);
-				vscode.window.showErrorMessage(`Failed to clean Storybook: ${errorMessage}`);
+			} catch (error: unknown) {
+				log.error('Failed to clean Storybook:', error);
+				vscode.window.showErrorMessage(`Failed to clean Storybook: ${getErrorMessage(error)}`);
 			}
 		}
 	);

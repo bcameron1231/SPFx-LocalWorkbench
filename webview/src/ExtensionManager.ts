@@ -5,14 +5,14 @@
 // placeholders on the page.
 
 import type { IWebPartManifest, IExtensionConfig, IActiveExtension, IVsCodeApi } from './types';
-import { BundleLoader, ComponentResolver, setupProperty, logger } from '@spfx-local-workbench/shared';
+import { BundleLoader, ComponentResolver, setupProperty, logger, getErrorMessage } from '@spfx-local-workbench/shared';
 import { SpfxContext, ThemeProvider } from './mocks';
 
 // PlaceholderName enum matching @microsoft/sp-application-base
 enum PlaceholderName {
     Top = 0,
     Bottom = 1
-};
+}
 
 // Mock PlaceholderContent that wraps an actual DOM element
 class MockPlaceholderContent {
@@ -33,6 +33,7 @@ class MockPlaceholderContent {
 }
 
 export class ExtensionManager {
+    private log = logger.createChild('ExtensionManager');
     private bundleLoader: BundleLoader;
     private componentResolver: ComponentResolver;
     private contextProvider: SpfxContext;
@@ -80,8 +81,9 @@ export class ExtensionManager {
             this.showDebugInfo(headerElement, config.manifest);
             return;
 
-        } catch (error: any) {
-            headerElement.innerHTML = '<div class="error-message">Failed to load extension: ' + error.message + '</div>';
+        } catch (error: unknown) {
+            this.log.error('Failed to load extension:', error);
+            headerElement.innerHTML = '<div class="error-message">Failed to load extension: ' + getErrorMessage(error) + '</div>';
             return;
         }
     }
@@ -130,8 +132,8 @@ export class ExtensionManager {
             changedEventHandlers.forEach(({ thisArg, handler }) => {
                 try {
                     handler.call(thisArg);
-                } catch (e: any) {
-                    logger.error('ExtensionManager - Error in changedEvent handler:', e);
+                } catch (error: unknown) {
+                    this.log.warn('Error in changedEvent handler:', error);
                 }
             });
         }, 50);
@@ -187,8 +189,8 @@ export class ExtensionManager {
                     if (initResult && typeof initResult.then === 'function') {
                         await initResult;
                     }
-                } catch (e: any) {
-                    logger.error('ExtensionManager - Error in onInit:', e);
+                } catch (error: unknown) {
+                    this.log.warn('Error in onInit:', error);
                 }
             }
 
@@ -208,10 +210,10 @@ export class ExtensionManager {
             }, 500);
 
             return active;
-        } catch (e: any) {
-            logger.error('ExtensionManager - Setup error:', e);
-            headerElement.innerHTML = '<div class="error-message">Extension setup error: ' + e.message + '</div>';
-            throw e;
+        } catch (error: unknown) {
+            this.log.error('Setup error:', error);
+            headerElement.innerHTML = '<div class="error-message">Extension setup error: ' + getErrorMessage(error) + '</div>';
+            throw error;
         }
     }
 

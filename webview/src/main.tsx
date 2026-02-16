@@ -6,7 +6,10 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { WorkbenchRuntime } from './WorkbenchRuntime';
 import { App, IAppHandlers } from './components/App';
+import { logger, getErrorMessage } from '@spfx-local-workbench/shared';
 import './styles/global.css';
+
+const log = logger.createChild('Main');
 
 // Wait for DOM to be ready
 if (document.readyState === 'loading') {
@@ -100,26 +103,26 @@ function initialize() {
             React.createElement(App, {
                 config: config,
                 onInitialized: (handlers: IAppHandlers) => {
-                    console.log('[Workbench] React app initialized, handlers received');
+                    log.debug('React app initialized, handlers received');
                     runtime.setAppHandlers(handlers);
                     // Initialize the runtime after React app is ready
-                    console.log('[Workbench] Calling runtime.initialize()');
+                    log.debug('Calling runtime.initialize()');
                     runtime.initialize().catch(error => {
-                        console.error('Workbench - Initialization error:', error);
+                        log.error('Initialization error:', error);
                     });
                 }
             }),
             root
         );
 
-    } catch (globalError: any) {
-        console.error('Workbench - Fatal initialization error:', globalError);
+    } catch (globalError: unknown) {
+        log.error('Fatal initialization error:', globalError);
         const root = document.getElementById('root');
         if (root) {
             root.innerHTML = `
                 <div style="padding: 20px;">
                     <div class="error-message">
-                        <strong>Fatal Error:</strong> ${globalError.message || globalError}
+                        <strong>Fatal Error:</strong> ${getErrorMessage(globalError)}
                     </div>
                     <p style="padding: 16px;">
                         The workbench failed to initialize. Please check the console for details.

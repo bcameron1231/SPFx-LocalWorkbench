@@ -1,4 +1,5 @@
 import React, { FC, useRef, useEffect } from 'react';
+import { logger } from '@spfx-local-workbench/shared';
 
 interface ICustomFieldComponentProps {
     field: any;
@@ -19,8 +20,8 @@ export const CustomFieldComponent: FC<ICustomFieldComponentProps> = ({
             if (containerRef.current) {
                 try {
                     field.properties.onRender(containerRef.current, value, onChange);
-                } catch (e: any) {
-                    console.error('PropertyPane - Custom field render error:', e);
+                } catch (error: unknown) {
+                    logger.warn('Custom field render error:', error);
                 }
             }
         }, [field, value, onChange]);
