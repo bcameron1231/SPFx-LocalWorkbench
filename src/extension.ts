@@ -289,13 +289,10 @@ export function activate(context: vscode.ExtensionContext) {
           }
         }
 
-        vscode.window.setStatusBarMessage(
-          '$(fluentui-broom) Storybook installation cleaned successfully',
-          7000,
-        );
+        vscode.window.showInformationMessage('SPFx Storybook installation cleaned successfully');
       } catch (error: unknown) {
-        log.error('Failed to clean Storybook:', error);
-        vscode.window.showErrorMessage(`Failed to clean Storybook: ${getErrorMessage(error)}`);
+        log.error('Failed to clean SPFx Storybook:', error);
+        vscode.window.showErrorMessage(`Failed to clean SPFx Storybook: ${getErrorMessage(error)}`);
       }
     },
   );

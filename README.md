@@ -9,7 +9,7 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 ### Web Parts
 
 - **Automatic SPFx Detection**: Automatically detects SPFx projects in your workspace
-- **Web Part Discovery**: Parses all web part manifests from your project  
+- **Web Part Discovery**: Parses all web part manifests from your project
 - **SPFx Runtime Environment**: Custom-built workbench that simulates the SPFx runtime with AMD module loading
 - **Property Pane**: Full property pane support for configuring web parts
 - **Live Reload Support**: Works with `heft start` for real-time development
@@ -93,47 +93,53 @@ The extension includes **Storybook integration** for visual testing and componen
    - Hot reload support during development
 
 4. **Story Structure**: Auto-generated stories follow CSF 3.0 format:
+
    ```typescript
    import type { Meta, StoryObj } from '@storybook/react';
+
    import HelloWorldWebPart from './HelloWorldWebPart';
-   
+
    const meta: Meta<typeof HelloWorldWebPart> = {
      title: 'WebParts/HelloWorld',
      component: HelloWorldWebPart,
-     parameters: { spfxContext: { /* ... */ } }
+     parameters: {
+       spfxContext: {
+         /* ... */
+       },
+     },
    };
-   
+
    export const Default: StoryObj = {};
    ```
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `SPFx: Open Local Workbench` | Opens the local workbench panel |
-| `SPFx: Start Serve & Open Workbench` | Starts serve and opens workbench |
-| `SPFx: Detect Web Parts` | Shows detected web parts in the project |
-| `SPFx: Open Storybook` | Starts Storybook dev server and opens panel |
-| `SPFx: Generate Storybook Stories` | Generates stories from SPFx manifests |
-| `SPFx: Open Developer Tools` | Opens webview developer tools |
+| Command                              | Description                                 |
+| ------------------------------------ | ------------------------------------------- |
+| `SPFx: Open Local Workbench`         | Opens the local workbench panel             |
+| `SPFx: Start Serve & Open Workbench` | Starts serve and opens workbench            |
+| `SPFx: Detect Web Parts`             | Shows detected web parts in the project     |
+| `SPFx: Open Storybook`               | Starts Storybook dev server and opens panel |
+| `SPFx: Generate Storybook Stories`   | Generates stories from SPFx manifests       |
+| `SPFx: Open Developer Tools`         | Opens webview developer tools               |
 
 ## Configuration
 
 ### General Settings
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `spfxLocalWorkbench.serveUrl` | `https://localhost:4321` | The URL where SPFx serve is running |
-| `spfxLocalWorkbench.autoOpenWorkbench` | `false` | Auto-open workbench when starting serve |
-| `spfxLocalWorkbench.statusBarAction` | `openWorkbench` | Action when clicking the SPFx status bar item: `openWorkbench`, `startServe`, or `openStorybook` |
+| Setting                                | Default                  | Description                                                                                      |
+| -------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `spfxLocalWorkbench.serveUrl`          | `https://localhost:4321` | The URL where SPFx serve is running                                                              |
+| `spfxLocalWorkbench.autoOpenWorkbench` | `false`                  | Auto-open workbench when starting serve                                                          |
+| `spfxLocalWorkbench.statusBarAction`   | `openWorkbench`          | Action when clicking the SPFx status bar item: `openWorkbench`, `startServe`, or `openStorybook` |
 
 ### Theme Settings
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `spfxLocalWorkbench.theme.current` | `teal` | Select a Microsoft theme or `custom` to use a custom theme |
-| `spfxLocalWorkbench.theme.customId` | `""` | Custom theme ID when `theme.current` is set to `custom`. Must match an ID defined in `theme.custom` |
-| `spfxLocalWorkbench.theme.custom` | `[]` | Custom themes to add alongside the default Microsoft themes. Each theme should have `id`, `name`, and `palette` properties |
+| Setting                             | Default | Description                                                                                                                |
+| ----------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `spfxLocalWorkbench.theme.current`  | `teal`  | Select a Microsoft theme or `custom` to use a custom theme                                                                 |
+| `spfxLocalWorkbench.theme.customId` | `""`    | Custom theme ID when `theme.current` is set to `custom`. Must match an ID defined in `theme.custom`                        |
+| `spfxLocalWorkbench.theme.custom`   | `[]`    | Custom themes to add alongside the default Microsoft themes. Each theme should have `id`, `name`, and `palette` properties |
 
 > **Note**: The extension includes 10 default Microsoft 365 themes (`teal`, `blue`, `orange`, `red`, `purple`, `green`, `periwinkle`, `cobalt`, `dark-teal`, `dark-blue`). You can switch between them using the `theme.current` setting or add your own custom themes using the `theme.custom` array setting.
 
@@ -141,11 +147,12 @@ The extension includes **Storybook integration** for visual testing and componen
 
 Customize the mock SharePoint context:
 
-| Setting | Default | Description |
-|---------|---------|-------------|
+| Setting                                  | Default   | Description                                                                   |
+| ---------------------------------------- | --------- | ----------------------------------------------------------------------------- |
 | `spfxLocalWorkbench.context.pageContext` | See below | SharePoint page context object (mirrors SPFx `context.pageContext` structure) |
 
 The `pageContext` object includes:
+
 - `site`: Site collection information (absoluteUrl, id)
 - `web`: Web information (absoluteUrl, title, description, templateName, id)
 - `user`: User information (displayName, email, loginName, isAnonymousGuestUser)
@@ -157,12 +164,14 @@ You can add additional properties as needed to match your SPFx solution requirem
 
 ### Storybook Settings
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `spfxLocalWorkbench.storybook.port` | `6006` | Port for the Storybook dev server |
-| `spfxLocalWorkbench.storybook.autoGenerate` | `true` | Automatically generate stories from SPFx manifests |
-| `spfxLocalWorkbench.storybook.generateLocaleStories` | `true` | Generate story variants for each locale |
-| `spfxLocalWorkbench.storybook.storiesPattern` | `src/**/*.stories.ts` | Glob pattern for custom story files |
+| Setting                                              | Default               | Description                                                    |
+| ---------------------------------------------------- | --------------------- | -------------------------------------------------------------- |
+| `spfxLocalWorkbench.storybook.port`                  | `6006`                | Port for the Storybook dev server                              |
+| `spfxLocalWorkbench.storybook.autoGenerate`          | `true`                | Automatically generate stories from SPFx manifests             |
+| `spfxLocalWorkbench.storybook.generateLocaleStories` | `true`                | Generate story variants for each locale                        |
+| `spfxLocalWorkbench.storybook.storiesPattern`        | `src/**/*.stories.ts` | Glob pattern for custom story files                            |
+| `spfxLocalWorkbench.storybook.autoDocs`              | `false`               | Enable auto-generated documentation pages for stories          |
+| `spfxLocalWorkbench.storybook.skipInstallPrompt`     | `false`               | Automatically install Storybook dependencies without prompting |
 
 ## Troubleshooting
 

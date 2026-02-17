@@ -34,6 +34,11 @@ export interface IStorybookServerOptions {
 export type ServerStatus = 'stopped' | 'starting' | 'running' | 'error';
 
 /**
+ * Status update callback type
+ */
+export type StatusUpdateCallback = (title: string, message: string) => void;
+
+/**
  * Manages the Storybook development server lifecycle
  */
 export class StorybookServerManager {
@@ -46,15 +51,18 @@ export class StorybookServerManager {
   private readyPromise: Promise<void> | null = null;
   private storyGenerator: StoryGenerator;
   private readonly storybookDir: string;
+  private statusCallback?: StatusUpdateCallback;
 
   constructor(
     private workspacePath: string,
     private detector: SpfxProjectDetector,
     private extensionUri: vscode.Uri,
     outputChannel?: vscode.OutputChannel,
+    statusCallback?: StatusUpdateCallback,
   ) {
     this.outputChannel = outputChannel || vscode.window.createOutputChannel('SPFx Storybook');
     this.storybookDir = path.join(workspacePath, 'temp', 'storybook');
+    this.statusCallback = statusCallback;
 
     // Read storybook configuration from VS Code settings
     const config = vscode.workspace.getConfiguration('spfxLocalWorkbench.storybook');
@@ -96,15 +104,21 @@ export class StorybookServerManager {
 
     try {
       // Generate/update stories before starting
+      this.statusCallback?.('Preparing Storybook...', 'Generating stories from SPFx manifests');
       await this.generateStories();
 
       // Check for Storybook installation
       const hasStorybook = await this.checkStorybookInstallation();
       if (!hasStorybook) {
+        this.statusCallback?.(
+          'Requesting dependency installation...',
+          'Please respond to the installation prompt',
+        );
         await this.initializeStorybook();
       }
 
       // Start the server
+      this.statusCallback?.('Starting Storybook...', 'Launching the development server');
       this.readyPromise = this.spawnStorybookProcess(options, startupTimeout);
       await this.readyPromise;
 
@@ -284,16 +298,30 @@ export class StorybookServerManager {
     const hasDependencies = await this.checkStorybookDependencies();
 
     if (!hasDependencies) {
-      const choice = await vscode.window.showInformationMessage(
-        'Storybook dependencies will be installed in temp/storybook (isolated from your project). You can remove it anytime using the "SPFx: Clean Storybook" command.',
-        'Install',
-        'Cancel',
-      );
+      const config = vscode.workspace.getConfiguration('spfxLocalWorkbench.storybook');
+      const skipPrompt = config.get<boolean>('skipInstallPrompt', false);
 
-      if (choice !== 'Install') {
-        throw new Error('Storybook dependencies are required.');
+      if (!skipPrompt) {
+        const choice = await vscode.window.showInformationMessage(
+          'SPFx Storybook needs to install dependencies to run.',
+          {
+            modal: true,
+            detail:
+              'Dependencies will be installed in temp/storybook (isolated from your project). Your project files will not be modified. You can remove these dependencies anytime using "SPFx: Clean SPFx Storybook".',
+          },
+          'Install Dependencies',
+        );
+
+        if (choice !== 'Install Dependencies') {
+          this.status = 'stopped';
+          vscode.window.showInformationMessage(
+            'Storybook dependencies are required. Close and reopen the panel to try again.',
+          );
+          throw new Error('Storybook dependencies installation was cancelled.');
+        }
       }
 
+      this.statusCallback?.('Installing dependencies...', 'This may take a moment');
       await this.createPackageJson();
       await this.installStorybookDependencies();
     }

@@ -16,6 +16,8 @@ export class StorybookPanel {
   private readonly panel: vscode.WebviewPanel;
   private readonly serverManager: StorybookServerManager;
   private disposables: vscode.Disposable[] = [];
+  private currentStatusTitle: string = 'Starting Storybook...';
+  private currentStatusMessage: string = 'Initializing';
 
   /**
    * Create or show the Storybook panel
@@ -90,6 +92,8 @@ export class StorybookPanel {
       workspaceFolder.uri.fsPath,
       detector,
       extensionUri,
+      undefined,
+      (title: string, message: string) => this.updateStatus(title, message),
     );
 
     // Set context for menu visibility
@@ -138,6 +142,18 @@ export class StorybookPanel {
   }
 
   /**
+   * Update the status display
+   */
+  private updateStatus(title: string, message: string): void {
+    this.currentStatusTitle = title;
+    this.currentStatusMessage = message;
+    // Update the HTML if we're in loading state
+    if (!this.serverManager.isRunning()) {
+      this.panel.webview.html = this.getLoadingHtml();
+    }
+  }
+
+  /**
    * Start the Storybook server
    */
   private async startServer(options?: IStorybookServerOptions): Promise<void> {
@@ -162,6 +178,8 @@ export class StorybookPanel {
    * Restart the Storybook server
    */
   public async restart(): Promise<void> {
+    this.currentStatusTitle = 'Restarting Storybook...';
+    this.currentStatusMessage = 'Initializing';
     this.panel.webview.html = this.getLoadingHtml();
     try {
       await this.serverManager.restart();
@@ -247,8 +265,8 @@ export class StorybookPanel {
 <body>
     <div class="loading">
         <div class="spinner"></div>
-        <h2>Starting Storybook...</h2>
-        <p>Generating stories and starting the dev server</p>
+        <h2>${escapeHtml(this.currentStatusTitle)}</h2>
+        <p>${escapeHtml(this.currentStatusMessage)}</p>
     </div>
 </body>
 </html>`;

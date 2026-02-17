@@ -123,25 +123,25 @@
       },
       {
         "command": "spfx-local-workbench.openStorybook",
-        "title": "Open Storybook",
+        "title": "Open SPFx Storybook",
         "category": "SPFx",
         "icon": "$(fluentui-teststep)"
       },
       {
         "command": "spfx-local-workbench.startServeStorybook",
-        "title": "Start Serve & Open Storybook",
+        "title": "Start Serve & Open SPFx Storybook",
         "category": "SPFx",
         "icon": "$(fluentui-teststep)"
       },
       {
         "command": "spfx-local-workbench.generateStories",
-        "title": "Generate Storybook Stories",
+        "title": "Generate SPFx Storybook Stories",
         "category": "SPFx",
         "icon": "$(file-code)"
       },
       {
         "command": "spfx-local-workbench.cleanStorybook",
-        "title": "Clean Storybook",
+        "title": "Clean SPFx Storybook",
         "category": "SPFx",
         "icon": "$(fluentui-broom)"
       }
@@ -442,6 +442,11 @@
             "type": "boolean",
             "default": false,
             "description": "Enable auto-generated documentation pages for stories in Storybook"
+          },
+          "spfxLocalWorkbench.storybook.skipInstallPrompt": {
+            "type": "boolean",
+            "default": false,
+            "description": "Automatically install Storybook dependencies without prompting"
           }
         }
       }
