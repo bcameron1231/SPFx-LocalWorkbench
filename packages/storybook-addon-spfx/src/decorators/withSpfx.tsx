@@ -1,10 +1,10 @@
-import { useChannel } from '@storybook/preview-api';
+import { useChannel, useGlobals } from '@storybook/preview-api';
 import type { Decorator, StoryContext } from '@storybook/react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { buildMockPageContext } from '@spfx-local-workbench/shared';
 
-import { DisplayMode, EVENTS, PARAM_KEY } from '../constants';
+import { DisplayMode, EVENTS, PARAM_KEY, STORYBOOK_GLOBAL_KEYS } from '../constants';
 import { SpfxContextProvider } from '../context/SpfxContext';
 import { mergePageContext } from '../defaults';
 import type { ISpfxParameters } from '../types';
@@ -69,6 +69,7 @@ function createMockSpHttpClient(): any {
  */
 export const withSpfx: Decorator = (Story, context: StoryContext) => {
   const parameters = context.parameters[PARAM_KEY] as ISpfxParameters | undefined;
+  const [globals] = useGlobals();
 
   if (!parameters?.componentId) {
     return (
@@ -87,8 +88,10 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     );
   }
 
+  // Read displayMode from globals (managed by the toolbar)
+  const globalDisplayMode = globals[STORYBOOK_GLOBAL_KEYS.DISPLAY_MODE];
   const [displayMode, setDisplayMode] = useState<DisplayMode>(
-    parameters.displayMode || DisplayMode.Edit,
+    globalDisplayMode || parameters.displayMode || DisplayMode.Edit,
   );
   const [themeId, setThemeId] = useState<string>(parameters.themeId || 'teal');
   const [locale, setLocale] = useState<string>(parameters.locale || 'en-US');
@@ -97,11 +100,15 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const componentInstanceRef = useRef<any>(null);
 
+  // Update displayMode when global changes
+  useEffect(() => {
+    if (globalDisplayMode !== undefined) {
+      setDisplayMode(globalDisplayMode);
+    }
+  }, [globalDisplayMode]);
+
   // Listen to events from toolbar and panels
   const emit = useChannel({
-    [EVENTS.DISPLAY_MODE_CHANGED]: (newMode: DisplayMode) => {
-      setDisplayMode(newMode);
-    },
     [EVENTS.THEME_CHANGED]: (newThemeId: string) => {
       setThemeId(newThemeId);
     },

@@ -25,3 +25,9 @@ export const EVENTS = {
   THEME_CHANGED: `${ADDON_ID}/theme-changed`,
   LOCALE_CHANGED: `${ADDON_ID}/locale-changed`,
 } as const;
+
+export const STORYBOOK_GLOBAL_KEYS = {
+  DISPLAY_MODE: `${PARAM_KEY}DisplayMode`,
+  THEME: `${PARAM_KEY}Theme`,
+  LOCALE: `${PARAM_KEY}Locale`,
+} as const;

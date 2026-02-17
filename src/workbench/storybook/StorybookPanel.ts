@@ -132,9 +132,6 @@ export class StorybookPanel {
           'spfxLocalWorkbench.isStorybook',
           this.panel.active,
         );
-        if (this.panel.visible) {
-          this.refresh();
-        }
       },
       null,
       this.disposables,
