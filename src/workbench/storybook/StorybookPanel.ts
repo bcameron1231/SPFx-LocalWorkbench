@@ -54,10 +54,7 @@ export class StorybookPanel {
       },
     );
 
-    panel.iconPath = {
-      light: vscode.Uri.joinPath(extensionUri, 'media', 'icon.png'),
-      dark: vscode.Uri.joinPath(extensionUri, 'media', 'icon.png'),
-    };
+    panel.iconPath = new vscode.ThemeIcon('fluentui-teststep');
 
     StorybookPanel.currentPanel = new StorybookPanel(panel, extensionUri, detector, options);
     return StorybookPanel.currentPanel;
