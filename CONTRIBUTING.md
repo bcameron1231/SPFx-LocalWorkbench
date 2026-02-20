@@ -52,12 +52,14 @@ The `@spfx-local-workbench/shared` package contains code shared between the VS C
 ### Constants
 
 **Application constants** (timing values, port numbers, etc.) are defined in `packages/shared/src/constants/`:
+
 - `timing.ts` - Delays, timeouts, and debounce intervals
 - `ports.ts` - Default port numbers for development servers
 - `DEFAULT_PAGE_CONTEXT.ts` - Default SPFx page context values
 - `MICROSOFT_THEMES.ts` - Built-in SharePoint themes
 
 When adding magic numbers or hardcoded values:
+
 1. Extract to an appropriately named constant in the relevant file
 2. Add JSDoc comments explaining the constant's purpose
 3. Export from `constants/index.ts`
@@ -70,6 +72,29 @@ When adding magic numbers or hardcoded values:
 ⚠️ **These values MUST be manually kept in sync with `package.json`** (`spfxLocalWorkbench.context.pageContext` default values) due to JSON schema limitations for VS Code settings.
 
 When updating default context values:
+
 1. Update `packages/shared/src/mocks/contextBuilder.ts` (source of truth)
 2. Update `package.json` configuration schema defaults to match
 3. Rebuild packages: `npm run packages:build`
+
+## TypeScript Configuration
+
+The project uses specific TypeScript compiler options in `tsconfig.json` that differ from defaults:
+
+### `skipLibCheck: true`
+
+**Why:** Storybook v8 type definitions use ESM modules internally, which conflicts with the extension's Node16/CommonJS module resolution. This setting allows TypeScript to skip type checking of `node_modules` declarations while still providing IntelliSense and autocomplete for our template files (`src/workbench/storybook/templates/`).
+
+**Trade-off:** We lose type checking of third-party library definitions, but gain the ability to use Storybook types for editor support without compilation errors.
+
+### `module: "Node16"`
+
+**Why:** Ensures proper Node.js module resolution for VS Code extensions, which run in a Node.js environment. This supports both CommonJS and ESM imports as used by Node.js 16+.
+
+### `jsx: "react"`
+
+**Why:** The extension includes React components in the webview UI. This setting enables JSX syntax transformation for `.tsx` files.
+
+### Path Aliases
+
+The `paths` configuration maps `@spfx-local-workbench/shared` to `./packages/shared/src` for importing shared code between the extension and Storybook addon without relative paths.

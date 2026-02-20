@@ -499,6 +499,10 @@
   },
   "devDependencies": {
     "@fluentui/react": "^8.110.10",
+    "@storybook/manager-api": "^8.0.0",
+    "@storybook/react": "^8.0.0",
+    "@storybook/react-vite": "^8.0.0",
+    "@storybook/theming": "^8.0.0",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/node": "22.x",
     "@types/react": "^17.0.0",

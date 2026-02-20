@@ -334,66 +334,10 @@ export class StorybookServerManager {
     // Create .storybook directory
     await vscode.workspace.fs.createDirectory(vscode.Uri.file(configDir));
 
-    // Create main.ts - points to both generated/ and user's src/
-    const mainConfig = `import type { StorybookConfig } from '@storybook/react-vite';
-import { join, dirname } from 'path';
-
-const config: StorybookConfig = {
-  stories: [
-    // Auto-generated stories from SPFx manifests
-    '../generated/**/*.stories.@(ts|tsx)',
-    // User-created stories in src directory
-    '../../src/**/*.stories.@(ts|tsx)'
-  ],
-  addons: [
-    '@storybook/addon-essentials',
-    '@storybook/addon-a11y',
-    '@spfx-local-workbench/storybook-addon-spfx'
-  ],
-  framework: {
-    name: '@storybook/react-vite',
-    options: {}
-  },
-  core: {
-    disableTelemetry: true,
-    disableWhatsNewNotifications: true
-  },
-  async viteFinal(config) {
-    // Ensure shared package is optimized for ESM in Vite
-    config.optimizeDeps = config.optimizeDeps || {};
-    config.optimizeDeps.include = config.optimizeDeps.include || [];
-    config.optimizeDeps.include.push('@spfx-local-workbench/shared');
-    
-    return config;
-  }
-};
-
-export default config;
-`;
-
-    // Create preview.ts
-    const previewConfig = `import type { Preview } from '@storybook/react';
-
-const preview: Preview = {
-  parameters: {
-    controls: {
-      matchers: {
-        color: /(background|color)$/i,
-        date: /Date$/i
-      }
-    },
-    backgrounds: {
-      disable: true
-    },
-    toolbar: {
-      copy: { hidden: true },
-      eject: { hidden: true }
-    }
-  }
-};
-
-export default preview;
-`;
+    // Read template files from the extension
+    const mainConfig = await this.readTemplateFile('main.ts');
+    const previewConfig = await this.readTemplateFile('preview.ts');
+    const managerConfig = await this.readTemplateFile('manager.ts');
 
     await vscode.workspace.fs.writeFile(vscode.Uri.file(mainTs), Buffer.from(mainConfig, 'utf-8'));
 
@@ -402,67 +346,26 @@ export default preview;
       Buffer.from(previewConfig, 'utf-8'),
     );
 
-    // Create manager.ts for branding/logo customization
-    const managerConfig = `import { addons } from '@storybook/manager-api';
-import { create } from '@storybook/theming';
-
-// Custom Storybook theme with branding
-const customTheme = create({
-  base: 'light',
-  
-  // Branding
-  brandTitle: 'SPFx Local Workbench Storybook',
-  brandUrl: 'https://github.com/bcameron1231/SPFx-LocalWorkbench',
-  brandImage: undefined, // Set to a URL or import a logo file here
-  brandTarget: '_blank',
-  
-  // UI Colors (customize as needed)
-  // colorPrimary: '#0078d4',
-  // colorSecondary: '#106ebe',
-  
-  // Typography
-  // fontBase: '"Segoe UI", "Segoe UI Web", Arial, sans-serif',
-  // fontCode: 'Monaco, Consolas, monospace',
-});
-
-addons.setConfig({
-  theme: customTheme,
-  sidebar: {
-    showToolbar: true,
-    collapsedRoots: [],
-  },
-  enableShortcuts: true,
-  initialActive: 'sidebar',
-  showPanel: true,
-  panelPosition: 'bottom',
-  sidebarAnimations: true,
-});
-
-// Reduce tooltip delay via CSS custom property
-// Storybook uses CSS transitions for tooltips with a default delay
-const style = document.createElement('style');
-style.innerHTML = \`
-  /* Reduce Storybook tooltip delay from 1000ms to 200ms */
-  :root {
-    --sb-tooltip-delay: 200ms !important;
-  }
-  
-  /* Target tooltip elements directly if custom property doesn't work */
-  [role="tooltip"],
-  [data-radix-popper-content-wrapper],
-  .os-tooltip {
-    transition-delay: 200ms !important;
-  }
-\`;
-document.head.appendChild(style);
-`;
-
     await vscode.workspace.fs.writeFile(
       vscode.Uri.file(managerTs),
       Buffer.from(managerConfig, 'utf-8'),
     );
 
     this.outputChannel.appendLine('✓ Created Storybook configuration files');
+  }
+
+  /**
+   * Read a template file from the extension's templates directory
+   */
+  private async readTemplateFile(filename: string): Promise<string> {
+    const templatePath = vscode.Uri.joinPath(this.extensionUri, 'dist', 'templates', filename);
+    try {
+      const content = await vscode.workspace.fs.readFile(templatePath);
+      return content.toString();
+    } catch (error: unknown) {
+      this.log.error(`Failed to read template file ${filename}:`, error);
+      throw new Error(`Failed to read template file ${filename}: ${getErrorMessage(error)}`);
+    }
   }
 
   /**
