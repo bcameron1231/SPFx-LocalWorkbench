@@ -40,15 +40,15 @@ export const ThemePreview: React.FC<IThemePreviewProps> = ({
       style={
         {
           '--theme-border-color': isSelected ? palette.themePrimary : 'transparent',
-          '--theme-background-color': isSelected ? palette.neutralLighter : 'transparent',
+          '--theme-background-color': isSelected ? 'rgba(128, 128, 128, 0.15)' : 'transparent',
           '--theme-primary': palette.themePrimary,
           '--theme-secondary': palette.themeSecondary,
           '--theme-dark': palette.themeDark,
           '--theme-neutral-primary': palette.neutralPrimary,
           '--theme-neutral-secondary': palette.neutralSecondary,
           '--theme-neutral-lighter': palette.neutralLighter,
-          '--theme-text-color': palette.neutralPrimary,
-          '--theme-label-color': palette.neutralPrimary,
+          '--theme-light': palette.themeLight,
+          '--theme-tertiary': palette.themeTertiary,
         } as React.CSSProperties
       }
       onClick={onClick}
@@ -64,21 +64,23 @@ export const ThemePreview: React.FC<IThemePreviewProps> = ({
       }}
     >
       <div className={styles.previewBlock}>
-        {/* Large primary color swatch */}
-        <div className={styles.largeSwatch} title={`Primary: ${palette.themePrimary}`} />
+        <div className={styles.colorSwatches}>
+          {/* Large primary color swatch */}
+          <div className={styles.largeSwatch} title={`Primary: ${palette.themePrimary}`} />
 
-        {/* Four small color swatches */}
-        <div className={styles.smallSwatchContainer}>
-          <div className={styles.smallSwatch} title={`Secondary: ${palette.themeSecondary}`} />
-          <div className={styles.smallSwatch} title={`Dark: ${palette.themeDark}`} />
-          <div
-            className={styles.smallSwatch}
-            title={`Neutral Primary: ${palette.neutralPrimary}`}
-          />
-          <div
-            className={styles.smallSwatch}
-            title={`Neutral Secondary: ${palette.neutralSecondary}`}
-          />
+          {/* Four small color swatches */}
+          <div className={styles.smallSwatchContainer}>
+            <div className={styles.smallSwatch} title={`Secondary: ${palette.themeSecondary}`} />
+            <div className={styles.smallSwatch} title={`Dark: ${palette.themeDark}`} />
+            <div
+              className={styles.smallSwatch}
+              title={`Neutral Primary: ${palette.neutralPrimary}`}
+            />
+            <div
+              className={styles.smallSwatch}
+              title={`Neutral Secondary: ${palette.neutralSecondary}`}
+            />
+          </div>
         </div>
 
         {/* Text preview */}

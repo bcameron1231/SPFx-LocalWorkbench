@@ -1,90 +1,96 @@
 .container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 12px;
-    cursor: default;
-    border-radius: 4px;
-    border: 2px solid var(--theme-border-color, transparent);
-    background-color: var(--theme-background-color, transparent);
-    transition: all 0.15s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  cursor: default;
+  border-radius: 4px;
+  border: 2px solid var(--theme-border-color, transparent);
+  background-color: var(--theme-background-color, transparent);
+  transition: all 0.15s ease-in-out;
 
-    &.clickable {
-        cursor: pointer;
+  &.clickable {
+    cursor: pointer;
 
-        &:hover {
-            background-color: var(--vscode-list-hoverBackground, rgba(255, 255, 255, 0.1));
-        }
+    &:hover {
+      background-color: rgba(128, 128, 128, 0.2);
     }
+  }
 
-    &.selected {
-        /* Border and background colors set via CSS custom properties */
-    }
+  &.selected {
+    /* Border and background colors set via CSS custom properties */
+  }
 }
 
 .previewBlock {
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+  overflow: hidden;
+  width: 64px;
+  height: 32px;
+  box-sizing: border-box;
+
+  & .colorSwatches {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
+    flex-direction: row;
+    width: 100%;
+    height: 16px;
 
-.largeSwatch {
-    width: 40px;
-    height: 24px;
-    border-radius: 2px;
-    background-color: var(--theme-primary);
-}
-
-.smallSwatchContainer {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 2px;
-    width: 40px;
-}
-
-.smallSwatch {
-    width: 8px;
-    height: 8px;
-    border-radius: 1px;
-
-    &:nth-child(1) {
-        background-color: var(--theme-secondary);
+    & .largeSwatch {
+      width: 50%;
+      background-color: var(--theme-primary);
+      flex-shrink: 0;
     }
 
-    &:nth-child(2) {
-        background-color: var(--theme-dark);
-    }
+    & .smallSwatchContainer {
+      display: flex;
+      width: 50%;
 
-    &:nth-child(3) {
-        background-color: var(--theme-neutral-primary);
-    }
+      & .smallSwatch {
+        width: 25%;
 
-    &:nth-child(4) {
-        background-color: var(--theme-neutral-secondary);
-    }
-}
+        &:nth-child(1) {
+          background-color: var(--theme-secondary);
+        }
 
-.textPreview {
+        &:nth-child(2) {
+          background-color: var(--theme-tertiary);
+        }
+
+        &:nth-child(3) {
+          background-color: var(--theme-dark);
+        }
+
+        &:nth-child(4) {
+          background-color: var(--theme-light);
+        }
+      }
+    }
+  }
+
+  & .textPreview {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 40px;
+    justify-content: flex-start;
+    padding: 2px;
+    width: 100%;
     height: 16px;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
-    border-radius: 2px;
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
     background-color: var(--theme-neutral-lighter);
-    color: var(--theme-text-color);
+    color: var(--theme-neutral-primary);
+  }
 }
 
 .label {
-    font-size: 14px;
-    font-weight: 400;
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
-    color: var(--theme-label-color);
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
+  color: inherit;
 
-    &.labelSelected {
-        font-weight: 600;
-    }
+  &.labelSelected {
+    font-weight: 600;
+  }
 }

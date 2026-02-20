@@ -11,6 +11,9 @@ export const globalTypes = {
   [STORYBOOK_GLOBAL_KEYS.DISPLAY_MODE]: {
     defaultValue: DisplayMode.Edit,
   },
+  [STORYBOOK_GLOBAL_KEYS.THEME]: {
+    defaultValue: 'teal',
+  },
 };
 
 export const parameters = {

@@ -2,7 +2,7 @@
  * Display Mode toolbar control
  * Allows switching between Edit and Read display modes
  */
-import { IconButton } from '@storybook/components';
+import { IconButton, Separator } from '@storybook/components';
 import { EditIcon, EyeIcon } from '@storybook/icons';
 import { useGlobals } from '@storybook/manager-api';
 import React from 'react';
@@ -23,8 +23,11 @@ export const DisplayModeToolbar: React.FC = () => {
   const Icon = isEditMode ? EditIcon : EyeIcon;
 
   return (
-    <IconButton title={title} onClick={toggleDisplayMode}>
-      <Icon />
-    </IconButton>
+    <>
+      <Separator />
+      <IconButton title={title} onClick={toggleDisplayMode}>
+        <Icon />
+      </IconButton>
+    </>
   );
 };

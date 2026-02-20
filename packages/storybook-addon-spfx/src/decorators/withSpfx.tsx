@@ -2,7 +2,7 @@ import { useChannel, useGlobals } from '@storybook/preview-api';
 import type { Decorator, StoryContext } from '@storybook/react';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { buildMockPageContext } from '@spfx-local-workbench/shared';
+import { MICROSOFT_THEMES, buildMockPageContext } from '@spfx-local-workbench/shared';
 
 import { DisplayMode, EVENTS, PARAM_KEY, STORYBOOK_GLOBAL_KEYS } from '../constants';
 import { SpfxContextProvider } from '../context/SpfxContext';
@@ -90,10 +90,11 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
 
   // Read displayMode from globals (managed by the toolbar)
   const globalDisplayMode = globals[STORYBOOK_GLOBAL_KEYS.DISPLAY_MODE];
+  const globalThemeId = globals[STORYBOOK_GLOBAL_KEYS.THEME];
   const [displayMode, setDisplayMode] = useState<DisplayMode>(
     globalDisplayMode || parameters.displayMode || DisplayMode.Edit,
   );
-  const [themeId, setThemeId] = useState<string>(parameters.themeId || 'teal');
+  const [themeId, setThemeId] = useState<string>(globalThemeId || parameters.themeId || 'teal');
   const [locale, setLocale] = useState<string>(parameters.locale || 'en-US');
   const [properties, setProperties] = useState<Record<string, any>>(parameters.properties || {});
 
@@ -107,11 +108,16 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     }
   }, [globalDisplayMode]);
 
+  // Update themeId when global changes
+  useEffect(() => {
+    if (globalThemeId !== undefined) {
+      setThemeId(globalThemeId);
+      console.log(`Global theme changed to: ${globalThemeId}`);
+    }
+  }, [globalThemeId]);
+
   // Listen to events from toolbar and panels
   const emit = useChannel({
-    [EVENTS.THEME_CHANGED]: (newThemeId: string) => {
-      setThemeId(newThemeId);
-    },
     [EVENTS.LOCALE_CHANGED]: (newLocale: string) => {
       setLocale(newLocale);
     },
@@ -186,6 +192,8 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
 
         // Set up the component context (mock SPFx context)
         // Match the structure from webview/src/mocks/SpfxContext.ts
+        const currentTheme = MICROSOFT_THEMES.find((t) => t.id === themeId) || MICROSOFT_THEMES[0];
+
         instance._context = {
           pageContext: mockPageContext,
           manifest: {
@@ -194,6 +202,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
           },
           domElement: containerRef.current,
           displayMode: displayMode,
+          theme: currentTheme.palette,
           sdks: {
             microsoftTeams: undefined, // Not running in Teams context
           },
@@ -287,6 +296,12 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
   // Update component when properties, display mode, theme, or locale change
   useEffect(() => {
     if (componentInstanceRef.current) {
+      // Update theme in context
+      const currentTheme = MICROSOFT_THEMES.find((t) => t.id === themeId) || MICROSOFT_THEMES[0];
+      if (componentInstanceRef.current._context) {
+        componentInstanceRef.current._context.theme = currentTheme.palette;
+      }
+
       componentInstanceRef.current._properties = properties;
       componentInstanceRef.current._displayMode = displayMode;
       if (componentInstanceRef.current._context) {

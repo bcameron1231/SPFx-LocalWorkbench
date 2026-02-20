@@ -2,57 +2,78 @@
  * Theme selector toolbar control
  * Allows switching between different SharePoint themes
  */
-import { IconButton, TooltipLinkList, WithTooltip } from '@storybook/components';
+import { IconButton, WithTooltip } from '@storybook/components';
+import { StarIcon } from '@storybook/icons';
 import { useGlobals } from '@storybook/manager-api';
-import React from 'react';
+import React, { useState } from 'react';
 
-import { MICROSOFT_THEMES } from '@spfx-local-workbench/shared';
+import { MICROSOFT_THEMES, ThemePreview } from '@spfx-local-workbench/shared';
 
-import { EVENTS, TOOLBAR_IDS } from '../../constants';
+import { STORYBOOK_GLOBAL_KEYS } from '../../constants';
 import styles from './ThemeToolbar.module.css';
 
 export const ThemeToolbar: React.FC = () => {
   const [globals, updateGlobals] = useGlobals();
-  const currentThemeId = globals.spfxThemeId || 'teal';
+  const [isOpen, setIsOpen] = useState(false);
+  const currentThemeId = globals[STORYBOOK_GLOBAL_KEYS.THEME] || 'teal';
 
   const currentTheme = MICROSOFT_THEMES.find((t) => t.id === currentThemeId) || MICROSOFT_THEMES[0];
 
   const handleThemeChange = (themeId: string) => {
-    updateGlobals({ spfxThemeId: themeId });
-
-    // Emit event for the preview
-    const channel = (window as any).__STORYBOOK_ADDONS_CHANNEL__;
-    if (channel) {
-      channel.emit(EVENTS.THEME_CHANGED, themeId);
-    }
+    updateGlobals({ [STORYBOOK_GLOBAL_KEYS.THEME]: themeId });
+    console.log(`Theme changed to: ${themeId}`);
+    setIsOpen(false);
   };
 
-  const links = MICROSOFT_THEMES.map((theme) => ({
-    id: theme.id,
-    title: theme.name,
-    active: theme.id === currentThemeId,
-    onClick: () => handleThemeChange(theme.id),
-    left: (
-      <div
-        className={styles.themeSwatch}
-        style={
-          {
-            '--theme-primary': theme.palette.themePrimary,
-          } as React.CSSProperties
-        }
-      />
-    ),
-  }));
+  const customThemes = MICROSOFT_THEMES.filter((t) => t.isCustom);
+  const microsoftThemes = MICROSOFT_THEMES.filter((t) => !t.isCustom);
+
+  const tooltip = (
+    <div className={styles.themeDropdown}>
+      {customThemes.length > 0 && (
+        <>
+          <div className={styles.themeGroupHeader}>From your organization</div>
+          {customThemes.map((theme) => (
+            <ThemePreview
+              key={theme.id}
+              theme={theme}
+              isSelected={theme.id === currentThemeId}
+              onClick={() => handleThemeChange(theme.id)}
+            />
+          ))}
+        </>
+      )}
+      <div className={styles.themeGroupHeader}>From Microsoft</div>
+      {microsoftThemes.map((theme) => (
+        <ThemePreview
+          key={theme.id}
+          theme={theme}
+          isSelected={theme.id === currentThemeId}
+          onClick={() => handleThemeChange(theme.id)}
+        />
+      ))}
+    </div>
+  );
 
   return (
     <WithTooltip
       placement="top"
       trigger="click"
       closeOnOutsideClick
-      tooltip={<TooltipLinkList links={links} />}
+      tooltip={tooltip}
+      visible={isOpen}
+      onVisibleChange={setIsOpen}
     >
-      <IconButton key={TOOLBAR_IDS.THEME} title="Select Theme">
-        🎨 <span className={styles.themeLabel}>{currentTheme.name}</span>
+      <IconButton
+        title={`Theme: ${currentTheme.name}`}
+        className={styles.toolbarIcon}
+        style={
+          {
+            '--themePrimary': currentTheme.palette.themePrimary,
+          } as React.CSSProperties
+        }
+      >
+        <StarIcon />
       </IconButton>
     </WithTooltip>
   );
