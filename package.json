@@ -144,6 +144,12 @@
         "title": "Clean SPFx Storybook",
         "category": "SPFx",
         "icon": "$(fluentui-broom)"
+      },
+      {
+        "command": "spfx-local-workbench.openSettings",
+        "title": "Open SPFx Workbench Settings",
+        "category": "SPFx",
+        "icon": "$(gear)"
       }
     ],
     "menus": {
@@ -165,6 +171,11 @@
         },
         {
           "command": "spfx-local-workbench.openDevTools",
+          "when": "spfxLocalWorkbench.isWorkbench || spfxLocalWorkbench.isStorybook",
+          "group": "navigation"
+        },
+        {
+          "command": "spfx-local-workbench.openSettings",
           "when": "spfxLocalWorkbench.isWorkbench || spfxLocalWorkbench.isStorybook",
           "group": "navigation"
         }

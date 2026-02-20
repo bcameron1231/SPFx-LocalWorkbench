@@ -183,6 +183,14 @@ export function activate(context: vscode.ExtensionContext) {
     },
   );
 
+  // Register the Open Settings command
+  const openSettingsCommand = vscode.commands.registerCommand(
+    'spfx-local-workbench.openSettings',
+    () => {
+      vscode.commands.executeCommand('workbench.action.openSettings', '@ext:BeauCameron.spfx-local-workbench');
+    },
+  );
+
   // Register the Open Storybook command
   const openStorybookCommand = vscode.commands.registerCommand(
     'spfx-local-workbench.openStorybook',
@@ -379,6 +387,7 @@ export function activate(context: vscode.ExtensionContext) {
     startServeStorybookCommand,
     detectWebPartsCommand,
     openDevToolsCommand,
+    openSettingsCommand,
     openStorybookCommand,
     generateStoriesCommand,
     cleanStorybookCommand,
