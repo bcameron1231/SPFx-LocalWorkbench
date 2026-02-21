@@ -9,7 +9,7 @@ import {
   AMD_REGISTRATION_DELAY_MS,
   BundleLoader,
   ComponentResolver,
-  type IWebPartManifest,
+  type IClientSideComponentManifest,
   ManifestLoader,
   StringsLoader,
   amdLoader,
@@ -49,7 +49,7 @@ function ensureReactGlobals(): void {
  * @param serveUrl - Base URL for the dev server (e.g., 'http://localhost:4321')
  * @returns Array of component manifests
  */
-export async function loadSpfxManifests(serveUrl: string): Promise<IWebPartManifest[]> {
+export async function loadSpfxManifests(serveUrl: string): Promise<IClientSideComponentManifest[]> {
   ensureReactGlobals();
   const loader = new ManifestLoader(serveUrl);
   return loader.loadManifests();
@@ -62,7 +62,7 @@ export async function loadSpfxManifests(serveUrl: string): Promise<IWebPartManif
  * @returns Array of newly added module names
  */
 export async function loadComponentBundle(
-  manifest: IWebPartManifest,
+  manifest: IClientSideComponentManifest,
   serveUrl: string,
 ): Promise<string[]> {
   ensureReactGlobals();
@@ -77,7 +77,7 @@ export async function loadComponentBundle(
  * @param locale - Optional locale override (e.g., 'en-us', 'de-de')
  */
 export async function loadComponentStrings(
-  manifest: IWebPartManifest,
+  manifest: IClientSideComponentManifest,
   serveUrl: string,
   locale?: string,
 ): Promise<void> {
@@ -91,7 +91,7 @@ export async function loadComponentStrings(
  * @param candidateModules - Optional array of module names to search (from bundle loading)
  * @returns Component class constructor
  */
-export function findComponentClass(manifest: IWebPartManifest, candidateModules?: string[]): any {
+export function findComponentClass(manifest: IClientSideComponentManifest, candidateModules?: string[]): any {
   const resolver = new ComponentResolver();
   return resolver.findComponentClass(manifest, candidateModules);
 }
@@ -107,7 +107,7 @@ export async function loadComponent(
   componentId: string,
   serveUrl: string,
   locale?: string,
-): Promise<{ manifest: IWebPartManifest; componentClass: any }> {
+): Promise<{ manifest: IClientSideComponentManifest; componentClass: any }> {
   // Ensure React is available as window globals for SPFx
   ensureReactGlobals();
 

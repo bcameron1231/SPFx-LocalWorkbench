@@ -1,22 +1,18 @@
+import type { IFrameworkModuleResource } from './IFrameworkModuleResource';
+import type { ILocalizedPathModuleResource } from './ILocalizedPathModuleResource';
+import type { IPathModuleResource } from './IPathModuleResource';
+
 /**
- * Script resource definition
- * Describes a JavaScript file that needs to be loaded
+ * A script resource entry in a component's `loaderConfig.scriptResources` map.
+ *
+ * Modelled after the three discriminated variants defined in
+ * client-side-component-loader-configuration.schema.json:
+ *
+ * - `'component'`     – provided by the SPFx framework runtime.
+ * - `'path'`         – a single-file module provided by the developer.
+ * - `'localizedPath'` – a locale-aware module provided by the developer.
  */
-export interface IScriptResource {
-  /**
-   * Resource type
-   * - 'path': Single file path
-   * - 'localizedPath': Multiple locale-specific paths
-   * - 'internal': SPFx internal dependency
-   */
-  type: 'path' | 'localizedPath' | 'internal' | string;
-
-  /** Single file path (for type: 'path') */
-  path?: string;
-
-  /** Locale-specific paths (for type: 'localizedPath') */
-  paths?: Record<string, string>;
-
-  /** Default locale path (for type: 'localizedPath') */
-  defaultPath?: string;
-}
+export type IScriptResource =
+  | IFrameworkModuleResource
+  | IPathModuleResource
+  | ILocalizedPathModuleResource;

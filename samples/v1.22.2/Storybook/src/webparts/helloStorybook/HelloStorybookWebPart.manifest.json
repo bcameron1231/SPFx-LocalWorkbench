@@ -20,11 +20,13 @@
     "group": { "default": "Advanced" },
     "title": {
       "default": "HelloStorybook",
-      "fr-fr": "BonjourStorybook"
+      "fr-fr": "BonjourStorybook",
+      "qps-ploc": "[!!HēłłōŚţōŕŷbōôķ!!]"
     },
     "description": {
       "default": "Sample web part to verify Storybook add-on integration.",
-      "fr-fr": "Exemple de composant Web pour vérifier l'intégration de l'add-on Storybook."
+      "fr-fr": "Exemple de composant Web pour vérifier l'intégration de l'add-on Storybook.",
+      "qps-ploc": "[!!Śample wēƀ ƥàŕţ ţō vērîfŷ Śţōŕŷbōôķ àđđ-ōñ îñţégrātîōñ!!]"
     },
     "officeFabricIconFontName": "ReadingMode",
     "properties": {
@@ -34,6 +36,30 @@
       "internalValue": {
         "key1": "Wowee",
         "key2": "Woweeee!"
+      }
+    }
+  }, {
+    "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Advanced
+    "group": { "default": "Advanced" },
+    "title": {
+      "default": "HiStorybook",
+      "fr-fr": "SalutStorybook",
+      "qps-ploc": "[!!ĤîŚţōŕŷbōôķ!!]"
+    },
+    "hiddenFromToolbox": true,
+    "description": {
+      "default": "Alternate configuration of the Storybook integration sample web part.",
+      "fr-fr": "Configuration alternative du composant Web de démonstration de l'intégration Storybook.",
+      "qps-ploc": "[!!Àļţēŕñàţē ċōñƒîĝûŕàţîōñ ōƒ ţĥē Śţōŕŷbōôķ îñţēĝŕàţîōñ śàmƥļē wēƀ ƥàŕţ!!]"
+    },
+    "officeFabricIconFontName": "ReadingModeSolid",
+    "properties": {
+      "textValue": "Hi Storybook",
+      "sliderValue": 42,
+      "toggleValue": false,
+      "internalValue": {
+        "key1": "Buhbye",
+        "key2": "Buhbyeeee!"
       }
     }
   }]

@@ -16,7 +16,9 @@ import { WebPartManager } from './WebPartManager';
 import type { IAppHandlers } from './components/App';
 import { SpfxContext, ThemeProvider } from './mocks';
 import type {
+  IComponentManifest,
   IExtensionConfig,
+  IExtensionManifest,
   IVsCodeApi,
   IWebPartConfig,
   IWebPartManifest,
@@ -35,7 +37,7 @@ export class WorkbenchRuntime {
   private extensionManager: ExtensionManager;
   private appHandlers: IAppHandlers | null = null;
 
-  private loadedManifests: IWebPartManifest[] = [];
+  private loadedManifests: IComponentManifest[] = [];
   private activeWebParts: IWebPartConfig[] = [];
   private activeExtensions: IExtensionConfig[] = [];
 
@@ -126,7 +128,7 @@ export class WorkbenchRuntime {
   }
 
   private async loadManifests(): Promise<void> {
-    this.loadedManifests = await this.manifestLoader.loadManifests();
+    this.loadedManifests = (await this.manifestLoader.loadManifests()) as IComponentManifest[];
 
     const componentCount = this.loadedManifests.length;
     const webPartCount = this.loadedManifests.filter((m) => m.componentType === 'WebPart').length;
@@ -137,7 +139,9 @@ export class WorkbenchRuntime {
   }
 
   async addExtension(manifestIndex: number): Promise<void> {
-    const extensions = this.loadedManifests.filter((m) => m.componentType === 'Extension');
+    const extensions = this.loadedManifests.filter(
+      (m): m is IExtensionManifest => m.componentType === 'Extension',
+    );
     const manifest = extensions[manifestIndex];
 
     if (!manifest) {
@@ -146,7 +150,7 @@ export class WorkbenchRuntime {
     }
 
     const instanceId = `ext-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const properties = manifest.preconfiguredEntries?.[0]?.properties || {};
+    const properties = {};
 
     const config: IExtensionConfig = {
       manifest: manifest,
@@ -221,8 +225,14 @@ export class WorkbenchRuntime {
     }
   }
 
-  async addWebPartAt(insertIndex: number, manifestIndex: number): Promise<void> {
-    const webParts = this.loadedManifests.filter((m) => m.componentType === 'WebPart');
+  async addWebPartAt(
+    insertIndex: number,
+    manifestIndex: number,
+    preconfiguredEntryIndex: number = 0,
+  ): Promise<void> {
+    const webParts = this.loadedManifests.filter(
+      (m): m is IWebPartManifest => m.componentType === 'WebPart',
+    );
     const manifest = webParts[manifestIndex];
 
     if (!manifest) {
@@ -230,7 +240,10 @@ export class WorkbenchRuntime {
     }
 
     const instanceId = `wp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const properties = manifest.preconfiguredEntries?.[0]?.properties || {};
+    const entry =
+      manifest.preconfiguredEntries?.[preconfiguredEntryIndex] ??
+      manifest.preconfiguredEntries?.[0];
+    const properties = entry?.properties || {};
 
     const config: IWebPartConfig = {
       manifest: manifest,
@@ -524,7 +537,7 @@ export class WorkbenchRuntime {
     return this.activeWebParts;
   }
 
-  getLoadedManifests(): IWebPartManifest[] {
+  getLoadedManifests(): IComponentManifest[] {
     return this.loadedManifests;
   }
 }

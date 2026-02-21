@@ -1,4 +1,4 @@
-import type { IWebPartManifest } from '../types';
+import type { IClientSideComponentManifest } from '../types';
 
 /**
  * ManifestLoader
@@ -17,7 +17,7 @@ export class ManifestLoader {
    * Load manifests.js and extract component manifests
    * @returns Array of manifests for all components (web parts + extensions)
    */
-  async loadManifests(): Promise<IWebPartManifest[]> {
+  async loadManifests(): Promise<IClientSideComponentManifest[]> {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
       throw new Error('ManifestLoader requires browser environment');
     }
@@ -33,7 +33,7 @@ export class ManifestLoader {
 
           // Update internal module base URLs to match serve URL
           // Preserves the path (e.g., /dist/) so bundle paths resolve correctly
-          manifests.forEach((manifest: IWebPartManifest) => {
+          manifests.forEach((manifest: IClientSideComponentManifest) => {
             if (manifest.loaderConfig?.internalModuleBaseUrls) {
               manifest.loaderConfig.internalModuleBaseUrls =
                 manifest.loaderConfig.internalModuleBaseUrls.map((url: string) => {

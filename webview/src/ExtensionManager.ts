@@ -15,7 +15,7 @@ import {
 } from '@spfx-local-workbench/shared';
 
 import { SpfxContext, ThemeProvider } from './mocks';
-import type { IActiveExtension, IExtensionConfig, IVsCodeApi, IWebPartManifest } from './types';
+import type { IActiveExtension, IExtensionConfig, IExtensionManifest, IVsCodeApi } from './types';
 
 // PlaceholderName enum matching @microsoft/sp-application-base
 enum PlaceholderName {
@@ -63,7 +63,7 @@ export class ExtensionManager {
     this.themeProvider = themeProvider;
   }
 
-  async loadExtensionBundle(manifest: IWebPartManifest): Promise<string[]> {
+  async loadExtensionBundle(manifest: IExtensionManifest): Promise<string[]> {
     return this.bundleLoader.loadBundle(manifest);
   }
 
@@ -164,7 +164,7 @@ export class ExtensionManager {
     };
   }
 
-  private findExtensionClass(manifest: IWebPartManifest, candidateModules?: string[]): any {
+  private findExtensionClass(manifest: IExtensionManifest, candidateModules?: string[]): any {
     return this.componentResolver.findComponentClass(manifest, candidateModules);
   }
 
@@ -237,7 +237,7 @@ export class ExtensionManager {
     }
   }
 
-  private showDebugInfo(domElement: HTMLElement, manifest: IWebPartManifest): void {
+  private showDebugInfo(domElement: HTMLElement, manifest: IExtensionManifest): void {
     let debugHtml = '<div style="padding:12px;color:#605e5c;font-size:13px;">';
     debugHtml += `<p><strong>${manifest.alias}</strong> extension bundle loaded.</p>`;
     debugHtml += '<p style="color:#a80000;">Could not find Application Customizer class.</p>';

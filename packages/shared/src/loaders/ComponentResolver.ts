@@ -1,4 +1,4 @@
-import type { IWebPartManifest } from '../types';
+import type { IClientSideComponentManifest } from '../types';
 import type { IAmdModules } from '../types/amd';
 
 /**
@@ -14,7 +14,7 @@ export class ComponentResolver {
    * @param candidateModules - Optional array of module names to search (from bundle loading)
    * @returns Component class constructor or null if not found
    */
-  findComponentClass(manifest: IWebPartManifest, candidateModules?: string[]): any {
+  findComponentClass(manifest: IClientSideComponentManifest, candidateModules?: string[]): any {
     if (typeof window === 'undefined') {
       throw new Error('ComponentResolver requires browser environment');
     }

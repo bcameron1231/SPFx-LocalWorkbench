@@ -10,6 +10,7 @@ export interface IComponentItem {
   iconName?: string;
   iconSrc?: string;
   manifestIndex: number;
+  preconfiguredEntryIndex?: number;
 }
 
 interface IComponentPickerProps {
@@ -18,7 +19,7 @@ interface IComponentPickerProps {
   isOpen: boolean;
   resultsLabel?: string;
   noResultsLabel?: string;
-  onSelect: (manifestIndex: number, location?: number) => void;
+  onSelect: (manifestIndex: number, location?: number, preconfiguredEntryIndex?: number) => void;
 }
 
 export const ComponentPicker: FC<IComponentPickerProps> = (props) => {
@@ -74,7 +75,9 @@ export const ComponentPicker: FC<IComponentPickerProps> = (props) => {
                   className={styles.item}
                   data-insert={location}
                   data-manifest={component.manifestIndex}
-                  onClick={() => onSelect(component.manifestIndex, location)}
+                  onClick={() =>
+                    onSelect(component.manifestIndex, location, component.preconfiguredEntryIndex)
+                  }
                 >
                   {component.iconName && (
                     <Icon iconName={component.iconName} className={styles.itemIcon} />

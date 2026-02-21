@@ -9,15 +9,18 @@ export interface IVsCodeApi {
 export interface IWorkbenchConfig {
   serveUrl: string;
   webParts: IWebPartManifest[];
-  extensions?: IWebPartManifest[];
+  extensions?: IExtensionManifest[];
   theme?: IThemeSettings;
   context: IContextSettings; // Always provided by extension (from WorkbenchConfig defaults)
 }
 
+/** Convenience union: any loaded component manifest (web part or extension). */
+export type IComponentManifest = IWebPartManifest | IExtensionManifest;
+
 export interface IWebPartManifest {
   id: string;
   alias: string;
-  componentType: string;
+  componentType: 'WebPart';
   version?: string;
   loaderConfig?: {
     entryModuleId?: string;
@@ -33,6 +36,19 @@ export interface IWebPartManifest {
     group?: ILocalizedString;
     properties?: Record<string, any>;
   }>;
+}
+
+export interface IExtensionManifest {
+  id: string;
+  alias: string;
+  componentType: 'Extension';
+  version?: string;
+  extensionType: 'Unknown' | 'ApplicationCustomizer' | 'FieldCustomizer' | 'ListViewCommandSet' | 'SearchQueryModifier' | 'FormCustomizer';
+  loaderConfig?: {
+    entryModuleId?: string;
+    internalModuleBaseUrls?: string[];
+    scriptResources?: Record<string, any>;
+  };
 }
 
 export interface IBaseClientSideWebPart {
@@ -61,7 +77,7 @@ export function isActiveWebPart(wp: IWebPartConfig): wp is IActiveWebPart {
 
 /** Extension configuration before instantiation (no runtime state). */
 export interface IExtensionConfig {
-  manifest: IWebPartManifest;
+  manifest: IExtensionManifest;
   instanceId: string;
   properties: Record<string, any>;
 }
@@ -126,7 +142,7 @@ declare global {
     require?: any;
     requirejs?: any;
     debugManifests?: {
-      getManifests(): IWebPartManifest[];
+      getManifests(): IComponentManifest[];
     };
   }
 }

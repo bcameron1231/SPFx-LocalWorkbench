@@ -1,4 +1,13 @@
-import type { IWebPartManifest } from '../types';
+import type { IClientSideComponentManifest, IScriptResourcePath } from '../types';
+
+/**
+ * Resolves an IScriptResourcePath value to a plain string.
+ * The schema allows a path to be either a bare string or an object with `path` + optional `integrity`.
+ */
+function resolvePath(value: IScriptResourcePath | undefined): string | undefined {
+  if (!value) return undefined;
+  return typeof value === 'string' ? value : value.path;
+}
 
 /**
  * BundleLoader
@@ -18,7 +27,7 @@ export class BundleLoader {
    * @param manifest - Component manifest containing loader config
    * @returns Promise that resolves with array of newly added module names
    */
-  async loadBundle(manifest: IWebPartManifest): Promise<string[]> {
+  async loadBundle(manifest: IClientSideComponentManifest): Promise<string[]> {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
       throw new Error('BundleLoader requires browser environment');
     }
@@ -52,15 +61,20 @@ export class BundleLoader {
    * @param manifest - Component manifest
    * @returns Relative bundle path
    */
-  private getBundlePath(manifest: IWebPartManifest): string {
+  private getBundlePath(manifest: IClientSideComponentManifest): string {
     if (manifest.loaderConfig?.scriptResources) {
       const entryId = manifest.loaderConfig.entryModuleId;
       const entry = entryId ? manifest.loaderConfig.scriptResources[entryId] : null;
 
-      if (entry?.paths?.default) {
-        return entry.paths.default;
-      } else if (entry?.path) {
-        return entry.path;
+      if (entry) {
+        if (entry.type === 'localizedPath') {
+          // Check paths['default'] first (older SPFx builds store the default locale
+          // under the key 'default'), then fall back to the proper defaultPath field.
+          const fromPaths = resolvePath(entry.paths?.['default'] as IScriptResourcePath | undefined);
+          return fromPaths ?? resolvePath(entry.defaultPath) ?? '';
+        } else if (entry.type === 'path') {
+          return resolvePath(entry.path) ?? '';
+        }
       }
     }
 

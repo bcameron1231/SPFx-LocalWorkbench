@@ -16,7 +16,6 @@ import type { IActiveWebPart, IVsCodeApi, IWebPartConfig, IWebPartManifest } fro
 
 export class WebPartManager {
   private log = logger.createChild('WebPartManager');
-  private vscode: IVsCodeApi;
   private bundleLoader: BundleLoader;
   private stringsLoader: StringsLoader;
   private componentResolver: ComponentResolver;
@@ -24,12 +23,11 @@ export class WebPartManager {
   private themeProvider: ThemeProvider;
 
   constructor(
-    vscode: IVsCodeApi,
+    _vscode: IVsCodeApi,
     serveUrl: string,
     contextProvider: SpfxContext,
     themeProvider: ThemeProvider,
   ) {
-    this.vscode = vscode;
     this.bundleLoader = new BundleLoader(serveUrl);
     this.stringsLoader = new StringsLoader(serveUrl);
     this.componentResolver = new ComponentResolver();

@@ -1,4 +1,4 @@
-import type { IWebPartManifest } from '../types';
+import type { IClientSideComponentManifest } from '../types';
 
 /**
  * StringsLoader
@@ -19,7 +19,7 @@ export class StringsLoader {
    * @param localeOverride - Optional locale override (e.g., 'en-us', 'de-de')
    * @returns Promise that resolves when strings are loaded
    */
-  async loadStrings(manifest: IWebPartManifest, localeOverride?: string): Promise<void> {
+  async loadStrings(manifest: IClientSideComponentManifest, localeOverride?: string): Promise<void> {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
       throw new Error('StringsLoader requires browser environment');
     }

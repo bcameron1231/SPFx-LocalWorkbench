@@ -12,6 +12,13 @@ export interface ISpfxParameters {
   /** Component ID from manifest */
   componentId: string;
 
+  /**
+   * Index of the preconfiguredEntry this story was generated from.
+   * Used when a manifest has multiple preconfiguredEntries so each gets its own story.
+   * Defaults to 0 when absent.
+   */
+  preconfiguredEntryIndex?: number;
+
   /** Initial property values */
   properties?: Record<string, any>;
 

@@ -33,6 +33,8 @@ export interface IGeneratedStory {
   componentId: string;
   /** Component alias */
   alias: string;
+  /** Index of the preconfiguredEntry this story was generated from */
+  preconfiguredEntryIndex: number;
   /** Locale (if this is a locale variant) */
   locale?: string;
 }
@@ -80,10 +82,26 @@ export class StoryGenerator {
       ? await this.detector.getLocaleInfo()
       : { default: 'en-US', locales: ['en-US'] };
 
-    // Generate a single story file for each web part containing all locale variants
+    // Generate a story file for each preconfiguredEntry in each web part
     for (const webPart of webParts) {
-      const story = await this.generateWebPartStory(webPart, localeInfo);
-      generatedStories.push(story);
+      const entries = webPart.preconfiguredEntries ?? [];
+      const entryCount = entries.length;
+
+      if (entryCount === 0) {
+        // No preconfiguredEntries – generate a single story using defaults
+        const story = await this.generateWebPartStory(webPart, localeInfo, 0, false);
+        generatedStories.push(story);
+      } else {
+        for (let entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+          const story = await this.generateWebPartStory(
+            webPart,
+            localeInfo,
+            entryIndex,
+            entryCount > 1,
+          );
+          generatedStories.push(story);
+        }
+      }
     }
 
     // Generate index file
@@ -93,31 +111,44 @@ export class StoryGenerator {
   }
 
   /**
-   * Generates a single story file for a web part with all locale variants
+   * Generates a single story file for a web part preconfiguredEntry with all locale variants.
+   * When a manifest has multiple entries, each gets its own file named with the entry title.
    */
   private async generateWebPartStory(
     manifest: IWebPartManifest,
     localeInfo: { default: string; locales: string[] },
+    entryIndex: number,
+    multipleEntries: boolean,
   ): Promise<IGeneratedStory> {
     const alias = manifest.alias;
     const componentId = manifest.id;
-    const fileName = `${alias}.stories.ts`;
-    const filePath = path.join(this.outputDir, fileName);
 
-    // Get display name from preconfigured entries
-    const preconfiguredEntry = manifest.preconfiguredEntries?.[0];
+    // Resolve the preconfiguredEntry for this index
+    const preconfiguredEntry = manifest.preconfiguredEntries?.[entryIndex];
     const defaultTitle = getLocalizedString(preconfiguredEntry?.title, localeInfo.default) || alias;
     const properties = preconfiguredEntry?.properties || {};
+
+    // When there are multiple entries, append a sanitized entry title to avoid filename
+    // collisions and to make the story file self-describing.
+    const fileName = multipleEntries
+      ? `${alias}--${this.sanitizeForFilename(defaultTitle)}.stories.ts`
+      : `${alias}.stories.ts`;
+    const filePath = path.join(this.outputDir, fileName);
+
+    // The Storybook title includes the entry title when there are multiple entries so each
+    // appears as a distinct component in the sidebar.
+    const storyTitle = multipleEntries ? `Web Parts/${alias}/${defaultTitle}` : undefined;
 
     // Generate story content with all locale variants
     const storyContent = this.generateStoryContent({
       componentId,
       alias,
-      title: defaultTitle,
+      title: storyTitle ?? defaultTitle,
       defaultLocale: localeInfo.default,
       locales: localeInfo.locales,
       properties,
       autoDocs: this.autoDocs,
+      preconfiguredEntryIndex: entryIndex,
     });
 
     // Write story file
@@ -127,7 +158,16 @@ export class StoryGenerator {
       filePath,
       componentId,
       alias,
+      preconfiguredEntryIndex: entryIndex,
     };
+  }
+
+  /** Converts an arbitrary string into a safe filename segment. */
+  private sanitizeForFilename(value: string): string {
+    return value
+      .replace(/[^a-zA-Z0-9 _-]/g, '') // strip special chars
+      .trim()
+      .replace(/\s+/g, '-'); // spaces → hyphens
   }
 
   /**
@@ -141,8 +181,18 @@ export class StoryGenerator {
     locales: string[];
     properties: Record<string, unknown>;
     autoDocs: boolean;
+    preconfiguredEntryIndex: number;
   }): string {
-    const { componentId, alias, title, defaultLocale, locales, properties, autoDocs } = options;
+    const {
+      componentId,
+      alias,
+      title,
+      defaultLocale,
+      locales,
+      properties,
+      autoDocs,
+      preconfiguredEntryIndex,
+    } = options;
 
     // Create the shared parameters object
     const pageContextForDefault = {
@@ -156,6 +206,7 @@ export class StoryGenerator {
     const sharedParameters = {
       spfx: {
         componentId: componentId,
+        preconfiguredEntryIndex: preconfiguredEntryIndex,
         locale: defaultLocale,
         properties: properties,
         context: {
@@ -166,7 +217,7 @@ export class StoryGenerator {
 
     // Header comment
     let content = `/**
- * Auto-generated Storybook story for ${alias}
+ * Auto-generated Storybook story for ${alias} (entry ${preconfiguredEntryIndex})
  * Component ID: ${componentId}
  * Default Locale: ${defaultLocale}
  * 

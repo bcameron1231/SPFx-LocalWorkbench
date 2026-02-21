@@ -1,16 +1,20 @@
 import { IconButton, Stack, Text } from '@fluentui/react';
 import React, { FC, Fragment, useMemo, useState } from 'react';
 
-import type { IWebPartConfig, IWebPartManifest } from '../../types';
+import type { IWebPartConfig, IComponentManifest } from '../../types';
 import { getLocalizedString } from '../../utilities';
-import { ComponentPicker } from '../ComponentPicker';
+import { ComponentPicker, IComponentItem } from '../ComponentPicker';
 //import { WebPartPicker } from '../WebPartPicker';
 import styles from './WorkbenchCanvas.module.css';
 
 interface IWorkbenchCanvasProps {
-  manifests: IWebPartManifest[];
+  manifests: IComponentManifest[];
   activeWebParts: IWebPartConfig[];
-  onAddWebPart: (insertIndex: number, manifestIndex: number) => void;
+  onAddWebPart: (
+    insertIndex: number,
+    manifestIndex: number,
+    preconfiguredEntryIndex?: number,
+  ) => void;
   onEditWebPart: (index: number) => void;
   onDeleteWebPart: (index: number) => void;
   locale?: string;
@@ -30,9 +34,13 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
     setOpenPickerIndex(openPickerIndex === insertIndex ? null : insertIndex);
   };
 
-  const handlePickerSelect = (manifestIndex: number, insertIndex: number = 0) => {
+  const handlePickerSelect = (
+    manifestIndex: number,
+    insertIndex: number = 0,
+    preconfiguredEntryIndex?: number,
+  ) => {
     setOpenPickerIndex(null);
-    onAddWebPart(insertIndex, manifestIndex);
+    onAddWebPart(insertIndex, manifestIndex, preconfiguredEntryIndex);
   };
 
   const handleOverlayClick = () => {
@@ -94,9 +102,9 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
 interface IAddZoneProps {
   insertIndex: number;
   isOpen: boolean;
-  manifests: IWebPartManifest[];
+  manifests: IComponentManifest[];
   onAddClick: (insertIndex: number) => void;
-  onSelect: (manifestIndex: number, insertIndex?: number) => void;
+  onSelect: (manifestIndex: number, insertIndex?: number, preconfiguredEntryIndex?: number) => void;
   locale?: string;
 }
 
@@ -109,17 +117,29 @@ const AddZone: FC<IAddZoneProps> = ({
   locale,
 }) => {
   const availableWebParts = useMemo(() => {
-    return manifests
+    const items: IComponentItem[] = [];
+    manifests
       .map((m, manifestIndex) => ({ ...m, manifestIndex }))
       .filter((m) => m.componentType === 'WebPart')
-      .map((wp, _index) => {
-        const title = getLocalizedString(wp.preconfiguredEntries?.[0]?.title, locale) || wp.alias;
-        const description =
-          getLocalizedString(wp.preconfiguredEntries?.[0]?.description, locale) || '';
-        const iconName = wp.preconfiguredEntries?.[0]?.officeFabricIconFontName;
-        const iconSrc = wp.preconfiguredEntries?.[0]?.iconImageUrl;
-        return { ...wp, title, description, iconName, iconSrc };
+      .forEach((wp) => {
+        const entries = wp.preconfiguredEntries?.length ? wp.preconfiguredEntries : [undefined];
+        entries.forEach((entry, entryIndex) => {
+          const title = getLocalizedString(entry?.title, locale) || wp.alias;
+          const description = getLocalizedString(entry?.description, locale) || '';
+          const iconName = entry?.officeFabricIconFontName;
+          const iconSrc = entry?.iconImageUrl;
+          items.push({
+            id: `${wp.id}-${entryIndex}`,
+            title,
+            description,
+            iconName,
+            iconSrc,
+            manifestIndex: wp.manifestIndex,
+            preconfiguredEntryIndex: entryIndex,
+          });
+        });
       });
+    return items;
   }, [manifests, locale]);
   return (
     <div className={styles.addZone} data-insert-index={insertIndex}>
@@ -141,7 +161,9 @@ const AddZone: FC<IAddZoneProps> = ({
         isOpen={isOpen}
         resultsLabel="Available web parts"
         noResultsLabel="No web parts found"
-        onSelect={onSelect}
+        onSelect={(manifestIndex, location, preconfiguredEntryIndex) =>
+          onSelect(manifestIndex, location, preconfiguredEntryIndex)
+        }
       />
     </div>
   );

@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import { isFileNotFoundError } from '@spfx-local-workbench/shared/utils/errorUtils';
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
 
-import type { IComponentLocales, ILocaleInfo, ISpfxConfig, IWebPartManifest } from './types';
+import type { IComponentLocales, IExtensionManifest, ILocaleInfo, ISpfxConfig, IWebPartManifest } from './types';
 import { normalizeLocaleCasing } from './types';
 
 export class SpfxProjectDetector {
@@ -129,8 +129,8 @@ export class SpfxProjectDetector {
   }
 
   // Finds all extension manifests in the project
-  public async getExtensionManifests(): Promise<IWebPartManifest[]> {
-    const manifests: IWebPartManifest[] = [];
+  public async getExtensionManifests(): Promise<IExtensionManifest[]> {
+    const manifests: IExtensionManifest[] = [];
 
     const srcPath = path.join(this.workspacePath, 'src');
     try {
@@ -145,7 +145,7 @@ export class SpfxProjectDetector {
       try {
         const content = await fs.readFile(manifestFile, 'utf8');
         const cleanContent = this.removeJsonComments(content.replace(/^\uFEFF/, ''));
-        const manifest = JSON.parse(cleanContent) as IWebPartManifest;
+        const manifest = JSON.parse(cleanContent) as IWebPartManifest | IExtensionManifest;
 
         // Include Extension manifests
         if (manifest.componentType === 'Extension') {

@@ -8,10 +8,21 @@ export * from './LocaleTypes';
 export interface IWebPartManifest {
   id: string;
   alias: string;
-  componentType: string;
+  componentType: 'WebPart';
   version: string;
   manifestVersion: number;
   preconfiguredEntries?: IPreconfiguredEntry[];
+  loaderConfig?: ILoaderConfig;
+}
+
+// Extension manifest structure
+export interface IExtensionManifest {
+  id: string;
+  alias: string;
+  componentType: 'Extension';
+  version: string;
+  manifestVersion: number;
+  extensionType: 'Unknown' | 'ApplicationCustomizer' | 'FieldCustomizer' | 'ListViewCommandSet' | 'SearchQueryModifier' | 'FormCustomizer';
   loaderConfig?: ILoaderConfig;
 }
 

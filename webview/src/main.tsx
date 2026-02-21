@@ -33,7 +33,11 @@ function initialize() {
 
     // Setup event listeners for React -> Runtime communication
     window.addEventListener('addWebPart', ((e: CustomEvent) => {
-      runtime.addWebPartAt(e.detail.insertIndex, e.detail.manifestIndex);
+      runtime.addWebPartAt(
+        e.detail.insertIndex,
+        e.detail.manifestIndex,
+        e.detail.preconfiguredEntryIndex,
+      );
     }) as EventListener);
 
     window.addEventListener('deleteWebPart', ((e: CustomEvent) => {

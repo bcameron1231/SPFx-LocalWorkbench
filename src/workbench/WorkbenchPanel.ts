@@ -17,7 +17,7 @@ import {
   onConfigurationChanged,
 } from './config';
 import { generateWorkbenchHtml } from './html';
-import type { IWebPartManifest } from './types';
+import type { IExtensionManifest, IWebPartManifest } from './types';
 
 const log = logger.createChild('WorkbenchPanel');
 
@@ -30,7 +30,7 @@ export class WorkbenchPanel {
   private readonly _extensionUri: vscode.Uri;
   private _disposables: vscode.Disposable[] = [];
   private _webParts: IWebPartManifest[] = [];
-  private _extensions: IWebPartManifest[] = [];
+  private _extensions: IExtensionManifest[] = [];
   private _settings: IWorkbenchSettings;
   private _liveReloadDebounceTimer: ReturnType<typeof setTimeout> | undefined;
 

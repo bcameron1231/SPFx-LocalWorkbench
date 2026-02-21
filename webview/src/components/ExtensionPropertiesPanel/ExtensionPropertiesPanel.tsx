@@ -46,7 +46,6 @@ export const ExtensionPropertiesPanel: FC<IExtensionPropertiesPanelProps> = ({
   };
 
   const title =
-    extension?.manifest.preconfiguredEntries?.[0]?.title?.default ||
     extension?.manifest.alias ||
     'Extension';
 

@@ -5,9 +5,9 @@ import { logger } from '@spfx-local-workbench/shared';
 
 import type {
   IActiveWebPart,
+  IComponentManifest,
   IExtensionConfig,
   IWebPartConfig,
-  IWebPartManifest,
   IWorkbenchConfig,
 } from '../../types';
 import { isActiveWebPart } from '../../types';
@@ -24,7 +24,7 @@ interface IAppProps {
 }
 
 export interface IAppHandlers {
-  setManifests: (manifests: IWebPartManifest[]) => void;
+  setManifests: (manifests: IComponentManifest[]) => void;
   setActiveWebParts: (webParts: IWebPartConfig[]) => void;
   setActiveExtensions: (extensions: IExtensionConfig[]) => void;
   openPropertyPane: (webPart: IActiveWebPart) => void;
@@ -33,7 +33,7 @@ export interface IAppHandlers {
 }
 
 export const App: FC<IAppProps> = ({ config: _config, onInitialized }) => {
-  const [manifests, setManifests] = useState<IWebPartManifest[]>([]);
+  const [manifests, setManifests] = useState<IComponentManifest[]>([]);
   const [activeWebParts, setActiveWebParts] = useState<IWebPartConfig[]>([]);
   const [activeExtensions, setActiveExtensions] = useState<IExtensionConfig[]>([]);
   const [selectedWebPart, setSelectedWebPart] = useState<IActiveWebPart>();
@@ -143,10 +143,10 @@ export const App: FC<IAppProps> = ({ config: _config, onInitialized }) => {
         <WorkbenchCanvas
           manifests={manifests}
           activeWebParts={activeWebParts}
-          onAddWebPart={(insertIndex, manifestIndex) => {
+          onAddWebPart={(insertIndex, manifestIndex, preconfiguredEntryIndex) => {
             window.dispatchEvent(
               new CustomEvent('addWebPart', {
-                detail: { insertIndex, manifestIndex },
+                detail: { insertIndex, manifestIndex, preconfiguredEntryIndex },
               }),
             );
           }}

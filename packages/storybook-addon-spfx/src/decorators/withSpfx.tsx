@@ -2,7 +2,7 @@ import { useChannel, useGlobals } from '@storybook/preview-api';
 import type { Decorator, StoryContext } from '@storybook/react';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { MICROSOFT_THEMES, buildMockPageContext } from '@spfx-local-workbench/shared';
+import { MICROSOFT_THEMES, buildMockPageContext, type IWebPartManifest } from '@spfx-local-workbench/shared';
 
 import { DisplayMode, EVENTS, PARAM_KEY, STORYBOOK_GLOBAL_KEYS } from '../constants';
 import { SpfxContextProvider } from '../context/SpfxContext';
@@ -96,10 +96,19 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
   );
   const [themeId, setThemeId] = useState<string>(globalThemeId || parameters.themeId || 'teal');
   const [locale, setLocale] = useState<string>(parameters.locale || 'en-US');
+  // Properties are seeded from the serve's manifest preconfiguredEntry once loaded;
+  // parameters.properties acts only as a fallback when the entry has none.
   const [properties, setProperties] = useState<Record<string, any>>(parameters.properties || {});
+  const [propertiesSeeded, setPropertiesSeeded] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const componentInstanceRef = useRef<any>(null);
+
+  // Reset seed flag whenever the story target changes so the new manifest entry's
+  // properties are picked up from the serve on the next load.
+  useEffect(() => {
+    setPropertiesSeeded(false);
+  }, [parameters.componentId, parameters.preconfiguredEntryIndex]);
 
   // Update displayMode when global changes
   useEffect(() => {
@@ -143,11 +152,25 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         const mockPageContext = buildMockPageContext(contextConfig);
 
         // Load the component using the proper component loader
-        const { manifest, componentClass: ComponentClass } = await loadSpfxComponent(
+        const { manifest: rawManifest, componentClass: ComponentClass } = await loadSpfxComponent(
           parameters.componentId,
           serveUrl,
           locale,
         );
+        // withSpfx is web-part–specific; cast to access preconfiguredEntries.
+        const manifest = rawManifest as IWebPartManifest;
+
+        // Resolve initial properties from the serve manifest's preconfiguredEntry so the
+        // source of truth is always the running serve, not baked-in story parameters.
+        const entryIndex = parameters.preconfiguredEntryIndex ?? 0;
+        const serveProperties = manifest.preconfiguredEntries?.[entryIndex]?.properties;
+        const resolvedProperties = serveProperties ?? parameters.properties ?? {};
+
+        // Seed React state once per component load so downstream effects see the correct values.
+        if (!propertiesSeeded) {
+          setProperties(resolvedProperties);
+          setPropertiesSeeded(true);
+        }
 
         // Create component instance
         const instance = new ComponentClass();
@@ -156,7 +179,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         // Set up the component with getters (similar to WebPartManager)
         instance._context = undefined;
         instance._domElement = containerRef.current;
-        instance._properties = properties;
+        instance._properties = resolvedProperties;
         instance._displayMode = displayMode;
 
         // Define property getters

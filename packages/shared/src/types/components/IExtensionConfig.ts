@@ -1,4 +1,4 @@
-import type { IWebPartManifest } from '../manifests';
+import type { IExtensionManifest } from '../manifests';
 
 /**
  * Extension configuration before instantiation
@@ -6,7 +6,7 @@ import type { IWebPartManifest } from '../manifests';
  */
 export interface IExtensionConfig {
   /** Component manifest */
-  manifest: IWebPartManifest;
+  manifest: IExtensionManifest;
 
   /** Unique instance identifier */
   instanceId: string;
