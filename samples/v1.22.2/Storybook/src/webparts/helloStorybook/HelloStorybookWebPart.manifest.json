@@ -28,7 +28,13 @@
     },
     "officeFabricIconFontName": "ReadingMode",
     "properties": {
-      "description": "HelloStorybook"
+      "textValue": "Hello Storybook",
+      "sliderValue": 81,
+      "toggleValue": true,
+      "internalValue": {
+        "key1": "Wowee",
+        "key2": "Woweeee!"
+      }
     }
   }]
 }

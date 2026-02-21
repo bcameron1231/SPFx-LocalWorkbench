@@ -2,8 +2,10 @@ import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import {
+  PropertyPaneTextField,
+  PropertyPaneSlider,
+  PropertyPaneToggle,
   type IPropertyPaneConfiguration,
-  PropertyPaneTextField
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
@@ -11,25 +13,34 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as strings from 'HelloStorybookWebPartStrings';
 import HelloStorybook from './components/HelloStorybook';
 import { IHelloStorybookProps } from './components/IHelloStorybookProps';
+import { IThemeColors, defaultThemeColors } from './components/IThemeColors';
 
 export interface IHelloStorybookWebPartProps {
-  description: string;
+  textValue: string;
+  sliderValue: number;
+  toggleValue: boolean;
+  internalValue: object;
 }
 
 export default class HelloStorybookWebPart extends BaseClientSideWebPart<IHelloStorybookWebPartProps> {
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
+  private _themeColors: IThemeColors = { ...defaultThemeColors };
 
   public render(): void {
     const element: React.ReactElement<IHelloStorybookProps> = React.createElement(
       HelloStorybook,
       {
-        description: this.properties.description,
         isDarkTheme: this._isDarkTheme,
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        userDisplayName: this.context.pageContext.user.displayName
+        themeColors: this._themeColors,
+        displayMode: this.displayMode,
+        textValue: this.properties.textValue,
+        sliderValue: this.properties.sliderValue,
+        toggleValue: this.properties.toggleValue,
+        internalValue: this.properties.internalValue,
       }
     );
 
@@ -77,16 +88,26 @@ export default class HelloStorybookWebPart extends BaseClientSideWebPart<IHelloS
     }
 
     this._isDarkTheme = !!currentTheme.isInverted;
-    const {
-      semanticColors
-    } = currentTheme;
+
+    const { palette, semanticColors } = currentTheme;
+
+    if (palette) {
+      this._themeColors = {
+        primary: palette.themePrimary || defaultThemeColors.primary,
+        secondary: palette.themeSecondary || defaultThemeColors.secondary,
+        tertiary: palette.themeTertiary || defaultThemeColors.tertiary,
+        light: palette.themeLight || defaultThemeColors.light,
+        dark: palette.themeDark || defaultThemeColors.dark,
+        bodyText: (semanticColors && semanticColors.bodyText) || defaultThemeColors.bodyText,
+        bodyBackground: (semanticColors && semanticColors.bodyBackground) || defaultThemeColors.bodyBackground,
+      };
+    }
 
     if (semanticColors) {
       this.domElement.style.setProperty('--bodyText', semanticColors.bodyText || null);
       this.domElement.style.setProperty('--link', semanticColors.link || null);
       this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
     }
-
   }
 
   protected onDispose(): void {
@@ -104,16 +125,25 @@ export default class HelloStorybookWebPart extends BaseClientSideWebPart<IHelloS
           header: {
             description: strings.PropertyPaneDescription
           },
-          groups: [
-            {
-              groupName: strings.BasicGroupName,
-              groupFields: [
-                PropertyPaneTextField('description', {
-                  label: strings.DescriptionFieldLabel
-                })
-              ]
-            }
-          ]
+          groups: [{
+            groupName: strings.BasicGroupName,
+            groupFields: [
+              PropertyPaneTextField('textValue', {
+                label: strings.TextValueFieldLabel,
+              }),
+              PropertyPaneSlider('sliderValue', {
+                label: strings.SliderValueFieldLabel,
+                min: 0,
+                max: 100,
+                step: 1,
+              }),
+              PropertyPaneToggle('toggleValue', {
+                label: strings.ToggleValueFieldLabel,
+                onText: strings.ToggleValueOnText,
+                offText: strings.ToggleValueOffText,
+              }),
+            ]
+          }],
         }
       ]
     };

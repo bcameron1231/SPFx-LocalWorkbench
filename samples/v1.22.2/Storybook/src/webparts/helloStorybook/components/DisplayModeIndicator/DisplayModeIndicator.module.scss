@@ -1,0 +1,12 @@
+.container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.icon {
+  width: 1rem;
+  color: "[theme:themePrimary, default: #0078d4]";
+}

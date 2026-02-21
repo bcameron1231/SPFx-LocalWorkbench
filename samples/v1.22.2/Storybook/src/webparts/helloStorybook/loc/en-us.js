@@ -1,8 +1,14 @@
 define([], function() {
   return {
+    DarkTheme: "Dark theme",
+    LightTheme: "Light theme",
+    SliderValueFieldLabel: "Slider value",
+    TextValueFieldLabel: "Text value",
+    ToggleValueFieldLabel: "Toggle value",
+    ToggleValueOffText: "Off",
+    ToggleValueOnText: "On",
     "PropertyPaneDescription": "Description",
     "BasicGroupName": "Group Name",
-    "DescriptionFieldLabel": "Description Field",
     "AppLocalEnvironmentSharePoint": "The app is running on your local environment as SharePoint web part",
     "AppLocalEnvironmentTeams": "The app is running on your local environment as Microsoft Teams app",
     "AppLocalEnvironmentOffice": "The app is running on your local environment in office.com",
