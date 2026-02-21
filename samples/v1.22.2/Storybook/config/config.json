@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "hello-storybook-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/helloStorybook/HelloStorybookWebPart.js",
+          "manifest": "./src/webparts/helloStorybook/HelloStorybookWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "HelloStorybookWebPartStrings": "lib/webparts/helloStorybook/loc/{locale}.js"
+  }
+}

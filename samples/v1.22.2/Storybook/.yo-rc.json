@@ -1,0 +1,19 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "useGulp": false,
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "22.19.0",
+    "sdksVersions": {},
+    "version": "1.22.2",
+    "libraryName": "storybook",
+    "libraryId": "ee692a69-a1d9-4f74-a1b0-542f29b1d2ff",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "storybook",
+    "solutionShortDescription": "storybook description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}
