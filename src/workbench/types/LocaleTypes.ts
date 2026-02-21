@@ -9,13 +9,6 @@ export interface ILocaleInfo {
 }
 
 /**
- * Locale information mapped by component ID
- */
-export interface IComponentLocales {
-  [componentId: string]: string[];
-}
-
-/**
  * Standard locale casing mapping (lowercase -> standard format)
  * Maps common SharePoint locale codes from file naming convention (lowercase)
  * to standard locale format (e.g., 'en-us' -> 'en-US')

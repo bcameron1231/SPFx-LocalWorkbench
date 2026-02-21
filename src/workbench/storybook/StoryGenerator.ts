@@ -77,13 +77,14 @@ export class StoryGenerator {
       return generatedStories;
     }
 
-    // Get locale information
-    const localeInfo = this.generateLocaleStories
-      ? await this.detector.getLocaleInfo()
-      : { default: 'en-US', locales: ['en-US'] };
-
     // Generate a story file for each preconfiguredEntry in each web part
     for (const webPart of webParts) {
+      // Resolve locales specific to this web part so that a web part without
+      // a given locale file doesn't get spurious locale variant stories.
+      const localeInfo = this.generateLocaleStories
+        ? await this.detector.getLocaleInfoForManifest(webPart)
+        : { default: 'en-US', locales: ['en-US'] };
+
       const entries = webPart.preconfiguredEntries ?? [];
       const entryCount = entries.length;
 
@@ -137,7 +138,9 @@ export class StoryGenerator {
 
     // The Storybook title includes the entry title when there are multiple entries so each
     // appears as a distinct component in the sidebar.
-    const storyTitle = multipleEntries ? `Web Parts/${alias}/${defaultTitle}` : undefined;
+    // NOTE: the template always adds a 'Web Parts/' prefix, so we only provide
+    // the path *within* that category here to avoid doubling the segment.
+    const storyTitle = multipleEntries ? `${alias}/${defaultTitle}` : undefined;
 
     // Generate story content with all locale variants
     const storyContent = this.generateStoryContent({

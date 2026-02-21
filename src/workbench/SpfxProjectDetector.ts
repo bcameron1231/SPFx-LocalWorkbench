@@ -5,13 +5,7 @@ import * as vscode from 'vscode';
 import { isFileNotFoundError } from '@spfx-local-workbench/shared/utils/errorUtils';
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
 
-import type {
-  IComponentLocales,
-  IExtensionManifest,
-  ILocaleInfo,
-  ISpfxConfig,
-  IWebPartManifest,
-} from './types';
+import type { IExtensionManifest, ILocaleInfo, ISpfxConfig, IWebPartManifest } from './types';
 import { normalizeLocaleCasing } from './types';
 
 export class SpfxProjectDetector {
@@ -216,139 +210,59 @@ export class SpfxProjectDetector {
     return files;
   }
 
-  // Finds all localization files based on config.json localizedResources
-  public async findLocalizationFiles(): Promise<string[]> {
-    const matchedFiles = await this.getMatchedLocalizationFiles();
-    return matchedFiles.map((file) => file.filePath);
-  }
-
-  // Gets distinct locale values from localization files
-  public async getComponentLocales(): Promise<string[]> {
-    const matchedFiles = await this.getMatchedLocalizationFiles();
-    const locales = new Set<string>();
-
-    for (const file of matchedFiles) {
-      const locale = this.extractLocaleFromPattern(file.filename, file.pattern);
-      if (locale) {
-        locales.add(normalizeLocaleCasing(locale));
-      }
-    }
-
-    return Array.from(locales).sort();
-  }
-
-  // Gets locale information including default locale
-  public async getLocaleInfo(): Promise<ILocaleInfo> {
-    const locales = await this.getComponentLocales();
-
-    // Determine default locale (first found or 'en-US')
-    const defaultLocale = locales.length > 0 ? locales[0] : 'en-US';
-
-    // Ensure default is in the list
-    if (!locales.includes(defaultLocale)) {
-      locales.unshift(defaultLocale);
-    }
-
-    return {
-      default: defaultLocale,
-      locales: locales.sort(),
-    };
-  }
-
-  // Gets supported locales for each component
-  public async getLocalesByComponent(): Promise<IComponentLocales> {
+  /**
+   * Gets locale information scoped to a single web part manifest.
+   * Only locales present in the manifest's own resource files are returned.
+   * Falls back to project-wide locale info when no per-component resources are found.
+   */
+  public async getLocaleInfoForManifest(manifest: IWebPartManifest): Promise<ILocaleInfo> {
     const config = await this.getBundleConfig();
-    if (!config?.localizedResources) {
-      return {};
-    }
+    const aliasLower = manifest.alias.toLowerCase();
 
-    const componentLocales: IComponentLocales = {};
-    const allLocales = new Set<string>();
+    if (config?.localizedResources) {
+      const localeSet = new Set<string>();
 
-    // First, collect all locales from all resources
-    for (const [resourceName, resourcePath] of Object.entries(config.localizedResources)) {
-      const pattern = resourcePath.replace('{locale}', '*');
-      const lastSlashIndex = pattern.lastIndexOf('/');
-      if (lastSlashIndex === -1) {
-        continue;
-      }
+      for (const [resourceName, resourcePath] of Object.entries(config.localizedResources)) {
+        // Match by resource key first (e.g. "HelloStorybookWebPartStrings" contains "HelloStorybookWebPart"),
+        // then fall back to matching against the resource path directory segment.
+        // Key-based matching is preferred because the directory name often omits the "WebPart" suffix.
+        const matchesKey = resourceName.toLowerCase().includes(aliasLower);
+        const matchesPath = resourcePath.toLowerCase().includes(aliasLower);
+        if (!matchesKey && !matchesPath) {
+          continue;
+        }
 
-      const dirPath = path.join(this.workspacePath, pattern.substring(0, lastSlashIndex));
-      const filePattern = pattern.substring(lastSlashIndex + 1);
+        const pattern = resourcePath.replace('{locale}', '*');
+        const lastSlash = pattern.lastIndexOf('/');
+        if (lastSlash === -1) continue;
 
-      try {
-        const entries = await fs.readdir(dirPath, { withFileTypes: true });
-        const locales: string[] = [];
+        const dirPath = path.join(this.workspacePath, pattern.substring(0, lastSlash));
+        const filePattern = pattern.substring(lastSlash + 1);
 
-        for (const entry of entries) {
-          if (entry.isFile() && this.matchesPattern(entry.name, filePattern)) {
-            const locale = this.extractLocaleFromPattern(entry.name, filePattern);
-            if (locale) {
-              const normalizedLocale = normalizeLocaleCasing(locale);
-              locales.push(normalizedLocale);
-              allLocales.add(normalizedLocale);
+        try {
+          const entries = await fs.readdir(dirPath, { withFileTypes: true });
+          for (const entry of entries) {
+            if (entry.isFile() && this.matchesPattern(entry.name, filePattern)) {
+              const locale = this.extractLocaleFromPattern(entry.name, filePattern);
+              if (locale) {
+                localeSet.add(normalizeLocaleCasing(locale));
+              }
             }
           }
+        } catch {
+          logger.debug(`SpfxProjectDetector - Localization dir not found: ${dirPath}`);
         }
+      }
 
-        if (locales.length > 0) {
-          componentLocales[resourceName] = locales.sort();
-        }
-      } catch (_error: unknown) {
-        // Directory might not exist
-        logger.debug(`SpfxProjectDetector - Localization directory not found: ${dirPath}`);
+      if (localeSet.size > 0) {
+        const locales = Array.from(localeSet).sort();
+        const defaultLocale = locales[0];
+        return { default: defaultLocale, locales };
       }
     }
 
-    return componentLocales;
-  }
-
-  // Processes localized resources and returns matched files with their patterns
-  private async getMatchedLocalizationFiles(): Promise<
-    Array<{ filePath: string; filename: string; pattern: string }>
-  > {
-    const matchedFiles: Array<{ filePath: string; filename: string; pattern: string }> = [];
-
-    // Get the bundle configuration
-    const config = await this.getBundleConfig();
-    if (!config?.localizedResources) {
-      return matchedFiles;
-    }
-
-    // Process each localized resource
-    for (const [_resourceName, resourcePath] of Object.entries(config.localizedResources)) {
-      // Replace {locale} with * to create a glob pattern
-      // e.g., "lib/webparts/helloWorld/loc/{locale}.js" -> "lib/webparts/helloWorld/loc/*.js"
-      const pattern = resourcePath.replace('{locale}', '*');
-
-      // Extract directory and file pattern
-      const lastSlashIndex = pattern.lastIndexOf('/');
-      if (lastSlashIndex === -1) {
-        continue;
-      }
-
-      const dirPath = path.join(this.workspacePath, pattern.substring(0, lastSlashIndex));
-      const filePattern = pattern.substring(lastSlashIndex + 1);
-
-      // Find all files matching the pattern
-      try {
-        const entries = await fs.readdir(dirPath, { withFileTypes: true });
-        for (const entry of entries) {
-          if (entry.isFile() && this.matchesPattern(entry.name, filePattern)) {
-            matchedFiles.push({
-              filePath: path.join(dirPath, entry.name),
-              filename: entry.name,
-              pattern: filePattern,
-            });
-          }
-        }
-      } catch (_error: unknown) {
-        // Directory might not exist, continue
-        logger.debug(`SpfxProjectDetector - Localization directory not found: ${dirPath}`);
-      }
-    }
-
-    return matchedFiles;
+    // Fallback: no per-component resources found, use project-wide defaults
+    return { default: 'en-US', locales: ['en-US'] };
   }
 
   // Matches a filename against a simple glob pattern (supports * wildcard)
