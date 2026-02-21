@@ -9,10 +9,19 @@
           "manifest": "./src/webparts/helloStorybook/HelloStorybookWebPart.manifest.json"
         }
       ]
+    },
+    "hello-teams-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/helloTeams/HelloTeamsWebPart.js",
+          "manifest": "./src/webparts/helloTeams/HelloTeamsWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
-    "HelloStorybookWebPartStrings": "lib/webparts/helloStorybook/loc/{locale}.js"
+    "HelloStorybookWebPartStrings": "lib/webparts/helloStorybook/loc/{locale}.js",
+    "HelloTeamsWebPartStrings": "lib/webparts/helloTeams/loc/{locale}.js"
   }
 }
