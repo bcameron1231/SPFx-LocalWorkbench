@@ -7,3 +7,4 @@ export * from './amd';
 export * from './ILocalizedString';
 export * from './IPageContextConfig';
 export * from './themes';
+export * from './ILocaleInfo';

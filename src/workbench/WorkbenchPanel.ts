@@ -6,6 +6,7 @@
 import * as vscode from 'vscode';
 
 import { LIVE_RELOAD_DEBOUNCE_MS } from '@spfx-local-workbench/shared';
+import type { IExtensionManifest, IWebPartManifest } from '@spfx-local-workbench/shared';
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
 import { getNonce } from '@spfx-local-workbench/shared/utils/securityUtils';
 
@@ -17,7 +18,6 @@ import {
   onConfigurationChanged,
 } from './config';
 import { generateWorkbenchHtml } from './html';
-import type { IExtensionManifest, IWebPartManifest } from './types';
 
 const log = logger.createChild('WorkbenchPanel');
 

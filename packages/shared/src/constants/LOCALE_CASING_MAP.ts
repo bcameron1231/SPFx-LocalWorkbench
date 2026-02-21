@@ -1,17 +1,7 @@
-// Locale-related types and utilities for SPFx Local Workbench
-
 /**
- * Locale information for a project
- */
-export interface ILocaleInfo {
-  default: string;
-  locales: string[];
-}
-
-/**
- * Standard locale casing mapping (lowercase -> standard format)
- * Maps common SharePoint locale codes from file naming convention (lowercase)
- * to standard locale format (e.g., 'en-us' -> 'en-US')
+ * Standard locale casing mapping (lowercase → standard format).
+ * Maps the lowercase file-naming convention used by SPFx locale files
+ * (e.g. `en-us.js`) to the correctly-cased BCP 47 tag (e.g. `en-US`).
  */
 export const LOCALE_CASING_MAP: Record<string, string> = {
   'ar-sa': 'ar-SA',
@@ -76,13 +66,3 @@ export const LOCALE_CASING_MAP: Record<string, string> = {
   'zh-cn': 'zh-CN',
   'zh-tw': 'zh-TW',
 };
-
-/**
- * Normalizes locale code to standard casing format
- * @param locale Locale code (e.g., 'en-us' or 'en-US')
- * @returns Standardized locale code (e.g., 'en-US')
- */
-export function normalizeLocaleCasing(locale: string): string {
-  const lowercase = locale.toLowerCase();
-  return LOCALE_CASING_MAP[lowercase] || locale;
-}

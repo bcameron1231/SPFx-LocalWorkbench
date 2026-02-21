@@ -8,10 +8,10 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 import { DEFAULT_PAGE_CONTEXT, getLocalizedString } from '@spfx-local-workbench/shared';
+import type { IWebPartManifest } from '@spfx-local-workbench/shared';
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
 
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
-import type { IWebPartManifest } from '../types';
 
 export interface IStoryGeneratorConfig {
   /** Workspace path */

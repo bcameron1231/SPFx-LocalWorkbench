@@ -2,11 +2,16 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import type {
+  IExtensionManifest,
+  ILocaleInfo,
+  IWebPartManifest,
+} from '@spfx-local-workbench/shared';
+import { normalizeLocaleCasing } from '@spfx-local-workbench/shared';
 import { isFileNotFoundError } from '@spfx-local-workbench/shared/utils/errorUtils';
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
 
-import type { IExtensionManifest, ILocaleInfo, ISpfxConfig, IWebPartManifest } from './types';
-import { normalizeLocaleCasing } from './types';
+import type { ISpfxConfig } from './types';
 
 export class SpfxProjectDetector {
   public readonly workspacePath: string;
