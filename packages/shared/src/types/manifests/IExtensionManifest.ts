@@ -1,5 +1,5 @@
-import type { IClientSideComponentManifest } from './IClientSideComponentManifest';
 import type { ExtensionType } from './ExtensionType';
+import type { IClientSideComponentManifest } from './IClientSideComponentManifest';
 
 /**
  * SPFx client-side extension manifest.

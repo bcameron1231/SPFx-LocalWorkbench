@@ -1,4 +1,4 @@
-import { Icon, SearchBox, Stack, Text, css } from '@fluentui/react';
+import { Icon, SearchBox, Stack, Text, TooltipHost, css } from '@fluentui/react';
 import React, { FC, useEffect, useRef, useState } from 'react';
 
 import styles from './ComponentPicker.module.css';
@@ -11,6 +11,7 @@ export interface IComponentItem {
   iconSrc?: string;
   manifestIndex: number;
   preconfiguredEntryIndex?: number;
+  hiddenFromToolbox?: boolean;
 }
 
 interface IComponentPickerProps {
@@ -72,7 +73,7 @@ export const ComponentPicker: FC<IComponentPickerProps> = (props) => {
               return (
                 <div
                   key={component.id}
-                  className={styles.item}
+                  className={css(styles.item, component.hiddenFromToolbox && styles.itemHidden)}
                   data-insert={location}
                   data-manifest={component.manifestIndex}
                   onClick={() =>
@@ -89,6 +90,14 @@ export const ComponentPicker: FC<IComponentPickerProps> = (props) => {
                     <Icon iconName="WebComponents" className={styles.itemIcon} />
                   )}
                   <Text className={styles.itemText}>{component.title}</Text>
+                  {component.hiddenFromToolbox && (
+                    <TooltipHost
+                      content="hiddenFromToolbox — this web part is hidden from the standard SharePoint authoring canvas toolbox"
+                      calloutProps={{ gapSpace: 4 }}
+                    >
+                      <Icon iconName="Hide" className={styles.hiddenIcon} />
+                    </TooltipHost>
+                  )}
                 </div>
               );
             })

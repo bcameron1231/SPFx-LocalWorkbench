@@ -1,4 +1,6 @@
-import type { ILocalizedString, IPageContextConfig } from '@spfx-local-workbench/shared';
+import type { IPageContextConfig, IWebPartManifest, IExtensionManifest, IComponentManifest } from '@spfx-local-workbench/shared';
+
+// ─── Webview-specific types ───────────────────────────────────────────────────
 
 export interface IVsCodeApi {
   postMessage(message: any): void;
@@ -12,86 +14,6 @@ export interface IWorkbenchConfig {
   extensions?: IExtensionManifest[];
   theme?: IThemeSettings;
   context: IContextSettings; // Always provided by extension (from WorkbenchConfig defaults)
-}
-
-/** Convenience union: any loaded component manifest (web part or extension). */
-export type IComponentManifest = IWebPartManifest | IExtensionManifest;
-
-export interface IWebPartManifest {
-  id: string;
-  alias: string;
-  componentType: 'WebPart';
-  version?: string;
-  loaderConfig?: {
-    entryModuleId?: string;
-    internalModuleBaseUrls?: string[];
-    scriptResources?: Record<string, any>;
-  };
-  preconfiguredEntries?: Array<{
-    title: ILocalizedString;
-    description: ILocalizedString;
-    officeFabricIconFontName?: string;
-    iconImageUrl?: string;
-    groupId: string;
-    group?: ILocalizedString;
-    properties?: Record<string, any>;
-  }>;
-}
-
-export interface IExtensionManifest {
-  id: string;
-  alias: string;
-  componentType: 'Extension';
-  version?: string;
-  extensionType: 'Unknown' | 'ApplicationCustomizer' | 'FieldCustomizer' | 'ListViewCommandSet' | 'SearchQueryModifier' | 'FormCustomizer';
-  loaderConfig?: {
-    entryModuleId?: string;
-    internalModuleBaseUrls?: string[];
-    scriptResources?: Record<string, any>;
-  };
-}
-
-export interface IBaseClientSideWebPart {
-  render: () => void;
-  onDispose: () => void;
-  onPropertyPaneFieldChanged(propertyPath: string, oldValue: any, newValue: any): void;
-  getPropertyPaneConfiguration: () => IPropertyPaneConfiguration;
-}
-
-/** Web part configuration before instantiation (no runtime state). */
-export interface IWebPartConfig {
-  manifest: IWebPartManifest;
-  instanceId: string;
-  properties: Record<string, any>;
-}
-
-/** Fully instantiated web part with runtime context and instance. */
-export interface IActiveWebPart extends IWebPartConfig {
-  context: any;
-  instance: IBaseClientSideWebPart;
-}
-
-export function isActiveWebPart(wp: IWebPartConfig): wp is IActiveWebPart {
-  return 'instance' in wp && (wp as any).instance !== null;
-}
-
-/** Extension configuration before instantiation (no runtime state). */
-export interface IExtensionConfig {
-  manifest: IExtensionManifest;
-  instanceId: string;
-  properties: Record<string, any>;
-}
-
-/** Fully instantiated extension with runtime context, instance, and DOM elements. */
-export interface IActiveExtension extends IExtensionConfig {
-  context: any;
-  instance: any;
-  headerDomElement?: HTMLDivElement;
-  footerDomElement?: HTMLDivElement;
-}
-
-export function isActiveExtension(ext: IExtensionConfig): ext is IActiveExtension {
-  return 'instance' in ext && (ext as any).instance !== null;
 }
 
 export interface IThemeSettings {

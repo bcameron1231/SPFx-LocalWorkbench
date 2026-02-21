@@ -70,7 +70,9 @@ export class BundleLoader {
         if (entry.type === 'localizedPath') {
           // Check paths['default'] first (older SPFx builds store the default locale
           // under the key 'default'), then fall back to the proper defaultPath field.
-          const fromPaths = resolvePath(entry.paths?.['default'] as IScriptResourcePath | undefined);
+          const fromPaths = resolvePath(
+            entry.paths?.['default'] as IScriptResourcePath | undefined,
+          );
           return fromPaths ?? resolvePath(entry.defaultPath) ?? '';
         } else if (entry.type === 'path') {
           return resolvePath(entry.path) ?? '';

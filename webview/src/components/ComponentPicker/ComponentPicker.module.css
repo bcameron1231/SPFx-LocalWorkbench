@@ -53,6 +53,18 @@
     }
 }
 
+.itemHidden {
+    opacity: 0.7;
+}
+
+.hiddenIcon {
+    margin-left: auto;
+    padding-left: 8px;
+    font-size: 12px;
+    color: #a19f9d;
+    flex-shrink: 0;
+}
+
 .itemIcon {
     width: 28px;
     height: 28px;

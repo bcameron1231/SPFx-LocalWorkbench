@@ -91,7 +91,10 @@ export async function loadComponentStrings(
  * @param candidateModules - Optional array of module names to search (from bundle loading)
  * @returns Component class constructor
  */
-export function findComponentClass(manifest: IClientSideComponentManifest, candidateModules?: string[]): any {
+export function findComponentClass(
+  manifest: IClientSideComponentManifest,
+  candidateModules?: string[],
+): any {
   const resolver = new ComponentResolver();
   return resolver.findComponentClass(manifest, candidateModules);
 }

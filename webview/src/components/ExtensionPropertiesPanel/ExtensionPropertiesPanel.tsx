@@ -9,7 +9,7 @@ import {
 } from '@fluentui/react';
 import React, { FC, useEffect, useState } from 'react';
 
-import type { IExtensionConfig } from '../../types';
+import type { IExtensionConfig } from '@spfx-local-workbench/shared';
 import styles from './ExtensionPropertiesPanel.module.css';
 
 interface IExtensionPropertiesPanelProps {
@@ -45,9 +45,7 @@ export const ExtensionPropertiesPanel: FC<IExtensionPropertiesPanelProps> = ({
     }
   };
 
-  const title =
-    extension?.manifest.alias ||
-    'Extension';
+  const title = extension?.manifest.alias || 'Extension';
 
   return (
     <div className={`${styles.panel} ${extension ? styles.open : ''}`}>

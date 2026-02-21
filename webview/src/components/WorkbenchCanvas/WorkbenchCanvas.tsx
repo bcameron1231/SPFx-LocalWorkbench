@@ -1,7 +1,7 @@
 import { IconButton, Stack, Text } from '@fluentui/react';
 import React, { FC, Fragment, useMemo, useState } from 'react';
 
-import type { IWebPartConfig, IComponentManifest } from '../../types';
+import type { IComponentManifest, IWebPartConfig, IWebPartManifest } from '@spfx-local-workbench/shared';
 import { getLocalizedString } from '../../utilities';
 import { ComponentPicker, IComponentItem } from '../ComponentPicker';
 //import { WebPartPicker } from '../WebPartPicker';
@@ -120,7 +120,7 @@ const AddZone: FC<IAddZoneProps> = ({
     const items: IComponentItem[] = [];
     manifests
       .map((m, manifestIndex) => ({ ...m, manifestIndex }))
-      .filter((m) => m.componentType === 'WebPart')
+      .filter((m): m is IWebPartManifest & { manifestIndex: number } => m.componentType === 'WebPart')
       .forEach((wp) => {
         const entries = wp.preconfiguredEntries?.length ? wp.preconfiguredEntries : [undefined];
         entries.forEach((entry, entryIndex) => {
@@ -136,6 +136,7 @@ const AddZone: FC<IAddZoneProps> = ({
             iconSrc,
             manifestIndex: wp.manifestIndex,
             preconfiguredEntryIndex: entryIndex,
+            hiddenFromToolbox: wp.hiddenFromToolbox === true,
           });
         });
       });

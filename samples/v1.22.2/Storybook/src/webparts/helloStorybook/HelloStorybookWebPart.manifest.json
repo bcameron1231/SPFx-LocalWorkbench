@@ -14,6 +14,7 @@
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
   "supportsThemeVariants": true,
+  "hiddenFromToolbox": true,
 
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Advanced
@@ -46,7 +47,6 @@
       "fr-fr": "SalutStorybook",
       "qps-ploc": "[!!ĤîŚţōŕŷbōôķ!!]"
     },
-    "hiddenFromToolbox": true,
     "description": {
       "default": "Alternate configuration of the Storybook integration sample web part.",
       "fr-fr": "Configuration alternative du composant Web de démonstration de l'intégration Storybook.",

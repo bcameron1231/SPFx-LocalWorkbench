@@ -3,14 +3,9 @@ import React, { FC, useEffect, useState } from 'react';
 
 import { logger } from '@spfx-local-workbench/shared';
 
-import type {
-  IActiveWebPart,
-  IComponentManifest,
-  IExtensionConfig,
-  IWebPartConfig,
-  IWorkbenchConfig,
-} from '../../types';
-import { isActiveWebPart } from '../../types';
+import type { IActiveWebPart, IComponentManifest, IExtensionConfig, IWebPartConfig } from '@spfx-local-workbench/shared';
+import { isActiveWebPart } from '@spfx-local-workbench/shared';
+import type { IWorkbenchConfig } from '../../types';
 import { ComponentPicker } from '../ComponentPicker';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { ExtensionPropertiesPanel } from '../ExtensionPropertiesPanel';

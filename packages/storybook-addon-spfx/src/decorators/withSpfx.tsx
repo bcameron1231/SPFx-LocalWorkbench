@@ -2,7 +2,11 @@ import { useChannel, useGlobals } from '@storybook/preview-api';
 import type { Decorator, StoryContext } from '@storybook/react';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { MICROSOFT_THEMES, buildMockPageContext, type IWebPartManifest } from '@spfx-local-workbench/shared';
+import {
+  type IWebPartManifest,
+  MICROSOFT_THEMES,
+  buildMockPageContext,
+} from '@spfx-local-workbench/shared';
 
 import { DisplayMode, EVENTS, PARAM_KEY, STORYBOOK_GLOBAL_KEYS } from '../constants';
 import { SpfxContextProvider } from '../context/SpfxContext';

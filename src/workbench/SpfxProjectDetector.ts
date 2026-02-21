@@ -5,7 +5,13 @@ import * as vscode from 'vscode';
 import { isFileNotFoundError } from '@spfx-local-workbench/shared/utils/errorUtils';
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
 
-import type { IComponentLocales, IExtensionManifest, ILocaleInfo, ISpfxConfig, IWebPartManifest } from './types';
+import type {
+  IComponentLocales,
+  IExtensionManifest,
+  ILocaleInfo,
+  ISpfxConfig,
+  IWebPartManifest,
+} from './types';
 import { normalizeLocaleCasing } from './types';
 
 export class SpfxProjectDetector {

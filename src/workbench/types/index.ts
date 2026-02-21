@@ -22,7 +22,13 @@ export interface IExtensionManifest {
   componentType: 'Extension';
   version: string;
   manifestVersion: number;
-  extensionType: 'Unknown' | 'ApplicationCustomizer' | 'FieldCustomizer' | 'ListViewCommandSet' | 'SearchQueryModifier' | 'FormCustomizer';
+  extensionType:
+    | 'Unknown'
+    | 'ApplicationCustomizer'
+    | 'FieldCustomizer'
+    | 'ListViewCommandSet'
+    | 'SearchQueryModifier'
+    | 'FormCustomizer';
   loaderConfig?: ILoaderConfig;
 }
 

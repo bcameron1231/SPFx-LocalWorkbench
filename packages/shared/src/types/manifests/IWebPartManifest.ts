@@ -80,7 +80,13 @@ export interface IWebPartManifest extends IClientSideComponentManifest {
    * Host surfaces on which the web part can be placed.
    * Defaults to ['SharePointFullPage'] when omitted.
    */
-  supportedHosts?: ('SharePointFullPage' | 'SharePointWebPart' | 'TeamsTab' | 'TeamsPersonalApp' | 'TeamsMeetingApp')[];
+  supportedHosts?: (
+    | 'SharePointFullPage'
+    | 'SharePointWebPart'
+    | 'TeamsTab'
+    | 'TeamsPersonalApp'
+    | 'TeamsMeetingApp'
+  )[];
 
   /**
    * If true, the web part (when running as a Teams app) may iframe pages from
