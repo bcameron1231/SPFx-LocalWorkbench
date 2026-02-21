@@ -77,6 +77,10 @@ function initialize() {
             runtime.handleOpenDevTools();
         }) as EventListener);
 
+        window.addEventListener('mockData', (() => {
+            runtime.handleMockData();
+        }) as EventListener);
+
         // Listen for live reload messages from the extension
         window.addEventListener('message', (event: MessageEvent) => {
             const message = event.data;

@@ -36,6 +36,11 @@ export class WorkbenchPanel {
         .getConfiguration('spfxLocalWorkbench.proxy')
         .get<boolean>('enabled', true);
 
+    // Expose the proxy service for recording commands
+    public get apiProxyService(): ApiProxyService | undefined {
+        return this._apiProxyService;
+    }
+
     // Creates or reveals the workbench panel
     public static createOrShow(extensionUri: vscode.Uri): void {
         const column = vscode.window.activeTextEditor
@@ -183,6 +188,10 @@ export class WorkbenchPanel {
 
             case 'openDevTools':
                 vscode.commands.executeCommand('workbench.action.webview.openDeveloperTools');
+                return;
+
+            case 'mockDataMenu':
+                vscode.commands.executeCommand('spfx-local-workbench.mockDataMenu');
                 return;
 
             case 'log':

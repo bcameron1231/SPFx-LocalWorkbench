@@ -4,9 +4,10 @@ import { Stack, Text, IconButton } from '@fluentui/react';
 interface IToolbarProps {
     onRefresh: () => void;
     onOpenDevTools: () => void;
+    onMockData: () => void;
 }
 
-export const Toolbar: FC<IToolbarProps> = ({ onRefresh, onOpenDevTools }) => {
+export const Toolbar: FC<IToolbarProps> = ({ onRefresh, onOpenDevTools, onMockData }) => {
     return (
         <Stack
             horizontal
@@ -25,6 +26,12 @@ export const Toolbar: FC<IToolbarProps> = ({ onRefresh, onOpenDevTools }) => {
                 SPFx Local Workbench
             </Text>
             <Stack horizontal tokens={{ childrenGap: 4 }}>
+                <IconButton
+                    iconProps={{ iconName: 'Database' }}
+                    title="Mock Data"
+                    ariaLabel="Mock Data"
+                    onClick={onMockData}
+                />
                 <IconButton
                     iconProps={{ iconName: 'Refresh' }}
                     title="Refresh"

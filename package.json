@@ -94,6 +94,39 @@
         "title": "Open Developer Tools",
         "category": "SPFx",
         "icon": "$(fluentui-developertools)"
+      },
+      {
+        "command": "spfx-local-workbench.mockDataMenu",
+        "title": "Mock Data",
+        "category": "SPFx",
+        "icon": "$(database)"
+      },
+      {
+        "command": "spfx-local-workbench.generateStatusStubs",
+        "title": "Generate Status Code Stubs",
+        "category": "SPFx Mock Data"
+      },
+      {
+        "command": "spfx-local-workbench.importJsonMock",
+        "title": "Import JSON File as Mock",
+        "category": "SPFx Mock Data"
+      },
+      {
+        "command": "spfx-local-workbench.importCsvMock",
+        "title": "Import CSV File as Mock",
+        "category": "SPFx Mock Data"
+      },
+      {
+        "command": "spfx-local-workbench.recordRequests",
+        "title": "Record Requests & Generate Rules",
+        "category": "SPFx Mock Data"
+      }
+    ],
+    "submenus": [
+      {
+        "id": "spfx-local-workbench.mockData",
+        "label": "Mock Data",
+        "icon": "$(database)"
       }
     ],
     "menus": {
@@ -112,6 +145,11 @@
           "command": "spfx-local-workbench.openDevTools",
           "when": "spfxLocalWorkbench.isWorkbench",
           "group": "navigation"
+        },
+        {
+          "command": "spfx-local-workbench.mockDataMenu",
+          "when": "spfxLocalWorkbench.isWorkbench",
+          "group": "navigation"
         }
       ],
       "webview/title": [
@@ -124,6 +162,33 @@
           "command": "spfx-local-workbench.openDevTools",
           "when": "webviewType == spfxLocalWorkbench",
           "group": "navigation"
+        },
+        {
+          "command": "spfx-local-workbench.mockDataMenu",
+          "when": "webviewType == spfxLocalWorkbench",
+          "group": "navigation"
+        }
+      ],
+      "spfx-local-workbench.mockData": [
+        {
+          "command": "spfx-local-workbench.scaffoldMockConfig",
+          "group": "1_scaffold"
+        },
+        {
+          "command": "spfx-local-workbench.generateStatusStubs",
+          "group": "2_generate"
+        },
+        {
+          "command": "spfx-local-workbench.importJsonMock",
+          "group": "3_import"
+        },
+        {
+          "command": "spfx-local-workbench.importCsvMock",
+          "group": "3_import"
+        },
+        {
+          "command": "spfx-local-workbench.recordRequests",
+          "group": "4_record"
         }
       ]
     },

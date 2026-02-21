@@ -15,6 +15,8 @@ export interface IMockRule {
     match: IMockRuleMatch;
     // The response to return when matched
     response: IMockRuleResponse;
+    // When true, the rule is skipped during matching
+    disabled?: boolean;
 }
 
 // Request matching criteria

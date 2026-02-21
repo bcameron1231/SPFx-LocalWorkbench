@@ -492,6 +492,10 @@ export class WorkbenchRuntime {
         this.vscode.postMessage({ command: 'openDevTools' });
     }
 
+    handleMockData(): void {
+        this.vscode.postMessage({ command: 'mockDataMenu' });
+    }
+
     private updateStatus(message: string): void {
         const loadingStatus = document.getElementById('loading-status');
         const statusText = document.getElementById('status-text');
