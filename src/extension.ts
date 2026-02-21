@@ -187,7 +187,10 @@ export function activate(context: vscode.ExtensionContext) {
   const openSettingsCommand = vscode.commands.registerCommand(
     'spfx-local-workbench.openSettings',
     () => {
-      vscode.commands.executeCommand('workbench.action.openSettings', '@ext:BeauCameron.spfx-local-workbench');
+      vscode.commands.executeCommand(
+        'workbench.action.openSettings',
+        '@ext:BeauCameron.spfx-local-workbench',
+      );
     },
   );
 
@@ -321,31 +324,36 @@ export function activate(context: vscode.ExtensionContext) {
         // Set command, tooltip, and icon based on configuration
         const versionString = `SPFx Project detected${version ? ` (${version})` : ''}`;
         let icon = 'fluentui-testbeaker';
+        let text = 'SPFx Workbench';
         switch (action) {
           case 'startServeWorkbench':
             statusBarItem.command = 'spfx-local-workbench.startServeWorkbench';
             statusBarItem.tooltip = `${versionString}\nClick to start serve and open the Local Workbench panel`;
             icon = 'fluentui-testbeakersolid';
+            text = 'SPFx Workbench';
             break;
           case 'startServeStorybook':
             statusBarItem.command = 'spfx-local-workbench.startServeStorybook';
             statusBarItem.tooltip = `${versionString}\nClick to start serve and open the SPFx Storybook panel`;
             icon = 'fluentui-teststep';
+            text = 'SPFx Storybook';
             break;
           case 'openStorybook':
             statusBarItem.command = 'spfx-local-workbench.openStorybook';
             statusBarItem.tooltip = `${versionString}\nClick to open the SPFx Storybook panel`;
             icon = 'fluentui-teststep';
+            text = 'SPFx Storybook';
             break;
           case 'openWorkbench':
           default:
             statusBarItem.command = 'spfx-local-workbench.openWorkbench';
             statusBarItem.tooltip = `${versionString}\nClick to open the Local Workbench panel`;
             icon = 'fluentui-testbeaker';
+            text = 'SPFx Workbench';
             break;
         }
 
-        statusBarItem.text = `$(${icon}) SPFx Workbench`;
+        statusBarItem.text = `$(${icon}) ${text}`;
         statusBarItem.show();
       } else {
         statusBarItem.hide();
