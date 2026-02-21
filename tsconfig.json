@@ -11,6 +11,7 @@
 		"strict": true,   /* enable all strict type-checking options */
 		"forceConsistentCasingInFileNames": true,
 		"skipLibCheck": true,  /* Skip type checking of declaration files */
+		"resolveJsonModule": true,
 		"paths": {
 			"@spfx-local-workbench/shared": ["./packages/shared/src"],
 			"@spfx-local-workbench/shared/*": ["./packages/shared/src/*"]

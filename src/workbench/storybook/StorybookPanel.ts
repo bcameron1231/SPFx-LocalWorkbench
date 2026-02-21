@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { escapeHtml, getErrorMessage } from '@spfx-local-workbench/shared';
 
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
+import type { IStorybookThemeColors } from '../types';
 import { IStorybookServerOptions, StorybookServerManager } from './StorybookServerManager';
 
 /**
@@ -134,8 +135,38 @@ export class StorybookPanel {
    * Start the Storybook server
    */
   private async startServer(options?: IStorybookServerOptions): Promise<void> {
+    const themeSetting = vscode.workspace
+      .getConfiguration('spfxLocalWorkbench.storybook')
+      .get<string>('theme', 'matchVsCode');
+
+    // When theme is forced to light or dark, skip CSS var extraction entirely.
+    // The manager will write { base: 'light' } / { base: 'dark' } to theme.json directly.
+    let themeColors: IStorybookThemeColors | undefined;
+
+    if (themeSetting === 'matchVsCode') {
+      // Capture VS Code theme colors from the loading HTML before starting the server.
+      // The loading HTML script posts --vscode-* CSS var values back to us.
+      // We race against a 1s timeout so a slow or missing message never blocks startup.
+      themeColors = await new Promise<IStorybookThemeColors | undefined>((resolve) => {
+        const timer = setTimeout(() => {
+          sub.dispose();
+          resolve(undefined);
+        }, 1000);
+
+        const sub = this.panel.webview.onDidReceiveMessage(
+          (msg: { command: string; colors?: IStorybookThemeColors }) => {
+            if (msg.command === 'vscodeThemeColors' && msg.colors) {
+              clearTimeout(timer);
+              sub.dispose();
+              resolve(msg.colors);
+            }
+          },
+        );
+      });
+    }
+
     try {
-      await this.serverManager.start(options);
+      await this.serverManager.start(options, themeColors);
       this.panel.webview.html = this.getStorybookHtml();
     } catch (error: unknown) {
       this.panel.webview.html = this.getErrorHtml(getErrorMessage(error));
@@ -158,12 +189,10 @@ export class StorybookPanel {
     this.currentStatusTitle = 'Restarting Storybook...';
     this.currentStatusMessage = 'Initializing';
     this.panel.webview.html = this.getLoadingHtml();
-    try {
-      await this.serverManager.restart();
-      this.panel.webview.html = this.getStorybookHtml();
-    } catch (error: unknown) {
-      this.panel.webview.html = this.getErrorHtml(getErrorMessage(error));
-    }
+    await this.serverManager.stop();
+    // Route through startServer() so theme colors are re-extracted (or the
+    // forced light/dark setting is respected) on every restart.
+    await this.startServer();
   }
 
   /**
@@ -245,6 +274,41 @@ export class StorybookPanel {
         <h2>${escapeHtml(this.currentStatusTitle)}</h2>
         <p>${escapeHtml(this.currentStatusMessage)}</p>
     </div>
+    <script>
+      (function () {
+        const vscodeApi = acquireVsCodeApi();
+        const s = getComputedStyle(document.body);
+        const get = function (v) { return s.getPropertyValue(v).trim() || ''; };
+        const isDark = document.body.classList.contains('vscode-dark') ||
+                       document.body.classList.contains('vscode-high-contrast');
+        vscodeApi.postMessage({
+          command: 'vscodeThemeColors',
+          colors: {
+            base:              isDark ? 'dark' : 'light',
+            colorPrimary:      get('--vscode-focusBorder'),
+            colorSecondary:    get('--vscode-button-background'),
+            appBg:             get('--vscode-sideBar-background'),
+            appContentBg:      get('--vscode-editor-background'),
+            appBorderColor:    get('--vscode-panel-border'),
+            fontCode:          get('--vscode-editor-font-family'),
+            textColor:         get('--vscode-editor-foreground'),
+            textInverseColor:  get('--vscode-button-foreground'),
+            textMutedColor:    get('--vscode-descriptionForeground'),
+            barBg:             get('--vscode-editorGroupHeader-tabsBackground'),
+            barTextColor:      get('--vscode-tab-inactiveForeground'),
+            barSelectedColor:  get('--vscode-focusBorder'),
+            barHoverColor:     get('--vscode-focusBorder'),
+            buttonBg:          get('--vscode-button-background'),
+            buttonBorder:      get('--vscode-button-border') || get('--vscode-button-background'),
+            booleanBg:         get('--vscode-settings-checkboxBackground') || get('--vscode-input-background'),
+            booleanSelectedBg: get('--vscode-inputOption-activeBackground') || get('--vscode-button-background'),
+            inputBg:           get('--vscode-input-background'),
+            inputBorder:       get('--vscode-input-border') || get('--vscode-panel-border'),
+            inputTextColor:    get('--vscode-input-foreground'),
+          }
+        });
+      }());
+    </script>
 </body>
 </html>`;
   }

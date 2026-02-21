@@ -12,6 +12,7 @@ import { getErrorMessage } from '@spfx-local-workbench/shared/utils/errorUtils';
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
 
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
+import type { IStorybookThemeColors } from '../types';
 import { StoryGenerator } from './StoryGenerator';
 
 /**
@@ -52,6 +53,7 @@ export class StorybookServerManager {
   private storyGenerator: StoryGenerator;
   private readonly storybookDir: string;
   private statusCallback?: StatusUpdateCallback;
+  private pendingThemeColors?: IStorybookThemeColors;
 
   constructor(
     private workspacePath: string,
@@ -78,11 +80,16 @@ export class StorybookServerManager {
   /**
    * Start the Storybook server
    */
-  public async start(options: IStorybookServerOptions = {}): Promise<void> {
+  public async start(
+    options: IStorybookServerOptions = {},
+    themeColors?: IStorybookThemeColors,
+  ): Promise<void> {
     if (this.status === 'running' || this.status === 'starting') {
       this.outputChannel.appendLine('Storybook is already running or starting');
       return this.readyPromise || Promise.resolve();
     }
+
+    this.pendingThemeColors = themeColors;
 
     this.port = options.port || DEFAULT_STORYBOOK_PORT;
     this.host = options.host || 'localhost';
@@ -116,6 +123,10 @@ export class StorybookServerManager {
         );
         await this.initializeStorybook();
       }
+
+      // Write theme.json for manager.ts to consume before the server starts.
+      // This runs unconditionally so the file is always fresh for the current session.
+      await this.writeVsCodeThemeJson();
 
       // Start the server
       this.statusCallback?.('Starting Storybook...', 'Launching the development server');
@@ -173,11 +184,14 @@ export class StorybookServerManager {
   }
 
   /**
-   * Restart the Storybook server
+   * Restart the Storybook server.
+   * Preserves the previously captured theme colors so that callers that bypass
+   * StorybookPanel.startServer() (e.g. re-render with new options) don't lose
+   * the theme established during the original start.
    */
   public async restart(options?: IStorybookServerOptions): Promise<void> {
     await this.stop();
-    await this.start(options);
+    await this.start(options, this.pendingThemeColors);
   }
 
   /**
@@ -221,6 +235,48 @@ export class StorybookServerManager {
       );
       // Don't throw - allow server to start even if story generation fails
     }
+  }
+
+  /**
+   * Writes theme.json to the .storybook config directory.
+   * Contains VS Code colors extracted from the webview, or an empty object when
+   * colors were unavailable — in which case Storybook uses its own built-in defaults.
+   * Called unconditionally before each server start so the file is always current.
+   */
+  private async writeVsCodeThemeJson(): Promise<void> {
+    const configDir = path.join(this.storybookDir, '.storybook');
+    await vscode.workspace.fs.createDirectory(vscode.Uri.file(configDir));
+
+    const themeSetting = vscode.workspace
+      .getConfiguration('spfxLocalWorkbench.storybook')
+      .get<string>('theme', 'matchVsCode');
+
+    let themeData: Record<string, unknown>;
+    let status: string;
+
+    if (themeSetting === 'light') {
+      themeData = { base: 'light' };
+      status = 'light (forced)';
+    } else if (themeSetting === 'dark') {
+      themeData = { base: 'dark' };
+      status = 'dark (forced)';
+    } else if (this.pendingThemeColors) {
+      // matchVsCode with captured colors
+      themeData = { ...this.pendingThemeColors, appBorderRadius: 4, inputBorderRadius: 2 };
+      status = `base: ${this.pendingThemeColors.base} (matched from VS Code)`;
+    } else {
+      // matchVsCode but colors unavailable — let Storybook use its own defaults
+      themeData = {};
+      status = 'no colors captured (using Storybook defaults)';
+    }
+
+    const jsonPath = path.join(configDir, 'theme.json');
+    await vscode.workspace.fs.writeFile(
+      vscode.Uri.file(jsonPath),
+      Buffer.from(JSON.stringify(themeData, null, 2), 'utf-8'),
+    );
+
+    this.outputChannel.appendLine(`✓ Written theme.json (${status})`);
   }
 
   /**

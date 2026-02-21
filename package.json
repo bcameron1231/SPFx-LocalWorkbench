@@ -458,6 +458,21 @@
             "type": "boolean",
             "default": false,
             "description": "Automatically install Storybook dependencies without prompting"
+          },
+          "spfxLocalWorkbench.storybook.theme": {
+            "type": "string",
+            "default": "matchVsCode",
+            "enum": [
+              "matchVsCode",
+              "light",
+              "dark"
+            ],
+            "enumDescriptions": [
+              "Derives the Storybook manager theme from your active VS Code color theme",
+              "Always use Storybook's built-in light theme",
+              "Always use Storybook's built-in dark theme"
+            ],
+            "description": "Controls the Storybook manager UI theme. Requires restarting the Storybook panel to take effect."
           }
         }
       }

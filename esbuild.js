@@ -22,7 +22,7 @@ const copyTemplatesPlugin = {
       }
 
       // Copy each template file
-      const templates = ['main.ts', 'preview.ts', 'manager.ts'];
+      const templates = ['main.ts', 'preview.ts', 'manager.ts', 'theme.json'];
       templates.forEach((template) => {
         const src = path.join(templatesDir, template);
         const dest = path.join(distTemplatesDir, template);

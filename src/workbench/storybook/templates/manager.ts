@@ -1,23 +1,29 @@
 import { addons } from '@storybook/manager-api';
 import { create } from '@storybook/theming';
 
-// Custom Storybook theme with branding
+// theme.json is written by the extension with VS Code colors before Storybook starts.
+// At compile time the file is an empty stub, so we cast to suppress type errors.
+import themeJson from './theme.json';
+
+const vsCodeTheme = themeJson as any;
+
+// Build the Storybook theme. vsCodeTheme provides color/base values derived from
+// the active VS Code theme. Values defined below always win (spread last).
+// When theme.json is empty (colors unavailable), Storybook uses its own defaults.
 const customTheme = create({
-  base: 'light',
-  
-  // Branding
+  ...vsCodeTheme,
+
+  // Typography — always Segoe UI to match SPFx, regardless of VS Code theme.
+  fontBase: '"Segoe UI", "Segoe UI Web", Arial, sans-serif',
+  // Code font comes from theme.json (user's VS Code editor font). Falls back to
+  // Storybook's default when not present.
+  ...(vsCodeTheme.fontCode ? { fontCode: vsCodeTheme.fontCode } : {}),
+
+  // Branding — always fixed.
   brandTitle: 'SPFx Local Workbench Storybook',
   brandUrl: 'https://github.com/bcameron1231/SPFx-LocalWorkbench',
-  brandImage: undefined, // Set to a URL or import a logo file here
+  brandImage: undefined,
   brandTarget: '_blank',
-  
-  // UI Colors (customize as needed)
-  // colorPrimary: '#0078d4',
-  // colorSecondary: '#106ebe',
-  
-  // Typography
-  // fontBase: '"Segoe UI", "Segoe UI Web", Arial, sans-serif',
-  // fontCode: 'Monaco, Consolas, monospace',
 });
 
 addons.setConfig({
