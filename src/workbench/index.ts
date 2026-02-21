@@ -27,4 +27,4 @@ export * from './types';
 export { generateWorkbenchHtml, generateErrorHtml } from './html';
 
 // API Proxy
-export { ApiProxyService } from './proxy';
+export { ApiProxyService, MockConfigGenerator } from './proxy';

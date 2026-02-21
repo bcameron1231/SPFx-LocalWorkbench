@@ -14,6 +14,7 @@ import type {
     IProxyResponse,
     IProxySettings
 } from './types';
+import type { IRecordedRequest } from './MockConfigGenerator';
 
 // Default proxy settings when not configured in VS Code settings
 const defaultProxySettings: IProxySettings = {
@@ -33,6 +34,8 @@ export class ApiProxyService implements vscode.Disposable {
     private _config: IMockConfig | undefined;
     private _settings: IProxySettings;
     private _configWatcher: vscode.FileSystemWatcher | undefined;
+    private _recordedRequests: IRecordedRequest[] = [];
+    private _recording = false;
 
     constructor(workspaceRoot: string) {
         this._workspaceRoot = workspaceRoot;
@@ -88,7 +91,17 @@ export class ApiProxyService implements vscode.Disposable {
                 return await this._respondFromRule(request, rule);
             }
 
-            // No matching rule
+            // No matching rule — record if recording is active
+            if (this._recording) {
+                this._recordedRequests.push({
+                    url: request.url,
+                    method: request.method,
+                    clientType: request.clientType,
+                    timestamp: Date.now(),
+                });
+                this._log(`  Recorded unmatched request (${this._recordedRequests.length} total)`);
+            }
+
             this._log(`  No match - fallback ${this._settings.fallbackStatus}`);
             return this._fallbackResponse(request);
         } catch (err: unknown) {
@@ -202,6 +215,38 @@ export class ApiProxyService implements vscode.Disposable {
             }),
             matched: false
         };
+    }
+
+    // ── Request Recording ────────────────────────────────────────────
+
+    // Start capturing unmatched requests.
+    startRecording(): void {
+        this._recordedRequests = [];
+        this._recording = true;
+        this._log('Request recording started');
+    }
+
+    // Stop recording and return all captured requests.
+    stopRecording(): IRecordedRequest[] {
+        this._recording = false;
+        const requests = [...this._recordedRequests];
+        this._log(`Request recording stopped (${requests.length} request(s) captured)`);
+        return requests;
+    }
+
+    // Whether recording is currently active.
+    get isRecording(): boolean {
+        return this._recording;
+    }
+
+    // Return the workspace root (needed by MockConfigGenerator).
+    get workspaceRoot(): string {
+        return this._workspaceRoot;
+    }
+
+    // Return the configured mock file path (needed by MockConfigGenerator).
+    get mockFile(): string {
+        return this._settings.mockFile;
     }
 
     // ── Helpers ──────────────────────────────────────────────────────

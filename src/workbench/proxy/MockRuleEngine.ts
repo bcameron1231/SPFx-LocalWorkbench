@@ -66,15 +66,35 @@ export class MockRuleEngine {
         return this._rules;
     }
 
-    // Finds the first matching rule for a given request.
-    // Rules are evaluated in order; first match wins.
-    // Returns undefined if no rule matches.
+    // Finds the best matching rule for a given request.
+    // For substring matches, the most specific (longest URL pattern) wins.
+    // For glob patterns, first match wins (since specificity can't be inferred from length).
+    // If two substring matches have the same URL length, the first one in the list wins.
     match(request: IProxyRequest): IMockRule | undefined {
+        let bestMatch: IMockRule | undefined;
+        let bestLength = -1;
+
         for (const rule of this._rules) {
-            if (matchRule(request, rule)) {
+            if (rule.disabled) {
+                continue;
+            }
+            if (!matchRule(request, rule)) {
+                continue;
+            }
+
+            // Glob patterns: return immediately (first match wins)
+            if (rule.match.urlPattern) {
                 return rule;
             }
+
+            // Substring matches: pick the longest (most specific) URL pattern
+            const len = rule.match.url.length;
+            if (len > bestLength) {
+                bestMatch = rule;
+                bestLength = len;
+            }
         }
-        return undefined;
+
+        return bestMatch;
     }
 }
