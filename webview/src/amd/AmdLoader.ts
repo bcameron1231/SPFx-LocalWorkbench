@@ -26,8 +26,9 @@ export class AmdLoader {
             return;
         }
 
-        // Initialize SPFx mocks
-        initializeSpfxMocks();
+        // Initialize SPFx mocks (pass proxy flag from config)
+        const proxyEnabled = window.__workbenchConfig?.proxyEnabled !== false;
+        initializeSpfxMocks(proxyEnabled);
 
         // Set up AMD define function
         this.setupDefine();

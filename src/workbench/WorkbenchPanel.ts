@@ -11,6 +11,7 @@ import type { IExternalDependency } from './SpfxProjectDetector';
 import type { IWebPartManifest } from './types';
 import { generateWorkbenchHtml, generateErrorHtml } from './html';
 import { getWorkbenchSettings, onConfigurationChanged, IWorkbenchSettings } from './config';
+import { ApiProxyService } from './proxy';
 
 // Generates a cryptographic nonce for CSP
 function getNonce(): string {
@@ -30,6 +31,10 @@ export class WorkbenchPanel {
     private _externalDependencies: IExternalDependency[] = [];
     private _settings: IWorkbenchSettings;
     private _liveReloadDebounceTimer: ReturnType<typeof setTimeout> | undefined;
+    private _apiProxyService: ApiProxyService | undefined;
+    private _lastProxyEnabled: boolean = vscode.workspace
+        .getConfiguration('spfxLocalWorkbench.proxy')
+        .get<boolean>('enabled', true);
 
     // Creates or reveals the workbench panel
     public static createOrShow(extensionUri: vscode.Uri): void {
@@ -74,9 +79,8 @@ export class WorkbenchPanel {
     // Revives the panel from a previous session
     public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri): void {
         WorkbenchPanel.currentPanel = new WorkbenchPanel(panel, extensionUri);
-    }    /**
-     * Private constructor - use createOrShow() instead
-     */
+    }    
+    
     private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
         this._panel = panel;
         this._extensionUri = extensionUri;
@@ -105,6 +109,18 @@ export class WorkbenchPanel {
         this._disposables.push(
             onConfigurationChanged((newSettings) => {
                 this._settings = newSettings;
+
+                // The proxy.enabled setting changes CSP, HTTP client classes, and bridge initialization — all baked into the HTML at load time.
+                const proxyNow = vscode.workspace
+                    .getConfiguration('spfxLocalWorkbench.proxy')
+                    .get<boolean>('enabled', true);
+                const proxyBefore = this._lastProxyEnabled;
+                if (proxyNow !== proxyBefore) {
+                    this._lastProxyEnabled = proxyNow;
+                    this._update();
+                    return;
+                }
+
                 this._panel.webview.postMessage({
                     command: 'settingsChanged',
                     settings: {
@@ -126,6 +142,13 @@ export class WorkbenchPanel {
             this._disposables
         );
 
+        // Initialize the API proxy service
+        const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+        if (workspaceFolder) {
+            this._apiProxyService = new ApiProxyService(workspaceFolder.uri.fsPath);
+            this._disposables.push(this._apiProxyService);
+        }
+
         // Watch for bundle changes (live reload)
         this._setupLiveReloadWatcher();
 
@@ -134,8 +157,25 @@ export class WorkbenchPanel {
     }
 
     // Handles messages from the webview
-    private async _handleMessage(message: { command: string; url?: string; text?: string }): Promise<void> {
+    private async _handleMessage(message: { command: string; url?: string; text?: string; [key: string]: any }): Promise<void> {
         switch (message.command) {
+            case 'apiRequest':
+                if (this._apiProxyService) {
+                    const response = await this._apiProxyService.handleRequest({
+                        id: message.id,
+                        url: message.url!,
+                        method: message.method,
+                        headers: message.headers,
+                        body: message.body,
+                        clientType: message.clientType
+                    });
+                    this._panel.webview.postMessage({
+                        command: 'apiResponse',
+                        ...response
+                    });
+                }
+                return;
+
             case 'refresh':
                 await this._loadComponents();
                 this._update();
@@ -240,9 +280,9 @@ export class WorkbenchPanel {
         const webview = this._panel.webview;
         this._panel.title = 'SPFx Local Workbench';
         this._panel.webview.html = this._getHtmlForWebview(webview);
-    }    /**
-     * Generates the HTML content for the webview
-     */
+    }    
+
+    // Generates the HTML content for the webview
     private _getHtmlForWebview(webview: vscode.Webview): string {
         const nonce = getNonce();
         const webPartsJson = JSON.stringify(this._webParts);
@@ -262,6 +302,7 @@ export class WorkbenchPanel {
             themeSettings: this._settings.theme,
             contextSettings: this._settings.context,
             pageContextSettings: this._settings.pageContext,
+            proxyEnabled: this._apiProxyService?.enabled ?? true,
             externalDependencies: this._externalDependencies
         });
     }

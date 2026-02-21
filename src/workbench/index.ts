@@ -25,3 +25,6 @@ export * from './types';
 
 // HTML generation (for advanced usage)
 export { generateWorkbenchHtml, generateErrorHtml } from './html';
+
+// API Proxy
+export { ApiProxyService } from './proxy';

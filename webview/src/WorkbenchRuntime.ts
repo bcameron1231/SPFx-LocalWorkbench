@@ -26,13 +26,13 @@ export class WorkbenchRuntime {
     private activeWebParts: IWebPartConfig[] = [];
     private activeExtensions: IExtensionConfig[] = [];
 
-    constructor(config: IWorkbenchConfig) {
-        this.vscode = window.acquireVsCodeApi();
+    constructor(config: IWorkbenchConfig, vscodeApi: IVsCodeApi) {
+        this.vscode = vscodeApi;
         this.config = config;
 
         // Initialize core components
         this.amdLoader = new AmdLoader();
-        this.contextProvider = new SpfxContext(config.context, config.pageContext);
+        this.contextProvider = new SpfxContext(config.context, config.pageContext, config.proxyEnabled !== false);
         this.themeProvider = new ThemeProvider(config.theme);
         this.webPartManager = new WebPartManager(
             this.vscode,

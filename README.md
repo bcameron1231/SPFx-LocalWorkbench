@@ -24,6 +24,17 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 - **Property Editing**: Click the edit (pencil) icon on a loaded extension to modify its `ClientSideComponentProperties` and re-render
 - **PlaceholderProvider Mock**: Full mock of `context.placeholderProvider` including `tryCreateContent()` and `changedEvent`
 
+### API Proxy & Mock System
+- **Drop-in HTTP client replacements**: `SPHttpClient`, `HttpClient`, and `AadHttpClient` are replaced with proxy-aware classes — no code changes needed in your web parts
+- **Configurable mock rules**: Define URL matching rules with inline or file-based JSON responses
+- **Glob pattern matching**: Match URLs with wildcards (e.g., `/_api/web/lists/getbytitle('*')/items`)
+- **Client type filtering**: Target rules to specific client types (`spHttp`, `http`, `aadHttp`)
+- **Hot reload**: Edit your mock config and rules are reloaded instantly
+- **Request logging**: All proxied calls are logged to the "SPFx API Proxy" output channel
+- **Fully optional**: Disable the proxy to use real `fetch()` calls with external tools like Dev Proxy
+
+> 📖 **[Full proxy documentation →](PROXY.md)** — architecture, setup guide, mock rule reference, and examples.
+
 ## Requirements
 
 - VS Code 1.100.0 or higher
@@ -110,6 +121,18 @@ Customize the mock SharePoint context:
 | `spfxLocalWorkbench.pageContext.webTemplate` | `STS#3` | Web template ID |
 | `spfxLocalWorkbench.pageContext.isSPO` | `true` | Whether this is SharePoint Online |
 
+### Proxy Settings
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `spfxLocalWorkbench.proxy.enabled` | `true` | Enable the API proxy. When `false`, HTTP clients make real `fetch()` calls so you can use external tools like [Dev Proxy](https://learn.microsoft.com/en-us/microsoft-cloud/dev/dev-proxy/overview). **Requires closing and reopening the workbench to take effect.** |
+| `spfxLocalWorkbench.proxy.mockFile` | `.spfx-workbench/api-mocks.json` | Path to the mock rules configuration file (relative to workspace root) |
+| `spfxLocalWorkbench.proxy.defaultDelay` | `0` | Default simulated latency (ms) for mock responses |
+| `spfxLocalWorkbench.proxy.fallbackStatus` | `404` | HTTP status returned when no mock rule matches |
+| `spfxLocalWorkbench.proxy.logRequests` | `true` | Log proxied requests to the "SPFx API Proxy" output channel |
+
+> See [PROXY.md](PROXY.md) for the full mock rule reference, architecture details, and examples.
+
 ## Troubleshooting
 
 Having issues? See the [Troubleshooting Guide](TROUBLESHOOTING.md).
@@ -117,6 +140,46 @@ Having issues? See the [Troubleshooting Guide](TROUBLESHOOTING.md).
 ## Contributing
 
 Contributions are welcome! See the [Contributing Guide](CONTRIBUTING.md) for development setup, project structure, and more.
+
+## Development
+
+### Building the Extension
+
+```bash
+npm install
+npm run compile
+```
+
+### Sample SPFx Projects
+
+If you keep test SPFx projects under `samples/`, they are excluded from VSIX packaging and VS Code search to keep the extension lean. The folder is still visible in the explorer. For the most reliable detection and debugging, open a sample project folder directly in its own VS Code window (or Extension Host) when testing.
+
+### Project Structure
+
+```
+src/
+  extension.ts              # Main extension entry point
+  workbench/
+    WorkbenchPanel.ts       # Webview panel that hosts the workbench
+    SpfxProjectDetector.ts  # SPFx project detection and manifest parsing
+    html/                   # HTML and CSS generation for webview
+    config/                 # Configuration management
+    proxy/                  # API proxy service and mock rule engine
+    types/                  # Type definitions
+webview/
+  src/
+    main.tsx                # React-based webview entry point
+    main.ts                 # Alternative non-React entry point
+    WorkbenchRuntime.ts     # Main workbench orchestrator
+    WebPartManager.ts       # Web part loading and lifecycle
+    ExtensionManager.ts     # Application Customizer loading and lifecycle
+    amd/                    # AMD module loader for SPFx bundles
+    components/             # React components (App, Canvas, PropertyPane, ExtensionPicker, etc.)
+    mocks/                  # SharePoint API mocks (Context, Theme, PropertyPane, sp-application-base)
+    proxy/                  # Proxy HTTP client replacements and bridge
+    ui/                     # UI utilities (CanvasRenderer)
+    types/                  # Webview-specific type definitions
+```
 
 ## License
 

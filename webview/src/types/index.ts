@@ -11,6 +11,7 @@ export interface IWorkbenchConfig {
     theme?: IThemeSettings;
     context?: IContextSettings;
     pageContext?: IPageContextSettings;
+    proxyEnabled?: boolean;
     externalDependencies?: Array<{ moduleName: string; globalName: string }>;
 }
 

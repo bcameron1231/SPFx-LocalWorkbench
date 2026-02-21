@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
+import { WorkbenchPanel, SpfxProjectDetector, createManifestWatcher, getWorkbenchSettings, ApiProxyService } from './workbench';
 import * as net from 'net';
-import { WorkbenchPanel, SpfxProjectDetector, createManifestWatcher, getWorkbenchSettings } from './workbench';
 
 function isPortReachable(host: string, port: number, timeout = 1000): Promise<boolean> {
 	return new Promise((resolve) => {
@@ -153,6 +153,21 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	);
 
+	// Register the Scaffold Mock Config command
+	const scaffoldMockConfigCommand = vscode.commands.registerCommand(
+		'spfx-local-workbench.scaffoldMockConfig',
+		async () => {
+			const wsFolder = vscode.workspace.workspaceFolders?.[0];
+			if (!wsFolder) {
+				vscode.window.showWarningMessage('No workspace folder open');
+				return;
+			}
+			const proxy = new ApiProxyService(wsFolder.uri.fsPath);
+			await proxy.scaffoldMockConfig();
+			proxy.dispose();
+			vscode.window.showInformationMessage('API mock configuration scaffolded at .spfx-workbench/api-mocks.json');
+	});
+	
 	const openDevToolsCommand = vscode.commands.registerCommand(
 		'spfx-local-workbench.openDevTools',
 		() => {
@@ -205,6 +220,7 @@ export function activate(context: vscode.ExtensionContext) {
 		openWorkbenchCommand,
 		startServeCommand,
 		detectWebPartsCommand,
+		scaffoldMockConfigCommand,
 		openDevToolsCommand,
 		statusBarItem
 	);
