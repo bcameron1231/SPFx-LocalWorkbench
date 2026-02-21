@@ -19,12 +19,11 @@ import type {
   IComponentManifest,
   IExtensionConfig,
   IExtensionManifest,
-  IVsCodeApi,
   IWebPartConfig,
   IWebPartManifest,
-  IWorkbenchConfig,
-} from './types';
-import { isActiveExtension, isActiveWebPart } from './types';
+} from '@spfx-local-workbench/shared';
+import { isActiveExtension, isActiveWebPart } from '@spfx-local-workbench/shared';
+import type { IVsCodeApi, IWorkbenchConfig } from './types';
 
 export class WorkbenchRuntime {
   private log = logger.createChild('Workbench');

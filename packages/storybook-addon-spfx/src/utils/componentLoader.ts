@@ -142,6 +142,23 @@ export async function loadComponent(
   }
   initializeSpfxMocks();
 
+  // Override the @fluentui/react AMD stub with the real package when it is
+  // available in the host project. This allows web parts to render real Fluent
+  // UI components (including Icon) and ensures initializeIcons() actually
+  // registers the icon font — the stub installed by initializeSpfxMocks is a
+  // deliberate no-op that breaks icon rendering in Storybook.
+  try {
+    const fluentUi = await import('@fluentui/react');
+    const amdModules = (window as any).__amdModules as Record<string, unknown> | undefined;
+    if (amdModules) {
+      amdModules['@fluentui/react'] = fluentUi;
+      amdModules['office-ui-fabric-react'] = fluentUi;
+    }
+    (fluentUi as any).initializeIcons?.();
+  } catch {
+    // @fluentui/react is not installed in this project — keep the stub.
+  }
+
   // Load manifests
   const manifests = await loadSpfxManifests(serveUrl);
 

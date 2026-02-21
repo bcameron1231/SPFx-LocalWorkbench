@@ -15,7 +15,8 @@ import {
 } from '@spfx-local-workbench/shared';
 
 import { SpfxContext, ThemeProvider } from './mocks';
-import type { IActiveExtension, IExtensionConfig, IExtensionManifest, IVsCodeApi } from './types';
+import type { IActiveExtension, IExtensionConfig, IExtensionManifest } from '@spfx-local-workbench/shared';
+import type { IVsCodeApi } from './types';
 
 // PlaceholderName enum matching @microsoft/sp-application-base
 enum PlaceholderName {

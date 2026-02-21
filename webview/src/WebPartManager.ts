@@ -12,7 +12,8 @@ import {
 } from '@spfx-local-workbench/shared';
 
 import { SpfxContext, ThemeProvider } from './mocks';
-import type { IActiveWebPart, IVsCodeApi, IWebPartConfig, IWebPartManifest } from './types';
+import type { IActiveWebPart, IWebPartConfig, IWebPartManifest } from '@spfx-local-workbench/shared';
+import type { IVsCodeApi } from './types';
 
 export class WebPartManager {
   private log = logger.createChild('WebPartManager');
