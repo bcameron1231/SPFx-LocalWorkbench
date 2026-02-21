@@ -431,7 +431,11 @@ export class StorybookServerManager {
 
     // Install Storybook v8 packages (pinned to avoid version conflicts)
     // Using v8 as it's stable and proven. v10 has peer dependency issues.
+    // Pin React 17 to match SPFx runtime expectations (ReactDOM.render API).
+    // Storybook 8 would otherwise resolve React 18 which removes ReactDOM.render.
     await this.runNpmInstall([
+      'react@17.0.2',
+      'react-dom@17.0.2',
       'storybook@^8.0.0',
       '@storybook/react-vite@^8.0.0',
       '@storybook/addon-essentials@^8.0.0',
