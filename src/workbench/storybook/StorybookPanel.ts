@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 
 import { escapeHtml, getErrorMessage } from '@spfx-local-workbench/shared';
-import { getNonce } from '@spfx-local-workbench/shared/utils/securityUtils';
 
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
 import { IStorybookServerOptions, StorybookServerManager } from './StorybookServerManager';
@@ -101,22 +100,6 @@ export class StorybookPanel {
 
     // Start the server and update content when ready
     this.startServer(options);
-
-    // Handle messages from the webview
-    this.panel.webview.onDidReceiveMessage(
-      (message) => {
-        switch (message.type) {
-          case 'refresh':
-            this.refresh();
-            break;
-          case 'restart':
-            this.restart();
-            break;
-        }
-      },
-      null,
-      this.disposables,
-    );
 
     // Handle panel disposal
     this.panel.onDidDispose(() => void this.dispose(), null, this.disposables);
@@ -271,7 +254,6 @@ export class StorybookPanel {
    */
   private getStorybookHtml(): string {
     const storybookUrl = this.serverManager.getUrl();
-    const nonce = getNonce();
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -280,7 +262,6 @@ export class StorybookPanel {
     <meta http-equiv="Content-Security-Policy" 
           content="default-src 'none'; 
                    frame-src ${storybookUrl} http://localhost:* ws://localhost:*; 
-                   script-src 'nonce-${nonce}'; 
                    style-src 'unsafe-inline';">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPFx Storybook</title>
@@ -291,76 +272,15 @@ export class StorybookPanel {
             overflow: hidden;
             background-color: var(--vscode-editor-background);
         }
-        .toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 12px;
-            background-color: var(--vscode-editorWidget-background);
-            border-bottom: 1px solid var(--vscode-editorWidget-border);
-        }
-        .toolbar-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .toolbar-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--vscode-editor-foreground);
-        }
-        .toolbar-url {
-            font-size: 12px;
-            color: var(--vscode-descriptionForeground);
-            font-family: 'Courier New', monospace;
-        }
-        .toolbar-actions {
-            display: flex;
-            gap: 8px;
-        }
-        button {
-            padding: 4px 12px;
-            font-size: 12px;
-            border: 1px solid var(--vscode-button-border);
-            background-color: var(--vscode-button-secondaryBackground);
-            color: var(--vscode-button-secondaryForeground);
-            cursor: pointer;
-            border-radius: 2px;
-        }
-        button:hover {
-            background-color: var(--vscode-button-secondaryHoverBackground);
-        }
         iframe {
             width: 100%;
-            height: calc(100vh - 41px);
+            height: 100vh;
             border: none;
         }
     </style>
 </head>
 <body>
-    <div class="toolbar">
-        <div class="toolbar-left">
-            <span class="toolbar-title">SPFx Storybook</span>
-            <span class="toolbar-url">${storybookUrl}</span>
-        </div>
-        <div class="toolbar-actions">
-            <button onclick="refresh()">↻ Refresh</button>
-            <button onclick="restart()">⟳ Restart</button>
-        </div>
-    </div>
     <iframe src="${storybookUrl}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
-    
-    <script nonce="${nonce}">
-        const vscode = acquireVsCodeApi();
-        
-        function refresh() {
-            vscode.postMessage({ type: 'refresh' });
-        }
-        
-        function restart() {
-            vscode.postMessage({ type: 'restart' });
-        }
-    </script>
 </body>
 </html>`;
   }
