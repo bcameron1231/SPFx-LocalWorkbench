@@ -200,22 +200,46 @@
             "default": "heft start --clean --nobrowser",
             "markdownDescription": "The command to run when starting the SPFx serve from the extension. Common options:\n- `heft start --clean --nobrowser`, `heft start --clean --nobrowser --locales=fr-fr`, `npm run start`"
           },
-          "spfxLocalWorkbench.statusBarAction": {
+          "spfxLocalWorkbench.statusBarWorkbenchAction": {
             "type": "string",
             "enum": [
               "openWorkbench",
-              "startServeWorkbench",
+              "startServeWorkbench"
+            ],
+            "markdownEnumDescriptions": [
+              "$(fluentui-testbeaker) Open the Local Workbench panel",
+              "$(fluentui-testbeakersolid) Start serve and open the Local Workbench panel"
+            ],
+            "default": "openWorkbench",
+            "description": "Action to perform when clicking the SPFx Workbench status bar button"
+          },
+          "spfxLocalWorkbench.statusBarStorybookAction": {
+            "type": "string",
+            "enum": [
               "openStorybook",
               "startServeStorybook"
             ],
             "markdownEnumDescriptions": [
-              "$(fluentui-testbeaker) Open the Local Workbench panel",
-              "$(fluentui-testbeakersolid) Start serve and open the Local Workbench panel",
               "$(fluentui-teststep) Open the SPFx Storybook panel",
               "$(fluentui-teststep) Start serve and open the SPFx Storybook panel"
             ],
-            "default": "openWorkbench",
-            "description": "Action to perform when clicking the SPFx status bar item"
+            "default": "openStorybook",
+            "description": "Action to perform when clicking the SPFx Storybook status bar button"
+          },
+          "spfxLocalWorkbench.statusBarDisplay": {
+            "type": "string",
+            "enum": [
+              "iconAndText",
+              "iconOnly",
+              "hidden"
+            ],
+            "enumDescriptions": [
+              "Show icon and text label on each status bar button",
+              "Show icon only on each status bar button",
+              "Hide all status bar buttons"
+            ],
+            "default": "iconAndText",
+            "description": "Controls the display style of the SPFx status bar buttons"
           }
         }
       },

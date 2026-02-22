@@ -308,8 +308,15 @@ export function activate(context: vscode.ExtensionContext) {
     },
   );
 
-  // Auto-detect SPFx projects and show status bar item
-  const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+  // Auto-detect SPFx projects and show status bar items
+  const workbenchStatusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Left,
+    101,
+  );
+  const storybookStatusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Left,
+    100,
+  );
 
   async function updateStatusBar() {
     const det = getDetector();
@@ -319,47 +326,52 @@ export function activate(context: vscode.ExtensionContext) {
       if (isSpfx) {
         const version = await det.getSpfxVersion();
         const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
-        const action = config.get<string>('statusBarAction', 'openWorkbench');
-
-        // Set command, tooltip, and icon based on configuration
         const versionString = `SPFx Project detected${version ? ` (${version})` : ''}`;
-        let icon = 'fluentui-testbeaker';
-        let text = 'SPFx Workbench';
-        switch (action) {
-          case 'startServeWorkbench':
-            statusBarItem.command = 'spfx-local-workbench.startServeWorkbench';
-            statusBarItem.tooltip = `${versionString}\nClick to start serve and open the Local Workbench panel`;
-            icon = 'fluentui-testbeakersolid';
-            text = 'SPFx Workbench';
-            break;
-          case 'startServeStorybook':
-            statusBarItem.command = 'spfx-local-workbench.startServeStorybook';
-            statusBarItem.tooltip = `${versionString}\nClick to start serve and open the SPFx Storybook panel`;
-            icon = 'fluentui-teststep';
-            text = 'SPFx Storybook';
-            break;
-          case 'openStorybook':
-            statusBarItem.command = 'spfx-local-workbench.openStorybook';
-            statusBarItem.tooltip = `${versionString}\nClick to open the SPFx Storybook panel`;
-            icon = 'fluentui-teststep';
-            text = 'SPFx Storybook';
-            break;
-          case 'openWorkbench':
-          default:
-            statusBarItem.command = 'spfx-local-workbench.openWorkbench';
-            statusBarItem.tooltip = `${versionString}\nClick to open the Local Workbench panel`;
-            icon = 'fluentui-testbeaker';
-            text = 'SPFx Workbench';
-            break;
+        const display = config.get<string>('statusBarDisplay', 'iconAndText');
+
+        if (display === 'hidden') {
+          workbenchStatusBarItem.hide();
+          storybookStatusBarItem.hide();
+          return;
         }
 
-        statusBarItem.text = `$(${icon}) ${text}`;
-        statusBarItem.show();
+        // Workbench button
+        const workbenchAction = config.get<string>('statusBarWorkbenchAction', 'openWorkbench');
+        let workbenchIcon: string;
+        if (workbenchAction === 'startServeWorkbench') {
+          workbenchStatusBarItem.command = 'spfx-local-workbench.startServeWorkbench';
+          workbenchStatusBarItem.tooltip = `${versionString}\nClick to start serve and open the Local Workbench panel`;
+          workbenchIcon = 'fluentui-testbeakersolid';
+        } else {
+          workbenchStatusBarItem.command = 'spfx-local-workbench.openWorkbench';
+          workbenchStatusBarItem.tooltip = `${versionString}\nClick to open the Local Workbench panel`;
+          workbenchIcon = 'fluentui-testbeaker';
+        }
+        workbenchStatusBarItem.text =
+          display === 'iconOnly'
+            ? `$(${workbenchIcon})`
+            : `$(${workbenchIcon}) SPFx Workbench`;
+        workbenchStatusBarItem.show();
+
+        // Storybook button
+        const storybookAction = config.get<string>('statusBarStorybookAction', 'openStorybook');
+        if (storybookAction === 'startServeStorybook') {
+          storybookStatusBarItem.command = 'spfx-local-workbench.startServeStorybook';
+          storybookStatusBarItem.tooltip = `${versionString}\nClick to start serve and open the SPFx Storybook panel`;
+        } else {
+          storybookStatusBarItem.command = 'spfx-local-workbench.openStorybook';
+          storybookStatusBarItem.tooltip = `${versionString}\nClick to open the SPFx Storybook panel`;
+        }
+        storybookStatusBarItem.text =
+          display === 'iconOnly' ? '$(fluentui-teststep)' : '$(fluentui-teststep) SPFx Storybook';
+        storybookStatusBarItem.show();
       } else {
-        statusBarItem.hide();
+        workbenchStatusBarItem.hide();
+        storybookStatusBarItem.hide();
       }
     } else {
-      statusBarItem.hide();
+      workbenchStatusBarItem.hide();
+      storybookStatusBarItem.hide();
     }
   }
 
@@ -372,7 +384,11 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Update status bar when configuration changes
   vscode.workspace.onDidChangeConfiguration((e) => {
-    if (e.affectsConfiguration('spfxLocalWorkbench.statusBarAction')) {
+    if (
+      e.affectsConfiguration('spfxLocalWorkbench.statusBarWorkbenchAction') ||
+      e.affectsConfiguration('spfxLocalWorkbench.statusBarStorybookAction') ||
+      e.affectsConfiguration('spfxLocalWorkbench.statusBarDisplay')
+    ) {
       updateStatusBar();
     }
   });
@@ -399,7 +415,8 @@ export function activate(context: vscode.ExtensionContext) {
     openStorybookCommand,
     generateStoriesCommand,
     cleanStorybookCommand,
-    statusBarItem,
+    workbenchStatusBarItem,
+    storybookStatusBarItem,
   );
 }
 
