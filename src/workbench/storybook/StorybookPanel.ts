@@ -285,20 +285,24 @@ export class StorybookPanel {
           command: 'vscodeThemeColors',
           colors: {
             base:              isDark ? 'dark' : 'light',
+            // colorSecondary is the sidebar selected-story row fill; button-background gives the vivid accent.
+            // colorPrimary is used for smaller accent elements (icons, focus rings, active marks).
             colorPrimary:      get('--vscode-focusBorder'),
             colorSecondary:    get('--vscode-button-background'),
             appBg:             get('--vscode-sideBar-background'),
             appContentBg:      get('--vscode-editor-background'),
             appBorderColor:    get('--vscode-panel-border'),
             fontCode:          get('--vscode-editor-font-family'),
-            textColor:         get('--vscode-editor-foreground'),
+            textColor:         get('--vscode-foreground'),
+            // textInverseColor renders on top of colorPrimary fills — use button-foreground which is
+            // guaranteed to contrast against button-background; focusBorder is similar enough in practice.
             textInverseColor:  get('--vscode-button-foreground'),
             textMutedColor:    get('--vscode-descriptionForeground'),
             barBg:             get('--vscode-editorGroupHeader-tabsBackground'),
             barTextColor:      get('--vscode-tab-inactiveForeground'),
-            barSelectedColor:  get('--vscode-focusBorder'),
-            barHoverColor:     get('--vscode-focusBorder'),
-            buttonBg:          get('--vscode-button-background'),
+            barSelectedColor:  get('--vscode-tab-activeForeground'),
+            barHoverColor:     get('--vscode-list-hoverForeground') || get('--vscode-foreground'),
+            buttonBg:          get('--vscode-inputOption-activeBackground'),
             buttonBorder:      get('--vscode-button-border') || get('--vscode-button-background'),
             booleanBg:         get('--vscode-settings-checkboxBackground') || get('--vscode-input-background'),
             booleanSelectedBg: get('--vscode-inputOption-activeBackground') || get('--vscode-button-background'),
