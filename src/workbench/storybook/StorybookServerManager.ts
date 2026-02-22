@@ -260,6 +260,9 @@ export class StorybookServerManager {
     } else if (themeSetting === 'dark') {
       themeData = { base: 'dark' };
       status = 'dark (forced)';
+    } else if (themeSetting === 'peacock') {
+      themeData = this.buildPeacockTheme();
+      status = `peacock (base: ${(themeData.base as string) ?? 'unknown'})`;
     } else if (this.pendingThemeColors) {
       // matchVsCode with captured colors
       themeData = { ...this.pendingThemeColors, appBorderRadius: 4, inputBorderRadius: 2 };
@@ -277,6 +280,58 @@ export class StorybookServerManager {
     );
 
     this.outputChannel.appendLine(`✓ Written theme.json (${status})`);
+  }
+
+  /**
+   * Builds a Storybook theme that uses Peacock extension colors for all accent/bar surfaces
+   * and falls back to the extracted VS Code CSS var colors for everything else.
+   *
+   * Peacock applies its brand color to the title bar, activity bar, and status bar via
+   * workbench.colorCustomizations. We map those surfaces to the analogous Storybook regions:
+   *   titleBar.*       → bar (top toolbar strip)
+   *   activityBar.*    → hover + button surface tints
+   *   titleBar.active* → colorSecondary (selected story row fill) + textInverseColor
+   *
+   * If the workspace has no Peacock color customizations, falls back to matchVsCode behavior.
+   */
+  private buildPeacockTheme(): Record<string, unknown> {
+    const colorCustomizations = vscode.workspace
+      .getConfiguration('workbench')
+      .get<Record<string, string>>('colorCustomizations', {});
+
+    const pColorSecondary = colorCustomizations['titleBar.activeBackground'];
+
+    // No peacock settings found — fall back to the standard VS Code CSS var mapping
+    if (!pColorSecondary) {
+      return this.pendingThemeColors
+        ? { ...this.pendingThemeColors, appBorderRadius: 4, inputBorderRadius: 2 }
+        : {};
+    }
+
+    const ptextInverseColor = colorCustomizations['titleBar.activeForeground'];
+    const pbarTextColor = colorCustomizations['titleBar.activeForeground'];
+    const pvarHoverColor = colorCustomizations['titleBar.inactiveForeground'];
+    const pbuttonBg = colorCustomizations['titleBar.inactiveBackground'];
+
+    // Base CSS vars provide the non-accent fields (app shell, inputs, typography)
+    const base: Partial<IStorybookThemeColors> = this.pendingThemeColors ?? {};
+
+    return {
+      ...base,
+      appBorderRadius: 4,
+      inputBorderRadius: 2,
+      // Selected story row fill → main peacock brand color
+      colorSecondary: pColorSecondary,
+      // Text rendered on top of brand-colored surfaces
+      textInverseColor: ptextInverseColor ?? base.textInverseColor,
+      // Top toolbar strip mirrors the title bar
+      barBg: pColorSecondary,
+      barTextColor: pbarTextColor ?? base.barTextColor,
+      barSelectedColor: ptextInverseColor ?? base.barSelectedColor,
+      // Hover/button tints use the slightly lighter activity bar variant
+      barHoverColor: pvarHoverColor ?? base.barHoverColor,
+      buttonBg: pbuttonBg ?? base.buttonBg,
+    };
   }
 
   /**

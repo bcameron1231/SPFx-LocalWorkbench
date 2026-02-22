@@ -464,11 +464,13 @@
             "default": "matchVsCode",
             "enum": [
               "matchVsCode",
+              "peacock",
               "light",
               "dark"
             ],
             "enumDescriptions": [
               "Derives the Storybook manager theme from your active VS Code color theme",
+              "Uses the Peacock extension color for accent and bar colors, blended with the VS Code theme. Falls back to matchVsCode if no Peacock color is set.",
               "Always use Storybook's built-in light theme",
               "Always use Storybook's built-in dark theme"
             ],

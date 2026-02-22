@@ -141,9 +141,10 @@ export class StorybookPanel {
 
     // When theme is forced to light or dark, skip CSS var extraction entirely.
     // The manager will write { base: 'light' } / { base: 'dark' } to theme.json directly.
+    // peacock still needs the base VS Code CSS vars for non-accent fields.
     let themeColors: IStorybookThemeColors | undefined;
 
-    if (themeSetting === 'matchVsCode') {
+    if (themeSetting === 'matchVsCode' || themeSetting === 'peacock') {
       // Capture VS Code theme colors from the loading HTML before starting the server.
       // The loading HTML script posts --vscode-* CSS var values back to us.
       // We race against a 1s timeout so a slow or missing message never blocks startup.
