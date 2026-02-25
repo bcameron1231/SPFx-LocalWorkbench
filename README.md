@@ -33,7 +33,9 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 - **Request logging**: All proxied calls are logged to the "SPFx API Proxy" output channel
 - **Fully optional**: Disable the proxy to use real `fetch()` calls with external tools like Dev Proxy
 
-> 📖 **[Full proxy documentation →](PROXY.md)** — architecture, setup guide, mock rule reference, and examples.
+>**[Full proxy documentation →](PROXY.md)** — architecture, setup guide, mock rule reference, and examples.
+>
+>**[Mock data generation →](MOCK-DATA.md)** — status code stubs, JSON/CSV import, request recording, and more.
 
 ## Requirements
 

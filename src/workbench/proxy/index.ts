@@ -4,6 +4,8 @@
 
 export { ApiProxyService } from './ApiProxyService';
 export { MockRuleEngine } from './MockRuleEngine';
+export { MockConfigGenerator } from './MockConfigGenerator';
+export type { IRecordedRequest } from './generators';
 export type {
     IMockConfig,
     IMockRule,

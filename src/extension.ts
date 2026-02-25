@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { WorkbenchPanel, SpfxProjectDetector, createManifestWatcher, getWorkbenchSettings, ApiProxyService } from './workbench';
+import { WorkbenchPanel, SpfxProjectDetector, createManifestWatcher, getWorkbenchSettings, ApiProxyService, MockConfigGenerator } from './workbench';
 import * as net from 'net';
 
 function isPortReachable(host: string, port: number, timeout = 1000): Promise<boolean> {
@@ -175,6 +175,133 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	);
 
+	// ── Mock Data Commands ──────────────────────────────────────────
+
+	// Mock Data menu button — opens a quick pick with all mock data actions
+	const mockDataMenuCommand = vscode.commands.registerCommand(
+		'spfx-local-workbench.mockDataMenu',
+		async () => {
+			const items: (vscode.QuickPickItem & { commandId: string })[] = [
+				{ label: '$(file-add) Scaffold Mock Config', description: 'Create a starter api-mocks.json file', commandId: 'spfx-local-workbench.scaffoldMockConfig' },
+				{ label: '$(symbol-number) Generate Status Code Stubs', description: 'Create rules for 200, 401, 404, 500, etc.', commandId: 'spfx-local-workbench.generateStatusStubs' },
+				{ label: '$(json) Import JSON File', description: 'Use a JSON file as a mock response body', commandId: 'spfx-local-workbench.importJsonMock' },
+				{ label: '$(table) Import CSV File', description: 'Parse CSV rows into a JSON mock response', commandId: 'spfx-local-workbench.importCsvMock' },
+				{ label: '$(record) Record Requests', description: 'Capture unmatched requests and generate rules', commandId: 'spfx-local-workbench.recordRequests' },
+			];
+
+			const pick = await vscode.window.showQuickPick(items, {
+				title: 'Mock Data',
+				placeHolder: 'Choose an action',
+			});
+
+			if (pick) {
+				await vscode.commands.executeCommand(pick.commandId);
+			}
+		}
+	);
+
+	// Helper to create a MockConfigGenerator for the current workspace
+	function createGenerator(): MockConfigGenerator | undefined {
+		const wsFolder = vscode.workspace.workspaceFolders?.[0];
+		if (!wsFolder) {
+			vscode.window.showWarningMessage('No workspace folder open');
+			return undefined;
+		}
+		const settings = ApiProxyService.readSettings();
+		return new MockConfigGenerator(wsFolder.uri.fsPath, settings.mockFile);
+	}
+
+	// Generate status-code stubs via interactive wizard
+	const generateStatusStubsCommand = vscode.commands.registerCommand(
+		'spfx-local-workbench.generateStatusStubs',
+		async () => {
+			const gen = createGenerator();
+			if (!gen) { return; }
+			const ok = await gen.generateStatusStubs();
+			if (ok) {
+				vscode.window.showInformationMessage('Mock rules generated successfully.');
+			}
+		}
+	);
+
+	// Import a JSON file as mock response body
+	const importJsonCommand = vscode.commands.registerCommand(
+		'spfx-local-workbench.importJsonMock',
+		async () => {
+			const gen = createGenerator();
+			if (!gen) { return; }
+			const ok = await gen.importJsonFile();
+			if (ok) {
+				vscode.window.showInformationMessage('JSON file imported as mock rule.');
+			}
+		}
+	);
+
+	// Import a CSV file as mock response body
+	const importCsvCommand = vscode.commands.registerCommand(
+		'spfx-local-workbench.importCsvMock',
+		async () => {
+			const gen = createGenerator();
+			if (!gen) { return; }
+			const ok = await gen.importCsvFile();
+			if (ok) {
+				vscode.window.showInformationMessage('CSV file imported as mock rule.');
+			}
+		}
+	);
+
+	// Record unmatched requests and generate rules from them
+	const recordingStatusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
+	recordingStatusBar.command = 'spfx-local-workbench.recordRequests';
+	recordingStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
+
+	const recordRequestsCommand = vscode.commands.registerCommand(
+		'spfx-local-workbench.recordRequests',
+		async () => {
+			// Use the WorkbenchPanel's proxy service — that's where actual requests flow
+			const proxy = WorkbenchPanel.currentPanel?.apiProxyService;
+			if (!proxy) {
+				vscode.window.showWarningMessage('Open the workbench first, then start recording.');
+				return;
+			}
+
+			// If already recording, stop and generate
+			if (proxy.isRecording) {
+				const requests = proxy.stopRecording();
+				recordingStatusBar.hide();
+
+				if (requests.length === 0) {
+					vscode.window.showInformationMessage('No unmatched requests were recorded. All requests may have matched existing rules.');
+					return;
+				}
+
+				const gen = createGenerator();
+				if (gen) {
+					const ok = await gen.generateFromRecordedRequests(requests);
+					if (ok) {
+						vscode.window.showInformationMessage(`Generated rules from ${requests.length} recorded request(s).`);
+					}
+				}
+				return;
+			}
+
+			// Start recording
+			proxy.startRecording();
+			recordingStatusBar.text = '$(record) Recording API Requests...';
+			recordingStatusBar.tooltip = 'Click to stop recording and generate mock rules';
+			recordingStatusBar.show();
+
+			// Refresh the workbench so web parts re-initialize and make their API calls
+			if (WorkbenchPanel.currentPanel) {
+				WorkbenchPanel.currentPanel.postMessage({ command: 'refresh' });
+			}
+
+			vscode.window.showInformationMessage(
+				'Recording API requests. Web parts are being refreshed. Click the status bar or run this command again to stop and generate rules.',
+			);
+		}
+	);
+
 	// Auto-detect SPFx projects and show status bar item
 	const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
 	statusBarItem.command = 'spfx-local-workbench.openWorkbench';
@@ -222,6 +349,11 @@ export function activate(context: vscode.ExtensionContext) {
 		detectWebPartsCommand,
 		scaffoldMockConfigCommand,
 		openDevToolsCommand,
+		mockDataMenuCommand,
+		generateStatusStubsCommand,
+		importJsonCommand,
+		importCsvCommand,
+		recordRequestsCommand,
 		statusBarItem
 	);
 }
