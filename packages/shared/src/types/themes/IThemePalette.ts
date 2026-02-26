@@ -4,31 +4,37 @@
  */
 export interface IThemePalette {
   // Theme colors
-  themePrimary: string;
-  themeLighterAlt: string;
-  themeLighter: string;
-  themeLight: string;
-  themeTertiary: string;
-  themeSecondary: string;
-  themeDarkAlt: string;
-  themeDark: string;
   themeDarker: string;
+  themeDark: string;
+  themeDarkAlt: string;
+  themePrimary: string;
+  themeSecondary: string;
+  themeTertiary: string;
+  themeLight: string;
+  themeLighter: string;
+  themeLighterAlt: string;
 
   // Neutral colors
-  neutralLighterAlt: string;
-  neutralLighter: string;
+  black: string;
+  neutralDark: string;
+  neutralPrimary: string;
+  neutralPrimaryAlt: string;
+  neutralSecondary: string;
+  neutralTertiary: string;
+  neutralTertiaryAlt: string;
   neutralLight: string;
+  neutralLighter: string;
+  neutralLighterAlt: string;
+  white: string;
   neutralQuaternaryAlt: string;
   neutralQuaternary: string;
-  neutralTertiaryAlt: string;
-  neutralTertiary: string;
-  neutralSecondary: string;
-  neutralPrimaryAlt: string;
-  neutralPrimary: string;
-  neutralDark: string;
-  black: string;
-  white: string;
+  neutralSecondaryAlt: string;
 
-  // Optional additional Fluent UI slots
-  [key: string]: string;
+  // Specific slots
+  primaryBackground: string;
+  primaryText: string;
+  accent: string;
+
+  // Optional additional slots
+  [key: string]: string; // bodyBackground, bodyText, disabledBackground, disabledText, error, etc.
 }

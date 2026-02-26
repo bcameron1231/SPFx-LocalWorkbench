@@ -249,17 +249,17 @@
           "spfxLocalWorkbench.theme.current": {
             "type": "string",
             "enum": [
-              "teal",
-              "blue",
-              "orange",
-              "red",
-              "purple",
-              "green",
-              "periwinkle",
-              "cobalt",
-              "dark-teal",
-              "dark-blue",
-              "custom"
+              "Teal",
+              "Blue",
+              "Orange",
+              "Red",
+              "Purple",
+              "Green",
+              "Periwinkle",
+              "Cobalt",
+              "Dark Teal",
+              "Dark Blue",
+              "Custom"
             ],
             "enumDescriptions": [
               "Teal - Microsoft's teal theme",
@@ -274,60 +274,66 @@
               "Dark Blue - Microsoft's dark blue theme",
               "Custom - Use a custom theme ID"
             ],
-            "default": "teal",
+            "default": "Teal",
             "description": "Select the theme for the workbench"
           },
-          "spfxLocalWorkbench.theme.customId": {
+          "spfxLocalWorkbench.theme.customName": {
             "type": "string",
             "default": "",
-            "markdownDescription": "Custom theme ID when `#spfxLocalWorkbench.theme.current#` is set to `custom`. Must match an ID defined in `#spfxLocalWorkbench.theme.custom#`"
+            "markdownDescription": "Custom theme name when `#spfxLocalWorkbench.theme.current#` is set to `Custom`. Must match a name defined in `#spfxLocalWorkbench.theme.custom#` - case sensitive"
           },
           "spfxLocalWorkbench.theme.custom": {
             "type": "array",
             "default": [],
-            "markdownDescription": "Custom themes in addition to the default Microsoft themes. Each theme should have `id`, `name`, and `palette` properties",
+            "markdownDescription": "Custom themes in addition to the default Microsoft themes. Each theme should have `name` and `palette` properties",
             "items": {
               "type": "object",
               "required": [
-                "id",
                 "name",
                 "palette"
               ],
               "properties": {
-                "id": {
-                  "type": "string",
-                  "description": "Unique identifier for the theme"
-                },
                 "name": {
                   "type": "string",
                   "description": "Display name for the theme"
+                },
+                "isInverted": {
+                  "type": "boolean",
+                  "description": "Whether this theme is a dark/inverted theme",
+                  "default": false
+                },
+                "backgroundImageUri": {
+                  "type": "string",
+                  "description": "Optional URI for a background image",
+                  "default": ""
                 },
                 "palette": {
                   "type": "object",
                   "description": "Fluent UI theme palette with color values",
                   "required": [
-                    "themePrimary",
-                    "themeLighterAlt",
-                    "themeLighter",
-                    "themeLight",
-                    "themeTertiary",
-                    "themeSecondary",
-                    "themeDarkAlt",
-                    "themeDark",
                     "themeDarker",
-                    "neutralLighterAlt",
-                    "neutralLighter",
+                    "themeDark",
+                    "themeDarkAlt",
+                    "themePrimary",
+                    "themeSecondary",
+                    "themeTertiary",
+                    "themeLight",
+                    "themeLighter",
+                    "themeLighterAlt",
+                    "black",
+                    "neutralDark",
+                    "neutralPrimary",
+                    "neutralPrimaryAlt",
+                    "neutralSecondary",
+                    "neutralTertiary",
+                    "neutralTertiaryAlt",
                     "neutralLight",
+                    "neutralLighter",
+                    "neutralLighterAlt",
+                    "white",
                     "neutralQuaternaryAlt",
                     "neutralQuaternary",
-                    "neutralTertiaryAlt",
-                    "neutralTertiary",
-                    "neutralSecondary",
-                    "neutralPrimaryAlt",
-                    "neutralPrimary",
-                    "neutralDark",
-                    "black",
-                    "white"
+                    "neutralSecondaryAlt"
                   ],
                   "additionalProperties": {
                     "type": "string"
@@ -533,7 +539,7 @@
     "packages:install": "cd packages/shared && npm install && cd ../storybook-addon-spfx && npm install",
     "clean": "rm -rf dist temp && npm run packages:clean",
     "clean:full": "npm run clean && rm -rf node_modules packages/*/node_modules",
-    "install": "npm install && npm run packages:install"
+    "postinstall": "npm run packages:install"
   },
   "dependencies": {
     "@spfx-local-workbench/shared": "file:./packages/shared"

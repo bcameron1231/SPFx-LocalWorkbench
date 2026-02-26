@@ -12,6 +12,7 @@ import { getErrorMessage } from '@spfx-local-workbench/shared/utils/errorUtils';
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
 
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
+import { getCurrentTheme, getCustomThemes } from '../config';
 import type { IStorybookThemeColors } from '../types';
 import { StoryGenerator } from './StoryGenerator';
 
@@ -59,6 +60,7 @@ export class StorybookServerManager {
     private workspacePath: string,
     private detector: SpfxProjectDetector,
     private extensionUri: vscode.Uri,
+    private extensionMode: vscode.ExtensionMode,
     outputChannel?: vscode.OutputChannel,
     statusCallback?: StatusUpdateCallback,
   ) {
@@ -447,8 +449,22 @@ export class StorybookServerManager {
 
     // Read template files from the extension
     const mainConfig = await this.readTemplateFile('main.ts');
-    const previewConfig = await this.readTemplateFile('preview.ts');
+    let previewConfig = await this.readTemplateFile('preview.ts');
     const managerConfig = await this.readTemplateFile('manager.ts');
+
+    // Inject VS Code settings into the generated preview config as Storybook globals.
+    // This makes the user's custom themes and default theme available in the toolbar
+    // without any network calls or VS Code API access from within Storybook.
+    const customThemes = getCustomThemes();
+    const defaultThemeName = getCurrentTheme().name;
+    const globalsInjection = `
+// Injected by VS Code extension at startup
+export const globals = {
+  spfxTheme: ${JSON.stringify(defaultThemeName)},
+  spfxCustomThemes: ${JSON.stringify(customThemes)},
+};
+`;
+    previewConfig += globalsInjection;
 
     await vscode.workspace.fs.writeFile(vscode.Uri.file(mainTs), Buffer.from(mainConfig, 'utf-8'));
 
@@ -480,28 +496,44 @@ export class StorybookServerManager {
   }
 
   /**
-   * Create package.json in temp/storybook directory
+   * Create package.json in temp/storybook directory from template.
+   *
+   * The template contains a `{{ADDON_REF}}` placeholder for the addon version.
+   * In development (ExtensionMode.Development / Test) the extension's local
+   * packages/ directory is used via a `file:` reference so that edits to the
+   * addon source are reflected without republishing anything.
+   * In production (ExtensionMode.Production) the published npm version is used.
+   *
+   * TODO: update the production version string below before each marketplace release.
    */
   private async createPackageJson(): Promise<void> {
     // Ensure temp/storybook directory exists
     await vscode.workspace.fs.createDirectory(vscode.Uri.file(this.storybookDir));
 
+    let addonRef: string;
+    if (this.extensionMode === vscode.ExtensionMode.Production) {
+      // Installed from the marketplace — resolve the addon from the npm registry.
+      addonRef = '^0.0.1'; // TODO: update to the published version before each release
+    } else {
+      // Running from source (F5 launch or extension tests) — link directly to the
+      // local packages/ directory so changes are reflected without republishing.
+      const addonLocalPath = path.join(
+        this.extensionUri.fsPath,
+        'packages',
+        'storybook-addon-spfx',
+      );
+      addonRef = `file:${path.relative(this.storybookDir, addonLocalPath).replace(/\\/g, '/')}`;
+    }
+
+    const packageJsonContent = (await this.readTemplateFile('package.json')).replace(
+      '{{ADDON_REF}}',
+      addonRef,
+    );
+
     const packageJsonPath = path.join(this.storybookDir, 'package.json');
-
-    const packageJson = {
-      name: 'spfx-storybook-isolated',
-      version: '1.0.0',
-      private: true,
-      description: 'Isolated Storybook installation for SPFx project',
-      scripts: {
-        storybook: 'storybook dev -p 6006',
-      },
-      devDependencies: {},
-    };
-
     await vscode.workspace.fs.writeFile(
       vscode.Uri.file(packageJsonPath),
-      Buffer.from(JSON.stringify(packageJson, null, 2), 'utf-8'),
+      Buffer.from(packageJsonContent, 'utf-8'),
     );
 
     this.outputChannel.appendLine('✓ Created package.json in temp/storybook');
@@ -540,29 +572,19 @@ export class StorybookServerManager {
   private async installStorybookDependencies(): Promise<void> {
     this.outputChannel.appendLine('Installing Storybook dependencies in temp/storybook...');
 
-    // Install Storybook v8 packages (pinned to avoid version conflicts)
-    // Using v8 as it's stable and proven. v10 has peer dependency issues.
-    // Pin React 17 to match SPFx runtime expectations (ReactDOM.render API).
-    // Storybook 8 would otherwise resolve React 18 which removes ReactDOM.render.
-    await this.runNpmInstall([
-      'react@17.0.2',
-      'react-dom@17.0.2',
-      'storybook@^8.0.0',
-      '@storybook/react-vite@^8.0.0',
-      '@storybook/addon-essentials@^8.0.0',
-      '@storybook/addon-a11y@^8.0.0',
-    ]);
+    // All dependencies (including the addon reference) are declared in package.json
+    // by createPackageJson(), so a single npm install resolves everything in one pass.
+    await this.runNpmInstall();
 
-    // Then link the addon from the extension
-    await this.linkAddon();
+    this.outputChannel.appendLine('✓ Storybook dependencies installed');
   }
 
   /**
-   * Run npm install with specified packages
+   * Run npm install in the temp/storybook directory
    */
-  private async runNpmInstall(packages: string[]): Promise<void> {
+  private async runNpmInstall(): Promise<void> {
     return new Promise((resolve, reject) => {
-      const npm = spawn('npm', ['install', '--save-dev', ...packages], {
+      const npm = spawn('npm', ['install'], {
         cwd: this.storybookDir,
         shell: true,
       });
@@ -577,7 +599,6 @@ export class StorybookServerManager {
 
       npm.on('close', (code) => {
         if (code === 0) {
-          this.outputChannel.appendLine('✓ Storybook dependencies installed');
           resolve();
         } else {
           reject(new Error(`npm install failed with code ${code}`));
@@ -588,50 +609,6 @@ export class StorybookServerManager {
         reject(error);
       });
     });
-  }
-
-  /**
-   * Link the SPFx Storybook addon from the extension
-   */
-  private async linkAddon(): Promise<void> {
-    this.outputChannel.appendLine('Linking @spfx-local-workbench/storybook-addon-spfx...');
-
-    try {
-      // Get the path to the addon in the extension packages directory
-      const extensionAddonPath = path.join(
-        this.extensionUri.fsPath,
-        'packages',
-        'storybook-addon-spfx',
-      );
-
-      // Update package.json with file: reference to the addon
-      const packageJsonPath = path.join(this.storybookDir, 'package.json');
-      const content = await vscode.workspace.fs.readFile(vscode.Uri.file(packageJsonPath));
-      const packageJson = JSON.parse(content.toString());
-
-      // Add file:// reference to the addon (relative path from storybook dir)
-      const addonPath = path.relative(this.storybookDir, extensionAddonPath);
-      packageJson.devDependencies['@spfx-local-workbench/storybook-addon-spfx'] =
-        `file:${addonPath.replace(/\\/g, '/')}`;
-
-      await vscode.workspace.fs.writeFile(
-        vscode.Uri.file(packageJsonPath),
-        Buffer.from(JSON.stringify(packageJson, null, 2), 'utf-8'),
-      );
-
-      this.outputChannel.appendLine(`Addon path: ${addonPath}`);
-
-      // Run npm install to install the addon
-      await this.runNpmInstall([]);
-
-      this.outputChannel.appendLine('✓ Addon linked successfully');
-    } catch (error: unknown) {
-      this.log.warn('Could not link addon:', error);
-      this.outputChannel.appendLine(`Warning: Could not link addon: ${getErrorMessage(error)}`);
-      this.outputChannel.appendLine(
-        'You may need to install @spfx-local-workbench/storybook-addon-spfx manually',
-      );
-    }
   }
 
   /**

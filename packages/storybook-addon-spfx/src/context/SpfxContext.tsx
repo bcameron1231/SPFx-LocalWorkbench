@@ -8,7 +8,7 @@ import { DisplayMode } from '../constants';
 interface ISpfxContextValue {
   componentId: string;
   displayMode: DisplayMode;
-  themeId: string;
+  themeName: string;
   locale: string;
   properties: Record<string, any>;
 }

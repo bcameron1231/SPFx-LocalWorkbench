@@ -3,9 +3,13 @@ import type { IThemePalette } from './IThemePalette';
 /**
  * SharePoint theme definition
  */
-export interface ITheme {
-  id: string;
+interface ISharePointTheme {
   name: string;
-  isCustom: boolean;
+  isInverted: boolean;
+  backgroundImageUri: string;
   palette: IThemePalette;
+}
+
+export interface ITheme extends ISharePointTheme {
+  isCustom: boolean;
 }

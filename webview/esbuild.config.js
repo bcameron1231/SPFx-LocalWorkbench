@@ -78,7 +78,8 @@ async function build() {
             'react': './webview/react-shim.js',
             'react-dom': './webview/react-dom-shim.js',
             '@fluentui/react': './webview/fluent-shim.js',
-            '@spfx-local-workbench/shared': './packages/shared/src/index.ts'
+            '@spfx-local-workbench/shared': './packages/shared/src/index.ts',
+            '@spfx-local-workbench/shared/fluent': './packages/shared/src/utilities/buildFluentTheme.ts'
         },
         define: {
             'process.env.NODE_ENV': production ? '"production"' : '"development"'

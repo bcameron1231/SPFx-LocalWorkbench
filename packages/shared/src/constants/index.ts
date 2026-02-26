@@ -1,3 +1,4 @@
+export * from './DEFAULT_THEME_NAME';
 export * from './MICROSOFT_THEMES';
 export * from './DEFAULT_PAGE_CONTEXT';
 export * from './timing';

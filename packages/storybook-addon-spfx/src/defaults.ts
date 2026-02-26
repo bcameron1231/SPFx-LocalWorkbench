@@ -6,8 +6,8 @@ import { DEFAULT_PAGE_CONTEXT } from '@spfx-local-workbench/shared';
  * NOTE: Default values come from @spfx-local-workbench/shared package.
  * The addon re-exports them for convenience and backward compatibility.
  *
- * When used via the VS Code extension, these defaults won't typically be used
- * because the story generator will inject config from VS Code settings.
+ * When a story generator pre-populates page context via the `spfxPageContext`
+ * global, these defaults are overridden at runtime.
  * These exist primarily for standalone Storybook usage.
  */
 

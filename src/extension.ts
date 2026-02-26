@@ -125,7 +125,7 @@ export function activate(context: vscode.ExtensionContext) {
     ),
     vscode.window.registerWebviewPanelSerializer(
       'spfxStorybook',
-      new StorybookPanelSerializer(context.extensionUri, getDetector),
+      new StorybookPanelSerializer(context.extensionUri, context.extensionMode, getDetector),
     ),
   );
 
@@ -210,7 +210,7 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
-      await StorybookPanel.createOrShow(context.extensionUri, det);
+      await StorybookPanel.createOrShow(context.extensionUri, context.extensionMode, det);
     },
   );
 
@@ -222,7 +222,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (ready) {
         const det = getDetector();
         if (det) {
-          await StorybookPanel.createOrShow(context.extensionUri, det);
+          await StorybookPanel.createOrShow(context.extensionUri, context.extensionMode, det);
         }
       }
     },
@@ -348,9 +348,7 @@ export function activate(context: vscode.ExtensionContext) {
           workbenchIcon = 'fluentui-testbeaker';
         }
         workbenchStatusBarItem.text =
-          display === 'iconOnly'
-            ? `$(${workbenchIcon})`
-            : `$(${workbenchIcon}) SPFx Workbench`;
+          display === 'iconOnly' ? `$(${workbenchIcon})` : `$(${workbenchIcon}) SPFx Workbench`;
         workbenchStatusBarItem.show();
 
         // Storybook button

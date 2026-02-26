@@ -30,4 +30,5 @@ export const STORYBOOK_GLOBAL_KEYS = {
   DISPLAY_MODE: `${PARAM_KEY}DisplayMode`,
   THEME: `${PARAM_KEY}Theme`,
   LOCALE: `${PARAM_KEY}Locale`,
+  CUSTOM_THEMES: `${PARAM_KEY}CustomThemes`,
 } as const;

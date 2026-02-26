@@ -1,4 +1,4 @@
-import type { IPageContextConfig, IWebPartManifest, IExtensionManifest, IComponentManifest } from '@spfx-local-workbench/shared';
+import type { IPageContextConfig, ITheme, IWebPartManifest, IExtensionManifest, IComponentManifest } from '@spfx-local-workbench/shared';
 
 // ─── Webview-specific types ───────────────────────────────────────────────────
 
@@ -12,16 +12,9 @@ export interface IWorkbenchConfig {
   serveUrl: string;
   webParts: IWebPartManifest[];
   extensions?: IExtensionManifest[];
-  theme?: IThemeSettings;
+  /** The active SharePoint theme. Comes from `spfxLocalWorkbench.theme.current` (+ custom). */
+  theme?: ITheme;
   context: IContextSettings; // Always provided by extension (from WorkbenchConfig defaults)
-}
-
-export interface IThemeSettings {
-  preset?: 'teamSite' | 'communicationSite' | 'dark' | 'highContrast' | 'custom';
-  customColors?: Record<string, string>;
-  primaryColor?: string;
-  backgroundColor?: string;
-  textColor?: string;
 }
 
 export interface IContextSettings {

@@ -3,10 +3,13 @@ import type { Decorator, StoryContext } from '@storybook/react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import {
+  DEFAULT_THEME_NAME,
+  type ITheme,
   type IWebPartManifest,
-  MICROSOFT_THEMES,
   buildMockPageContext,
+  buildThemeList,
 } from '@spfx-local-workbench/shared';
+import { buildFluentTheme } from '@spfx-local-workbench/shared/fluent';
 
 import { DisplayMode, EVENTS, PARAM_KEY, STORYBOOK_GLOBAL_KEYS } from '../constants';
 import { SpfxContextProvider } from '../context/SpfxContext';
@@ -73,7 +76,7 @@ function createMockSpHttpClient(): any {
  */
 export const withSpfx: Decorator = (Story, context: StoryContext) => {
   const parameters = context.parameters[PARAM_KEY] as ISpfxParameters | undefined;
-  const [globals] = useGlobals();
+  const [globals, updateGlobals] = useGlobals();
 
   if (!parameters?.componentId) {
     return (
@@ -94,11 +97,15 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
 
   // Read displayMode from globals (managed by the toolbar)
   const globalDisplayMode = globals[STORYBOOK_GLOBAL_KEYS.DISPLAY_MODE];
-  const globalThemeId = globals[STORYBOOK_GLOBAL_KEYS.THEME];
+  const globalThemeName = globals[STORYBOOK_GLOBAL_KEYS.THEME];
+  const globalCustomThemes: ITheme[] = globals[STORYBOOK_GLOBAL_KEYS.CUSTOM_THEMES] ?? [];
+  const storyThemes: ITheme[] = parameters?.customThemes ?? [];
   const [displayMode, setDisplayMode] = useState<DisplayMode>(
     globalDisplayMode || parameters.displayMode || DisplayMode.Edit,
   );
-  const [themeId, setThemeId] = useState<string>(globalThemeId || parameters.themeId || 'teal');
+  const [themeName, setThemeName] = useState<string>(
+    globalThemeName || parameters.themeName || DEFAULT_THEME_NAME,
+  );
   const [locale, setLocale] = useState<string>(parameters.locale || 'en-US');
   // Properties are seeded from the serve's manifest preconfiguredEntry once loaded;
   // parameters.properties acts only as a fallback when the entry has none.
@@ -121,13 +128,21 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     }
   }, [globalDisplayMode]);
 
-  // Update themeId when global changes
+  // Update themeName when global changes
   useEffect(() => {
-    if (globalThemeId !== undefined) {
-      setThemeId(globalThemeId);
-      console.log(`Global theme changed to: ${globalThemeId}`);
+    if (globalThemeName !== undefined) {
+      setThemeName(globalThemeName);
     }
-  }, [globalThemeId]);
+  }, [globalThemeName]);
+
+  // When the story declares a preferred theme, push it to the global so the
+  // toolbar reflects it. Stories with no themeName are theme-agnostic and leave
+  // the global untouched, inheriting whatever the user or the `spfxTheme` global set.
+  useEffect(() => {
+    if (parameters.themeName) {
+      updateGlobals({ [STORYBOOK_GLOBAL_KEYS.THEME]: parameters.themeName });
+    }
+  }, [parameters.themeName]);
 
   // Listen to events from toolbar and panels
   const emit = useChannel({
@@ -164,11 +179,12 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         // withSpfx is web-part–specific; cast to access preconfiguredEntries.
         const manifest = rawManifest as IWebPartManifest;
 
-        // Resolve initial properties from the serve manifest's preconfiguredEntry so the
-        // source of truth is always the running serve, not baked-in story parameters.
+        // Resolve initial properties: start from the manifest's preconfiguredEntry
+        // then merge story-level parameters.properties on top so individual stories
+        // can override specific keys without replacing the whole property bag.
         const entryIndex = parameters.preconfiguredEntryIndex ?? 0;
-        const serveProperties = manifest.preconfiguredEntries?.[entryIndex]?.properties;
-        const resolvedProperties = serveProperties ?? parameters.properties ?? {};
+        const serveProperties = manifest.preconfiguredEntries?.[entryIndex]?.properties ?? {};
+        const resolvedProperties = { ...serveProperties, ...parameters.properties };
 
         // Seed React state once per component load so downstream effects see the correct values.
         if (!propertiesSeeded) {
@@ -219,7 +235,8 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
 
         // Set up the component context (mock SPFx context)
         // Match the structure from webview/src/mocks/SpfxContext.ts
-        const currentTheme = MICROSOFT_THEMES.find((t) => t.id === themeId) || MICROSOFT_THEMES[0];
+        const allThemes = buildThemeList(storyThemes, globalCustomThemes);
+        const currentTheme = allThemes.find((t) => t.name === themeName) ?? allThemes[0];
 
         instance._context = {
           pageContext: mockPageContext,
@@ -229,7 +246,6 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
           },
           domElement: containerRef.current,
           displayMode: displayMode,
-          theme: currentTheme.palette,
           sdks: {
             microsoftTeams: undefined, // Not running in Teams context
           },
@@ -282,6 +298,18 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         // Render the component
         instance.render();
 
+        // Notify the web part of the initial theme via the SPFx onThemeChanged lifecycle.
+        // This is the correct API — not context.theme.
+        if (typeof instance.onThemeChanged === 'function') {
+          try {
+            instance.onThemeChanged(
+              buildFluentTheme(currentTheme.palette, currentTheme.isInverted),
+            );
+          } catch (e: any) {
+            console.warn('onThemeChanged error:', e);
+          }
+        }
+
         // Emit property changes when they happen
         if (instance.onPropertyPaneFieldChanged) {
           const originalHandler = instance.onPropertyPaneFieldChanged.bind(instance);
@@ -322,27 +350,35 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
 
   // Update component when properties, display mode, theme, or locale change
   useEffect(() => {
-    if (componentInstanceRef.current) {
-      // Update theme in context
-      const currentTheme = MICROSOFT_THEMES.find((t) => t.id === themeId) || MICROSOFT_THEMES[0];
-      if (componentInstanceRef.current._context) {
-        componentInstanceRef.current._context.theme = currentTheme.palette;
-      }
+    const instance = componentInstanceRef.current;
+    if (!instance) return;
 
-      componentInstanceRef.current._properties = properties;
-      componentInstanceRef.current._displayMode = displayMode;
-      if (componentInstanceRef.current._context) {
-        componentInstanceRef.current._context.displayMode = displayMode;
+    // Resolve the current theme from all sources
+    const allThemes = buildThemeList(storyThemes, globalCustomThemes);
+    const currentTheme = allThemes.find((t) => t.name === themeName) ?? allThemes[0];
+
+    // Notify the web part of the theme change
+    if (typeof instance.onThemeChanged === 'function') {
+      try {
+        instance.onThemeChanged(buildFluentTheme(currentTheme.palette, currentTheme.isInverted));
+      } catch (e: any) {
+        console.warn('onThemeChanged error:', e);
       }
-      componentInstanceRef.current.render();
     }
-  }, [properties, displayMode, themeId, locale]);
+
+    instance._properties = properties;
+    instance._displayMode = displayMode;
+    if (instance._context) {
+      instance._context.displayMode = displayMode;
+    }
+    instance.render();
+  }, [properties, displayMode, themeName, locale]);
 
   return (
     <SpfxContextProvider
       componentId={parameters.componentId}
       displayMode={displayMode}
-      themeId={themeId}
+      themeName={themeName}
       locale={locale}
       properties={properties}
     >

@@ -4,41 +4,62 @@
  */
 import { IconButton, WithTooltip } from '@storybook/components';
 import { StarIcon } from '@storybook/icons';
-import { useGlobals } from '@storybook/manager-api';
+import { useGlobals, useParameter } from '@storybook/manager-api';
 import React, { useState } from 'react';
 
-import { MICROSOFT_THEMES, ThemePreview } from '@spfx-local-workbench/shared';
+import { ThemePreview, buildThemeList, DEFAULT_THEME_NAME } from '@spfx-local-workbench/shared';
+import type { ITheme } from '@spfx-local-workbench/shared';
 
-import { STORYBOOK_GLOBAL_KEYS } from '../../constants';
+import { PARAM_KEY, STORYBOOK_GLOBAL_KEYS } from '../../constants';
+import type { ISpfxParameters } from '../../types';
 import styles from './ThemeToolbar.module.css';
 
 export const ThemeToolbar: React.FC = () => {
   const [globals, updateGlobals] = useGlobals();
   const [isOpen, setIsOpen] = useState(false);
-  const currentThemeId = globals[STORYBOOK_GLOBAL_KEYS.THEME] || 'teal';
 
-  const currentTheme = MICROSOFT_THEMES.find((t) => t.id === currentThemeId) || MICROSOFT_THEMES[0];
+  const currentThemeName: string = globals[STORYBOOK_GLOBAL_KEYS.THEME] ?? DEFAULT_THEME_NAME;
+  const globalCustomThemes: ITheme[] = globals[STORYBOOK_GLOBAL_KEYS.CUSTOM_THEMES] ?? [];
+  const parameters = useParameter<Partial<ISpfxParameters>>(PARAM_KEY, {});
+  const storyThemes: ITheme[] = parameters?.customThemes ?? [];
 
-  const handleThemeChange = (themeId: string) => {
-    updateGlobals({ [STORYBOOK_GLOBAL_KEYS.THEME]: themeId });
-    console.log(`Theme changed to: ${themeId}`);
+  // Build deduplicated list: story themes > global custom themes > Microsoft themes
+  // MICROSOFT_THEMES is appended by buildThemeList — never imported here directly
+  const allThemes = buildThemeList(storyThemes, globalCustomThemes);
+
+  const currentTheme = allThemes.find((t) => t.name === currentThemeName) ?? allThemes[0];
+
+  const handleThemeChange = (themeName: string) => {
+    updateGlobals({ [STORYBOOK_GLOBAL_KEYS.THEME]: themeName });
     setIsOpen(false);
   };
 
-  const customThemes = MICROSOFT_THEMES.filter((t) => t.isCustom);
-  const microsoftThemes = MICROSOFT_THEMES.filter((t) => !t.isCustom);
+  const microsoftThemes = allThemes.filter((t) => !t.isCustom);
 
   const tooltip = (
     <div className={styles.themeDropdown}>
-      {customThemes.length > 0 && (
+      {storyThemes.length > 0 && (
+        <>
+          <div className={styles.themeGroupHeader}>This story</div>
+          {storyThemes.map((theme) => (
+            <ThemePreview
+              key={theme.name}
+              theme={theme}
+              isSelected={theme.name === currentThemeName}
+              onClick={() => handleThemeChange(theme.name)}
+            />
+          ))}
+        </>
+      )}
+      {globalCustomThemes.length > 0 && (
         <>
           <div className={styles.themeGroupHeader}>From your organization</div>
-          {customThemes.map((theme) => (
+          {globalCustomThemes.map((theme) => (
             <ThemePreview
-              key={theme.id}
+              key={theme.name}
               theme={theme}
-              isSelected={theme.id === currentThemeId}
-              onClick={() => handleThemeChange(theme.id)}
+              isSelected={theme.name === currentThemeName}
+              onClick={() => handleThemeChange(theme.name)}
             />
           ))}
         </>
@@ -46,10 +67,10 @@ export const ThemeToolbar: React.FC = () => {
       <div className={styles.themeGroupHeader}>From Microsoft</div>
       {microsoftThemes.map((theme) => (
         <ThemePreview
-          key={theme.id}
+          key={theme.name}
           theme={theme}
-          isSelected={theme.id === currentThemeId}
-          onClick={() => handleThemeChange(theme.id)}
+          isSelected={theme.name === currentThemeName}
+          onClick={() => handleThemeChange(theme.name)}
         />
       ))}
     </div>
@@ -65,11 +86,11 @@ export const ThemeToolbar: React.FC = () => {
       onVisibleChange={setIsOpen}
     >
       <IconButton
-        title={`Theme: ${currentTheme.name}`}
+        title={`Theme: ${currentTheme?.name ?? DEFAULT_THEME_NAME}`}
         className={styles.toolbarIcon}
         style={
           {
-            '--themePrimary': currentTheme.palette.themePrimary,
+            '--themePrimary': currentTheme?.palette.themePrimary,
           } as React.CSSProperties
         }
       >
@@ -78,3 +99,4 @@ export const ThemeToolbar: React.FC = () => {
     </WithTooltip>
   );
 };
+

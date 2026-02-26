@@ -16,7 +16,8 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
-      "@spfx-local-workbench/shared": ["../shared/src"]
+      "@spfx-local-workbench/shared": ["../shared/src"],
+      "@spfx-local-workbench/shared/fluent": ["../shared/src/utilities/buildFluentTheme"]
     }
   },
   "include": ["src/**/*"],

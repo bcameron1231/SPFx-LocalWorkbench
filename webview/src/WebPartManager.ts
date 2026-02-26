@@ -172,6 +172,31 @@ export class WebPartManager {
     }
   }
 
+  /**
+   * Re-applies a new theme to all currently active web part instances without unmounting them.
+   * Calls both `applyThemeToWebPart` (CSS vars on the container) and `onThemeChanged`
+   * (the SPFx lifecycle method) for each active instance.
+   *
+   * @param activeWebParts - The list of currently active web parts (from WorkbenchRuntime)
+   * @param themeProvider - The new ThemeProvider built from the updated theme
+   */
+  reapplyTheme(activeWebParts: IActiveWebPart[], themeProvider: ThemeProvider): void {
+    for (const webPart of activeWebParts) {
+      const instance = webPart.instance as any;
+      const domElement: HTMLElement | null = instance?._domElement ?? null;
+      if (domElement) {
+        themeProvider.applyThemeToWebPart(domElement);
+      }
+      if (typeof instance?.onThemeChanged === 'function') {
+        try {
+          instance.onThemeChanged(themeProvider.getTheme());
+        } catch (error: unknown) {
+          this.log.warn('Error in onThemeChanged during reapplyTheme:', error);
+        }
+      }
+    }
+  }
+
   private showDebugInfo(
     domElement: HTMLElement,
     manifest: IWebPartManifest,

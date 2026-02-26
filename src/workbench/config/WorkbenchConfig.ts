@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 
 import {
   DEFAULT_PAGE_CONTEXT,
+  DEFAULT_THEME_NAME,
   type IPageContextConfig,
   type ITheme,
   MICROSOFT_THEMES,
@@ -105,14 +106,14 @@ export function getThemes(): ITheme[] {
  */
 export function getCurrentTheme(): ITheme {
   const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
-  const theme = config.get<string>('theme.current', 'teal');
+  const theme = config.get<string>('theme.current', DEFAULT_THEME_NAME);
   const customTheme = config.get<string>('theme.customId', '');
 
   // Use custom theme ID if theme is set to 'custom'
-  const currentThemeId = theme === 'custom' ? customTheme : theme;
+  const currentThemeName = theme === 'custom' ? customTheme : theme;
 
   const allThemes = getThemes();
-  const foundTheme = allThemes.find((t) => t.id === currentThemeId);
+  const foundTheme = allThemes.find((t) => t.name === currentThemeName);
 
   // Default to Teal if theme not found
   return foundTheme || MICROSOFT_THEMES[0];
@@ -120,21 +121,21 @@ export function getCurrentTheme(): ITheme {
 
 /**
  * Sets the current theme
- * @param themeId ID of the theme to set as current
+ * @param themeName Name of the theme to set as current
  */
-export async function setCurrentTheme(themeId: string): Promise<void> {
+export async function setCurrentTheme(themeName: string): Promise<void> {
   const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
 
   // Check if this is a Microsoft theme
-  const isMicrosoftTheme = MICROSOFT_THEMES.some((t) => t.id === themeId);
+  const isMicrosoftTheme = MICROSOFT_THEMES.some((t) => t.name === themeName);
 
   if (isMicrosoftTheme) {
-    // Set theme to the Microsoft theme ID
-    await config.update('theme.current', themeId, vscode.ConfigurationTarget.Workspace);
+    // Set theme to the Microsoft theme name
+    await config.update('theme.current', themeName, vscode.ConfigurationTarget.Workspace);
   } else {
-    // Set theme to 'custom' and store the ID in customId
+    // Set theme to 'custom' and store the name in customName
     await config.update('theme.current', 'custom', vscode.ConfigurationTarget.Workspace);
-    await config.update('theme.customId', themeId, vscode.ConfigurationTarget.Workspace);
+    await config.update('theme.customName', themeName, vscode.ConfigurationTarget.Workspace);
   }
 }
 

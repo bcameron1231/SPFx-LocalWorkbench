@@ -135,13 +135,13 @@ The extension includes **Storybook integration** for visual testing and componen
 
 ### Theme Settings
 
-| Setting                             | Default | Description                                                                                                                |
-| ----------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `spfxLocalWorkbench.theme.current`  | `teal`  | Select a Microsoft theme or `custom` to use a custom theme                                                                 |
-| `spfxLocalWorkbench.theme.customId` | `""`    | Custom theme ID when `theme.current` is set to `custom`. Must match an ID defined in `theme.custom`                        |
-| `spfxLocalWorkbench.theme.custom`   | `[]`    | Custom themes to add alongside the default Microsoft themes. Each theme should have `id`, `name`, and `palette` properties |
+| Setting                               | Default  | Description                                                                                                                      |
+| ------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `spfxLocalWorkbench.theme.current`    | `"Teal"` | Select a Microsoft theme by name (e.g. `"Teal"`, `"Blue"`) or `"Custom"` to use a custom theme                                  |
+| `spfxLocalWorkbench.theme.customName` | `""`     | Custom theme name when `theme.current` is set to `"Custom"`. Must match a `name` defined in `theme.custom`                       |
+| `spfxLocalWorkbench.theme.custom`     | `[]`     | Custom themes to add alongside the default Microsoft themes. Each theme should have `name`, `isInverted`, and `palette` properties |
 
-> **Note**: The extension includes 10 default Microsoft 365 themes (`teal`, `blue`, `orange`, `red`, `purple`, `green`, `periwinkle`, `cobalt`, `dark-teal`, `dark-blue`). You can switch between them using the `theme.current` setting or add your own custom themes using the `theme.custom` array setting.
+> **Note**: The extension includes 10 default Microsoft 365 themes: `Teal`, `Blue`, `Orange`, `Red`, `Purple`, `Green`, `Periwinkle`, `Cobalt`, `Dark Teal`, `Dark Blue`. Themes are identified by their `name` property (case-sensitive). Custom themes defined here also appear in the Storybook theme toolbar under "From your organization".
 
 ### Context Settings
 

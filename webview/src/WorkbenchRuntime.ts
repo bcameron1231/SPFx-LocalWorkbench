@@ -10,19 +10,20 @@ import {
   initializeSpfxMocks,
   logger,
 } from '@spfx-local-workbench/shared';
+import type {
+  IComponentManifest,
+  IExtensionConfig,
+  IExtensionManifest,
+  ITheme,
+  IWebPartConfig,
+  IWebPartManifest,
+} from '@spfx-local-workbench/shared';
+import { isActiveExtension, isActiveWebPart } from '@spfx-local-workbench/shared';
 
 import { ExtensionManager } from './ExtensionManager';
 import { WebPartManager } from './WebPartManager';
 import type { IAppHandlers } from './components/App';
 import { SpfxContext, ThemeProvider } from './mocks';
-import type {
-  IComponentManifest,
-  IExtensionConfig,
-  IExtensionManifest,
-  IWebPartConfig,
-  IWebPartManifest,
-} from '@spfx-local-workbench/shared';
-import { isActiveExtension, isActiveWebPart } from '@spfx-local-workbench/shared';
 import type { IVsCodeApi, IWorkbenchConfig } from './types';
 
 export class WorkbenchRuntime {
@@ -71,12 +72,17 @@ export class WorkbenchRuntime {
   }
 
   // Applies updated settings from the extension host without full reload
-  updateSettings(settings: { serveUrl?: string; theme?: any; context?: any }): void {
+  updateSettings(settings: { serveUrl?: string; theme?: ITheme; context?: any }): void {
     if (settings.serveUrl) {
       this.config.serveUrl = settings.serveUrl;
     }
     if (settings.theme) {
       this.themeProvider = new ThemeProvider(settings.theme);
+      // Re-theme active web parts in-place — no unmount needed.
+      this.webPartManager.reapplyTheme(
+        this.activeWebParts.filter(isActiveWebPart),
+        this.themeProvider,
+      );
     }
     if (settings.context) {
       this.contextProvider = new SpfxContext(settings.context);

@@ -24,6 +24,7 @@ export class StorybookPanel {
    */
   public static async createOrShow(
     extensionUri: vscode.Uri,
+    extensionMode: vscode.ExtensionMode,
     detector: SpfxProjectDetector,
     options?: IStorybookServerOptions,
   ): Promise<StorybookPanel> {
@@ -56,7 +57,7 @@ export class StorybookPanel {
 
     panel.iconPath = new vscode.ThemeIcon('fluentui-teststep');
 
-    StorybookPanel.currentPanel = new StorybookPanel(panel, extensionUri, detector, options);
+    StorybookPanel.currentPanel = new StorybookPanel(panel, extensionUri, extensionMode, detector, options);
     return StorybookPanel.currentPanel;
   }
 
@@ -66,14 +67,16 @@ export class StorybookPanel {
   public static async revive(
     panel: vscode.WebviewPanel,
     extensionUri: vscode.Uri,
+    extensionMode: vscode.ExtensionMode,
     detector: SpfxProjectDetector,
   ): Promise<void> {
-    StorybookPanel.currentPanel = new StorybookPanel(panel, extensionUri, detector);
+    StorybookPanel.currentPanel = new StorybookPanel(panel, extensionUri, extensionMode, detector);
   }
 
   private constructor(
     panel: vscode.WebviewPanel,
     private readonly extensionUri: vscode.Uri,
+    extensionMode: vscode.ExtensionMode,
     detector: SpfxProjectDetector,
     options?: IStorybookServerOptions,
   ) {
@@ -89,6 +92,7 @@ export class StorybookPanel {
       workspaceFolder.uri.fsPath,
       detector,
       extensionUri,
+      extensionMode,
       undefined,
       (title: string, message: string) => this.updateStatus(title, message),
     );
@@ -418,6 +422,7 @@ export class StorybookPanel {
 export class StorybookPanelSerializer implements vscode.WebviewPanelSerializer {
   constructor(
     private readonly extensionUri: vscode.Uri,
+    private readonly extensionMode: vscode.ExtensionMode,
     private readonly getDetector: () => SpfxProjectDetector | undefined,
   ) {}
 
@@ -428,6 +433,6 @@ export class StorybookPanelSerializer implements vscode.WebviewPanelSerializer {
       return;
     }
 
-    await StorybookPanel.revive(webviewPanel, this.extensionUri, detector);
+    await StorybookPanel.revive(webviewPanel, this.extensionUri, this.extensionMode, detector);
   }
 }

@@ -3,6 +3,7 @@
  * This file is loaded in the preview iframe and provides decorators
  */
 import { DisplayMode, STORYBOOK_GLOBAL_KEYS } from './constants';
+import { DEFAULT_THEME_NAME } from '@spfx-local-workbench/shared';
 import { withSpfx } from './decorators/withSpfx';
 
 export const decorators = [withSpfx];
@@ -12,7 +13,7 @@ export const globalTypes = {
     defaultValue: DisplayMode.Edit,
   },
   [STORYBOOK_GLOBAL_KEYS.THEME]: {
-    defaultValue: 'teal',
+    defaultValue: DEFAULT_THEME_NAME,
   },
 };
 

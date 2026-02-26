@@ -1,5 +1,5 @@
 {
-  "name": "storybook-addon-spfx",
+  "name": "@spfx-local-workbench/storybook-addon-spfx",
   "version": "1.0.0",
   "description": "Storybook addon for SharePoint Framework components",
   "author": {

@@ -20,10 +20,10 @@ const customTheme = create({
   ...(vsCodeTheme.fontCode ? { fontCode: vsCodeTheme.fontCode } : {}),
 
   // Branding — always fixed.
-  brandTitle: 'SPFx Local Workbench Storybook',
-  brandUrl: 'https://github.com/bcameron1231/SPFx-LocalWorkbench',
-  brandImage: undefined,
-  brandTarget: '_blank',
+  // brandTitle: 'SPFx Local Workbench Storybook',
+  // brandUrl: 'https://github.com/bcameron1231/SPFx-LocalWorkbench',
+  // brandImage: undefined,
+  // brandTarget: '_blank',
 });
 
 addons.setConfig({
