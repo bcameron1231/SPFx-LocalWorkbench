@@ -13,5 +13,11 @@
     "typescript.tsc.autoDetect": "off",
     "explorer.fileNesting.patterns": {
         "*.module.css": "${capture}.module.css.d.ts"
-    }
+    },
+    "cSpell.words": [
+        "Customizer",
+        "Customizers",
+        "getby",
+        "getbytitle"
+    ]
 }
