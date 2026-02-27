@@ -5,6 +5,7 @@
   padding: 1em;
   color: "[theme:bodyText, default: #323130]";
   color: var(--bodyText);
+
   &.teams {
     font-family: $ms-font-family-fallbacks;
   }
@@ -19,7 +20,7 @@
 .properties {
   flex-grow: 1;
   border-radius: 4px;
-  background-color: "[theme:neutralLighter, default: #edebe9]";
+  background-color: "[theme:neutralLighter, default: red]";
   padding: 0.5rem 1rem;
 }
 

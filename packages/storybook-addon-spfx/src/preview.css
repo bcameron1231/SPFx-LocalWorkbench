@@ -1,0 +1,10 @@
+/*
+ * Global preview-frame styles for the SPFx Storybook addon.
+ *
+ * withSpfx calls applyPaletteAsCssVars(document.body, palette) on every theme
+ * change, which sets --primaryBackground (and the full palette) on <body>.
+ * This rule makes the canvas background automatically react to those updates.
+ */
+body {
+  background-color: var(--primaryBackground, #ffffff);
+}

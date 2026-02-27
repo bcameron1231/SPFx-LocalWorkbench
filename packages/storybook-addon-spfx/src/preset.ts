@@ -2,6 +2,7 @@
  * Storybook preset for SPFx addon
  * This file tells Storybook how to load the addon
  */
+import path from 'path';
 
 export function managerEntries(entry: string[] = []): string[] {
   return [...entry, '@spfx-local-workbench/storybook-addon-spfx/manager'];
@@ -12,25 +13,26 @@ export function previewAnnotations(entry: string[] = []): string[] {
 }
 
 /**
- * Forces Vite to pre-bundle the shared packages via esbuild (CJS → ESM conversion).
+ * Forces Vite to pre-bundle the shared packages via esbuild.
  *
- * Why this is needed:
- * - `@spfx-local-workbench/shared` is a CJS package ("module": "commonjs").
- * - During development it is installed via a `file:` reference, which npm symlinks
- *   rather than copying. Vite detects symlinks and bypasses its pre-bundler, serving
- *   the raw CJS directly via a `/@fs/` URL. ESM `import` statements cannot consume
- *   raw CJS — named exports are missing and the module fails to load.
- * - Adding the packages to `optimizeDeps.include` forces Vite to always run them
- *   through esbuild pre-bundling regardless of how they were installed, converting
- *   CJS to a proper ESM wrapper.
+ * @spfx-local-workbench/shared is an ESM package installed via a `file:`
+ * reference during development (npm symlinks it instead of copying it).
+ * Vite detects symlinks and may bypass its pre-bundler, serving the file
+ * directly via a `/@fs/` URL. Because the package is now ESM this is safe
+ * for named exports, but listing it in `optimizeDeps.include` still forces
+ * a single pre-bundled copy, which avoids module-identity split issues when
+ * the same package is reachable from multiple node_modules paths.
  *
- * In production (installed from npm), pre-bundling an already-correct package is
- * a no-op, so this hook is safe to keep permanently.
+ * The `/fluent` sub-path export is listed separately because it is a distinct
+ * Vite entry point that exposes @fluentui/react-dependent utilities in
+ * isolation so the Storybook manager bundle never pulls in @fluentui/react
+ * at init time.
  *
- * The `/fluent` sub-path export is listed separately because it is a distinct Vite
- * entry point. It exposes @fluentui/react-dependent utilities in isolation so that
- * the Storybook manager bundle never pulls in @fluentui/react at init time (it is
- * unavailable in that context and would cause the entire utilities barrel to fail).
+ * server.fs.allow:
+ * The addon (and shared) resolve outside the Storybook project root via
+ * symlink. Vite's default server.fs.strict would block `/@fs/` requests
+ * with 403. Adding the addon directory and its parent (packages/) to
+ * server.fs.allow fixes this without widening security beyond what is needed.
  */
 export async function viteFinal(config: any) {
   config.optimizeDeps ??= {};
@@ -41,5 +43,20 @@ export async function viteFinal(config: any) {
       config.optimizeDeps.include.push(dep);
     }
   }
+
+  // __dirname here is the dist/storybook-addon-spfx/src/ directory of the addon.
+  // Navigate up 3 levels to reach the addon package root, then one more to the
+  // packages/ directory (which also contains the sibling shared package).
+  const addonRoot = path.resolve(__dirname, '../../..');
+  const packagesDir = path.resolve(addonRoot, '..');
+  config.server ??= {};
+  config.server.fs ??= {};
+  config.server.fs.allow ??= [];
+  for (const dir of [addonRoot, packagesDir]) {
+    if (!config.server.fs.allow.includes(dir)) {
+      config.server.fs.allow.push(dir);
+    }
+  }
+
   return config;
 }

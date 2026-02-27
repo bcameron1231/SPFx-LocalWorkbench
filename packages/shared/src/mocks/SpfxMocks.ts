@@ -1,4 +1,5 @@
 import { spPropertyPaneModule } from './PropertyPaneMocks';
+import { loadThemedStylesModule } from '../utilities/loadThemedStyles';
 
 // Deep recursive merge matching lodash merge behaviour
 function deepMerge(target: any, ...sources: any[]): any {
@@ -210,6 +211,10 @@ export function initializeSpfxMocks(): void {
     SPHttpClientConfiguration: {},
     HttpClientConfiguration: {},
   };
+
+  // Register load-themed-styles so SPFx web-part CSS reaches the DOM and
+  // [theme:token, default: color] tokens are resolved against the active theme.
+  amdModules['@microsoft/load-themed-styles'] = loadThemedStylesModule;
 
   amdModules['@microsoft/sp-lodash-subset'] = {
     escape: (s: string) => s,

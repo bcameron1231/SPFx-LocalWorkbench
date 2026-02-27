@@ -1,91 +1,92 @@
 /* Global styles for the SPFx Local Workbench */
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html {
-    height: auto;
-    overflow-y: auto;
+  height: auto;
+  overflow-y: auto;
 }
 
 body {
-    margin: 0;
-    padding: 0 0 32px 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #fff;
-    height: auto;
-    min-height: 100vh;
-    overflow-y: auto;
+  margin: 0;
+  padding: 0 0 32px 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--primaryBackground, white);
+  height: auto;
+  min-height: 100vh;
+  overflow-y: auto;
 }
 
 /* Common utilities */
 .spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid #edebe9;
-    border-top-color: #0078d4;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 16px;
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--neutralLight, #edebe9);
+  border-top-color: var(--themePrimary, #0078d4);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .error-message {
-    background: #fde7e9;
-    border: 1px solid #f1707b;
-    border-radius: 2px;
-    padding: 12px 16px;
-    color: #a80000;
-    font-size: 14px;
+  background: var(--errorBackground, #fde7e9);
+  border: 1px solid var(--errorText, #a80000);
+  border-radius: 2px;
+  padding: 12px 16px;
+  color: var(--errorText, #a80000);
+  font-size: 14px;
 }
 
 /* SPFx extension render target (accessed by SPFx runtime) */
 .app-customizer-header-content {
-    /* placeholder for content rendered by extensions */
+  /* placeholder for content rendered by extensions */
 }
 
 /* Status bar (static HTML outside React root) */
 .status-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #fff;
-    border-top: 1px solid #edebe9;
-    padding: 6px 20px;
-    display: flex;
-    align-items: center;
-    align-content: center;
-    font-size: 12px;
-    color: #605e5c;
-    z-index: 100;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--primaryBackground, #fff);
+  border-top: 1px solid var(--neutralLight, #edebe9);
+  padding: 6px 20px;
+  display: flex;
+  align-items: center;
+  align-content: center;
+  font-size: 12px;
+  color: var(--neutralSecondary, #605e5c);
+  z-index: 100;
 }
 
 .status-bar .separator {
-    width: 1px;
-    background: #edebe9;
-    margin: 0 8px;
+  width: 1px;
+  background: var(--neutralLight, #edebe9);
+  margin: 0 8px;
 }
 
 .status-indicator {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #107c10;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #107c10;
 }
 
 .status-dot.disconnected {
-    background: #d13438;
+  background: #d13438;
 }
-

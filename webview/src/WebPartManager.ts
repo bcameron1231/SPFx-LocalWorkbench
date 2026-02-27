@@ -10,9 +10,13 @@ import {
   logger,
   setupProperty,
 } from '@spfx-local-workbench/shared';
+import type {
+  IActiveWebPart,
+  IWebPartConfig,
+  IWebPartManifest,
+} from '@spfx-local-workbench/shared';
 
 import { SpfxContext, ThemeProvider } from './mocks';
-import type { IActiveWebPart, IWebPartConfig, IWebPartManifest } from '@spfx-local-workbench/shared';
 import type { IVsCodeApi } from './types';
 
 export class WebPartManager {
@@ -130,9 +134,6 @@ export class WebPartManager {
         }
       }
 
-      // Apply theme
-      this.themeProvider.applyThemeToWebPart(domElement);
-
       // Call onThemeChanged if available
       if (typeof instance.onThemeChanged === 'function') {
         try {
@@ -173,9 +174,17 @@ export class WebPartManager {
   }
 
   /**
+   * Replaces the stored ThemeProvider so that web parts added after a settings
+   * change receive the updated theme on their first render.
+   */
+  updateThemeProvider(themeProvider: ThemeProvider): void {
+    this.themeProvider = themeProvider;
+  }
+
+  /**
    * Re-applies a new theme to all currently active web part instances without unmounting them.
-   * Calls both `applyThemeToWebPart` (CSS vars on the container) and `onThemeChanged`
-   * (the SPFx lifecycle method) for each active instance.
+   * Calls `onThemeChanged` (the SPFx lifecycle method) for each active instance; CSS vars are
+   * already inherited from `document.body` via cascade.
    *
    * @param activeWebParts - The list of currently active web parts (from WorkbenchRuntime)
    * @param themeProvider - The new ThemeProvider built from the updated theme
@@ -183,15 +192,23 @@ export class WebPartManager {
   reapplyTheme(activeWebParts: IActiveWebPart[], themeProvider: ThemeProvider): void {
     for (const webPart of activeWebParts) {
       const instance = webPart.instance as any;
-      const domElement: HTMLElement | null = instance?._domElement ?? null;
-      if (domElement) {
-        themeProvider.applyThemeToWebPart(domElement);
-      }
+
+      // Notify the web part via the SPFx lifecycle hook (triggers React re-render
+      // in web parts that implement it).
       if (typeof instance?.onThemeChanged === 'function') {
         try {
           instance.onThemeChanged(themeProvider.getTheme());
         } catch (error: unknown) {
           this.log.warn('Error in onThemeChanged during reapplyTheme:', error);
+        }
+      }
+
+      // Force a re-render
+      if (typeof instance?.render === 'function') {
+        try {
+          instance.render();
+        } catch (error: unknown) {
+          this.log.warn('Error in render during reapplyTheme:', error);
         }
       }
     }

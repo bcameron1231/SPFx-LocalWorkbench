@@ -8,6 +8,9 @@ import type { ITheme, IThemePalette } from '../types';
 /*
   To pull theme values directly from the SharePoint page, paste this in the console:
   const keys = ['themeDarker','themeDark','themeDarkAlt','themePrimary','themeSecondary','themeTertiary','themeLight','themeLighter','themeLighterAlt','black','neutralDark','neutralPrimary','neutralPrimaryAlt','neutralSecondary','neutralTertiary','neutralTertiaryAlt','neutralLight','neutralLighter','neutralLighterAlt','white','neutralQuaternaryAlt','neutralQuaternary','neutralSecondaryAlt','primaryBackground','primaryText','bodyBackground','bodyText','disabledBackground','disabledText','error','accent'];const theme = Object.fromEntries(keys.map(k => [k, __themeState__.theme[k]])); console.log(theme);console.log(__themeState__.theme.backgroundImageUri);
+
+  To find which theme values have specific values, from the SharePoint page, paste this in the console:
+  const find='#650e08';console.log("Matching theme keys ("+find+"):",Object.keys(__themeState__.theme).filter(key => __themeState__.theme[key] && __themeState__.theme[key].toString().toLowerCase() === find.toLowerCase()));
 */
 
 const microsoftPalettes: Record<string, IThemePalette> = {

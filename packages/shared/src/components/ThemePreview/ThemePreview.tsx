@@ -23,9 +23,11 @@ export interface IThemePreviewProps {
   onClick?: () => void;
 }
 
+const SMALL_SWATCH_WIDTH = 12.5; // each of 4 small swatches is 12.5% wide (4 × 12.5 = 50% right half)
+
 /**
  * ThemePreview component displays a visual representation of a theme
- * with a large primary color block, 4 smaller color swatches, and text preview
+ * using an SVG with a primary color block, 4 smaller color swatches, and text preview
  */
 export const ThemePreview: React.FC<IThemePreviewProps> = ({
   theme,
@@ -33,24 +35,20 @@ export const ThemePreview: React.FC<IThemePreviewProps> = ({
   onClick,
 }) => {
   const { palette } = theme;
+  const smallSwatches = [
+    palette.themeSecondary,
+    palette.themeTertiary,
+    palette.themeLight,
+    palette.accent ?? palette.themePrimary,
+  ];
 
   return (
     <div
-      className={`${styles.container} ${isSelected ? styles.selected : ''} ${onClick ? styles.clickable : ''}`}
-      style={
-        {
-          '--theme-border-color': isSelected ? palette.themePrimary : 'transparent',
-          '--theme-background-color': isSelected ? 'rgba(128, 128, 128, 0.15)' : 'transparent',
-          '--theme-primary': palette.themePrimary,
-          '--theme-secondary': palette.themeSecondary,
-          '--theme-dark': palette.themeDark,
-          '--theme-neutral-primary': palette.neutralPrimary,
-          '--theme-neutral-secondary': palette.neutralSecondary,
-          '--theme-neutral-lighter': palette.neutralLighter,
-          '--theme-light': palette.themeLight,
-          '--theme-tertiary': palette.themeTertiary,
-        } as React.CSSProperties
-      }
+      className={`${styles.container} ${onClick ? styles.clickable : ''}`}
+      style={{
+        borderColor: isSelected ? palette.themePrimary : undefined,
+        backgroundColor: isSelected ? palette.neutralLight : undefined,
+      }}
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
@@ -63,32 +61,45 @@ export const ThemePreview: React.FC<IThemePreviewProps> = ({
         }
       }}
     >
-      <div className={styles.previewBlock}>
-        <div className={styles.colorSwatches}>
-          {/* Large primary color swatch */}
-          <div className={styles.largeSwatch} title={`Primary: ${palette.themePrimary}`} />
-
-          {/* Four small color swatches */}
-          <div className={styles.smallSwatchContainer}>
-            <div className={styles.smallSwatch} title={`Secondary: ${palette.themeSecondary}`} />
-            <div className={styles.smallSwatch} title={`Dark: ${palette.themeDark}`} />
-            <div
-              className={styles.smallSwatch}
-              title={`Neutral Primary: ${palette.neutralPrimary}`}
-            />
-            <div
-              className={styles.smallSwatch}
-              title={`Neutral Secondary: ${palette.neutralSecondary}`}
-            />
-          </div>
-        </div>
-
-        {/* Text preview */}
-        <div className={styles.textPreview}>Abc</div>
-      </div>
+      <svg
+        role="presentation"
+        className={styles.svgIcon}
+        viewBox="0 0 84 46"
+        aria-hidden="true"
+        style={{ borderColor: palette.neutralLight }}
+      >
+        {/* Background */}
+        <rect
+          height="100%"
+          width="100%"
+          fill={palette.primaryBackground ?? palette.white}
+          stroke="none"
+        />
+        {/* Large primary swatch — top-left 50% */}
+        <rect y="0%" height="50%" width="50%" fill={palette.themePrimary} stroke="none" />
+        {/* Small swatches — top-right 50% */}
+        {smallSwatches.map((color, i) => (
+          <rect
+            key={i}
+            y="0%"
+            height="50%"
+            width={`${SMALL_SWATCH_WIDTH}%`}
+            fill={color}
+            stroke="none"
+            x={`${50 + i * SMALL_SWATCH_WIDTH}%`}
+          />
+        ))}
+        {/* Text preview in lower-left */}
+        <text x="10%" y="84%" fill={palette.bodyText ?? palette.neutralPrimary} role="presentation">
+          Abc
+        </text>
+      </svg>
 
       {/* Theme name label */}
-      <div className={`${styles.label} ${isSelected ? styles.labelSelected : ''}`}>
+      <div
+        className={`${styles.label} ${isSelected ? styles.labelSelected : ''}`}
+        style={{ color: isSelected ? (palette.bodyText ?? palette.neutralPrimary) : 'inherit' }}
+      >
         {theme.name}
       </div>
     </div>

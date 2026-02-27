@@ -8,8 +8,10 @@ import {
   type IWebPartManifest,
   buildMockPageContext,
   buildThemeList,
+  loadTheme,
 } from '@spfx-local-workbench/shared';
-import { buildFluentTheme } from '@spfx-local-workbench/shared/fluent';
+import { loadTheme as loadFluentUiTheme } from '@fluentui/react';
+import { applyPaletteAsCssVars, buildFlatTheme, buildFluentTheme } from '@spfx-local-workbench/shared/fluent';
 
 import { DisplayMode, EVENTS, PARAM_KEY, STORYBOOK_GLOBAL_KEYS } from '../constants';
 import { SpfxContextProvider } from '../context/SpfxContext';
@@ -170,6 +172,15 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         // Build mock pageContext with all computed properties (uses shared builder)
         const mockPageContext = buildMockPageContext(contextConfig);
 
+        // Resolve and pre-apply the theme BEFORE loading the bundle so that the
+        // inline copy of @microsoft/load-themed-styles (bundled inside the web part)
+        // finds window.__themeState__.theme already populated when it calls loadStyles.
+        const allThemesEarly = buildThemeList(storyThemes, globalCustomThemes);
+        const currentThemeEarly = allThemesEarly.find((t) => t.name === themeName) ?? allThemesEarly[0];
+        applyPaletteAsCssVars(document.body, currentThemeEarly.palette, currentThemeEarly.isInverted);
+        loadTheme(buildFlatTheme(currentThemeEarly.palette, currentThemeEarly.isInverted));
+        loadFluentUiTheme(buildFluentTheme(currentThemeEarly.palette, currentThemeEarly.isInverted));
+
         // Load the component using the proper component loader
         const { manifest: rawManifest, componentClass: ComponentClass } = await loadSpfxComponent(
           parameters.componentId,
@@ -235,9 +246,6 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
 
         // Set up the component context (mock SPFx context)
         // Match the structure from webview/src/mocks/SpfxContext.ts
-        const allThemes = buildThemeList(storyThemes, globalCustomThemes);
-        const currentTheme = allThemes.find((t) => t.name === themeName) ?? allThemes[0];
-
         instance._context = {
           pageContext: mockPageContext,
           manifest: {
@@ -295,20 +303,30 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
           }
         }
 
-        // Render the component
-        instance.render();
+        // Apply theme before first render so the web part sees the correct palette
+        // from the start — mirrors the workbench order: CSS vars → onThemeChanged → render().
+        // Call loadTheme again *after* the bundle has loaded so that _syncInlineThemeState
+        // runs over the now-populated registeredThemableStyles and back-fills any style
+        // elements the inline copy of @microsoft/load-themed-styles already injected with
+        // real palette values (rather than the var() fallback / default hex).
+        applyPaletteAsCssVars(document.body, currentThemeEarly.palette, currentThemeEarly.isInverted);
+        loadTheme(buildFlatTheme(currentThemeEarly.palette, currentThemeEarly.isInverted));
 
         // Notify the web part of the initial theme via the SPFx onThemeChanged lifecycle.
-        // This is the correct API — not context.theme.
+        // This MUST happen before render() so _themeColors / isDarkTheme are correct for
+        // the first paint.
         if (typeof instance.onThemeChanged === 'function') {
           try {
             instance.onThemeChanged(
-              buildFluentTheme(currentTheme.palette, currentTheme.isInverted),
+              buildFluentTheme(currentThemeEarly.palette, currentThemeEarly.isInverted),
             );
           } catch (e: any) {
             console.warn('onThemeChanged error:', e);
           }
         }
+
+        // Render the component — theme is already applied above.
+        instance.render();
 
         // Emit property changes when they happen
         if (instance.onPropertyPaneFieldChanged) {
@@ -356,6 +374,15 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     // Resolve the current theme from all sources
     const allThemes = buildThemeList(storyThemes, globalCustomThemes);
     const currentTheme = allThemes.find((t) => t.name === themeName) ?? allThemes[0];
+
+    // Apply to document.body so the Storybook canvas background matches the theme.
+    applyPaletteAsCssVars(document.body, currentTheme.palette, currentTheme.isInverted);
+    // Populate __themeState__.theme with the full flat theme (palette + semantic colors +
+    // flattened font ramp + effects) so [theme:token] CSS tokens resolve correctly.
+    loadTheme(buildFlatTheme(currentTheme.palette, currentTheme.isInverted));
+    // Update @fluentui/react's global theme registry so Fluent UI controls inside the
+    // web part (SearchBox, Dropdown, etc.) render in the selected theme.
+    loadFluentUiTheme(buildFluentTheme(currentTheme.palette, currentTheme.isInverted));
 
     // Notify the web part of the theme change
     if (typeof instance.onThemeChanged === 'function') {

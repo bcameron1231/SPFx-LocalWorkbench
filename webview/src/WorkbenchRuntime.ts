@@ -49,6 +49,7 @@ export class WorkbenchRuntime {
     this.manifestLoader = new ManifestLoader(config.serveUrl);
     this.contextProvider = new SpfxContext(config.context);
     this.themeProvider = new ThemeProvider(config.theme);
+    this.themeProvider.applyThemeToDocument();
     this.webPartManager = new WebPartManager(
       this.vscode,
       config.serveUrl,
@@ -78,6 +79,10 @@ export class WorkbenchRuntime {
     }
     if (settings.theme) {
       this.themeProvider = new ThemeProvider(settings.theme);
+      this.themeProvider.applyThemeToDocument();
+      // Keep WebPartManager's reference in sync so new web parts added after
+      // this settings change are instantiated with the updated theme.
+      this.webPartManager.updateThemeProvider(this.themeProvider);
       // Re-theme active web parts in-place — no unmount needed.
       this.webPartManager.reapplyTheme(
         this.activeWebParts.filter(isActiveWebPart),

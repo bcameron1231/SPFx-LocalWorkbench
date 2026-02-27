@@ -2,9 +2,13 @@
  * Storybook preview configuration for SPFx addon
  * This file is loaded in the preview iframe and provides decorators
  */
-import { DisplayMode, STORYBOOK_GLOBAL_KEYS } from './constants';
 import { DEFAULT_THEME_NAME } from '@spfx-local-workbench/shared';
+
+import { DisplayMode, STORYBOOK_GLOBAL_KEYS } from './constants';
 import { withSpfx } from './decorators/withSpfx';
+// Global preview-frame styles — makes the canvas body background react to the
+// SPFx palette CSS vars that withSpfx sets on document.body on every theme change.
+import './preview.css';
 
 export const decorators = [withSpfx];
 

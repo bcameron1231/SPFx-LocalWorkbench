@@ -7,7 +7,7 @@ import { StarIcon } from '@storybook/icons';
 import { useGlobals, useParameter } from '@storybook/manager-api';
 import React, { useState } from 'react';
 
-import { ThemePreview, buildThemeList, DEFAULT_THEME_NAME } from '@spfx-local-workbench/shared';
+import { DEFAULT_THEME_NAME, ThemePreview, buildThemeList } from '@spfx-local-workbench/shared';
 import type { ITheme } from '@spfx-local-workbench/shared';
 
 import { PARAM_KEY, STORYBOOK_GLOBAL_KEYS } from '../../constants';
@@ -85,18 +85,9 @@ export const ThemeToolbar: React.FC = () => {
       visible={isOpen}
       onVisibleChange={setIsOpen}
     >
-      <IconButton
-        title={`Theme: ${currentTheme?.name ?? DEFAULT_THEME_NAME}`}
-        className={styles.toolbarIcon}
-        style={
-          {
-            '--themePrimary': currentTheme?.palette.themePrimary,
-          } as React.CSSProperties
-        }
-      >
-        <StarIcon />
+      <IconButton title={`Theme: ${currentTheme?.name ?? DEFAULT_THEME_NAME}`}>
+        <StarIcon style={{ color: currentTheme?.palette.themePrimary }} />
       </IconButton>
     </WithTooltip>
   );
 };
-

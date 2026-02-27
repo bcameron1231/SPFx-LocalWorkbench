@@ -1,128 +1,128 @@
 /* ExtensionPropertiesPanel component styles */
 
 .panel {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 320px;
-    height: 100vh;
-    background: #fff;
-    box-shadow: -2px 0 8px rgba(0,0,0,0.1);
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-    z-index: 1000;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;
+  height: 100vh;
+  background: var(--primaryBackground, #fff);
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 1000;
 
-    &.open {
-        transform: translateX(0);
-    }
+  &.open {
+    transform: translateX(0);
+  }
 }
 
 .content {
-    padding: 16px;
-    overflow-y: auto;
-    height: calc(100vh - 52px);
+  padding: 16px;
+  overflow-y: auto;
+  height: calc(100vh - 52px);
 }
 
 .property {
-    margin-bottom: 16px;
+  margin-bottom: 16px;
 }
 
 .label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #323130;
-    margin-bottom: 6px;
-    display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--neutralPrimary, #323130);
+  margin-bottom: 6px;
+  display: block;
 }
 
 .input {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #c8c6c4;
-    border-radius: 2px;
-    font-size: 14px;
-    font-family: inherit;
-    background: #fff;
-    color: #323130;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--neutralLight, #c8c6c4);
+  border-radius: 2px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--primaryBackground, #fff);
+  color: var(--neutralPrimary, #323130);
 
-    &:focus {
-        outline: none;
-        border-color: #0078d4;
-    }
+  &:focus {
+    outline: none;
+    border-color: var(--themePrimary, #0078d4);
+  }
 }
 
 .toggleContainer {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .toggle {
-    position: relative;
-    width: 40px;
-    height: 20px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    padding: 0;
+  position: relative;
+  width: 40px;
+  height: 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  padding: 0;
 }
 
 .toggleOff {
-    background-color: #c8c6c4;
+  background-color: var(--neutralLight, #c8c6c4);
 
-    .toggleThumb {
-        left: 2px;
-    }
+  .toggleThumb {
+    left: 2px;
+  }
 }
 
 .toggleOn {
-    background-color: #0078d4;
+  background-color: var(--themePrimary, #0078d4);
 
-    .toggleThumb {
-        left: 22px;
-    }
+  .toggleThumb {
+    left: 22px;
+  }
 }
 
 .toggleThumb {
-    position: absolute;
-    top: 2px;
-    width: 16px;
-    height: 16px;
-    background: white;
-    border-radius: 50%;
-    transition: left 0.2s;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  position: absolute;
+  top: 2px;
+  width: 16px;
+  height: 16px;
+  background: var(--primaryBackground, #fff);
+  border-radius: 50%;
+  transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .actions {
-    display: flex;
-    gap: 8px;
-    padding: 16px;
-    border-top: 1px solid #edebe9;
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  border-top: 1px solid var(--neutralLight, #edebe9);
 }
 
 .button {
-    padding: 8px 16px;
-    border: 1px solid #c8c6c4;
-    border-radius: 2px;
-    background: #fff;
-    color: #323130;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+  padding: 8px 16px;
+  border: 1px solid var(--neutralLight, #c8c6c4);
+  border-radius: 2px;
+  background: var(--primaryBackground, #fff);
+  color: var(--neutralPrimary, #323130);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
 
-    &:hover {
-        background: #f3f2f1;
-    }
+  &:hover {
+    background: var(--neutralLighter, #f3f2f1);
+  }
 }
 
 .buttonPrimary {
-    background: #0078d4;
-    border-color: #0078d4;
-    color: #fff;
+  background: var(--themePrimary, #0078d4);
+  border-color: var(--themePrimary, #0078d4);
+  color: var(--primaryBackground, #fff);
 
-    &:hover {
-        background: #106ebe;
-    }
+  &:hover {
+    background: var(--themeDark, #106ebe);
+  }
 }

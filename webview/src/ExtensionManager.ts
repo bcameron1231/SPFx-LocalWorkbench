@@ -215,10 +215,6 @@ export class ExtensionManager {
         }
       }
 
-      // Apply theme
-      this.themeProvider.applyThemeToWebPart(headerElement);
-      this.themeProvider.applyThemeToWebPart(footerElement);
-
       // Check if content was rendered
       setTimeout(() => {
         const hasHeaderContent = headerElement.innerHTML.trim().length > 0;

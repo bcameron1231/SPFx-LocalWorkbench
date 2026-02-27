@@ -1,83 +1,82 @@
 .popup {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #fff;
-    border: 1px solid #edebe9;
-    border-radius: 4px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    padding: 16px;
-    min-width: 300px;
-    max-width: 400px;
-    z-index: 100;
-    display: none;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--primaryBackground, #fff);
+  color: var(--neutralPrimary, #605e5c);
+  border: 1px solid var(--neutralLight, #edebe9);
+  border-radius: 4px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  min-width: 300px;
+  max-width: 400px;
+  z-index: 100;
+  display: none;
 
-    &.open {
-        display: block;
-    }
+  &.open {
+    display: block;
+  }
 
-    /* Flip the popup above the + button when it would overflow the viewport */
-    &.upward {
-        top: auto;
-        bottom: 100%;
-    }
+  /* Flip the popup above the + button when it would overflow the viewport */
+  &.upward {
+    top: auto;
+    bottom: 100%;
+  }
 }
 
 .search {
-    margin-bottom: 12px;
+  margin-bottom: 12px;
 }
 
 .resultsLabel {
-    font-weight: 600;
-    margin-bottom: 4px;
+  font-weight: 600;
+  margin-bottom: 4px;
 }
 
 .results {
-    max-height: 300px;
-    min-height: 52px;
-    overflow-y: auto;
-    color: #323130;
+  max-height: 300px;
+  min-height: 52px;
+  overflow-y: auto;
 }
 
 .item {
-    display: flex;
-    align-items: center;
-    padding: 12px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background 0.1s;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.1s;
 
-    &:hover {
-        background: #f3f2f1;
-    }
+  &:hover {
+    background: var(--neutralLighter, #f3f2f1);
+  }
 }
 
 .itemHidden {
-    opacity: 0.7;
+  opacity: 0.7;
 }
 
 .hiddenIcon {
-    margin-left: auto;
-    padding-left: 8px;
-    font-size: 12px;
-    color: #a19f9d;
-    flex-shrink: 0;
+  margin-left: auto;
+  padding-left: 8px;
+  font-size: 12px;
+  color: var(--neutralTertiary, #a19f9d);
+  flex-shrink: 0;
 }
 
 .itemIcon {
-    width: 28px;
-    height: 28px;
-    margin-right: 12px;
-    font-size: 28px;
+  width: 28px;
+  height: 28px;
+  margin-right: 12px;
+  font-size: 28px;
 }
 
 .itemText {
-    font-size: 12px;
+  font-size: 12px;
 }
 
 .noResults {
-    margin-top: 17px;
-    color: #605e5c;
-    font-style: italic;
+  margin-top: 17px;
+  font-style: italic;
 }
