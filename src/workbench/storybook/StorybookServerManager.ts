@@ -126,9 +126,12 @@ export class StorybookServerManager {
         await this.initializeStorybook();
       }
 
-      // Write theme.json for manager.ts to consume before the server starts.
-      // This runs unconditionally so the file is always fresh for the current session.
+      // Write theme.json and preview.ts globals unconditionally so both files
+      // are always up to date with current VS Code settings on every launch.
+      // (initializeStorybook only runs on first launch, so without this the globals
+      // written into preview.ts would become stale until a clean + reinstall.)
       await this.writeVsCodeThemeJson();
+      await this.updatePreviewGlobals();
 
       // Start the server
       this.statusCallback?.('Starting Storybook...', 'Launching the development server');
@@ -282,6 +285,32 @@ export class StorybookServerManager {
     );
 
     this.outputChannel.appendLine(`✓ Written theme.json (${status})`);
+  }
+
+  /**
+   * Re-writes preview.ts from the template with freshly injected VS Code globals
+   * (current theme + custom themes).  Called unconditionally before every server
+   * start so the globals are always current without requiring a Storybook clean.
+   */
+  private async updatePreviewGlobals(): Promise<void> {
+    const configDir = path.join(this.storybookDir, '.storybook');
+    await vscode.workspace.fs.createDirectory(vscode.Uri.file(configDir));
+
+    const previewTs = path.join(configDir, 'preview.ts');
+    let previewConfig = await this.readTemplateFile('preview.ts');
+
+    const customThemes = getCustomThemes();
+    const defaultThemeName = getCurrentTheme().name;
+    previewConfig += `\n// Injected by VS Code extension at startup\nexport const globals = {\n  spfxTheme: ${JSON.stringify(defaultThemeName)},\n  spfxCustomThemes: ${JSON.stringify(customThemes)},\n};\n`;
+
+    await vscode.workspace.fs.writeFile(
+      vscode.Uri.file(previewTs),
+      Buffer.from(previewConfig, 'utf-8'),
+    );
+
+    this.outputChannel.appendLine(
+      `✓ Updated preview.ts globals (default theme: ${defaultThemeName}, customThemes: ${customThemes.length})`,
+    );
   }
 
   /**
@@ -441,7 +470,6 @@ export class StorybookServerManager {
 
     const configDir = path.join(this.storybookDir, '.storybook');
     const mainTs = path.join(configDir, 'main.ts');
-    const previewTs = path.join(configDir, 'preview.ts');
     const managerTs = path.join(configDir, 'manager.ts');
 
     // Create .storybook directory
@@ -449,34 +477,17 @@ export class StorybookServerManager {
 
     // Read template files from the extension
     const mainConfig = await this.readTemplateFile('main.ts');
-    let previewConfig = await this.readTemplateFile('preview.ts');
     const managerConfig = await this.readTemplateFile('manager.ts');
 
-    // Inject VS Code settings into the generated preview config as Storybook globals.
-    // This makes the user's custom themes and default theme available in the toolbar
-    // without any network calls or VS Code API access from within Storybook.
-    const customThemes = getCustomThemes();
-    const defaultThemeName = getCurrentTheme().name;
-    const globalsInjection = `
-// Injected by VS Code extension at startup
-export const globals = {
-  spfxTheme: ${JSON.stringify(defaultThemeName)},
-  spfxCustomThemes: ${JSON.stringify(customThemes)},
-};
-`;
-    previewConfig += globalsInjection;
-
     await vscode.workspace.fs.writeFile(vscode.Uri.file(mainTs), Buffer.from(mainConfig, 'utf-8'));
-
-    await vscode.workspace.fs.writeFile(
-      vscode.Uri.file(previewTs),
-      Buffer.from(previewConfig, 'utf-8'),
-    );
-
     await vscode.workspace.fs.writeFile(
       vscode.Uri.file(managerTs),
       Buffer.from(managerConfig, 'utf-8'),
     );
+
+    // preview.ts is written by updatePreviewGlobals(), which also runs unconditionally
+    // on every subsequent start, so globals are always fresh.
+    await this.updatePreviewGlobals();
 
     this.outputChannel.appendLine('✓ Created Storybook configuration files');
   }
