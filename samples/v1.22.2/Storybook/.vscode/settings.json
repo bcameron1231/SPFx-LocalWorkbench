@@ -18,5 +18,13 @@
   "spfxLocalWorkbench.storybook.autoDocs": false,
   "spfxLocalWorkbench.statusBarStorybookAction": "startServeStorybook",
   "spfxLocalWorkbench.statusBarWorkbenchAction": "startServeWorkbench",
-  "spfxLocalWorkbench.statusBarDisplay": "iconOnly"
+  "spfxLocalWorkbench.statusBarDisplay": "iconOnly",
+  "spfxLocalWorkbench.theme.current": "Blue",
+  "spfxLocalWorkbench.theme.customName": "Yamabuki Yellow!",
+  "spfxLocalWorkbench.theme.custom": [
+    {
+      "name": "Yamabuki Yellow",
+      "palette": {"themeLight":"#f9e4ae","themeTertiary":"#f3c961","black":"#1e1f24","neutralSecondary":"#7e828c","neutralTertiaryAlt":"#c8c6c4","themeSecondary":"#edb21c","themeDarker":"#835e00","neutralQuaternary":"#d0d0d0","neutralPrimaryAlt":"#4a4d57","neutralPrimary":"#34373f","themeDark":"#b28000","themeLighter":"#fcf0d3","neutralTertiary":"#bcbec6","neutralQuaternaryAlt":"#e1dfdd","themeLighterAlt":"#fefbf4","white":"#ffffff","neutralLighter":"#f3f2f1","neutralLight":"#edebe9","neutralDark":"#282a30","themeDarkAlt":"#d39700","neutralLighterAlt":"#faf9f8","themePrimary":"#eba800"}
+    }
+  ]
 }

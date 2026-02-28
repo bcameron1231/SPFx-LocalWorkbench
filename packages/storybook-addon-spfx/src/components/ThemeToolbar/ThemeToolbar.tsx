@@ -7,12 +7,15 @@ import { StarIcon } from '@storybook/icons';
 import { useGlobals, useParameter } from '@storybook/manager-api';
 import React, { useState } from 'react';
 
-import { DEFAULT_THEME_NAME, ThemePreview, buildThemeList } from '@spfx-local-workbench/shared';
-import type { ITheme } from '@spfx-local-workbench/shared';
+import {
+  DEFAULT_THEME_NAME,
+  ThemePickerDropdown,
+  buildThemeList,
+} from '@spfx-local-workbench/shared';
+import type { ITheme, IThemeGroup } from '@spfx-local-workbench/shared';
 
 import { PARAM_KEY, STORYBOOK_GLOBAL_KEYS } from '../../constants';
 import type { ISpfxParameters } from '../../types';
-import styles from './ThemeToolbar.module.css';
 
 export const ThemeToolbar: React.FC = () => {
   const [globals, updateGlobals] = useGlobals();
@@ -35,45 +38,18 @@ export const ThemeToolbar: React.FC = () => {
   };
 
   const microsoftThemes = allThemes.filter((t) => !t.isCustom);
+  const groups: IThemeGroup[] = [
+    { label: 'This story', themes: storyThemes },
+    { label: 'From your organization', themes: globalCustomThemes },
+    { label: 'From Microsoft', themes: microsoftThemes },
+  ];
 
   const tooltip = (
-    <div className={styles.themeDropdown}>
-      {storyThemes.length > 0 && (
-        <>
-          <div className={styles.themeGroupHeader}>This story</div>
-          {storyThemes.map((theme) => (
-            <ThemePreview
-              key={theme.name}
-              theme={theme}
-              isSelected={theme.name === currentThemeName}
-              onClick={() => handleThemeChange(theme.name)}
-            />
-          ))}
-        </>
-      )}
-      {globalCustomThemes.length > 0 && (
-        <>
-          <div className={styles.themeGroupHeader}>From your organization</div>
-          {globalCustomThemes.map((theme) => (
-            <ThemePreview
-              key={theme.name}
-              theme={theme}
-              isSelected={theme.name === currentThemeName}
-              onClick={() => handleThemeChange(theme.name)}
-            />
-          ))}
-        </>
-      )}
-      <div className={styles.themeGroupHeader}>From Microsoft</div>
-      {microsoftThemes.map((theme) => (
-        <ThemePreview
-          key={theme.name}
-          theme={theme}
-          isSelected={theme.name === currentThemeName}
-          onClick={() => handleThemeChange(theme.name)}
-        />
-      ))}
-    </div>
+    <ThemePickerDropdown
+      groups={groups}
+      currentThemeName={currentThemeName}
+      onSelect={handleThemeChange}
+    />
   );
 
   return (

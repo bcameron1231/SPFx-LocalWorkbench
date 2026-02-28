@@ -21,6 +21,8 @@ export interface IHtmlGeneratorConfig {
   extensionUri: vscode.Uri;
   // Current theme (from getCurrentTheme())
   currentTheme?: ITheme;
+  // Custom themes from spfxLocalWorkbench.theme.custom
+  customThemes?: ITheme[];
   // Context settings from user configuration
   contextSettings?: Partial<IContextConfig>;
 }
@@ -90,6 +92,7 @@ function generateStatusBar(
         <span id="component-count">${countText}</span>
         <div class="separator"></div>
         <span id="locale-switcher">${locale.toLowerCase()}</span>
+        <div id="theme-picker"></div>
     </div>
     `;
 }
@@ -111,6 +114,7 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
     webParts: webParts,
     extensions: extensions,
     theme: config.currentTheme,
+    customThemes: config.customThemes ?? [],
     context: config.contextSettings,
   };
 

@@ -72,8 +72,13 @@ export class WorkbenchRuntime {
     this.appHandlers = handlers;
   }
 
+  /** Persists the selected theme to VS Code workspace settings. */
+  persistTheme(theme: ITheme): void {
+    this.vscode.postMessage({ command: 'setTheme', themeName: theme.name, isCustomTheme: theme.isCustom });
+  }
+
   // Applies updated settings from the extension host without full reload
-  updateSettings(settings: { serveUrl?: string; theme?: ITheme; context?: any }): void {
+  updateSettings(settings: { serveUrl?: string; theme?: ITheme; customThemes?: ITheme[]; context?: any }): void {
     if (settings.serveUrl) {
       this.config.serveUrl = settings.serveUrl;
     }
@@ -88,9 +93,18 @@ export class WorkbenchRuntime {
         this.activeWebParts.filter(isActiveWebPart),
         this.themeProvider,
       );
+      // Notify the StatusBarThemePicker so it reflects the new selection.
+      window.dispatchEvent(
+        new CustomEvent('workbenchSettingsThemeUpdated', { detail: settings.theme }),
+      );
     }
     if (settings.context) {
       this.contextProvider = new SpfxContext(settings.context);
+    }
+    if (settings.customThemes !== undefined) {
+      window.dispatchEvent(
+        new CustomEvent('workbenchSettingsCustomThemesUpdated', { detail: settings.customThemes }),
+      );
     }
     this.log.debug('Settings updated in-place');
   }

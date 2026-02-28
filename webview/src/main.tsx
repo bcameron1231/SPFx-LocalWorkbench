@@ -4,10 +4,12 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { getErrorMessage, logger } from '@spfx-local-workbench/shared';
+import { buildThemeList, getErrorMessage, logger } from '@spfx-local-workbench/shared';
+import type { ITheme, IThemeGroup } from '@spfx-local-workbench/shared';
 
 import { WorkbenchRuntime } from './WorkbenchRuntime';
 import { App, IAppHandlers } from './components/App';
+import { StatusBarThemePicker } from './components/StatusBarThemePicker';
 import './styles/global.css';
 
 const log = logger.createChild('Main');
@@ -64,6 +66,11 @@ function initialize() {
       runtime.updateExtensionProperties(e.detail.instanceId, e.detail.properties);
     }) as EventListener);
 
+    window.addEventListener('workbenchThemeChanged', ((e: CustomEvent<ITheme>) => {
+      runtime.updateSettings({ theme: e.detail });
+      runtime.persistTheme(e.detail);
+    }) as EventListener);
+
     window.addEventListener('refresh', (() => {
       runtime.handleRefresh();
     }) as EventListener);
@@ -116,6 +123,23 @@ function initialize() {
       }),
       root,
     );
+
+    // Mount the theme picker into the status bar element
+    const themePickerRoot = document.getElementById('theme-picker');
+    if (themePickerRoot) {
+      const microsoftThemes = buildThemeList();
+      const initialTheme = config.theme ?? microsoftThemes[0];
+      const groups: IThemeGroup[] = [
+        ...(config.customThemes?.length
+          ? [{ label: 'From your organization', themes: config.customThemes }]
+          : []),
+        { label: 'From Microsoft', themes: microsoftThemes },
+      ];
+      ReactDOM.render(
+        React.createElement(StatusBarThemePicker, { initialTheme, groups }),
+        themePickerRoot,
+      );
+    }
   } catch (globalError: unknown) {
     log.error('Fatal initialization error:', globalError);
     const root = document.getElementById('root');

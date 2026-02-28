@@ -69,7 +69,8 @@ body {
 
 .status-bar .separator {
   width: 1px;
-  background: var(--neutralLight, #edebe9);
+  height: 14px;
+  background: var(--neutralSecondary, #edebe9);
   margin: 0 8px;
 }
 

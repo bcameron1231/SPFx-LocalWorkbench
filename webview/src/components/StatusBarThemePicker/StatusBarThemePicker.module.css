@@ -1,0 +1,22 @@
+/* StatusBarThemePicker: a relative-positioned container so the popup anchors upward */
+
+.container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* The dropdown popup — attached to the bottom of the container, opens upward */
+.popup {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  background: var(--primaryBackground, #fff);
+  border: 1px solid var(--neutralLight, #edebe9);
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14), 0 2px 4px rgba(0, 0, 0, 0.12);
+  min-width: 320px;
+  z-index: 200;
+  margin-bottom: 4px;
+  color: var(--neutralPrimary, #323130);
+}

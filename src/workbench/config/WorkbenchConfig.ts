@@ -123,17 +123,12 @@ export function getCurrentTheme(): ITheme {
  * Sets the current theme
  * @param themeName Name of the theme to set as current
  */
-export async function setCurrentTheme(themeName: string): Promise<void> {
+export async function setCurrentTheme(themeName: string, isCustom: boolean): Promise<void> {
   const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
 
-  // Check if this is a Microsoft theme
-  const isMicrosoftTheme = MICROSOFT_THEMES.some((t) => t.name === themeName);
-
-  if (isMicrosoftTheme) {
-    // Set theme to the Microsoft theme name
+  if (!isCustom) {
     await config.update('theme.current', themeName, vscode.ConfigurationTarget.Workspace);
   } else {
-    // Set theme to 'Custom' and store the name in customName
     await config.update('theme.current', 'Custom', vscode.ConfigurationTarget.Workspace);
     await config.update('theme.customName', themeName, vscode.ConfigurationTarget.Workspace);
   }

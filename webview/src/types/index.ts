@@ -14,6 +14,8 @@ export interface IWorkbenchConfig {
   extensions?: IExtensionManifest[];
   /** The active SharePoint theme. Comes from `spfxLocalWorkbench.theme.current` (+ custom). */
   theme?: ITheme;
+  /** Custom themes defined in `spfxLocalWorkbench.theme.custom`. */
+  customThemes?: ITheme[];
   context: IContextSettings; // Always provided by extension (from WorkbenchConfig defaults)
 }
 

@@ -14,8 +14,10 @@ import { SpfxProjectDetector } from './SpfxProjectDetector';
 import {
   IWorkbenchSettings,
   getCurrentTheme,
+  getCustomThemes,
   getWorkbenchSettings,
   onConfigurationChanged,
+  setCurrentTheme,
 } from './config';
 import { generateWorkbenchHtml } from './html';
 
@@ -110,6 +112,7 @@ export class WorkbenchPanel {
           settings: {
             serveUrl: newSettings.serveUrl,
             theme: currentTheme,
+            customThemes: getCustomThemes(),
             context: newSettings.context,
           },
         });
@@ -137,6 +140,8 @@ export class WorkbenchPanel {
     command: string;
     url?: string;
     text?: string;
+    themeName?: string;
+    isCustomTheme?: boolean;
   }): Promise<void> {
     switch (message.command) {
       case 'refresh':
@@ -155,6 +160,12 @@ export class WorkbenchPanel {
         log.error('Webview error:', message.text);
         if (message.text) {
           vscode.window.showErrorMessage(message.text);
+        }
+        return;
+
+      case 'setTheme':
+        if (message.themeName) {
+          await setCurrentTheme(message.themeName, message.isCustomTheme ?? false);
         }
         return;
     }
@@ -261,6 +272,7 @@ export class WorkbenchPanel {
       webview: webview,
       extensionUri: this._extensionUri,
       currentTheme: currentTheme,
+      customThemes: getCustomThemes(),
       contextSettings: this._settings.context,
     });
   }
