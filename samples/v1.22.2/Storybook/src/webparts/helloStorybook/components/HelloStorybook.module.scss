@@ -20,7 +20,7 @@
 .properties {
   flex-grow: 1;
   border-radius: 4px;
-  background-color: "[theme:neutralLighter, default: red]";
+  background-color: "[theme:neutralLighter, default: red]"; /* Use a noticeable default color to identify missing theme variables */
   padding: 0.5rem 1rem;
 }
 
@@ -49,8 +49,15 @@
 .section {
   margin-top: 1.5em;
 
-  h3 {
+  &.horizontal {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .sectionTitle {
     margin-bottom: 0.5em;
     font-weight: 600;
+    font-size: 18px;
   }
 }

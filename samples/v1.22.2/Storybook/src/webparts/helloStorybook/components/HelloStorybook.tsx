@@ -4,6 +4,7 @@ import type { IHelloStorybookProps } from './IHelloStorybookProps';
 import { ThemePreview } from './ThemePreview/ThemePreview';
 import { DisplayModeIndicator } from './DisplayModeIndicator/DisplayModeIndicator';
 import * as strings from 'HelloStorybookWebPartStrings';
+import { css } from '@fluentui/react';
 
 export default class HelloStorybook extends React.Component<IHelloStorybookProps> {
   public render(): React.ReactElement<IHelloStorybookProps> {
@@ -11,7 +12,7 @@ export default class HelloStorybook extends React.Component<IHelloStorybookProps
       isDarkTheme,
       environmentMessage,
       hasTeamsContext,
-      themeColors,
+      theme,
       displayMode,
     } = this.props;
 
@@ -33,13 +34,13 @@ export default class HelloStorybook extends React.Component<IHelloStorybookProps
             <p><b>Internal Value</b>: <pre>{JSON.stringify(this.props.internalValue, null, 2)}</pre></p>
           </div>
         </div>
-        <div className={styles.section}>
-          <h3>Display Mode</h3>
+        <div className={css(styles.section, styles.horizontal)}>
+          <div className={styles.sectionTitle}>Display Mode:</div>
           <DisplayModeIndicator displayMode={displayMode} />
         </div>
         <div className={styles.section}>
-          <h3>Fluent UI Theme Colors</h3>
-          <ThemePreview themeColors={themeColors} />
+          <div className={styles.sectionTitle}>Theme:</div>
+          <ThemePreview theme={theme} />
         </div>
       </section>
     );

@@ -8,12 +8,11 @@ import {
   type IPropertyPaneConfiguration,
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
-import { IReadonlyTheme } from '@microsoft/sp-component-base';
+import { IPalette, IReadonlyTheme } from '@microsoft/sp-component-base';
 
 import * as strings from 'HelloStorybookWebPartStrings';
 import HelloStorybook from './components/HelloStorybook';
 import { IHelloStorybookProps } from './components/IHelloStorybookProps';
-import { IThemeColors, defaultThemeColors } from './components/IThemeColors';
 
 export interface IHelloStorybookWebPartProps {
   textValue: string;
@@ -26,7 +25,7 @@ export default class HelloStorybookWebPart extends BaseClientSideWebPart<IHelloS
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
-  private _themeColors: IThemeColors = { ...defaultThemeColors };
+  private _theme: IReadonlyTheme | undefined;
 
   public render(): void {
     const element: React.ReactElement<IHelloStorybookProps> = React.createElement(
@@ -35,7 +34,7 @@ export default class HelloStorybookWebPart extends BaseClientSideWebPart<IHelloS
         isDarkTheme: this._isDarkTheme,
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        themeColors: this._themeColors,
+        theme: this._theme,
         displayMode: this.displayMode,
         textValue: this.properties.textValue,
         sliderValue: this.properties.sliderValue,
@@ -89,19 +88,8 @@ export default class HelloStorybookWebPart extends BaseClientSideWebPart<IHelloS
 
     this._isDarkTheme = !!currentTheme.isInverted;
 
-    const { palette, semanticColors } = currentTheme;
-
-    if (palette) {
-      this._themeColors = {
-        primary: palette.themePrimary || defaultThemeColors.primary,
-        secondary: palette.themeSecondary || defaultThemeColors.secondary,
-        tertiary: palette.themeTertiary || defaultThemeColors.tertiary,
-        light: palette.themeLight || defaultThemeColors.light,
-        dark: palette.themeDark || defaultThemeColors.dark,
-        bodyText: (semanticColors && semanticColors.bodyText) || defaultThemeColors.bodyText,
-        bodyBackground: (semanticColors && semanticColors.bodyBackground) || defaultThemeColors.bodyBackground,
-      };
-    }
+    const { semanticColors } = currentTheme;
+    this._theme = currentTheme;
 
     if (semanticColors) {
       this.domElement.style.setProperty('--bodyText', semanticColors.bodyText || null);
