@@ -12,16 +12,24 @@ import type {
     IMockRule,
     IProxyRequest,
     IProxyResponse,
-    IProxySettings
+    IProxySettings,
+    ProxyMode
 } from './types';
 import type { IRecordedRequest } from './MockConfigGenerator';
 
-// Default proxy settings when not configured in VS Code settings
+const DEFAULT_MOCK_FILE = '.spfx-workbench/api-mocks.json';
+const DEFAULT_FALLBACK_STATUS = 404;
+
 const defaultProxySettings: IProxySettings = {
     enabled: true,
-    mockFile: '.spfx-workbench/api-mocks.json',
-    defaultDelay: 0,
-    fallbackStatus: 404,
+    activeMode: {
+        mode: 'mock',
+        options: {
+            mockFile: DEFAULT_MOCK_FILE,
+            defaultDelay: 0,
+            fallbackStatus: DEFAULT_FALLBACK_STATUS,
+        }
+    },
     logRequests: true
 };
 
@@ -35,7 +43,6 @@ export class ApiProxyService implements vscode.Disposable {
     private _settings: IProxySettings;
     private _configWatcher: vscode.FileSystemWatcher | undefined;
     private _recordedRequests: IRecordedRequest[] = [];
-    private _recording = false;
 
     constructor(workspaceRoot: string) {
         this._workspaceRoot = workspaceRoot;
@@ -64,13 +71,51 @@ export class ApiProxyService implements vscode.Disposable {
     // Read proxy settings from VS Code configuration
     static readSettings(): IProxySettings {
         const config = vscode.workspace.getConfiguration('spfxLocalWorkbench.proxy');
+        const mode = config.get<ProxyMode>('mode', defaultProxySettings.activeMode.mode);
+        const mockFile = config.get<string>('mockFile', DEFAULT_MOCK_FILE);
+        const fallbackStatus = config.get<number>('fallbackStatus', DEFAULT_FALLBACK_STATUS);
+
+        const activeMode = ((): IProxySettings['activeMode'] => {
+            switch (mode) {
+                case 'passthrough':
+                    return { mode, options: { allowedOrigins: config.get<string[]>('allowedOrigins') } };
+                case 'record':
+                    return { mode, options: { mockFile, fallbackStatus, serveMocksWhileRecording: config.get<boolean>('serveMocksWhileRecording', true) } };
+                case 'mock':
+                default:
+                    return { mode: 'mock', options: { mockFile, defaultDelay: config.get<number>('defaultDelay', 0), fallbackStatus } };
+            }
+        })();
+
         return {
             enabled: config.get<boolean>('enabled', defaultProxySettings.enabled),
-            mockFile: config.get<string>('mockFile', defaultProxySettings.mockFile),
-            defaultDelay: config.get<number>('defaultDelay', defaultProxySettings.defaultDelay),
-            fallbackStatus: config.get<number>('fallbackStatus', defaultProxySettings.fallbackStatus),
+            activeMode,
             logRequests: config.get<boolean>('logRequests', defaultProxySettings.logRequests)
         };
+    }
+
+    get mode(): ProxyMode {
+        return this._settings.activeMode.mode;
+    }
+
+    // Helpers to extract mode-specific options with safe fallbacks
+    private get _mockFile(): string {
+        const { activeMode } = this._settings;
+        if (activeMode.mode === 'mock') { return activeMode.options.mockFile; }
+        if (activeMode.mode === 'record') { return activeMode.options.mockFile; }
+        return DEFAULT_MOCK_FILE;
+    }
+
+    private get _defaultDelay(): number {
+        const { activeMode } = this._settings;
+        return activeMode.mode === 'mock' ? activeMode.options.defaultDelay : 0;
+    }
+
+    private get _fallbackStatus(): number {
+        const { activeMode } = this._settings;
+        if (activeMode.mode === 'mock') { return activeMode.options.fallbackStatus; }
+        if (activeMode.mode === 'record') { return activeMode.options.fallbackStatus; }
+        return DEFAULT_FALLBACK_STATUS;
     }
 
     // Whether the proxy is currently enabled
@@ -91,8 +136,8 @@ export class ApiProxyService implements vscode.Disposable {
                 return await this._respondFromRule(request, rule);
             }
 
-            // No matching rule — record if recording is active
-            if (this._recording) {
+            // Record unmatched requests when in record mode
+            if (this._settings.activeMode.mode === 'record') {
                 this._recordedRequests.push({
                     url: request.url,
                     method: request.method,
@@ -102,7 +147,7 @@ export class ApiProxyService implements vscode.Disposable {
                 this._log(`  Recorded unmatched request (${this._recordedRequests.length} total)`);
             }
 
-            this._log(`  No match - fallback ${this._settings.fallbackStatus}`);
+            this._log(`  No match - fallback ${this._fallbackStatus}`);
             return this._fallbackResponse(request);
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);
@@ -120,7 +165,7 @@ export class ApiProxyService implements vscode.Disposable {
     // ── Config Loading ──────────────────────────────────────────────
 
     private async _loadConfig(): Promise<void> {
-        const configPath = path.join(this._workspaceRoot, this._settings.mockFile);
+        const configPath = path.join(this._workspaceRoot, this._mockFile);
 
         try {
             const uri = vscode.Uri.file(configPath);
@@ -128,12 +173,12 @@ export class ApiProxyService implements vscode.Disposable {
             const text = Buffer.from(raw).toString('utf-8');
             this._config = JSON.parse(text) as IMockConfig;
             this._ruleEngine.setRules(this._config.rules || []);
-            this._log(`Loaded ${this._config.rules?.length ?? 0} mock rules from ${this._settings.mockFile}`);
+            this._log(`Loaded ${this._config.rules?.length ?? 0} mock rules from ${this._mockFile}`);
         } catch {
             // Config file doesn't exist yet — that's fine
             this._config = undefined;
             this._ruleEngine.setRules([]);
-            this._log(`No mock config found at ${this._settings.mockFile} (using defaults)`);
+            this._log(`No mock config found at ${this._mockFile} (using defaults)`);
         }
     }
 
@@ -144,7 +189,7 @@ export class ApiProxyService implements vscode.Disposable {
         }
 
         // Watch the mock config file and all files in the mocks directory
-        const configPattern = new vscode.RelativePattern(workspaceFolder, this._settings.mockFile);
+        const configPattern = new vscode.RelativePattern(workspaceFolder, this._mockFile);
         this._configWatcher = vscode.workspace.createFileSystemWatcher(configPattern);
 
         const onChange = () => {
@@ -168,7 +213,7 @@ export class ApiProxyService implements vscode.Disposable {
     // Build a response from a matched mock rule
     private async _respondFromRule(request: IProxyRequest, rule: IMockRule): Promise<IProxyResponse> {
         // Determine delay
-        const delay = rule.response.delay ?? this._config?.delay ?? this._settings.defaultDelay;
+        const delay = rule.response.delay ?? this._config?.delay ?? this._defaultDelay;
         if (delay > 0) {
             await new Promise(resolve => setTimeout(resolve, delay));
         }
@@ -205,7 +250,7 @@ export class ApiProxyService implements vscode.Disposable {
     private _fallbackResponse(request: IProxyRequest): IProxyResponse {
         return {
             id: request.id,
-            status: this._settings.fallbackStatus,
+            status: this._fallbackStatus,
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({
                 error: 'No mock rule matched',
@@ -219,24 +264,33 @@ export class ApiProxyService implements vscode.Disposable {
 
     // ── Request Recording ────────────────────────────────────────────
 
-    // Start capturing unmatched requests.
+    // Start capturing unmatched requests by switching to record mode.
     startRecording(): void {
         this._recordedRequests = [];
-        this._recording = true;
+        this._settings = {
+            ...this._settings,
+            activeMode: {
+                mode: 'record',
+                options: {
+                    mockFile: this._mockFile,
+                    fallbackStatus: this._fallbackStatus,
+                    serveMocksWhileRecording: true,
+                }
+            }
+        };
         this._log('Request recording started');
     }
 
-    // Stop recording and return all captured requests.
+    // Stop recording and return all captured requests (reverts to mock mode).
     stopRecording(): IRecordedRequest[] {
-        this._recording = false;
         const requests = [...this._recordedRequests];
+        this._settings = ApiProxyService.readSettings();
         this._log(`Request recording stopped (${requests.length} request(s) captured)`);
         return requests;
     }
 
-    // Whether recording is currently active.
     get isRecording(): boolean {
-        return this._recording;
+        return this._settings.activeMode.mode === 'record';
     }
 
     // Return the workspace root (needed by MockConfigGenerator).
@@ -246,7 +300,7 @@ export class ApiProxyService implements vscode.Disposable {
 
     // Return the configured mock file path (needed by MockConfigGenerator).
     get mockFile(): string {
-        return this._settings.mockFile;
+        return this._mockFile;
     }
 
     // ── Helpers ──────────────────────────────────────────────────────
@@ -260,7 +314,7 @@ export class ApiProxyService implements vscode.Disposable {
 
     // Initialize the scaffold files if they don't exist
     async scaffoldMockConfig(): Promise<void> {
-        const configPath = path.join(this._workspaceRoot, this._settings.mockFile);
+        const configPath = path.join(this._workspaceRoot, this._mockFile);
 
         try {
             await vscode.workspace.fs.stat(vscode.Uri.file(configPath));
@@ -301,7 +355,7 @@ export class ApiProxyService implements vscode.Disposable {
             Buffer.from(JSON.stringify(scaffold, null, 2), 'utf-8')
         );
 
-        this._log(`Scaffolded mock config at ${this._settings.mockFile}`);
+        this._log(`Scaffolded mock config at ${this._mockFile}`);
         await this._loadConfig();
     }
 

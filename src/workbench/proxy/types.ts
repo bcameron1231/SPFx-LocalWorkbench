@@ -3,8 +3,29 @@
 // Type definitions for the API proxy/mock system that intercepts
 // SPFx HTTP client calls and returns configurable mock responses.
 
-// The proxy operating mode
-export type ProxyMode = 'mock';
+// Proxy operating modes
+export type ProxyMode = 'mock' | 'passthrough' | 'record';
+
+export interface IMockModeOptions {
+    mockFile: string;
+    defaultDelay: number;
+    fallbackStatus: number;
+}
+
+export interface IPassthroughModeOptions {
+    allowedOrigins?: string[];
+}
+
+export interface IRecordModeOptions {
+    mockFile: string;
+    fallbackStatus: number;
+    serveMocksWhileRecording: boolean;
+}
+
+export type ProxyModeOptions =
+    | { mode: 'mock'; options: IMockModeOptions }
+    | { mode: 'passthrough'; options: IPassthroughModeOptions }
+    | { mode: 'record'; options: IRecordModeOptions };
 
 // Client type identifier for matching rules
 export type ApiClientType = 'spHttp' | 'http' | 'aadHttp' | 'fetch';
@@ -85,14 +106,7 @@ export interface IProxyResponse {
 
 // VS Code settings for proxy behavior
 export interface IProxySettings {
-    // Whether the API proxy system is enabled
     enabled: boolean;
-    // Path to the mock configuration file relative to workspace
-    mockFile: string;
-    // Default delay in ms when not specified by a rule
-    defaultDelay: number;
-    // HTTP status to return when no rule matches
-    fallbackStatus: number;
-    // Whether to log all proxied requests to the output channel
+    activeMode: ProxyModeOptions;
     logRequests: boolean;
 }

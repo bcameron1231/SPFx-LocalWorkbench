@@ -303,6 +303,17 @@
           "default": true,
           "description": "Enable the API proxy system. When disabled, HTTP client calls (SPHttpClient, HttpClient, AadHttpClient) make real fetch() requests instead of routing through the mock rule engine. This allows external tools like Dev Proxy to intercept network traffic. Requires closing and reopening the workbench to take effect."
         },
+        "spfxLocalWorkbench.proxy.mode": {
+          "type": "string",
+          "default": "mock",
+          "enum": ["mock", "passthrough", "record"],
+          "enumDescriptions": [
+            "Intercept API calls and return mock responses based on configured rules",
+            "Forward all API calls to their real endpoints",
+            "Serve existing mock rules and capture unmatched requests for stub generation"
+          ],
+          "description": "Proxy operating mode"
+        },
         "spfxLocalWorkbench.proxy.mockFile": {
           "type": "string",
           "default": ".spfx-workbench/api-mocks.json",
@@ -322,6 +333,17 @@
           "type": "boolean",
           "default": true,
           "description": "Log all proxied API requests to the 'SPFx API Proxy' output channel"
+        },
+        "spfxLocalWorkbench.proxy.allowedOrigins": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "URL patterns allowed in passthrough mode (empty = all)"
+        },
+        "spfxLocalWorkbench.proxy.serveMocksWhileRecording": {
+          "type": "boolean",
+          "default": true,
+          "description": "When in record mode, also serve existing mock rules for matched requests"
         }
       }
     }

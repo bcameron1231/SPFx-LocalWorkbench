@@ -14,5 +14,10 @@ export type {
     IProxyRequest,
     IProxyResponse,
     IProxySettings,
-    ApiClientType
+    ApiClientType,
+    ProxyMode,
+    ProxyModeOptions,
+    IMockModeOptions,
+    IPassthroughModeOptions,
+    IRecordModeOptions
 } from './types';
