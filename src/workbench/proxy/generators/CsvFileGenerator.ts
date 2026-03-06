@@ -5,6 +5,7 @@
 import * as vscode from 'vscode';
 import type { IMockRule } from '../types';
 import { parseCsv } from './CsvParser';
+import type { CsvParseWarning } from './CsvParser';
 import { promptRuleOptions } from './shared';
 
 /**
@@ -23,11 +24,25 @@ export async function importCsvFile(): Promise<IMockRule[] | undefined> {
     const fileUri = fileUris[0];
     const raw = await vscode.workspace.fs.readFile(fileUri);
     const text = Buffer.from(raw).toString('utf-8');
-    const rows = parseCsv(text);
+    const result = parseCsv(text);
+
+
+    if (!result.ok) {
+        vscode.window.showErrorMessage(`CSV parse error: ${result.error}`);
+        return undefined;
+    }
+
+    const { rows, warnings } = result;
 
     if (rows.length === 0) {
         vscode.window.showErrorMessage('The CSV file is empty or has no data rows.');
         return undefined;
+    }
+
+    // Show warnings if any
+    if (warnings.length > 0) {
+        const showWarnings = await showCsvWarnings(warnings, rows.length);
+        if (!showWarnings) { return undefined; }
     }
 
     // Show preview
@@ -83,4 +98,28 @@ export async function importCsvFile(): Promise<IMockRule[] | undefined> {
     };
 
     return [rule];
+}
+
+// Shows parse warnings and asks whether to proceed.
+async function showCsvWarnings(warnings: CsvParseWarning[], rowCount: number): Promise<boolean> {
+    const summary = warnings.length === 1
+        ? '1 warning while parsing CSV'
+        : `${warnings.length} warnings while parsing CSV`;
+
+    const detail = warnings
+        .slice(0, 10)
+        .map(w => `  Row ${w.row}: ${w.message}`)
+        .join('\n');
+
+    const extra = warnings.length > 10
+        ? `\n  ... and ${warnings.length - 10} more warning(s)`
+        : '';
+
+    const choice = await vscode.window.showWarningMessage(
+        `${summary} (${rowCount} row(s) parsed).\n\n${detail}${extra}`,
+        { modal: true },
+        'Continue Anyway',
+    );
+
+    return choice === 'Continue Anyway';
 }
