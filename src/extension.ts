@@ -1,5 +1,10 @@
 import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
 import { WorkbenchPanel, SpfxProjectDetector, createManifestWatcher, getWorkbenchSettings, ApiProxyService, MockConfigGenerator } from './workbench';
+import { loadPackageNls } from './i18nLoader';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone });
+const localize = nls.loadMessageBundle();
 import * as net from 'net';
 
 function isPortReachable(host: string, port: number, timeout = 1000): Promise<boolean> {
@@ -19,6 +24,8 @@ function delay(ms: number): Promise<void> {
 
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
+	// runtime localization via vscode-nls; also load package nls for development-time strings
+	const translations = loadPackageNls(context.extensionPath, vscode.env.language);
 
 	// Shared detector instance — workspace path rarely changes
 	let detector: SpfxProjectDetector | undefined;
@@ -53,14 +60,14 @@ export function activate(context: vscode.ExtensionContext) {
 		async () => {
 			const det = getDetector();
 			if (!det) {
-				vscode.window.showErrorMessage('No workspace folder open');
+				vscode.window.showErrorMessage(localize('extension.noWorkspace', 'No workspace folder open'));
 				return;
 			}
 
 			const isSpfx = await det.isSpfxProject();
 
 			if (!isSpfx) {
-				vscode.window.showErrorMessage('This does not appear to be an SPFx project');
+				vscode.window.showErrorMessage(localize('extension.notSpfx', 'This does not appear to be an SPFx project'));
 				return;
 			}
 
@@ -85,7 +92,7 @@ export function activate(context: vscode.ExtensionContext) {
 			const serverReady = await vscode.window.withProgress(
 				{
 					location: vscode.ProgressLocation.Notification,
-					title: 'SPFx Serve',
+					title: localize('serve.title', 'SPFx Serve'),
 					cancellable: true
 				},
 				async (progress, cancellationToken) => {
@@ -93,7 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
 					const pollIntervalMs = 500;
 					const startTime = Date.now();
 
-					progress.report({ message: 'Waiting for serve to start…' });
+					progress.report({ message: localize('serve.waiting', 'Waiting for serve to start…') });
 
 					while (Date.now() - startTime < maxWaitMs) {
 						if (cancellationToken.isCancellationRequested) {
@@ -105,7 +112,7 @@ export function activate(context: vscode.ExtensionContext) {
 						}
 
 						const elapsed = Math.round((Date.now() - startTime) / 1000);
-						progress.report({ message: `Waiting for serve to start… (${elapsed}s)` });
+						progress.report({ message: localize('serve.waitingElapsed', 'Waiting for serve to start… ({0}s)', elapsed) });
 						await delay(pollIntervalMs);
 					}
 
@@ -117,10 +124,10 @@ export function activate(context: vscode.ExtensionContext) {
 				WorkbenchPanel.createOrShow(context.extensionUri);
 			} else {
 				const choice = await vscode.window.showWarningMessage(
-					'SPFx serve did not start in time. Open workbench anyway?',
-					'Open', 'Cancel'
+					localize('serve.timedout', 'SPFx serve did not start in time. Open workbench anyway?'),
+					localize('common.open', 'Open'), localize('common.cancel', 'Cancel')
 				);
-				if (choice === 'Open') {
+				if (choice === localize('common.open', 'Open')) {
 					WorkbenchPanel.createOrShow(context.extensionUri);
 				}
 			}
@@ -138,17 +145,17 @@ export function activate(context: vscode.ExtensionContext) {
 
 			const det = getDetector();
 			if (!det) {
-				vscode.window.showWarningMessage('No workspace folder open');
+				vscode.window.showWarningMessage(localize('extension.noWorkspace', 'No workspace folder open'));
 				return;
 			}
 
 			const manifests = await det.getWebPartManifests();
 
 			if (manifests.length === 0) {
-				vscode.window.showInformationMessage('No web parts found in this project');
+				vscode.window.showInformationMessage(localize('detect.noWebParts', 'No web parts found in this project'));
 			} else {
 				const webPartNames = manifests.map(m => m.alias || m.id).join(', ');
-				vscode.window.showInformationMessage(`Found ${manifests.length} web part(s): ${webPartNames}`);
+				vscode.window.showInformationMessage(localize('detect.found', 'Found {0} web part(s): {1}', manifests.length, webPartNames));
 			}
 		}
 	);
@@ -159,15 +166,15 @@ export function activate(context: vscode.ExtensionContext) {
 		async () => {
 			const wsFolder = vscode.workspace.workspaceFolders?.[0];
 			if (!wsFolder) {
-				vscode.window.showWarningMessage('No workspace folder open');
+				vscode.window.showWarningMessage(localize('extension.noWorkspace', 'No workspace folder open'));
 				return;
 			}
 			const proxy = new ApiProxyService(wsFolder.uri.fsPath);
 			await proxy.scaffoldMockConfig();
 			proxy.dispose();
-			vscode.window.showInformationMessage('API mock configuration scaffolded at .spfx-workbench/api-mocks.json');
-	});
-	
+			vscode.window.showInformationMessage(localize('mock.scaffolded', 'API mock configuration scaffolded at .spfx-workbench/api-mocks.json'));
+		});
+
 	const openDevToolsCommand = vscode.commands.registerCommand(
 		'spfx-local-workbench.openDevTools',
 		() => {
@@ -182,11 +189,11 @@ export function activate(context: vscode.ExtensionContext) {
 		'spfx-local-workbench.mockDataMenu',
 		async () => {
 			const items: (vscode.QuickPickItem & { commandId: string })[] = [
-				{ label: '$(file-add) Scaffold Mock Config', description: 'Create a starter api-mocks.json file', commandId: 'spfx-local-workbench.scaffoldMockConfig' },
-				{ label: '$(symbol-number) Generate Status Code Stubs', description: 'Create rules for 200, 401, 404, 500, etc.', commandId: 'spfx-local-workbench.generateStatusStubs' },
-				{ label: '$(json) Import JSON File', description: 'Use a JSON file as a mock response body', commandId: 'spfx-local-workbench.importJsonMock' },
-				{ label: '$(table) Import CSV File', description: 'Parse CSV rows into a JSON mock response', commandId: 'spfx-local-workbench.importCsvMock' },
-				{ label: '$(record) Record Requests', description: 'Capture unmatched requests and generate rules', commandId: 'spfx-local-workbench.recordRequests' },
+				{ label: `$(file-add) ${localize('mock.scaffold.label', 'Scaffold Mock Config')}`, description: localize('mock.scaffold.description', 'Create a starter api-mocks.json file'), commandId: 'spfx-local-workbench.scaffoldMockConfig' },
+				{ label: `$(symbol-number) ${localize('mock.generate.label', 'Generate Status Code Stubs')}`, description: localize('mock.generate.description', 'Create rules for 200, 401, 404, 500, etc.'), commandId: 'spfx-local-workbench.generateStatusStubs' },
+				{ label: `$(json) ${localize('mock.importJson.label', 'Import JSON File')}`, description: localize('mock.importJson.description', 'Use a JSON file as a mock response body'), commandId: 'spfx-local-workbench.importJsonMock' },
+				{ label: `$(table) ${localize('mock.importCsv.label', 'Import CSV File')}`, description: localize('mock.importCsv.description', 'Parse CSV rows into a JSON mock response'), commandId: 'spfx-local-workbench.importCsvMock' },
+				{ label: `$(record) ${localize('mock.record.label', 'Record Requests')}`, description: localize('mock.record.description', 'Capture unmatched requests and generate rules'), commandId: 'spfx-local-workbench.recordRequests' },
 			];
 
 			const pick = await vscode.window.showQuickPick(items, {
@@ -204,7 +211,7 @@ export function activate(context: vscode.ExtensionContext) {
 	function createGenerator(): MockConfigGenerator | undefined {
 		const wsFolder = vscode.workspace.workspaceFolders?.[0];
 		if (!wsFolder) {
-			vscode.window.showWarningMessage('No workspace folder open');
+			vscode.window.showWarningMessage(localize('extension.noWorkspace', 'No workspace folder open'));
 			return undefined;
 		}
 		const settings = ApiProxyService.readSettings();
@@ -219,7 +226,7 @@ export function activate(context: vscode.ExtensionContext) {
 			if (!gen) { return; }
 			const ok = await gen.generateStatusStubs();
 			if (ok) {
-				vscode.window.showInformationMessage('Mock rules generated successfully.');
+				vscode.window.showInformationMessage(localize('mock.generated', 'Mock rules generated successfully.'));
 			}
 		}
 	);
@@ -232,7 +239,7 @@ export function activate(context: vscode.ExtensionContext) {
 			if (!gen) { return; }
 			const ok = await gen.importJsonFile();
 			if (ok) {
-				vscode.window.showInformationMessage('JSON file imported as mock rule.');
+				vscode.window.showInformationMessage(localize('mock.importJson.success', 'JSON file imported as mock rule.'));
 			}
 		}
 	);
@@ -245,7 +252,7 @@ export function activate(context: vscode.ExtensionContext) {
 			if (!gen) { return; }
 			const ok = await gen.importCsvFile();
 			if (ok) {
-				vscode.window.showInformationMessage('CSV file imported as mock rule.');
+				vscode.window.showInformationMessage(localize('mock.importCsv.success', 'CSV file imported as mock rule.'));
 			}
 		}
 	);
@@ -261,7 +268,7 @@ export function activate(context: vscode.ExtensionContext) {
 			// Use the WorkbenchPanel's proxy service — that's where actual requests flow
 			const proxy = WorkbenchPanel.currentPanel?.apiProxyService;
 			if (!proxy) {
-				vscode.window.showWarningMessage('Open the workbench first, then start recording.');
+				vscode.window.showWarningMessage(localize('record.openFirst', 'Open the workbench first, then start recording.'));
 				return;
 			}
 
@@ -271,7 +278,7 @@ export function activate(context: vscode.ExtensionContext) {
 				recordingStatusBar.hide();
 
 				if (requests.length === 0) {
-					vscode.window.showInformationMessage('No unmatched requests were recorded. All requests may have matched existing rules.');
+					vscode.window.showInformationMessage(localize('record.noRequests', 'No unmatched requests were recorded. All requests may have matched existing rules.'));
 					return;
 				}
 
@@ -279,7 +286,7 @@ export function activate(context: vscode.ExtensionContext) {
 				if (gen) {
 					const ok = await gen.generateFromRecordedRequests(requests);
 					if (ok) {
-						vscode.window.showInformationMessage(`Generated rules from ${requests.length} recorded request(s).`);
+						vscode.window.showInformationMessage(localize('record.generated', 'Generated rules from {0} recorded request(s).', requests.length));
 					}
 				}
 				return;
@@ -287,8 +294,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 			// Start recording
 			proxy.startRecording();
-			recordingStatusBar.text = '$(record) Recording API Requests...';
-			recordingStatusBar.tooltip = 'Click to stop recording and generate mock rules';
+			recordingStatusBar.text = '$(record) ' + localize('recording.statusText', 'Recording API Requests...');
+			recordingStatusBar.tooltip = localize('recording.tooltip', 'Click to stop recording and generate mock rules');
 			recordingStatusBar.show();
 
 			// Refresh the workbench so web parts re-initialize and make their API calls
@@ -296,9 +303,7 @@ export function activate(context: vscode.ExtensionContext) {
 				WorkbenchPanel.currentPanel.postMessage({ command: 'refresh' });
 			}
 
-			vscode.window.showInformationMessage(
-				'Recording API requests. Web parts are being refreshed. Click the status bar or run this command again to stop and generate rules.',
-			);
+			vscode.window.showInformationMessage(localize('recording.inProgress', 'Recording API requests. Web parts are being refreshed. Click the status bar or run this command again to stop and generate rules.'));
 		}
 	);
 
@@ -313,8 +318,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 			if (isSpfx) {
 				const version = await det.getSpfxVersion();
-				statusBarItem.text = `$(fluentui-testbeaker) SPFx Workbench`;
-				statusBarItem.tooltip = `SPFx Project detected${version ? ` (${version})` : ''}\nClick to open local workbench`;
+				const sbText = translations['status.spfxWorkbench'] ?? localize('status.spfxWorkbench', 'SPFx Workbench');
+				statusBarItem.text = `$(fluentui-testbeaker) ${sbText}`;
+				const detectedText = version ? (translations['status.spfxDetectedWithVersion'] ? translations['status.spfxDetectedWithVersion'].replace('{0}', version) : localize('status.spfxDetectedWithVersion', 'SPFx Project detected ({0})', version)) : (translations['status.spfxDetected'] ?? localize('status.spfxDetected', 'SPFx Project detected'));
+				const clickText = translations['status.clickToOpen'] ?? localize('status.clickToOpen', 'Click to open local workbench');
+				statusBarItem.tooltip = `${detectedText}\n${clickText}`;
 				statusBarItem.show();
 			} else {
 				statusBarItem.hide();
@@ -363,7 +371,7 @@ class WorkbenchPanelSerializer implements vscode.WebviewPanelSerializer {
 	constructor(
 		private readonly _extensionUri: vscode.Uri,
 		private readonly _getDetector: () => SpfxProjectDetector | undefined
-	) {}
+	) { }
 
 	async deserializeWebviewPanel(
 		webviewPanel: vscode.WebviewPanel,
@@ -373,14 +381,14 @@ class WorkbenchPanelSerializer implements vscode.WebviewPanelSerializer {
 		const detector = this._getDetector();
 		if (detector) {
 			const isSpfx = await detector.isSpfxProject();
-			
+
 			if (isSpfx) {
 				// Revive the panel
 				WorkbenchPanel.revive(webviewPanel, this._extensionUri);
 				return;
 			}
 		}
-		
+
 		// Not an SPFx project - close the panel
 		webviewPanel.dispose();
 	}
