@@ -7,4 +7,5 @@ export { importJsonFile } from './JsonFileGenerator';
 export { importCsvFile } from './CsvFileGenerator';
 export { generateFromRecordedRequests } from './RecordedRequestGenerator';
 export { parseCsv } from './CsvParser';
+export type { CsvParseResult, CsvParseSuccess, CsvParseError, CsvParseWarning, CsvParseOptions } from './CsvParser';
 export type { IRecordedRequest } from './types';
