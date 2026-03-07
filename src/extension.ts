@@ -215,7 +215,11 @@ export function activate(context: vscode.ExtensionContext) {
 			return undefined;
 		}
 		const settings = ApiProxyService.readSettings();
-		return new MockConfigGenerator(wsFolder.uri.fsPath, settings.mockFile);
+		const { activeMode } = settings;
+		const mockFile = (activeMode.mode === 'mock' || activeMode.mode === 'record')
+			? activeMode.options.mockFile
+			: undefined;
+		return new MockConfigGenerator(wsFolder.uri.fsPath, mockFile);
 	}
 
 	// Generate status-code stubs via interactive wizard
