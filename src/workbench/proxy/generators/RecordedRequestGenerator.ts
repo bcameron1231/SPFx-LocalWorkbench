@@ -3,6 +3,7 @@
 // Generates mock rules from previously recorded unmatched API requests.
 
 import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
 import type { IMockRule } from '../types';
 import { defaultBodyForStatus, STATUS_CODE_OPTIONS } from './shared';
 import type { IRecordedRequest } from './types';
@@ -14,10 +15,10 @@ import type { IRecordedRequest } from './types';
 export async function generateFromRecordedRequests(
     requests: IRecordedRequest[]
 ): Promise<IMockRule[] | undefined> {
+    nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone });
+    const localize = nls.loadMessageBundle();
     if (requests.length === 0) {
-        vscode.window.showInformationMessage(
-            'No unmatched requests have been recorded yet. Run your web part first, then try again.'
-        );
+        vscode.window.showInformationMessage(localize('record.noRecordedRequests', 'No unmatched requests have been recorded yet. Run your web part first, then try again.'));
         return undefined;
     }
 
@@ -41,7 +42,7 @@ export async function generateFromRecordedRequests(
             request: r,
         })),
         {
-            title: `Generate rules from ${unique.length} recorded request(s)`,
+            title: localize('record.pickTitle', 'Generate rules from {0} recorded request(s)', unique.length),
             canPickMany: true,
             ignoreFocusOut: true,
         }
@@ -56,7 +57,7 @@ export async function generateFromRecordedRequests(
             description: s.description,
             status: s.status,
         })),
-        { title: 'Default status code for generated rules', ignoreFocusOut: true }
+        { title: localize('record.statusTitle', 'Default status code for generated rules'), ignoreFocusOut: true }
     );
     if (!statusPick) { return undefined; }
 

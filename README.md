@@ -25,6 +25,7 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 - **PlaceholderProvider Mock**: Full mock of `context.placeholderProvider` including `tryCreateContent()` and `changedEvent`
 
 ### API Proxy & Mock System
+
 - **Drop-in HTTP client replacements**: `SPHttpClient`, `HttpClient`, and `AadHttpClient` are replaced with proxy-aware classes — no code changes needed in your web parts
 - **Configurable mock rules**: Define URL matching rules with inline or file-based JSON responses
 - **Glob pattern matching**: Match URLs with wildcards (e.g., `/_api/web/lists/getbytitle('*')/items`)
@@ -81,7 +82,7 @@ This extension provides a **custom-built workbench environment** that simulates 
 ## Commands
 
 | Command | Description |
-|---------|-------------|
+| --------- | ------------- |
 | `SPFx: Open Local Workbench` | Opens the local workbench panel |
 | `SPFx: Start Serve & Open Workbench` | Starts serve and opens workbench |
 | `SPFx: Detect Web Parts` | Shows detected web parts in the project |
@@ -91,7 +92,7 @@ This extension provides a **custom-built workbench environment** that simulates 
 ### Basic Settings
 
 | Setting | Default | Description |
-|---------|---------|-------------|
+| --------- | --------- | ------------- |
 | `spfxLocalWorkbench.serveUrl` | `https://localhost:4321` | The URL where SPFx serve is running |
 | `spfxLocalWorkbench.autoOpenWorkbench` | `false` | Auto-open workbench when starting serve |
 
@@ -100,7 +101,7 @@ This extension provides a **custom-built workbench environment** that simulates 
 Customize the mock SharePoint context:
 
 | Setting | Default | Description |
-|---------|---------|-------------|
+| --------- | --------- | ------------- |
 | `spfxLocalWorkbench.context.siteUrl` | `https://contoso.sharepoint.com/sites/devsite` | SharePoint site URL |
 | `spfxLocalWorkbench.context.webUrl` | `https://contoso.sharepoint.com/sites/devsite` | SharePoint web URL |
 | `spfxLocalWorkbench.context.userDisplayName` | `Local Workbench User` | Display name of the current user |
@@ -111,14 +112,14 @@ Customize the mock SharePoint context:
 ### Theme Settings
 
 | Setting | Default | Description |
-|---------|---------|-------------|
+| --------- | --------- | ------------- |
 | `spfxLocalWorkbench.theme.preset` | `teamSite` | Theme preset: `teamSite`, `communicationSite`, `dark`, `highContrast`, or `custom` |
 | `spfxLocalWorkbench.theme.customColors` | `{}` | Custom theme colors when using `custom` preset |
 
 ### Page Context Settings
 
 | Setting | Default | Description |
-|---------|---------|-------------|
+| --------- | --------- | ------------- |
 | `spfxLocalWorkbench.pageContext.webTitle` | `Local Workbench` | Title of the web |
 | `spfxLocalWorkbench.pageContext.webTemplate` | `STS#3` | Web template ID |
 | `spfxLocalWorkbench.pageContext.isSPO` | `true` | Whether this is SharePoint Online |
@@ -126,8 +127,8 @@ Customize the mock SharePoint context:
 ### Proxy Settings
 
 | Setting | Default | Description |
-|---------|---------|-------------|
-| `spfxLocalWorkbench.proxy.enabled` | `true` | Enable the API proxy. When `false`, HTTP clients make real `fetch()` calls so you can use external tools like [Dev Proxy](https://learn.microsoft.com/en-us/microsoft-cloud/dev/dev-proxy/overview). **Requires closing and reopening the workbench to take effect.** |
+| --------- | --------- | ------------- |
+| `spfxLocalWorkbench.proxy.enabled` | `true` | Enable the API proxy. When `false`, HTTP clients make real `fetch()` calls so you can use external tools like [Dev Proxy](https://learn.microsoft.com/microsoft-cloud/dev/dev-proxy/overview). **Requires closing and reopening the workbench to take effect.** |
 | `spfxLocalWorkbench.proxy.mockFile` | `.spfx-workbench/api-mocks.json` | Path to the mock rules configuration file (relative to workspace root) |
 | `spfxLocalWorkbench.proxy.defaultDelay` | `0` | Default simulated latency (ms) for mock responses |
 | `spfxLocalWorkbench.proxy.fallbackStatus` | `404` | HTTP status returned when no mock rule matches |
@@ -158,7 +159,7 @@ If you keep test SPFx projects under `samples/`, they are excluded from VSIX pac
 
 ### Project Structure
 
-```
+```text
 src/
   extension.ts              # Main extension entry point
   workbench/

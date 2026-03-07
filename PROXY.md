@@ -13,7 +13,7 @@ The proxy system has three layers:
 The workbench replaces the real SPFx HTTP clients with proxy-aware versions:
 
 | Real SPFx Class | Proxy Replacement | Client Type Tag |
-|---|---|---|
+| --- | --- | --- |
 | `SPHttpClient` | `ProxySPHttpClient` | `spHttp` |
 | `HttpClient` | `ProxyHttpClient` | `http` |
 | `AadHttpClient` | `ProxyAadHttpClient` | `aadHttp` |
@@ -30,7 +30,7 @@ Under the hood, every method call:
 
 The `ProxyBridge` is a singleton that manages communication between the webview and the VS Code extension host using `postMessage`:
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │  Webview (your web part)                        │
 │                                                 │
@@ -129,7 +129,7 @@ Create a file at `.spfx-workbench/api-mocks.json` in your project root (or run t
 ### 2. Configuration File Structure
 
 | Property | Type | Description |
-|---|---|---|
+| --- | --- | --- |
 | `delay` | `number` | Global default delay (ms) applied to all responses unless overridden per-rule. |
 | `rules` | `IMockRule[]` | Array of mock rules. Evaluated in order; first match wins. |
 
@@ -140,7 +140,7 @@ Each rule has a **match** section and a **response** section:
 #### Match
 
 | Property | Type | Required | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `url` | `string` | Yes | URL substring to match against the request URL. |
 | `method` | `string` | No | HTTP method filter (`GET`, `POST`, etc.). If omitted, matches any method. |
 | `clientType` | `string` | No | Restrict to a specific client: `spHttp`, `http`, or `aadHttp`. |
@@ -149,7 +149,7 @@ Each rule has a **match** section and a **response** section:
 #### Response
 
 | Property | Type | Required | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `status` | `number` | Yes | HTTP status code to return (e.g., `200`, `404`, `500`). |
 | `headers` | `object` | No | Response headers. Defaults to `{ "content-type": "application/json" }`. |
 | `body` | `any` | No | Inline response body. Can be an object (auto-serialized to JSON) or a string. |
@@ -278,7 +278,7 @@ Target calls made through `AadHttpClient` to a custom backend:
 You can customize proxy behavior through VS Code settings:
 
 | Setting | Default | Description |
-|---|---|---|
+| --- | --- | --- |
 | `spfxLocalWorkbench.proxy.enabled` | `true` | Enable or disable the API proxy system. When disabled, HTTP client calls make real `fetch()` requests instead of routing through the mock rule engine, allowing external tools like Dev Proxy to handle them. **Requires closing and reopening the workbench to take effect.** |
 | `spfxLocalWorkbench.proxy.mockFile` | `.spfx-workbench/api-mocks.json` | Path to the mock config file (relative to workspace root). |
 | `spfxLocalWorkbench.proxy.defaultDelay` | `0` | Default delay (ms) for all mock responses. |
@@ -294,7 +294,7 @@ All proxied requests are logged to the **SPFx API Proxy** output channel (access
 The `MockProxyResponse` returned to your web part mirrors the SPFx `SPHttpClientResponse` interface:
 
 | Property / Method | Description |
-|---|---|
+| --- | --- |
 | `.ok` | `true` if status is 200–299. |
 | `.status` | The HTTP status code. |
 | `.headers` | Response headers object. |
@@ -310,4 +310,4 @@ Your existing web part code like `response.json().then(data => ...)` works witho
 - **Use `bodyFile`** for large payloads to keep your mock config readable.
 - **Check the Output channel** ("SPFx API Proxy") to verify which rules are matching and debug unexpected 404s.
 - **Unmatched requests** return the `fallbackStatus` (default `404`) with a JSON body describing what was requested, making it easy to identify missing mock rules.
-- **Disable the proxy** entirely by setting `spfxLocalWorkbench.proxy.enabled` to `false`. When disabled, the built-in proxy clients are swapped out for passthrough clients that make **real `fetch()` calls** from the webview. This lets you use external tools like [Dev Proxy](https://learn.microsoft.com/en-us/microsoft-cloud/dev/dev-proxy/overview) to intercept and mock network traffic instead. The webview's Content-Security-Policy is also widened (`connect-src https: http:`) so requests can reach any endpoint. **You must close and reopen the workbench after changing this setting.**
+- **Disable the proxy** entirely by setting `spfxLocalWorkbench.proxy.enabled` to `false`. When disabled, the built-in proxy clients are swapped out for passthrough clients that make **real `fetch()` calls** from the webview. This lets you use external tools like [Dev Proxy](https://learn.microsoft.com/microsoft-cloud/dev/dev-proxy/overview) to intercept and mock network traffic instead. The webview's Content-Security-Policy is also widened (`connect-src https: http:`) so requests can reach any endpoint. **You must close and reopen the workbench after changing this setting.**

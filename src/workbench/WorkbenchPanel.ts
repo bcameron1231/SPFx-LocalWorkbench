@@ -5,6 +5,7 @@
 // extension and the webview.
 
 import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
 import { randomBytes } from 'crypto';
 import { SpfxProjectDetector } from './SpfxProjectDetector';
 import type { IExternalDependency } from './SpfxProjectDetector';
@@ -12,11 +13,15 @@ import type { IWebPartManifest } from './types';
 import { generateWorkbenchHtml, generateErrorHtml } from './html';
 import { getWorkbenchSettings, onConfigurationChanged, IWorkbenchSettings } from './config';
 import { ApiProxyService } from './proxy';
+import { loadPackageNls } from '../i18nLoader';
 
 // Generates a cryptographic nonce for CSP
 function getNonce(): string {
     return randomBytes(16).toString('base64url');
 }
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone });
+const localize = nls.loadMessageBundle();
 
 // WorkbenchPanel manages the webview that hosts the SPFx local workbench.
 export class WorkbenchPanel {
@@ -47,8 +52,12 @@ export class WorkbenchPanel {
             ? vscode.window.activeTextEditor.viewColumn
             : undefined;
 
+        const translations = loadPackageNls(extensionUri.fsPath, vscode.env.language);
+        const panelTitle = translations['panel.title'] ?? localize('panel.title', 'SPFx Local Workbench');
+
         // If we already have a panel, show it
         if (WorkbenchPanel.currentPanel) {
+            WorkbenchPanel.currentPanel._panel.title = panelTitle; 
             WorkbenchPanel.currentPanel._panel.reveal(column);
             return;
         }
@@ -66,7 +75,7 @@ export class WorkbenchPanel {
         // Otherwise, create a new panel
         const panel = vscode.window.createWebviewPanel(
             WorkbenchPanel.viewType,
-            'SPFx Local Workbench',
+            panelTitle,
             column || vscode.ViewColumn.One,
             {
                 enableScripts: true,
@@ -83,11 +92,14 @@ export class WorkbenchPanel {
 
     // Revives the panel from a previous session
     public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri): void {
+        const translations = loadPackageNls(extensionUri.fsPath, vscode.env.language);
+        panel.title = translations['panel.title'] ?? localize('panel.title', 'SPFx Local Workbench');
         WorkbenchPanel.currentPanel = new WorkbenchPanel(panel, extensionUri);
-    }    
-    
+    }
     private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
         this._panel = panel;
+        const translations = loadPackageNls(extensionUri.fsPath, vscode.env.language);
+        this._panel.title = translations['panel.title'] ?? localize('panel.title', this._panel.title ?? 'SPFx Local Workbench');
         this._extensionUri = extensionUri;
         this._settings = getWorkbenchSettings();
         void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.isWorkbench', true);
@@ -210,7 +222,7 @@ export class WorkbenchPanel {
     private async _loadComponents(): Promise<void> {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
         if (!workspaceFolder) {
-            vscode.window.showWarningMessage('No workspace folder open');
+            vscode.window.showWarningMessage(localize('extension.noWorkspace', 'No workspace folder open'));
             return;
         }
 
@@ -218,7 +230,7 @@ export class WorkbenchPanel {
         const isSpfx = await detector.isSpfxProject();
 
         if (!isSpfx) {
-            vscode.window.showWarningMessage('This does not appear to be an SPFx project.');
+            vscode.window.showWarningMessage(localize('extension.notSpfx', 'This does not appear to be an SPFx project'));
             return;
         }
 
@@ -229,7 +241,7 @@ export class WorkbenchPanel {
         this._externalDependencies = await detector.resolveExternalDependencies();
 
         if (this._webParts.length === 0 && this._extensions.length === 0) {
-            vscode.window.showWarningMessage('No web parts or extensions found in this SPFx project.');
+            vscode.window.showWarningMessage(localize('workbench.noComponents', 'No web parts or extensions found in this SPFx project.'));
         }
     }
 
@@ -287,7 +299,6 @@ export class WorkbenchPanel {
     // Updates the webview content
     private _update(): void {
         const webview = this._panel.webview;
-        this._panel.title = 'SPFx Local Workbench';
         this._panel.webview.html = this._getHtmlForWebview(webview);
     }    
 
@@ -303,6 +314,7 @@ export class WorkbenchPanel {
             webPartsJson,
             extensionsJson,
             cspSource: webview.cspSource,
+            // NOTE: Leaving this as is because Chris' PR will presumably add locale support.  Can revisit if needed.
             locale: 'en-us', // TODO: Support override
             webPartCount: this._webParts.length,
             extensionCount: this._extensions.length,

@@ -3,8 +3,10 @@
 // Imports a CSV file, parses it into JSON rows, and generates a mock rule.
 
 import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
 import type { IMockRule } from '../types';
 import { parseCsv } from './CsvParser';
+import type { CsvParseWarning } from './CsvParser';
 import { promptRuleOptions } from './shared';
 
 /**
@@ -12,9 +14,11 @@ import { promptRuleOptions } from './shared';
  * Returns the generated rule, or `undefined` if the user cancelled.
  */
 export async function importCsvFile(): Promise<IMockRule[] | undefined> {
+    nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone });
+    const localize = nls.loadMessageBundle();
     // Pick file
     const fileUris = await vscode.window.showOpenDialog({
-        title: 'Import CSV File as Mock Response Body',
+        title: localize('importCsv.title', 'Import CSV File as Mock Response Body'),
         canSelectMany: false,
         filters: { 'CSV Files': ['csv'] },
     });
@@ -23,11 +27,25 @@ export async function importCsvFile(): Promise<IMockRule[] | undefined> {
     const fileUri = fileUris[0];
     const raw = await vscode.workspace.fs.readFile(fileUri);
     const text = Buffer.from(raw).toString('utf-8');
-    const rows = parseCsv(text);
+    const result = parseCsv(text);
+
+
+    if (!result.ok) {
+        vscode.window.showErrorMessage(`CSV parse error: ${result.error}`);
+        return undefined;
+    }
+
+    const { rows, warnings } = result;
 
     if (rows.length === 0) {
-        vscode.window.showErrorMessage('The CSV file is empty or has no data rows.');
+        vscode.window.showErrorMessage(localize('importCsv.empty', 'The CSV file is empty or has no data rows.'));
         return undefined;
+    }
+
+    // Show warnings if any
+    if (warnings.length > 0) {
+        const showWarnings = await showCsvWarnings(warnings, rows.length);
+        if (!showWarnings) { return undefined; }
     }
 
     // Show preview
@@ -35,20 +53,20 @@ export async function importCsvFile(): Promise<IMockRule[] | undefined> {
     const totalLabel = rows.length > 3 ? `\n... and ${rows.length - 3} more rows` : '';
 
     const proceed = await vscode.window.showInformationMessage(
-        `Parsed ${rows.length} row(s) from CSV.\n\nPreview:\n${previewLines}${totalLabel}`,
+        localize('importCsv.previewMessage', "Parsed {0} row(s) from CSV.\n\nPreview:\n{1}{2}", rows.length, previewLines, totalLabel),
         { modal: true },
-        'Continue'
+        localize('importCsv.continue', 'Continue')
     );
-    if (proceed !== 'Continue') { return undefined; }
+    if (proceed !== localize('importCsv.continue', 'Continue')) { return undefined; }
 
     // Wrap format choice
     const wrapChoice = await vscode.window.showQuickPick(
         [
-            { label: 'Array', description: 'Wrap rows in a plain JSON array: [...]' },
-            { label: 'SharePoint REST', description: 'Wrap in { d: { results: [...] } }' },
-            { label: 'Graph / OData', description: 'Wrap in { value: [...] }' },
+            { label: localize('importCsv.wrap.array', 'Array'), description: localize('importCsv.wrap.arrayDesc', 'Wrap rows in a plain JSON array: [...]') },
+            { label: localize('importCsv.wrap.sprest', 'SharePoint REST'), description: localize('importCsv.wrap.sprestDesc', 'Wrap in { d: { results: [...] } }') },
+            { label: localize('importCsv.wrap.graph', 'Graph / OData'), description: localize('importCsv.wrap.graphDesc', 'Wrap in { value: [...] }') },
         ],
-        { title: 'Response body format', ignoreFocusOut: true }
+        { title: localize('importCsv.formatTitle', 'Response body format'), ignoreFocusOut: true }
     );
     if (!wrapChoice) { return undefined; }
 
@@ -66,7 +84,7 @@ export async function importCsvFile(): Promise<IMockRule[] | undefined> {
     }
 
     // Ask for URL, method, clientType, status
-    const ruleOptions = await promptRuleOptions('Import CSV');
+    const ruleOptions = await promptRuleOptions(localize('importCsv.promptTitle', 'Import CSV'));
     if (!ruleOptions) { return undefined; }
 
     const rule: IMockRule = {
@@ -83,4 +101,28 @@ export async function importCsvFile(): Promise<IMockRule[] | undefined> {
     };
 
     return [rule];
+}
+
+// Shows parse warnings and asks whether to proceed.
+async function showCsvWarnings(warnings: CsvParseWarning[], rowCount: number): Promise<boolean> {
+    const summary = warnings.length === 1
+        ? '1 warning while parsing CSV'
+        : `${warnings.length} warnings while parsing CSV`;
+
+    const detail = warnings
+        .slice(0, 10)
+        .map(w => `  Row ${w.row}: ${w.message}`)
+        .join('\n');
+
+    const extra = warnings.length > 10
+        ? `\n  ... and ${warnings.length - 10} more warning(s)`
+        : '';
+
+    const choice = await vscode.window.showWarningMessage(
+        `${summary} (${rowCount} row(s) parsed).\n\n${detail}${extra}`,
+        { modal: true },
+        'Continue Anyway',
+    );
+
+    return choice === 'Continue Anyway';
 }

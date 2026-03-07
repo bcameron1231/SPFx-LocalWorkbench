@@ -52,19 +52,23 @@ export interface IMockRuleMatch {
     urlPattern?: boolean;
 }
 
-// The mock response definition
-export interface IMockRuleResponse {
+// Base properties shared by all mock response variants
+interface IMockRuleResponseBase {
     // HTTP status code to return
     status: number;
     // Response headers
     headers?: Record<string, string>;
-    // Inline response body (used when bodyFile is not set)
-    body?: unknown;
-    // Path to a JSON file containing the response body (relative to workspace)
-    bodyFile?: string;
     // Simulated delay in milliseconds before returning the response
     delay?: number;
 }
+
+// The mock response definition.
+// Uses a discriminated union so that `body` and `bodyFile` are mutually exclusive.
+export type IMockRuleResponse = IMockRuleResponseBase & (
+    | { body?: unknown; bodyFile?: never }
+    | { body?: never; bodyFile?: string }
+    | { body?: never; bodyFile?: never }
+);
 
 // Top-level mock configuration file structure (.spfx-workbench/api-mocks.json)
 export interface IMockConfig {

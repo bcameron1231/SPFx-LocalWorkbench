@@ -8,14 +8,27 @@ The SPFx Local Workbench includes tools to help you **generate and populate** yo
 
 ## Table of Contents
 
-- [Scaffold Mock Config](#scaffold-mock-config)
-- [Generate Status Code Stubs](#generate-status-code-stubs)
-- [Import JSON File](#import-json-file)
-- [Import CSV File](#import-csv-file)
-- [Record Requests](#record-requests)
-- [How Rules Are Merged](#how-rules-are-merged)
-- [Disabled Rules](#disabled-rules)
-- [URL Matching Behavior](#url-matching-behavior)
+- [Mock Data Generation](#mock-data-generation)
+  - [Table of Contents](#table-of-contents)
+  - [Scaffold Mock Config](#scaffold-mock-config)
+  - [Generate Status Code Stubs](#generate-status-code-stubs)
+    - [Wizard Steps](#wizard-steps)
+    - [What It Generates](#what-it-generates)
+  - [Import JSON File](#import-json-file)
+    - [Workflow](#workflow)
+    - [Example with `bodyFile`](#example-with-bodyfile)
+  - [Import CSV File](#import-csv-file)
+    - [Workflow](#workflow-1)
+    - [Example](#example)
+    - [CSV Parsing Notes](#csv-parsing-notes)
+  - [Record Requests](#record-requests)
+    - [How It Works](#how-it-works)
+    - [What It Generates](#what-it-generates-1)
+    - [Typical Workflow](#typical-workflow)
+  - [How Rules Are Merged](#how-rules-are-merged)
+  - [Disabled Rules](#disabled-rules)
+  - [URL Matching Behavior](#url-matching-behavior)
+  - [All Commands](#all-commands)
 
 ---
 
@@ -147,6 +160,7 @@ This keeps your `api-mocks.json` small and lets you manage large response payloa
 
 Parse a `.csv` file and use its rows as the JSON response body for a mock rule. This is useful when you have tabular data in a spreadsheet that you want to serve as a mock API response.
 
+<!-- markdownlint-disable MD024 -->
 ### Workflow
 
 1. **Pick a CSV file** — the first row is treated as column headers
@@ -288,7 +302,7 @@ For **glob pattern** rules (`"urlPattern": true`), first match wins — specific
 ## All Commands
 
 | Command | Description |
-|---|---|
+| --- | --- |
 | `SPFx Mock Data: Scaffold API Mock Configuration` | Create a starter `api-mocks.json` file |
 | `SPFx Mock Data: Generate Status Code Stubs` | Generate rules for multiple status codes via wizard |
 | `SPFx Mock Data: Import JSON File as Mock` | Import a JSON file as a mock response body |

@@ -1,7 +1,7 @@
 {
   "name": "spfx-local-workbench",
-  "displayName": "SPFx Local Workbench",
-  "description": "A local workbench for testing SharePoint Framework (SPFx) web parts without deploying to SharePoint",
+  "displayName": "%displayName%",
+  "description": "%description%",
   "version": "0.0.1",
   "publisher": "BeauCameron",
   "icon": "media/icon.png",
@@ -33,28 +33,28 @@
   "contributes": {
     "icons": {
       "fluentui-testbeaker": {
-        "description": "Test Beaker",
+        "description": "%icons.fluentui-testbeaker.description%",
         "default": {
           "fontPath": "media/icons.woff",
           "fontCharacter": "\\F3A5"
         }
       },
       "fluentui-localelanguage": {
-        "description": "Locale Language",
+        "description": "%icons.fluentui-localelanguage.description%",
         "default": {
           "fontPath": "media/icons.woff",
           "fontCharacter": "\\F2B7"
         }
       },
       "fluentui-sync": {
-        "description": "Sync",
+        "description": "%icons.fluentui-sync.description%",
         "default": {
           "fontPath": "media/icons.woff",
           "fontCharacter": "\\E895"
         }
       },
       "fluentui-developertools": {
-        "description": "Developer Tools",
+        "description": "%icons.fluentui-developertools.description%",
         "default": {
           "fontPath": "media/icons.woff",
           "fontCharacter": "\\EC7A"
@@ -64,26 +64,26 @@
     "commands": [
       {
         "command": "spfx-local-workbench.openWorkbench",
-        "title": "Open Local Workbench",
-        "category": "SPFx",
+        "title": "%command.spfx-local-workbench.openWorkbench.title%",
+        "category": "SPFx Local Workbench",
         "icon": "$(fluentui-testbeaker)"
       },
       {
         "command": "spfx-local-workbench.startServe",
-        "title": "Start Serve & Open Workbench",
-        "category": "SPFx",
+        "title": "%command.spfx-local-workbench.startServe.title%",
+        "category": "SPFx Local Workbench",
         "icon": "$(play)"
       },
       {
         "command": "spfx-local-workbench.detectWebParts",
-        "title": "Refresh Web Parts",
-        "category": "SPFx",
+        "title": "%command.spfx-local-workbench.detectWebParts.title%",
+        "category": "SPFx Local Workbench",
         "icon": "$(fluentui-sync)"
       },
       {
         "command": "spfx-local-workbench.scaffoldMockConfig",
-        "title": "Scaffold API Mock Configuration",
-        "category": "SPFx",
+        "title": "%command.spfx-local-workbench.scaffoldMockConfig.title%",
+        "category": "SPFx Local Workbench",
         "icon": {
           "light": "media/sync-light.svg",
           "dark": "media/sync-dark.svg"
@@ -91,41 +91,41 @@
       },
       {
         "command": "spfx-local-workbench.openDevTools",
-        "title": "Open Developer Tools",
-        "category": "SPFx",
+        "title": "%command.spfx-local-workbench.openDevTools.title%",
+        "category": "SPFx Local Workbench",
         "icon": "$(fluentui-developertools)"
       },
       {
         "command": "spfx-local-workbench.mockDataMenu",
-        "title": "Mock Data",
-        "category": "SPFx",
+        "title": "%command.spfx-local-workbench.mockDataMenu.title%",
+        "category": "SPFx Local Workbench",
         "icon": "$(database)"
       },
       {
         "command": "spfx-local-workbench.generateStatusStubs",
-        "title": "Generate Status Code Stubs",
+        "title": "%command.spfx-local-workbench.generateStatusStubs.title%",
         "category": "SPFx Mock Data"
       },
       {
         "command": "spfx-local-workbench.importJsonMock",
-        "title": "Import JSON File as Mock",
+        "title": "%command.spfx-local-workbench.importJsonMock.title%",
         "category": "SPFx Mock Data"
       },
       {
         "command": "spfx-local-workbench.importCsvMock",
-        "title": "Import CSV File as Mock",
+        "title": "%command.spfx-local-workbench.importCsvMock.title%",
         "category": "SPFx Mock Data"
       },
       {
         "command": "spfx-local-workbench.recordRequests",
-        "title": "Record Requests & Generate Rules",
+        "title": "%command.spfx-local-workbench.recordRequests.title%",
         "category": "SPFx Mock Data"
       }
     ],
     "submenus": [
       {
         "id": "spfx-local-workbench.mockData",
-        "label": "Mock Data",
+        "label": "%submenu.spfx-local-workbench.mockData.label%",
         "icon": "$(database)"
       }
     ],
@@ -193,57 +193,57 @@
       ]
     },
     "configuration": {
-      "title": "SPFx Local Workbench",
+      "title": "%configuration.spfxLocalWorkbench.title%",
       "properties": {
         "spfxLocalWorkbench.serveUrl": {
           "type": "string",
           "default": "https://localhost:4321",
-          "description": "The URL where the SPFx serve is running"
+          "description": "%configuration.spfxLocalWorkbench.serveUrl.description%"
         },
         "spfxLocalWorkbench.autoOpenWorkbench": {
           "type": "boolean",
           "default": false,
-          "description": "Automatically open the workbench when starting serve"
+          "description": "%configuration.spfxLocalWorkbench.autoOpenWorkbench.description%"
         },
         "spfxLocalWorkbench.context.siteUrl": {
           "type": "string",
           "default": "https://contoso.sharepoint.com/sites/devsite",
-          "description": "The SharePoint site URL to use in the mock context"
+          "description": "%configuration.spfxLocalWorkbench.context.siteUrl.description%"
         },
         "spfxLocalWorkbench.context.webUrl": {
           "type": "string",
           "default": "https://contoso.sharepoint.com/sites/devsite",
-          "description": "The SharePoint web URL to use in the mock context"
+          "description": "%configuration.spfxLocalWorkbench.context.webUrl.description%"
         },
         "spfxLocalWorkbench.context.userDisplayName": {
           "type": "string",
           "default": "Local Workbench User",
-          "description": "The display name of the current user in the mock context"
+          "description": "%configuration.spfxLocalWorkbench.context.userDisplayName.description%"
         },
         "spfxLocalWorkbench.context.userEmail": {
           "type": "string",
           "default": "user@contoso.onmicrosoft.com",
-          "description": "The email address of the current user in the mock context"
+          "description": "%configuration.spfxLocalWorkbench.context.userEmail.description%"
         },
         "spfxLocalWorkbench.context.userLoginName": {
           "type": "string",
           "default": "i:0#.f|membership|user@contoso.onmicrosoft.com",
-          "description": "The login name of the current user in the mock context"
+          "description": "%configuration.spfxLocalWorkbench.context.userLoginName.description%"
         },
         "spfxLocalWorkbench.context.culture": {
           "type": "string",
           "default": "en-US",
-          "description": "The culture/locale to use in the mock context (e.g., en-US, de-DE, fr-FR)"
+          "description": "%configuration.spfxLocalWorkbench.context.culture.description%"
         },
         "spfxLocalWorkbench.context.isAnonymousGuestUser": {
           "type": "boolean",
           "default": false,
-          "description": "Whether the user is an anonymous guest"
+          "description": "%configuration.spfxLocalWorkbench.context.isAnonymousGuestUser.description%"
         },
         "spfxLocalWorkbench.context.customContext": {
           "type": "object",
           "default": {},
-          "description": "Additional custom context properties to merge into the mock context (JSON object)",
+          "description": "%configuration.spfxLocalWorkbench.context.customContext.description%",
           "additionalProperties": true
         },
         "spfxLocalWorkbench.theme.preset": {
@@ -257,18 +257,18 @@
             "custom"
           ],
           "enumDescriptions": [
-            "Default SharePoint Team Site theme (blue)",
-            "SharePoint Communication Site theme (teal)",
-            "Dark mode theme",
-            "High contrast theme for accessibility",
-            "Use custom theme colors defined in theme.customColors"
+            "%configuration.spfxLocalWorkbench.theme.preset.enumDescriptions.teamSite%",
+            "%configuration.spfxLocalWorkbench.theme.preset.enumDescriptions.communicationSite%",
+            "%configuration.spfxLocalWorkbench.theme.preset.enumDescriptions.dark%",
+            "%configuration.spfxLocalWorkbench.theme.preset.enumDescriptions.highContrast%",
+            "%configuration.spfxLocalWorkbench.theme.preset.enumDescriptions.custom%"
           ],
-          "description": "The SharePoint theme preset to use"
+          "description": "%configuration.spfxLocalWorkbench.theme.preset.description%"
         },
         "spfxLocalWorkbench.theme.customColors": {
           "type": "object",
           "default": {},
-          "description": "Custom theme colors when using 'custom' preset. Keys should be SharePoint theme slot names (e.g., themePrimary, themeDark, neutralPrimary)",
+          "description": "%configuration.spfxLocalWorkbench.theme.customColors.description%",
           "additionalProperties": {
             "type": "string"
           }
@@ -276,32 +276,32 @@
         "spfxLocalWorkbench.pageContext.webTitle": {
           "type": "string",
           "default": "Local Workbench",
-          "description": "The title of the web in the page context"
+          "description": "%configuration.spfxLocalWorkbench.pageContext.webTitle.description%"
         },
         "spfxLocalWorkbench.pageContext.webDescription": {
           "type": "string",
           "default": "Local development workbench for SPFx web parts",
-          "description": "The description of the web in the page context"
+          "description": "%configuration.spfxLocalWorkbench.pageContext.webDescription.description%"
         },
         "spfxLocalWorkbench.pageContext.webTemplate": {
           "type": "string",
           "default": "STS#3",
-          "description": "The web template ID (e.g., STS#3 for Team Site, SITEPAGEPUBLISHING#0 for Communication Site)"
+          "description": "%configuration.spfxLocalWorkbench.pageContext.webTemplate.description%"
         },
         "spfxLocalWorkbench.pageContext.isNoScriptEnabled": {
           "type": "boolean",
           "default": false,
-          "description": "Whether NoScript is enabled on the site"
+          "description": "%configuration.spfxLocalWorkbench.pageContext.isNoScriptEnabled.description%"
         },
         "spfxLocalWorkbench.pageContext.isSPO": {
           "type": "boolean",
           "default": true,
-          "description": "Whether this is SharePoint Online (vs. on-premises)"
+          "description": "%configuration.spfxLocalWorkbench.pageContext.isSPO.description%"
         },
         "spfxLocalWorkbench.proxy.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Enable the API proxy system. When disabled, HTTP client calls (SPHttpClient, HttpClient, AadHttpClient) make real fetch() requests instead of routing through the mock rule engine. This allows external tools like Dev Proxy to intercept network traffic. Requires closing and reopening the workbench to take effect."
+          "description": "%configuration.spfxLocalWorkbench.proxy.enabled.description%"
         },
         "spfxLocalWorkbench.proxy.mode": {
           "type": "string",
@@ -317,22 +317,22 @@
         "spfxLocalWorkbench.proxy.mockFile": {
           "type": "string",
           "default": ".spfx-workbench/api-mocks.json",
-          "description": "Path to the mock rules configuration file (relative to workspace root)"
+          "description": "%configuration.spfxLocalWorkbench.proxy.mockFile.description%"
         },
         "spfxLocalWorkbench.proxy.defaultDelay": {
           "type": "number",
           "default": 0,
-          "description": "Default simulated latency in milliseconds for mock responses"
+          "description": "%configuration.spfxLocalWorkbench.proxy.defaultDelay.description%"
         },
         "spfxLocalWorkbench.proxy.fallbackStatus": {
           "type": "number",
           "default": 404,
-          "description": "HTTP status code returned when no mock rule matches in mock mode"
+          "description": "%configuration.spfxLocalWorkbench.proxy.fallbackStatus.description%"
         },
         "spfxLocalWorkbench.proxy.logRequests": {
           "type": "boolean",
           "default": true,
-          "description": "Log all proxied API requests to the 'SPFx API Proxy' output channel"
+          "description": "%configuration.spfxLocalWorkbench.proxy.logRequests.description%"
         },
         "spfxLocalWorkbench.proxy.allowedOrigins": {
           "type": "array",
@@ -364,7 +364,14 @@
     "package:webview": "node webview/esbuild.config.js --production",
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
-    "generate:icons": "node scripts/generateIcons.js"
+    "generate:icons": "node scripts/generateIcons.js",
+    "i18n:extract": "npx vscode-nls-dev extract -i src -o i18n -l package.nls.json || echo 'Install vscode-nls-dev to run extraction'",
+    "i18n:generate": "npx vscode-nls-dev create-package -s package.nls.json -d i18n -o i18n-packages || echo 'Install vscode-nls-dev to run generation'",
+    "i18n:help": "echo 'Use npx vscode-nls-dev extract/create-package or install vscode-nls-dev as a devDependency'"
+  },
+
+  "dependencies": {
+    "vscode-nls": "^5.0.0"
   },
   "devDependencies": {
     "@fluentui/react": "^8.110.10",
