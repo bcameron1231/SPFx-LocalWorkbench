@@ -203,32 +203,30 @@
           "command": "spfx-local-workbench.openWorkbench",
           "when": "resourceFilename =~ /\\.manifest\\.json$/",
           "group": "navigation"
-        }
-      ],
-      "webview/title": [
+        },
         {
           "command": "spfx-local-workbench.detectWebParts",
           "when": "spfxLocalWorkbench.isWorkbench",
           "group": "navigation"
         },
         {
+          "command": "spfx-local-workbench.mockDataMenu",
+          "when": "spfxLocalWorkbench.isWorkbench",
+          "group": "navigation"
+        },
+        {
           "command": "spfx-local-workbench.openDevTools",
           "when": "spfxLocalWorkbench.isWorkbench || spfxLocalWorkbench.isStorybook",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
           "command": "spfx-local-workbench.openSettings",
           "when": "spfxLocalWorkbench.isWorkbench || spfxLocalWorkbench.isStorybook",
-          "group": "navigation"
+          "group": "navigation@2"
         },
         {
           "command": "spfx-local-workbench.generateStories",
           "when": "spfxLocalWorkbench.isStorybook",
-          "group": "navigation"
-        },
-        {
-          "command": "spfx-local-workbench.mockDataMenu",
-          "when": "spfxLocalWorkbench.isWorkbench",
           "group": "navigation"
         }
       ],
