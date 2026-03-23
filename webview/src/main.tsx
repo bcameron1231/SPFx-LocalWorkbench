@@ -10,6 +10,7 @@ import type { ITheme, IThemeGroup } from '@spfx-local-workbench/shared';
 import { WorkbenchRuntime } from './WorkbenchRuntime';
 import { App, IAppHandlers } from './components/App';
 import { StatusBarThemePicker } from './components/StatusBarThemePicker';
+import { initializeProxyBridge } from './proxy';
 import './styles/global.css';
 
 const log = logger.createChild('Main');
@@ -30,8 +31,18 @@ function initialize() {
       throw new Error('Workbench configuration not found');
     }
 
+    // Acquire VS Code API once - must only be called once per webview
+    const vscodeApi = window.acquireVsCodeApi();
+
+    // Only initialize the proxy bridge when the proxy is enabled.
+    // When disabled, HTTP clients use real fetch() calls so external
+    // tools like Dev Proxy can intercept network traffic.
+    if (config.proxyEnabled !== false) {
+      initializeProxyBridge(vscodeApi);
+    }
+
     // Create the workbench runtime
-    const runtime = new WorkbenchRuntime(config);
+    const runtime = new WorkbenchRuntime(config, vscodeApi);
 
     // Setup event listeners for React -> Runtime communication
     window.addEventListener('addWebPart', ((e: CustomEvent) => {
@@ -77,6 +88,10 @@ function initialize() {
 
     window.addEventListener('openDevTools', (() => {
       runtime.handleOpenDevTools();
+    }) as EventListener);
+
+    window.addEventListener('mockData', (() => {
+      runtime.handleMockData();
     }) as EventListener);
 
     // Listen for live reload messages from the extension
