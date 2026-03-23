@@ -10,7 +10,7 @@
         "samples/**": true // exclude local SPFx sample projects from search
     },
     // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
-    "typescript.tsc.autoDetect": "off",
+    "typescript.ts.tsc.autoDetect": "off",
     "explorer.fileNesting.patterns": {
         "*.module.css": "${capture}.module.css.d.ts"
     },
@@ -52,6 +52,13 @@
     
     // Disable VS Code's built-in import organization (Prettier plugin handles this)
     "typescript.preferences.organizeImportsOnSave": false,
-    "javascript.preferences.organizeImportsOnSave": false
+    "javascript.preferences.organizeImportsOnSave": false,
+
+    "cSpell.words": [
+        "Customizer",
+        "Customizers",
+        "getby",
+        "getbytitle"
+    ]
 }
 

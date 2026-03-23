@@ -47,7 +47,7 @@ export class WorkbenchRuntime {
 
     // Initialize core components
     this.manifestLoader = new ManifestLoader(config.serveUrl);
-    this.contextProvider = new SpfxContext(config.context);
+    this.contextProvider = new SpfxContext(config.context, config.proxyEnabled !== false);
     this.themeProvider = new ThemeProvider(config.theme);
     this.themeProvider.applyThemeToDocument();
     this.webPartManager = new WebPartManager(
@@ -74,11 +74,21 @@ export class WorkbenchRuntime {
 
   /** Persists the selected theme to VS Code workspace settings. */
   persistTheme(theme: ITheme): void {
-    this.vscode.postMessage({ command: 'setTheme', themeName: theme.name, isCustomTheme: theme.isCustom });
+    this.vscode.postMessage({
+      command: 'setTheme',
+      themeName: theme.name,
+      isCustomTheme: theme.isCustom,
+    });
   }
 
   // Applies updated settings from the extension host without full reload
-  updateSettings(settings: { serveUrl?: string; theme?: ITheme; customThemes?: ITheme[]; context?: any }): void {
+  updateSettings(settings: {
+    serveUrl?: string;
+    theme?: ITheme;
+    customThemes?: ITheme[];
+    context?: any;
+    proxyEnabled?: boolean;
+  }): void {
     if (settings.serveUrl) {
       this.config.serveUrl = settings.serveUrl;
     }
@@ -99,7 +109,7 @@ export class WorkbenchRuntime {
       );
     }
     if (settings.context) {
-      this.contextProvider = new SpfxContext(settings.context);
+      this.contextProvider = new SpfxContext(settings.context, settings.proxyEnabled !== false);
     }
     if (settings.customThemes !== undefined) {
       window.dispatchEvent(
@@ -520,6 +530,10 @@ export class WorkbenchRuntime {
 
   handleOpenDevTools(): void {
     this.vscode.postMessage({ command: 'openDevTools' });
+  }
+
+  handleMockData(): void {
+    this.vscode.postMessage({ command: 'mockDataMenu' });
   }
 
   private updateStatus(message: string): void {

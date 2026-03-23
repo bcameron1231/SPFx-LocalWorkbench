@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 
 import type { ITheme } from '@spfx-local-workbench/shared';
 
+import type { IExternalDependency } from '../SpfxProjectDetector';
 import type { IContextConfig } from '../config/WorkbenchConfig';
 
 // Configuration for generating the workbench HTML
@@ -25,6 +26,10 @@ export interface IHtmlGeneratorConfig {
   customThemes?: ITheme[];
   // Context settings from user configuration
   contextSettings?: Partial<IContextConfig>;
+  // Whether the API proxy is enabled (default true)
+  proxyEnabled?: boolean;
+  // External dependencies resolved from the SPFx project's node_modules
+  externalDependencies?: IExternalDependency[];
 }
 
 // Generates the Content Security Policy for the webview
@@ -116,6 +121,11 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
     theme: config.currentTheme,
     customThemes: config.customThemes ?? [],
     context: config.contextSettings,
+    proxyEnabled: config.proxyEnabled !== false,
+    externalDependencies: (config.externalDependencies || []).map((dep) => ({
+      moduleName: dep.moduleName,
+      globalName: dep.globalName,
+    })),
   };
 
   // Resolve local vendor UMD bundles shipped with the extension
@@ -125,17 +135,42 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
   const reactDomUri = config.webview.asWebviewUri(
     vscode.Uri.joinPath(config.extensionUri, 'dist', 'webview', 'vendor', 'react-dom.js'),
   );
+  // Fluent UI for the extension's own UI (toolbar, property pane, component picker, etc.).
+  // This is the extension's own dependency — completely independent of the SPFx project.
   const fluentUri = config.webview.asWebviewUri(
     vscode.Uri.joinPath(config.extensionUri, 'dist', 'webview', 'vendor', 'fluentui-react.js'),
   );
+
+  // External dependencies resolved from the SPFx project's node_modules.
+  // These are libraries (like @fluentui/react) that SPFx marks as externals —
+  // the web part bundle expects the host to provide them.  We load the real
+  // UMD from the project so the web part gets the exact version it was
+  // compiled against.
+  const externalScripts = (config.externalDependencies || [])
+    .map((dep) => {
+      if (!dep.bundlePath) {
+        return '';
+      }
+      const uri = config.webview.asWebviewUri(vscode.Uri.file(dep.bundlePath));
+      return `    <!-- SPFx external: ${dep.moduleName} (from project node_modules) -->\n    <script nonce="${config.nonce}" src="${uri}"></script>`;
+    })
+    .filter(Boolean)
+    .join('\n');
 
   return `
     <!-- React 17.0.2 UMD - bundled locally (matches SPFx runtime) -->
     <script nonce="${config.nonce}" src="${reactUri}"></script>
     <script nonce="${config.nonce}" src="${reactDomUri}"></script>
     
-    <!-- Fluent UI React v8 UMD - bundled locally (matches SPFx runtime) -->
+    <!-- Fluent UI React v8 UMD - extension's own dependency for workbench UI -->
     <script nonce="${config.nonce}" src="${fluentUri}"></script>
+    <script nonce="${config.nonce}">
+        // Rename to a private global so the SPFx project's own @fluentui/react can coexist without conflicts
+        window.__ExtFluentUI = window.FluentUIReact;
+        delete window.FluentUIReact;
+    </script>
+
+${externalScripts ? `    <!-- SPFx project externals (loaded from project node_modules) -->\n${externalScripts}\n` : ''}
     
     <!-- Inject workbench configuration -->
     <script nonce="${config.nonce}">

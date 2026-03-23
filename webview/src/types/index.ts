@@ -1,4 +1,10 @@
-import type { IPageContextConfig, ITheme, IWebPartManifest, IExtensionManifest, IComponentManifest } from '@spfx-local-workbench/shared';
+import type {
+  IComponentManifest,
+  IExtensionManifest,
+  IPageContextConfig,
+  ITheme,
+  IWebPartManifest,
+} from '@spfx-local-workbench/shared';
 
 // ─── Webview-specific types ───────────────────────────────────────────────────
 
@@ -17,6 +23,8 @@ export interface IWorkbenchConfig {
   /** Custom themes defined in `spfxLocalWorkbench.theme.custom`. */
   customThemes?: ITheme[];
   context: IContextSettings; // Always provided by extension (from WorkbenchConfig defaults)
+  proxyEnabled?: boolean;
+  externalDependencies?: Array<{ moduleName: string; globalName: string }>;
 }
 
 export interface IContextSettings {

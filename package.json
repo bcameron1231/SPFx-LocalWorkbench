@@ -1,7 +1,7 @@
 {
   "name": "spfx-local-workbench",
-  "displayName": "SPFx Local Workbench",
-  "description": "A local workbench for testing SharePoint Framework (SPFx) web parts without deploying to SharePoint",
+  "displayName": "%displayName%",
+  "description": "%description%",
   "version": "0.0.1",
   "publisher": "BeauCameron",
   "author": {
@@ -47,7 +47,7 @@
   "contributes": {
     "icons": {
       "fluentui-testbeaker": {
-        "description": "Test Beaker",
+        "description": "%icons.fluentui-testbeaker.description%",
         "default": {
           "fontPath": "media/icons.woff",
           "fontCharacter": "\\F3A5"
@@ -68,21 +68,21 @@
         }
       },
       "fluentui-localelanguage": {
-        "description": "Locale Language",
+        "description": "%icons.fluentui-localelanguage.description%",
         "default": {
           "fontPath": "media/icons.woff",
           "fontCharacter": "\\F2B7"
         }
       },
       "fluentui-sync": {
-        "description": "Sync",
+        "description": "%icons.fluentui-sync.description%",
         "default": {
           "fontPath": "media/icons.woff",
           "fontCharacter": "\\E895"
         }
       },
       "fluentui-developertools": {
-        "description": "Developer Tools",
+        "description": "%icons.fluentui-developertools.description%",
         "default": {
           "fontPath": "media/icons.woff",
           "fontCharacter": "\\EC7A"
@@ -99,57 +99,102 @@
     "commands": [
       {
         "command": "spfx-local-workbench.openWorkbench",
-        "title": "Open Local Workbench",
-        "category": "SPFx",
+        "title": "%command.spfx-local-workbench.openWorkbench.title%",
+        "category": "SPFx Local Workbench",
         "icon": "$(fluentui-testbeaker)"
       },
       {
         "command": "spfx-local-workbench.startServeWorkbench",
-        "title": "Start Serve & Open Workbench",
-        "category": "SPFx",
+        "title": "%command.spfx-local-workbench.startServe.title%",
+        "category": "SPFx Local Workbench",
         "icon": "$(fluentui-testbeakersolid)"
       },
       {
         "command": "spfx-local-workbench.detectWebParts",
-        "title": "Refresh Web Parts",
-        "category": "SPFx",
+        "title": "%command.spfx-local-workbench.detectWebParts.title%",
+        "category": "SPFx Local Workbench",
         "icon": "$(fluentui-sync)"
       },
+
       {
         "command": "spfx-local-workbench.openDevTools",
-        "title": "Open Developer Tools",
-        "category": "SPFx",
+        "title": "%command.spfx-local-workbench.openDevTools.title%",
+        "category": "SPFx Local Workbench",
         "icon": "$(fluentui-developertools)"
       },
       {
+        "command": "spfx-local-workbench.openSettings",
+        "title": "%command.spfx-local-workbench.openSettings.title%",
+        "category": "SPFx Local Workbench",
+        "icon": "$(gear)"
+      },
+
+      {
         "command": "spfx-local-workbench.openStorybook",
-        "title": "Open SPFx Storybook",
-        "category": "SPFx",
+        "title": "%command.spfx-local-workbench.openStorybook.title%",
+        "category": "SPFx Local Workbench",
         "icon": "$(fluentui-teststep)"
       },
       {
         "command": "spfx-local-workbench.startServeStorybook",
-        "title": "Start Serve & Open SPFx Storybook",
-        "category": "SPFx",
+        "title": "%command.spfx-local-workbench.startServeStorybook.title%",
+        "category": "SPFx Local Workbench",
         "icon": "$(fluentui-teststep)"
       },
       {
         "command": "spfx-local-workbench.generateStories",
-        "title": "Generate SPFx Storybook Stories",
-        "category": "SPFx",
+        "title": "%command.spfx-local-workbench.generateStories.title%",
+        "category": "SPFx Local Workbench",
         "icon": "$(file-code)"
       },
       {
         "command": "spfx-local-workbench.cleanStorybook",
-        "title": "Clean SPFx Storybook",
-        "category": "SPFx",
+        "title": "%command.spfx-local-workbench.cleanStorybook.title%",
+        "category": "SPFx Local Workbench",
         "icon": "$(fluentui-broom)"
       },
+
       {
-        "command": "spfx-local-workbench.openSettings",
-        "title": "Open SPFx Workbench Settings",
-        "category": "SPFx",
-        "icon": "$(gear)"
+        "command": "spfx-local-workbench.scaffoldMockConfig",
+        "title": "%command.spfx-local-workbench.scaffoldMockConfig.title%",
+        "category": "SPFx Local Workbench",
+        "icon": {
+          "light": "media/sync-light.svg",
+          "dark": "media/sync-dark.svg"
+        }
+      },
+      {
+        "command": "spfx-local-workbench.mockDataMenu",
+        "title": "%command.spfx-local-workbench.mockDataMenu.title%",
+        "category": "SPFx Local Workbench",
+        "icon": "$(database)"
+      },
+      {
+        "command": "spfx-local-workbench.generateStatusStubs",
+        "title": "%command.spfx-local-workbench.generateStatusStubs.title%",
+        "category": "SPFx Mock Data"
+      },
+      {
+        "command": "spfx-local-workbench.importJsonMock",
+        "title": "%command.spfx-local-workbench.importJsonMock.title%",
+        "category": "SPFx Mock Data"
+      },
+      {
+        "command": "spfx-local-workbench.importCsvMock",
+        "title": "%command.spfx-local-workbench.importCsvMock.title%",
+        "category": "SPFx Mock Data"
+      },
+      {
+        "command": "spfx-local-workbench.recordRequests",
+        "title": "%command.spfx-local-workbench.recordRequests.title%",
+        "category": "SPFx Mock Data"
+      }
+    ],
+    "submenus": [
+      {
+        "id": "spfx-local-workbench.mockData",
+        "label": "%submenu.spfx-local-workbench.mockData.label%",
+        "icon": "$(database)"
       }
     ],
     "menus": {
@@ -158,15 +203,12 @@
           "command": "spfx-local-workbench.openWorkbench",
           "when": "resourceFilename =~ /\\.manifest\\.json$/",
           "group": "navigation"
-        },
+        }
+      ],
+      "webview/title": [
         {
           "command": "spfx-local-workbench.detectWebParts",
           "when": "spfxLocalWorkbench.isWorkbench",
-          "group": "navigation"
-        },
-        {
-          "command": "spfx-local-workbench.generateStories",
-          "when": "spfxLocalWorkbench.isStorybook",
           "group": "navigation"
         },
         {
@@ -178,27 +220,59 @@
           "command": "spfx-local-workbench.openSettings",
           "when": "spfxLocalWorkbench.isWorkbench || spfxLocalWorkbench.isStorybook",
           "group": "navigation"
+        },
+        {
+          "command": "spfx-local-workbench.generateStories",
+          "when": "spfxLocalWorkbench.isStorybook",
+          "group": "navigation"
+        },
+        {
+          "command": "spfx-local-workbench.mockDataMenu",
+          "when": "spfxLocalWorkbench.isWorkbench",
+          "group": "navigation"
+        }
+      ],
+      "spfx-local-workbench.mockData": [
+        {
+          "command": "spfx-local-workbench.scaffoldMockConfig",
+          "group": "1_scaffold"
+        },
+        {
+          "command": "spfx-local-workbench.generateStatusStubs",
+          "group": "2_generate"
+        },
+        {
+          "command": "spfx-local-workbench.importJsonMock",
+          "group": "3_import"
+        },
+        {
+          "command": "spfx-local-workbench.importCsvMock",
+          "group": "3_import"
+        },
+        {
+          "command": "spfx-local-workbench.recordRequests",
+          "group": "4_record"
         }
       ]
     },
     "configuration": [
       {
-        "title": "General",
+        "title": "%configuration.spfxLocalWorkbench.group.general.title%",
         "properties": {
           "spfxLocalWorkbench.serveUrl": {
             "type": "string",
             "default": "https://localhost:4321",
-            "description": "The URL where the SPFx serve is running"
+            "description": "%configuration.spfxLocalWorkbench.serveUrl.description%"
           },
           "spfxLocalWorkbench.autoOpenWorkbench": {
             "type": "boolean",
             "default": false,
-            "description": "Automatically open the workbench when starting serve"
+            "description": "%configuration.spfxLocalWorkbench.autoOpenWorkbench.description%"
           },
           "spfxLocalWorkbench.serveCommand": {
             "type": "string",
             "default": "heft start --clean --nobrowser",
-            "markdownDescription": "The command to run when starting the SPFx serve from the extension. Common options:\n- `heft start --clean --nobrowser`, `heft start --clean --nobrowser --locales=fr-fr`, `npm run start`"
+            "markdownDescription": "%configuration.spfxLocalWorkbench.serveCommand.mdDescription%"
           },
           "spfxLocalWorkbench.statusBarWorkbenchAction": {
             "type": "string",
@@ -207,8 +281,8 @@
               "startServeWorkbench"
             ],
             "markdownEnumDescriptions": [
-              "$(fluentui-testbeaker) Open the Local Workbench panel",
-              "$(fluentui-testbeakersolid) Start serve and open the Local Workbench panel"
+              "configuration.spfxLocalWorkbench.statusBarWorkbenchAction.mdEnumDescriptions.openWorkbench",
+              "configuration.spfxLocalWorkbench.statusBarWorkbenchAction.mdEnumDescriptions.startServe"
             ],
             "default": "openWorkbench",
             "description": "Action to perform when clicking the SPFx Workbench status bar button"
@@ -220,11 +294,11 @@
               "startServeStorybook"
             ],
             "markdownEnumDescriptions": [
-              "$(fluentui-teststep) Open the SPFx Storybook panel",
-              "$(fluentui-teststep) Start serve and open the SPFx Storybook panel"
+              "configuration.spfxLocalWorkbench.statusBarStorybookAction.mdEnumDescriptions.openStorybook",
+              "configuration.spfxLocalWorkbench.statusBarStorybookAction.mdEnumDescriptions.startServeStorybook"
             ],
             "default": "openStorybook",
-            "description": "Action to perform when clicking the SPFx Storybook status bar button"
+            "description": "%configuration.spfxLocalWorkbench.statusBarStorybookAction.description%"
           },
           "spfxLocalWorkbench.statusBarDisplay": {
             "type": "string",
@@ -233,18 +307,19 @@
               "iconOnly",
               "hidden"
             ],
-            "enumDescriptions": [
-              "Show icon and text label on each status bar button",
-              "Show icon only on each status bar button",
-              "Hide all status bar buttons"
+            "markdownEnumDescriptions": [
+              "configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.iconAndText",
+              "configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.iconOnly",
+              "configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.hidden"
             ],
             "default": "iconAndText",
-            "description": "Controls the display style of the SPFx status bar buttons"
+            "description": "%configuration.spfxLocalWorkbench.statusBarDisplay.description%"
           }
         }
       },
+
       {
-        "title": "Theme",
+        "title": "%configuration.spfxLocalWorkbench.group.theme.title%",
         "properties": {
           "spfxLocalWorkbench.theme.current": {
             "type": "string",
@@ -262,30 +337,30 @@
               "Custom"
             ],
             "enumDescriptions": [
-              "Teal - Microsoft's teal theme",
-              "Blue - Microsoft's blue theme",
-              "Orange - Microsoft's orange theme",
-              "Red - Microsoft's red theme",
-              "Purple - Microsoft's purple theme",
-              "Green - Microsoft's green theme",
-              "Periwinkle - Microsoft's periwinkle theme",
-              "Cobalt - Microsoft's cobalt theme",
-              "Dark Teal - Microsoft's dark teal theme",
-              "Dark Blue - Microsoft's dark blue theme",
-              "Custom - Use a custom theme ID"
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.teal%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.blue%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.orange%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.red%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.purple%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.green%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.periwinkle%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.cobalt%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.darkTeal%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.darkBlue%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.custom%"
             ],
             "default": "Teal",
-            "description": "Select the theme for the workbench"
+            "description": "%configuration.spfxLocalWorkbench.theme.current.description%"
           },
           "spfxLocalWorkbench.theme.customName": {
             "type": "string",
             "default": "",
-            "markdownDescription": "Custom theme name when `#spfxLocalWorkbench.theme.current#` is set to `Custom`. Must match a name defined in `#spfxLocalWorkbench.theme.custom#` - case sensitive"
+            "markdownDescription": "%configuration.spfxLocalWorkbench.theme.customName.mdDescription%"
           },
           "spfxLocalWorkbench.theme.custom": {
             "type": "array",
             "default": [],
-            "markdownDescription": "Custom themes in addition to the default Microsoft themes. Each theme should have `name` and `palette` properties",
+            "markdownDescription": "%configuration.spfxLocalWorkbench.theme.custom.mdDescription%",
             "items": {
               "type": "object",
               "required": [
@@ -295,55 +370,55 @@
               "properties": {
                 "name": {
                   "type": "string",
-                  "description": "Display name for the theme"
+                  "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.name.description%"
                 },
                 "isInverted": {
                   "type": "boolean",
-                  "description": "Whether this theme is a dark/inverted theme",
+                  "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.isInverted.description%",
                   "default": false
                 },
                 "backgroundImageUri": {
                   "type": "string",
-                  "description": "Optional URI for a background image",
+                  "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.backgroundImageUri.description%",
                   "default": ""
                 },
                 "palette": {
                   "type": "object",
-                  "description": "Fluent UI theme palette. Only themePrimary is required — unspecified slots fall back to the default Fluent UI blue palette values (and probably look janky as heck).",
+                  "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.description%",
                   "required": ["themePrimary"],
                   "additionalProperties": { "type": "string" },
                   "properties": {
-                    "themePrimary":     { "type": "string", "description": "Primary brand color (required)" },
-                    "accent":           { "type": "string", "description": "Accent color, often the same as themePrimary" },
-                    "themeDarker":      { "type": "string", "description": "Darkest shade of the primary ramp" },
-                    "themeDark":        { "type": "string", "description": "Dark shade of the primary ramp" },
-                    "themeDarkAlt":     { "type": "string", "description": "Slightly darker than primary" },
-                    "themeSecondary":   { "type": "string", "description": "Slightly lighter than primary" },
-                    "themeTertiary":    { "type": "string", "description": "Mid-light shade of the primary ramp" },
-                    "themeLight":       { "type": "string", "description": "Light shade of the primary ramp" },
-                    "themeLighter":     { "type": "string", "description": "Lighter shade of the primary ramp" },
-                    "themeLighterAlt":  { "type": "string", "description": "Lightest shade of the primary ramp" },
-                    "white":            { "type": "string", "description": "Page background color (required for dark/inverted themes)" },
-                    "black":            { "type": "string", "description": "Darkest neutral (required for dark/inverted themes)" },
-                    "neutralDark":      { "type": "string", "description": "Near-black neutral — headings, strong text" },
-                    "neutralPrimary":   { "type": "string", "description": "Primary body text color" },
-                    "neutralPrimaryAlt":{ "type": "string", "description": "Slightly lighter than neutralPrimary" },
-                    "neutralSecondary": { "type": "string", "description": "Secondary text, icons, placeholders" },
-                    "neutralSecondaryAlt": { "type": "string", "description": "Alternate secondary neutral" },
-                    "neutralTertiary":  { "type": "string", "description": "Tertiary text, disabled states" },
-                    "neutralTertiaryAlt": { "type": "string", "description": "Lighter tertiary neutral, used for borders" },
-                    "neutralQuaternary":  { "type": "string", "description": "Quaternary neutral" },
-                    "neutralQuaternaryAlt": { "type": "string", "description": "Slightly lighter quaternary neutral" },
-                    "neutralLight":     { "type": "string", "description": "Light neutral — borders, dividers" },
-                    "neutralLighter":   { "type": "string", "description": "Lighter neutral — hover backgrounds" },
-                    "neutralLighterAlt":{ "type": "string", "description": "Lightest neutral — subtle backgrounds" },
-                    "primaryBackground":{ "type": "string", "description": "Page/canvas background (white for light themes, dark for inverted)" },
-                    "primaryText":      { "type": "string", "description": "Primary text on the page background" },
-                    "bodyBackground":   { "type": "string", "description": "Body background, typically same as primaryBackground" },
-                    "bodyText":         { "type": "string", "description": "Body text color, typically same as primaryText" },
-                    "disabledBackground": { "type": "string", "description": "Background for disabled elements" },
-                    "disabledText":     { "type": "string", "description": "Text color for disabled elements" },
-                    "error":            { "type": "string", "description": "Error/danger color" }
+                    "themePrimary":     { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themePrimary.description%" },
+                    "accent":           { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.accent.description%" },
+                    "themeDarker":      { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeDarker.description%" },
+                    "themeDark":        { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeDark.description%" },
+                    "themeDarkAlt":     { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeDarkAlt.description%" },
+                    "themeSecondary":   { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeSecondary.description%" },
+                    "themeTertiary":    { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeTertiary.description%" },
+                    "themeLight":       { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeLight.description%" },
+                    "themeLighter":     { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeLighter.description%" },
+                    "themeLighterAlt":  { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeLighterAlt.description%" },
+                    "white":            { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.white.description%" },
+                    "black":            { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.black.description%" },
+                    "neutralDark":      { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralDark.description%" },
+                    "neutralPrimary":   { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralPrimary.description%" },
+                    "neutralPrimaryAlt":{ "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralPrimaryAlt.description%" },
+                    "neutralSecondary": { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralSecondary.description%" },
+                    "neutralSecondaryAlt": { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralSecondaryAlt.description%" },
+                    "neutralTertiary":  { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralTertiary.description%" },
+                    "neutralTertiaryAlt": { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralTertiaryAlt.description%" },
+                    "neutralQuaternary":  { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralQuaternary.description%" },
+                    "neutralQuaternaryAlt": { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralQuaternaryAlt.description%" },
+                    "neutralLight":     { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralLight.description%" },
+                    "neutralLighter":   { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralLighter.description%" },
+                    "neutralLighterAlt":{ "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralLighterAlt.description%" },
+                    "primaryBackground":{ "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.primaryBackground.description%" },
+                    "primaryText":      { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.primaryText.description%" },
+                    "bodyBackground":   { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.bodyBackground.description%" },
+                    "bodyText":         { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.bodyText.description%" },
+                    "disabledBackground": { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.disabledBackground.description%" },
+                    "disabledText":     { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.disabledText.description%" },
+                    "error":            { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.error.description%" }
                   }
                 }
               }
@@ -351,8 +426,9 @@
           }
         }
       },
+
       {
-        "title": "Context",
+        "title": "%configuration.spfxLocalWorkbench.group.context.title%",
         "properties": {
           "spfxLocalWorkbench.context.pageContext": {
             "type": "object",
@@ -380,121 +456,122 @@
               "isNoScriptEnabled": false,
               "isSPO": true
             },
-            "markdownDescription": "SharePoint page context for the mock environment (mirrors SPFx `context.pageContext` structure). Additional properties can be added as needed",
+            "markdownDescription": "%configuration.spfxLocalWorkbench.context.pageContext.mdDescription%",
             "properties": {
               "site": {
                 "type": "object",
-                "description": "Site-level context information",
+                "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.site.description%",
                 "properties": {
                   "absoluteUrl": {
                     "type": "string",
-                    "description": "Absolute URL of the site collection"
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.site.properties.absoluteUrl.description%"
                   }
                 },
                 "additionalProperties": true
               },
               "web": {
                 "type": "object",
-                "description": "Web-level context information",
+                "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.web.description%",
                 "properties": {
                   "absoluteUrl": {
                     "type": "string",
-                    "description": "Absolute URL of the web"
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.web.properties.absoluteUrl.description%"
                   },
                   "title": {
                     "type": "string",
-                    "description": "Title of the web"
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.web.properties.title.description%"
                   },
                   "description": {
                     "type": "string",
-                    "description": "Description of the web"
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.web.properties.description.description%"
                   },
                   "templateName": {
                     "type": "string",
-                    "description": "Web template name (e.g., STS#3, SITEPAGEPUBLISHING#0)"
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.web.properties.templateName.description%"
                   }
                 },
                 "additionalProperties": true
               },
               "user": {
                 "type": "object",
-                "description": "Current user information",
+                "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.user.description%",
                 "properties": {
                   "displayName": {
                     "type": "string",
-                    "description": "Display name of the user"
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.user.properties.displayName.description%"
                   },
                   "email": {
                     "type": "string",
-                    "description": "Email address of the user"
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.user.properties.email.description%"
                   },
                   "loginName": {
                     "type": "string",
-                    "description": "Login name of the user"
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.user.properties.loginName.description%"
                   },
                   "isAnonymousGuestUser": {
                     "type": "boolean",
-                    "description": "Whether the user is an anonymous guest"
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.user.properties.isAnonymousGuestUser.description%"
                   }
                 },
                 "additionalProperties": true
               },
               "cultureInfo": {
                 "type": "object",
-                "description": "Culture/locale information",
+                "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.cultureInfo.description%",
                 "properties": {
                   "currentCultureName": {
                     "type": "string",
-                    "description": "Current culture code (e.g., en-US, de-DE, fr-FR)"
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.cultureInfo.properties.currentCultureName.description%"
                   }
                 },
                 "additionalProperties": true
               },
               "isNoScriptEnabled": {
                 "type": "boolean",
-                "description": "Whether NoScript is enabled on the site"
+                "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.isNoScriptEnabled.description%"
               },
               "isSPO": {
                 "type": "boolean",
-                "description": "Whether this is SharePoint Online (vs. on-premises)"
+                "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.isSPO.description%"
               }
             },
             "additionalProperties": true
           }
         }
       },
+      
       {
-        "title": "Storybook",
+        "title": "%configuration.spfxLocalWorkbench.group.storybook.title%",
         "properties": {
           "spfxLocalWorkbench.storybook.port": {
             "type": "number",
             "default": 6006,
-            "description": "Port for the Storybook dev server"
+            "description": "%configuration.spfxLocalWorkbench.storybook.port.description%"
           },
           "spfxLocalWorkbench.storybook.autoGenerate": {
             "type": "boolean",
             "default": true,
-            "description": "Automatically generate stories from SPFx component manifests"
+            "description": "%configuration.spfxLocalWorkbench.storybook.autoGenerate.description%"
           },
           "spfxLocalWorkbench.storybook.storiesPattern": {
             "type": "string",
             "default": "src/**/*.stories.ts",
-            "description": "Glob pattern for discovering custom story files in the SPFx project"
+            "description": "%configuration.spfxLocalWorkbench.storybook.storiesPattern.description%"
           },
           "spfxLocalWorkbench.storybook.generateLocaleStories": {
             "type": "boolean",
             "default": true,
-            "description": "Automatically generate story variants for each supported locale"
+            "description": "%configuration.spfxLocalWorkbench.storybook.generateLocaleStories.description%"
           },
           "spfxLocalWorkbench.storybook.autoDocs": {
             "type": "boolean",
             "default": false,
-            "description": "Enable auto-generated documentation pages for stories in Storybook"
+            "description": "%configuration.spfxLocalWorkbench.storybook.autoDocs.description%"
           },
           "spfxLocalWorkbench.storybook.skipInstallPrompt": {
             "type": "boolean",
             "default": false,
-            "description": "Automatically install Storybook dependencies without prompting"
+            "description": "%configuration.spfxLocalWorkbench.storybook.skipInstallPrompt.description%"
           },
           "spfxLocalWorkbench.storybook.theme": {
             "type": "string",
@@ -506,17 +583,70 @@
               "dark"
             ],
             "enumDescriptions": [
-              "Derives the Storybook manager theme from your active VS Code color theme",
-              "Uses the Peacock extension color for accent and bar colors, blended with the VS Code theme. Falls back to matchVsCode if no Peacock color is set.",
-              "Always use Storybook's built-in light theme",
-              "Always use Storybook's built-in dark theme"
+              "%configuration.spfxLocalWorkbench.storybook.theme.enumDescriptions.matchVsCode%",
+              "%configuration.spfxLocalWorkbench.storybook.theme.enumDescriptions.peacock%",
+              "%configuration.spfxLocalWorkbench.storybook.theme.enumDescriptions.light%",
+              "%configuration.spfxLocalWorkbench.storybook.theme.enumDescriptions.dark%"
             ],
-            "description": "Controls the Storybook manager UI theme. Requires restarting the Storybook panel to take effect."
+            "description": "%configuration.spfxLocalWorkbench.storybook.theme.description%"
+          }
+        }
+      },
+      {
+        "title": "%configuration.spfxLocalWorkbench.group.proxy.title%",
+        "properties": {
+          "spfxLocalWorkbench.proxy.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.spfxLocalWorkbench.proxy.enabled.description%"
+          },
+          "spfxLocalWorkbench.proxy.mode": {
+            "type": "string",
+            "default": "mock",
+            "enum": ["mock", "passthrough", "record"],
+            "enumDescriptions": [
+              "%configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.mock%",
+              "%configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.passthrough%",
+              "%configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.record%"
+            ],
+            "description": "%configuration.spfxLocalWorkbench.proxy.mode.description%"
+          },
+          "spfxLocalWorkbench.proxy.mockFile": {
+            "type": "string",
+            "default": ".spfx-workbench/api-mocks.json",
+            "description": "%configuration.spfxLocalWorkbench.proxy.mockFile.description%"
+          },
+          "spfxLocalWorkbench.proxy.defaultDelay": {
+            "type": "number",
+            "default": 0,
+            "description": "%configuration.spfxLocalWorkbench.proxy.defaultDelay.description%"
+          },
+          "spfxLocalWorkbench.proxy.fallbackStatus": {
+            "type": "number",
+            "default": 404,
+            "description": "%configuration.spfxLocalWorkbench.proxy.fallbackStatus.description%"
+          },
+          "spfxLocalWorkbench.proxy.logRequests": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.spfxLocalWorkbench.proxy.logRequests.description%"
+          },
+          "spfxLocalWorkbench.proxy.allowedOrigins": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": [],
+            "description": "%configuration.spfxLocalWorkbench.proxy.allowedOrigins.description%"
+          },
+          "spfxLocalWorkbench.proxy.serveMocksWhileRecording": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.spfxLocalWorkbench.proxy.serveMocksWhileRecording.description%"
           }
         }
       }
     ]
   },
+
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "npm run packages:build && npm run check-types && npm run lint && npm run generate:css-types && npm-run-all compile:*",
@@ -546,10 +676,15 @@
     "packages:install": "cd packages/shared && npm install && cd ../storybook-addon-spfx && npm install",
     "clean": "rm -rf dist temp && npm run packages:clean",
     "clean:full": "npm run clean && rm -rf node_modules packages/*/node_modules",
-    "postinstall": "npm run packages:install"
+    "postinstall": "npm run packages:install",
+    "i18n:extract": "npx vscode-nls-dev extract -i src -o i18n -l package.nls.json || echo 'Install vscode-nls-dev to run extraction'",
+    "i18n:generate": "npx vscode-nls-dev create-package -s package.nls.json -d i18n -o i18n-packages || echo 'Install vscode-nls-dev to run generation'",
+    "i18n:help": "echo 'Use npx vscode-nls-dev extract/create-package or install vscode-nls-dev as a devDependency'"
   },
+
   "dependencies": {
-    "@spfx-local-workbench/shared": "file:./packages/shared"
+    "@spfx-local-workbench/shared": "file:./packages/shared",
+    "vscode-nls": "^5.0.0"
   },
   "devDependencies": {
     "@fluentui/react": "^8.110.10",

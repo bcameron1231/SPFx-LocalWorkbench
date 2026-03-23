@@ -30,4 +30,4 @@ Run the following command to trust the dev certificate:
 heft trust-dev-cert
 ```
 
-For more details, see the [official documentation](https://learn.microsoft.com/en-us/sharepoint/dev/spfx/set-up-your-development-environment#trusting-the-self-signed-developer-certificate).
+For more details, see the [official documentation](https://learn.microsoft.com/sharepoint/dev/spfx/set-up-your-development-environment#trusting-the-self-signed-developer-certificate).

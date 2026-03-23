@@ -4,12 +4,15 @@
 // It handles the lifecycle of the webview and communication between the
 // extension and the webview.
 import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
 
 import { LIVE_RELOAD_DEBOUNCE_MS } from '@spfx-local-workbench/shared';
 import type { IExtensionManifest, IWebPartManifest } from '@spfx-local-workbench/shared';
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
 import { getNonce } from '@spfx-local-workbench/shared/utils/securityUtils';
 
+import { loadPackageNls } from '../i18nLoader';
+import type { IExternalDependency } from './SpfxProjectDetector';
 import { SpfxProjectDetector } from './SpfxProjectDetector';
 import {
   IWorkbenchSettings,
@@ -20,8 +23,12 @@ import {
   setCurrentTheme,
 } from './config';
 import { generateWorkbenchHtml } from './html';
+import { ApiProxyService } from './proxy';
 
 const log = logger.createChild('WorkbenchPanel');
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone });
+const localize = nls.loadMessageBundle();
 
 // WorkbenchPanel manages the webview that hosts the SPFx local workbench.
 export class WorkbenchPanel {
@@ -33,8 +40,18 @@ export class WorkbenchPanel {
   private _disposables: vscode.Disposable[] = [];
   private _webParts: IWebPartManifest[] = [];
   private _extensions: IExtensionManifest[] = [];
+  private _externalDependencies: IExternalDependency[] = [];
   private _settings: IWorkbenchSettings;
   private _liveReloadDebounceTimer: ReturnType<typeof setTimeout> | undefined;
+  private _apiProxyService: ApiProxyService | undefined;
+  private _lastProxyEnabled: boolean = vscode.workspace
+    .getConfiguration('spfxLocalWorkbench.proxy')
+    .get<boolean>('enabled', true);
+
+  // Expose the proxy service for recording commands
+  public get apiProxyService(): ApiProxyService | undefined {
+    return this._apiProxyService;
+  }
 
   // Creates or reveals the workbench panel
   public static createOrShow(extensionUri: vscode.Uri): void {
@@ -42,24 +59,36 @@ export class WorkbenchPanel {
       ? vscode.window.activeTextEditor.viewColumn
       : undefined;
 
+    const translations = loadPackageNls(extensionUri.fsPath, vscode.env.language);
+    const panelTitle =
+      translations['panel.title'] ?? localize('panel.title', 'SPFx Local Workbench');
+
     // If we already have a panel, show it
     if (WorkbenchPanel.currentPanel) {
+      WorkbenchPanel.currentPanel._panel.title = panelTitle;
       WorkbenchPanel.currentPanel._panel.reveal(column);
       return;
+    }
+
+    // Build localResourceRoots: extension assets + workspace folder (for SPFx node_modules)
+    const resourceRoots: vscode.Uri[] = [
+      vscode.Uri.joinPath(extensionUri, 'media'),
+      vscode.Uri.joinPath(extensionUri, 'dist'),
+    ];
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    if (workspaceFolder) {
+      resourceRoots.push(workspaceFolder.uri);
     }
 
     // Otherwise, create a new panel
     const panel = vscode.window.createWebviewPanel(
       WorkbenchPanel.viewType,
-      'SPFx Local Workbench',
+      panelTitle,
       column || vscode.ViewColumn.One,
       {
         enableScripts: true,
         retainContextWhenHidden: true,
-        localResourceRoots: [
-          vscode.Uri.joinPath(extensionUri, 'media'),
-          vscode.Uri.joinPath(extensionUri, 'dist'),
-        ],
+        localResourceRoots: resourceRoots,
       },
     );
 
@@ -70,12 +99,20 @@ export class WorkbenchPanel {
 
   // Revives the panel from a previous session
   public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri): void {
+    const translations = loadPackageNls(extensionUri.fsPath, vscode.env.language);
+    panel.title = translations['panel.title'] ?? localize('panel.title', 'SPFx Local Workbench');
     WorkbenchPanel.currentPanel = new WorkbenchPanel(panel, extensionUri);
-  } /**
+  }
+
+  /**
    * Private constructor - use createOrShow() instead
    */
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
     this._panel = panel;
+    const translations = loadPackageNls(extensionUri.fsPath, vscode.env.language);
+    this._panel.title =
+      translations['panel.title'] ??
+      localize('panel.title', this._panel.title ?? 'SPFx Local Workbench');
     this._extensionUri = extensionUri;
     this._settings = getWorkbenchSettings();
     void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.isWorkbench', true);
@@ -107,6 +144,18 @@ export class WorkbenchPanel {
       onConfigurationChanged((newSettings) => {
         this._settings = newSettings;
         const currentTheme = getCurrentTheme();
+
+        // The proxy.enabled setting changes CSP, HTTP client classes, and bridge initialization — all baked into the HTML at load time.
+        const proxyNow = vscode.workspace
+          .getConfiguration('spfxLocalWorkbench.proxy')
+          .get<boolean>('enabled', true);
+        const proxyBefore = this._lastProxyEnabled;
+        if (proxyNow !== proxyBefore) {
+          this._lastProxyEnabled = proxyNow;
+          this._update();
+          return;
+        }
+
         this._panel.webview.postMessage({
           command: 'settingsChanged',
           settings: {
@@ -128,6 +177,13 @@ export class WorkbenchPanel {
       this._disposables,
     );
 
+    // Initialize the API proxy service
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    if (workspaceFolder) {
+      this._apiProxyService = new ApiProxyService(workspaceFolder.uri.fsPath);
+      this._disposables.push(this._apiProxyService);
+    }
+
     // Watch for bundle changes (live reload)
     this._setupLiveReloadWatcher();
 
@@ -142,8 +198,26 @@ export class WorkbenchPanel {
     text?: string;
     themeName?: string;
     isCustomTheme?: boolean;
+    [key: string]: any; // TODO: Should this be more strongly typed?
   }): Promise<void> {
     switch (message.command) {
+      case 'apiRequest':
+        if (this._apiProxyService) {
+          const response = await this._apiProxyService.handleRequest({
+            id: message.id,
+            url: message.url!,
+            method: message.method,
+            headers: message.headers,
+            body: message.body,
+            clientType: message.clientType,
+          });
+          this._panel.webview.postMessage({
+            command: 'apiResponse',
+            ...response,
+          });
+        }
+        return;
+
       case 'refresh':
         await this._loadComponents();
         this._update();
@@ -151,6 +225,10 @@ export class WorkbenchPanel {
 
       case 'openDevTools':
         vscode.commands.executeCommand('workbench.action.webview.openDeveloperTools');
+        return;
+
+      case 'mockDataMenu':
+        vscode.commands.executeCommand('spfx-local-workbench.mockDataMenu');
         return;
 
       case 'log':
@@ -175,7 +253,9 @@ export class WorkbenchPanel {
   private async _loadComponents(): Promise<void> {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     if (!workspaceFolder) {
-      vscode.window.showWarningMessage('No workspace folder open');
+      vscode.window.showWarningMessage(
+        localize('extension.noWorkspace', 'No workspace folder open'),
+      );
       return;
     }
 
@@ -183,15 +263,25 @@ export class WorkbenchPanel {
     const isSpfx = await detector.isSpfxProject();
 
     if (!isSpfx) {
-      vscode.window.showWarningMessage('This does not appear to be an SPFx project.');
+      vscode.window.showWarningMessage(
+        localize('extension.notSpfx', 'This does not appear to be an SPFx project'),
+      );
       return;
     }
 
     this._webParts = await detector.getWebPartManifests();
     this._extensions = await detector.getExtensionManifests();
 
+    // Resolve external dependencies (e.g. @fluentui/react) from the SPFx
+    this._externalDependencies = await detector.resolveExternalDependencies();
+
     if (this._webParts.length === 0 && this._extensions.length === 0) {
-      vscode.window.showWarningMessage('No web parts or extensions found in this SPFx project.');
+      vscode.window.showWarningMessage(
+        localize(
+          'workbench.noComponents',
+          'No web parts or extensions found in this SPFx project.',
+        ),
+      );
     }
   }
 
@@ -249,9 +339,10 @@ export class WorkbenchPanel {
   // Updates the webview content
   private _update(): void {
     const webview = this._panel.webview;
-    this._panel.title = 'SPFx Local Workbench';
     this._panel.webview.html = this._getHtmlForWebview(webview);
-  } /**
+  }
+
+  /**
    * Generates the HTML content for the webview
    */
   private _getHtmlForWebview(webview: vscode.Webview): string {
@@ -274,6 +365,8 @@ export class WorkbenchPanel {
       currentTheme: currentTheme,
       customThemes: getCustomThemes(),
       contextSettings: this._settings.context,
+      proxyEnabled: this._apiProxyService?.enabled ?? true,
+      externalDependencies: this._externalDependencies,
     });
   }
 

@@ -1,5 +1,9 @@
 import { buildMockPageContext } from '@spfx-local-workbench/shared';
 
+import { PassthroughHttpClient } from '../proxy/PassthroughHttpClient';
+import { ProxyAadHttpClient } from '../proxy/ProxyAadHttpClient';
+import { ProxyHttpClient } from '../proxy/ProxyHttpClient';
+import { ProxySPHttpClient } from '../proxy/ProxySPHttpClient';
 import type { IContextSettings } from '../types';
 
 /**
@@ -10,9 +14,11 @@ import type { IContextSettings } from '../types';
  */
 export class SpfxContext {
   private contextSettings: IContextSettings;
+  private proxyEnabled: boolean;
 
-  constructor(contextSettings: IContextSettings) {
+  constructor(contextSettings: IContextSettings, proxyEnabled: boolean = true) {
     this.contextSettings = contextSettings;
+    this.proxyEnabled = proxyEnabled;
   }
 
   createMockContext(webPartId: string, instanceId: string): any {
@@ -32,10 +38,13 @@ export class SpfxContext {
         }),
         finish: () => {},
       },
-      httpClient: this.createMockHttpClient(),
-      spHttpClient: this.createMockSpHttpClient(),
+      httpClient: this.proxyEnabled ? new ProxyHttpClient() : new PassthroughHttpClient(),
+      spHttpClient: this.proxyEnabled ? new ProxySPHttpClient() : new PassthroughHttpClient(),
       aadHttpClientFactory: {
-        getClient: () => Promise.resolve(this.createMockHttpClient()),
+        getClient: () =>
+          Promise.resolve(
+            this.proxyEnabled ? new ProxyAadHttpClient() : new PassthroughHttpClient(),
+          ),
       },
       msGraphClientFactory: {
         getClient: () =>
@@ -60,53 +69,6 @@ export class SpfxContext {
         isRenderedByWebPart: () => true,
         isPropertyPaneOpen: () => false,
       },
-    };
-  }
-
-  private createMockHttpClient(): any {
-    return {
-      get: (_url: string, _config?: any) =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({}),
-        }),
-      post: (_url: string, _config?: any, _options?: any) =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({}),
-        }),
-      fetch: (_url: string, _config?: any, _options?: any) =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({}),
-        }),
-    };
-  }
-
-  private createMockSpHttpClient(): any {
-    const configurations = {
-      v1: { flags: {} },
-    };
-    return {
-      configurations: configurations,
-      get: (_url: string, _config?: any) =>
-        Promise.resolve({
-          ok: true,
-          status: 200,
-          json: () => Promise.resolve({ d: {} }),
-        }),
-      post: (_url: string, _config?: any, _options?: any) =>
-        Promise.resolve({
-          ok: true,
-          status: 200,
-          json: () => Promise.resolve({ d: {} }),
-        }),
-      fetch: (_url: string, _config?: any, _options?: any) =>
-        Promise.resolve({
-          ok: true,
-          status: 200,
-          json: () => Promise.resolve({ d: {} }),
-        }),
     };
   }
 }

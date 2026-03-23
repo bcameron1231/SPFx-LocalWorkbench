@@ -36,3 +36,6 @@ export type { IStorybookServerOptions, ServerStatus } from './storybook/Storyboo
 
 // HTML generation (for advanced usage)
 export { generateWorkbenchHtml, generateErrorHtml } from './html';
+
+// API Proxy
+export { ApiProxyService, MockConfigGenerator } from './proxy';
