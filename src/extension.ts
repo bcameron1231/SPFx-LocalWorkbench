@@ -2,13 +2,13 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { DEFAULT_SPFX_SERVE_PORT } from '@spfx-local-workbench/shared';
-import { initializeLocalization, localize } from '@spfx-local-workbench/shared/utilities/localize';
+import { getErrorMessage, isFileNotFoundError } from '@spfx-local-workbench/shared';
+import { logger } from '@spfx-local-workbench/shared';
 import {
-  getErrorMessage,
-  isFileNotFoundError,
-} from '@spfx-local-workbench/shared/utils/errorUtils';
-import { logger } from '@spfx-local-workbench/shared/utils/logger';
-import { isPortReachable } from '@spfx-local-workbench/shared/utils/networkUtils';
+  initializeLocalization,
+  isPortReachable,
+  localize,
+} from '@spfx-local-workbench/shared/utils/node';
 
 import {
   ApiProxyService,

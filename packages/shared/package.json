@@ -25,8 +25,12 @@
       "default": "./dist/index.js"
     },
     "./fluent": {
-      "types": "./dist/utilities/buildFluentTheme.d.ts",
-      "default": "./dist/utilities/buildFluentTheme.js"
+      "types": "./dist/utils/buildFluentTheme.d.ts",
+      "default": "./dist/utils/buildFluentTheme.js"
+    },
+    "./utils/node": {
+      "types": "./dist/utils/node/index.d.ts",
+      "default": "./dist/utils/node/index.js"
     },
     "./*": {
       "types": "./dist/*/index.d.ts",

@@ -3,7 +3,7 @@
 // Imports a CSV file, parses it into JSON rows, and generates a mock rule.
 import * as vscode from 'vscode';
 
-import { localize } from '@spfx-local-workbench/shared/utilities/localize';
+import { localize } from '@spfx-local-workbench/shared/utils/node';
 
 import type { IMockRule } from '../types';
 import { parseCsv } from './CsvParser';

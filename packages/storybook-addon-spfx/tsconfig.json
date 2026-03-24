@@ -17,7 +17,7 @@
     "baseUrl": ".",
     "paths": {
       "@spfx-local-workbench/shared": ["../shared/src"],
-      "@spfx-local-workbench/shared/fluent": ["../shared/src/utilities/buildFluentTheme"]
+      "@spfx-local-workbench/shared/fluent": ["../shared/src/utils/buildFluentTheme"]
     }
   },
   "include": ["src/**/*"],

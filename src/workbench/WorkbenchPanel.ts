@@ -7,9 +7,8 @@ import * as vscode from 'vscode';
 
 import { LIVE_RELOAD_DEBOUNCE_MS } from '@spfx-local-workbench/shared';
 import type { IExtensionManifest, IWebPartManifest } from '@spfx-local-workbench/shared';
-import { localize } from '@spfx-local-workbench/shared/utilities/localize';
-import { logger } from '@spfx-local-workbench/shared/utils/logger';
-import { getNonce } from '@spfx-local-workbench/shared/utils/securityUtils';
+import { logger } from '@spfx-local-workbench/shared';
+import { getNonce, localize } from '@spfx-local-workbench/shared/utils/node';
 
 import type { IExternalDependency } from './SpfxProjectDetector';
 import { SpfxProjectDetector } from './SpfxProjectDetector';

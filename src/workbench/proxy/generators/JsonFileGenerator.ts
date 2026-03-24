@@ -5,7 +5,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import { localize } from '@spfx-local-workbench/shared/utilities/localize';
+import { localize } from '@spfx-local-workbench/shared/utils/node';
 
 import type { IMockRule } from '../types';
 import { promptRuleOptions } from './shared';

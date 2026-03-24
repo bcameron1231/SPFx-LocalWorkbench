@@ -3,7 +3,7 @@
 // Generates mock rules from previously recorded unmatched API requests.
 import * as vscode from 'vscode';
 
-import { localize } from '@spfx-local-workbench/shared/utilities/localize';
+import { localize } from '@spfx-local-workbench/shared/utils/node';
 
 import type { IMockRule } from '../types';
 import { STATUS_CODE_OPTIONS, defaultBodyForStatus } from './shared';

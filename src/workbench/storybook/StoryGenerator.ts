@@ -9,7 +9,7 @@ import * as path from 'path';
 
 import { DEFAULT_PAGE_CONTEXT, getLocalizedString } from '@spfx-local-workbench/shared';
 import type { IWebPartManifest } from '@spfx-local-workbench/shared';
-import { logger } from '@spfx-local-workbench/shared/utils/logger';
+import { logger } from '@spfx-local-workbench/shared';
 
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
 

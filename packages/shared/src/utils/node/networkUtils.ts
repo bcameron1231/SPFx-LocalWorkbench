@@ -1,6 +1,6 @@
 import * as net from 'net';
 
-import { PORT_CHECK_TIMEOUT_MS } from '../constants';
+import { PORT_CHECK_TIMEOUT_MS } from '../../constants';
 
 /**
  * Check if a port is reachable on a given host

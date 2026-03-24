@@ -19,7 +19,7 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@spfx-local-workbench/shared": ["../packages/shared/src"],
-      "@spfx-local-workbench/shared/fluent": ["../packages/shared/src/utilities/buildFluentTheme"]
+      "@spfx-local-workbench/shared/fluent": ["../packages/shared/src/utils/buildFluentTheme"]
     }
   },
   "include": ["src/**/*"],

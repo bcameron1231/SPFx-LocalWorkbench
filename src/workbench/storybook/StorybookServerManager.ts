@@ -8,8 +8,7 @@ import {
   PROCESS_FORCE_KILL_TIMEOUT_MS,
   STORYBOOK_STARTUP_TIMEOUT_MS,
 } from '@spfx-local-workbench/shared';
-import { getErrorMessage } from '@spfx-local-workbench/shared/utils/errorUtils';
-import { logger } from '@spfx-local-workbench/shared/utils/logger';
+import { getErrorMessage, logger } from '@spfx-local-workbench/shared';
 
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
 import { getCurrentTheme, getCustomThemes } from '../config';

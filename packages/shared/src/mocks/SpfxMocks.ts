@@ -1,5 +1,5 @@
-import { deepMerge } from '../utilities/deepMerge';
-import { loadThemedStylesModule } from '../utilities/loadThemedStyles';
+import { deepMerge } from '../utils/deepMerge';
+import { loadThemedStylesModule } from '../utils/loadThemedStyles';
 import { spPropertyPaneModule } from './PropertyPaneMocks';
 
 export function initializeSpfxMocks(): void {

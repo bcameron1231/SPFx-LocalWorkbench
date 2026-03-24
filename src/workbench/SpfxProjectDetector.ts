@@ -8,8 +8,7 @@ import type {
   IWebPartManifest,
 } from '@spfx-local-workbench/shared';
 import { normalizeLocaleCasing } from '@spfx-local-workbench/shared';
-import { isFileNotFoundError } from '@spfx-local-workbench/shared/utils/errorUtils';
-import { logger } from '@spfx-local-workbench/shared/utils/logger';
+import { isFileNotFoundError, logger } from '@spfx-local-workbench/shared';
 
 import type { ISpfxConfig } from './types';
 
