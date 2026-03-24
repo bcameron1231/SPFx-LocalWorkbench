@@ -30,7 +30,7 @@ function extractHeaders(raw: HeadersInit | undefined): Record<string, string> | 
 // "Best-effort" serialization of a fetch body to a string.
 // Handles the most common cases (string, ArrayBuffer, Uint8Array).
 function serializeBody(raw: BodyInit | null | undefined): string | undefined {
-  if (raw === null) {
+  if (raw == null) {
     return undefined;
   }
   if (typeof raw === 'string') {
