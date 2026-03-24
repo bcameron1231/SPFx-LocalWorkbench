@@ -38,7 +38,7 @@ export function buildThemeList(...customLists: ITheme[][]): ITheme[] {
   }
 
   // Append Microsoft themes as the final layer (no isCustom override needed)
-  // We allow microsoft themes to be overriden because you can technically hide a given theme in a tenant and then use the same name for a custom one
+  // We allow microsoft themes to be overridden because you can technically hide a given theme in a tenant and then use the same name for a custom one
   //  reality is that it's an edge case, and it won't affect nearly anyone anyway
   for (const theme of MICROSOFT_THEMES) {
     if (!addedThemeNames.has(theme.name)) {
