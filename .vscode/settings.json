@@ -9,8 +9,6 @@
         "dist": true, // set this to false to include "dist" folder in search results
         "samples/**": true // exclude local SPFx sample projects from search
     },
-    // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
-    "typescript.ts.tsc.autoDetect": "off",
     "explorer.fileNesting.patterns": {
         "*.module.css": "${capture}.module.css.d.ts"
     },
@@ -48,11 +46,8 @@
     // Code actions on save - let Prettier handle import organization
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit" // Auto-fix ESLint issues on save
+        // Note: source.organizeImports is omitted - Prettier plugin handles import formatting
     },
-    
-    // Disable VS Code's built-in import organization (Prettier plugin handles this)
-    "typescript.preferences.organizeImportsOnSave": false,
-    "javascript.preferences.organizeImportsOnSave": false,
 
     "cSpell.words": [
         "Customizer",
