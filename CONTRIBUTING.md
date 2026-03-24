@@ -73,7 +73,7 @@ When adding magic numbers or hardcoded values:
 
 When updating default context values:
 
-1. Update `packages/shared/src/mocks/contextBuilder.ts` (source of truth)
+1. Update `packages/shared/src/constants/DEFAULT_PAGE_CONTEXT.ts` (source of truth)
 2. Update `package.json` configuration schema defaults to match
 3. Rebuild packages: `npm run packages:build`
 
