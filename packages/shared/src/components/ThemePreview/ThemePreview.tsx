@@ -53,7 +53,7 @@ export const ThemePreview: React.FC<IThemePreviewProps> = ({
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       aria-label={`${theme.name} theme${isSelected ? ' (selected)' : ''}`}
-      aria-pressed={isSelected}
+      aria-pressed={onClick ? isSelected : undefined}
       onKeyDown={(e) => {
         if (onClick && (e.key === 'Enter' || e.key === ' ')) {
           e.preventDefault();
