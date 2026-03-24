@@ -1,31 +1,6 @@
-import { spPropertyPaneModule } from './PropertyPaneMocks';
+import { deepMerge } from '../utilities/deepMerge';
 import { loadThemedStylesModule } from '../utilities/loadThemedStyles';
-
-// Deep recursive merge matching lodash merge behaviour
-function deepMerge(target: any, ...sources: any[]): any {
-  for (const source of sources) {
-    if (source === null || source === undefined) {
-      continue;
-    }
-    for (const key of Object.keys(source)) {
-      const srcVal = source[key];
-      const tgtVal = target[key];
-      if (
-        srcVal &&
-        typeof srcVal === 'object' &&
-        !Array.isArray(srcVal) &&
-        tgtVal &&
-        typeof tgtVal === 'object' &&
-        !Array.isArray(tgtVal)
-      ) {
-        target[key] = deepMerge({ ...tgtVal }, srcVal);
-      } else {
-        target[key] = srcVal;
-      }
-    }
-  }
-  return target;
-}
+import { spPropertyPaneModule } from './PropertyPaneMocks';
 
 export function initializeSpfxMocks(): void {
   const amdModules = window.__amdModules!;
