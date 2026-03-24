@@ -11,7 +11,12 @@ const watch = process.argv.includes('--watch');
 const copyTemplatesPlugin = {
   name: 'copy-templates',
   setup(build) {
-    build.onEnd(() => {
+    build.onEnd((result) => {
+      // Skip copying if build failed
+      if (result.errors.length > 0) {
+        return;
+      }
+
       // Copy template files to dist
       const templatesDir = path.join(__dirname, 'src/workbench/storybook/templates');
       const distTemplatesDir = path.join(__dirname, 'dist/templates');
@@ -40,7 +45,12 @@ const copyTemplatesPlugin = {
 const copyLocalizationPlugin = {
   name: 'copy-localization',
   setup(build) {
-    build.onEnd(() => {
+    build.onEnd((result) => {
+      // Skip copying if build failed
+      if (result.errors.length > 0) {
+        return;
+      }
+
       const distDir = path.join(__dirname, 'dist');
 
       // Ensure dist directory exists
