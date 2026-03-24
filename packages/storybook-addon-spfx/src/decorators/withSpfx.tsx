@@ -1,3 +1,4 @@
+import { loadTheme as loadFluentUiTheme } from '@fluentui/react';
 import { useChannel, useGlobals } from '@storybook/preview-api';
 import type { Decorator, StoryContext } from '@storybook/react';
 import React, { useEffect, useRef, useState } from 'react';
@@ -10,8 +11,11 @@ import {
   buildThemeList,
   loadTheme,
 } from '@spfx-local-workbench/shared';
-import { loadTheme as loadFluentUiTheme } from '@fluentui/react';
-import { applyPaletteAsCssVars, buildFlatTheme, buildFluentTheme } from '@spfx-local-workbench/shared/fluent';
+import {
+  applyPaletteAsCssVars,
+  buildFlatTheme,
+  buildFluentTheme,
+} from '@spfx-local-workbench/shared/fluent';
 
 import { DisplayMode, EVENTS, PARAM_KEY, STORYBOOK_GLOBAL_KEYS } from '../constants';
 import { SpfxContextProvider } from '../context/SpfxContext';
@@ -176,10 +180,17 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         // inline copy of @microsoft/load-themed-styles (bundled inside the web part)
         // finds window.__themeState__.theme already populated when it calls loadStyles.
         const allThemesEarly = buildThemeList(storyThemes, globalCustomThemes);
-        const currentThemeEarly = allThemesEarly.find((t) => t.name === themeName) ?? allThemesEarly[0];
-        applyPaletteAsCssVars(document.body, currentThemeEarly.palette, currentThemeEarly.isInverted);
+        const currentThemeEarly =
+          allThemesEarly.find((t) => t.name === themeName) ?? allThemesEarly[0];
+        applyPaletteAsCssVars(
+          document.body,
+          currentThemeEarly.palette,
+          currentThemeEarly.isInverted,
+        );
         loadTheme(buildFlatTheme(currentThemeEarly.palette, currentThemeEarly.isInverted));
-        loadFluentUiTheme(buildFluentTheme(currentThemeEarly.palette, currentThemeEarly.isInverted));
+        loadFluentUiTheme(
+          buildFluentTheme(currentThemeEarly.palette, currentThemeEarly.isInverted),
+        );
 
         // Load the component using the proper component loader
         const { manifest: rawManifest, componentClass: ComponentClass } = await loadSpfxComponent(
@@ -309,7 +320,11 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         // runs over the now-populated registeredThemableStyles and back-fills any style
         // elements the inline copy of @microsoft/load-themed-styles already injected with
         // real palette values (rather than the var() fallback / default hex).
-        applyPaletteAsCssVars(document.body, currentThemeEarly.palette, currentThemeEarly.isInverted);
+        applyPaletteAsCssVars(
+          document.body,
+          currentThemeEarly.palette,
+          currentThemeEarly.isInverted,
+        );
         loadTheme(buildFlatTheme(currentThemeEarly.palette, currentThemeEarly.isInverted));
 
         // Notify the web part of the initial theme via the SPFx onThemeChanged lifecycle.

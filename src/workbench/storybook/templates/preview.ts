@@ -5,17 +5,17 @@ const preview: Preview = {
     controls: {
       matchers: {
         color: /(background|color)$/i,
-        date: /Date$/i
-      }
+        date: /Date$/i,
+      },
     },
     backgrounds: {
-      disable: true
+      disable: true,
     },
     toolbar: {
       copy: { hidden: true },
-      eject: { hidden: true }
-    }
-  }
+      eject: { hidden: true },
+    },
+  },
 };
 
 export default preview;

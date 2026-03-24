@@ -14,7 +14,7 @@
   "serve.waiting": "En attente du démarrage du service…",
   "serve.waitingElapsed": "En attente du démarrage du service… ({0}s)",
   "serve.timedout": "Le service SPFx n'a pas démarré à temps. Ouvrir le workbench quand même ?",
-  
+
   "common.open": "Ouvrir",
   "common.cancel": "Annuler",
 
@@ -41,7 +41,7 @@
   "record.openFirst": "Ouvrez d'abord le workbench, puis démarrez l'enregistrement.",
   "record.noRequests": "Aucune requête non appariée n'a été enregistrée. Toutes les requêtes ont peut-être correspondu à des règles existantes.",
   "record.generated": "Règles générées à partir de {0} requête(s) enregistrée(s).",
-  
+
   "recording.statusText": "Enregistrement des requêtes API...",
   "recording.tooltip": "Cliquez pour arrêter l'enregistrement et générer des règles mock",
   "recording.inProgress": "Enregistrement des requêtes API. Les composants WebPart sont rafraîchis. Cliquez sur la barre d'état ou exécutez de nouveau la commande pour arrêter et générer des règles.",

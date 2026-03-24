@@ -14,7 +14,7 @@
   "serve.waiting": "Waiting for serve to start…",
   "serve.waitingElapsed": "Waiting for serve to start… ({0}s)",
   "serve.timedout": "SPFx serve did not start in time. Open workbench anyway?",
-  
+
   "common.open": "Open",
   "common.cancel": "Cancel",
 
@@ -41,7 +41,7 @@
   "record.openFirst": "Open the workbench first, then start recording.",
   "record.noRequests": "No unmatched requests were recorded. All requests may have matched existing rules.",
   "record.generated": "Generated rules from {0} recorded request(s).",
-  
+
   "recording.statusText": "Recording API Requests...",
   "recording.tooltip": "Click to stop recording and generate mock rules",
   "recording.inProgress": "Recording API requests. Web parts are being refreshed. Click the status bar or run this command again to stop and generate rules.",

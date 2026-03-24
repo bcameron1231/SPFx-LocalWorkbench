@@ -10,6 +10,7 @@ import {
 import React, { FC, useEffect, useState } from 'react';
 
 import type { IExtensionConfig } from '@spfx-local-workbench/shared';
+
 import styles from './ExtensionPropertiesPanel.module.css';
 
 interface IExtensionPropertiesPanelProps {

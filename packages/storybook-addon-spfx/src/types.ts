@@ -78,7 +78,6 @@ export interface ISpfxParameters {
    * without having to specify the full context object.
    */
   context?: ISpfxContextConfig;
-
 }
 
 /**

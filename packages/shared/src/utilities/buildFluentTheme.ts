@@ -59,7 +59,9 @@ export function buildFlatTheme(
   // into { tinyFontFamily, tinyFontSize, tinyFontWeight, xSmallFontFamily, … }.
   // This matches the key format present in SharePoint's __themeState__.theme.
   if (theme.fonts) {
-    for (const [sizeKey, fontObj] of Object.entries(theme.fonts as Record<string, Record<string, string | number>>)) {
+    for (const [sizeKey, fontObj] of Object.entries(
+      theme.fonts as Record<string, Record<string, string | number>>,
+    )) {
       for (const [propKey, propVal] of Object.entries(fontObj)) {
         if (propVal !== null && propVal !== undefined) {
           // e.g. "tiny" + "fontFamily" → "tinyFontFamily"
@@ -97,17 +99,17 @@ export function buildFlatTheme(
  */
 const OWN_CSS_VARS: ReadonlyArray<[cssVar: string, themeKey: string]> = [
   // Palette slots
-  ['--themePrimary',     'themePrimary'],
-  ['--themeDark',        'themeDark'],
-  ['--neutralPrimary',   'neutralPrimary'],
+  ['--themePrimary', 'themePrimary'],
+  ['--themeDark', 'themeDark'],
+  ['--neutralPrimary', 'neutralPrimary'],
   ['--neutralSecondary', 'neutralSecondary'],
-  ['--neutralTertiary',  'neutralTertiary'],
-  ['--neutralLight',     'neutralLight'],
-  ['--neutralLighter',   'neutralLighter'],
-  ['--neutralDark',      'neutralDark'],
+  ['--neutralTertiary', 'neutralTertiary'],
+  ['--neutralLight', 'neutralLight'],
+  ['--neutralLighter', 'neutralLighter'],
+  ['--neutralDark', 'neutralDark'],
   // Semantic color slots
-  ['--errorBackground',  'errorBackground'],
-  ['--errorText',        'errorText'],
+  ['--errorBackground', 'errorBackground'],
+  ['--errorText', 'errorText'],
 ];
 
 /**
@@ -163,4 +165,3 @@ export function applyPaletteAsCssVars(
   domElement.style.fontFamily =
     "'Segoe UI', 'Segoe UI Web (West European)', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif";
 }
-

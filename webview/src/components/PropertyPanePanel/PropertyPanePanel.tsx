@@ -2,8 +2,8 @@ import { IconButton, Separator, Stack, Text } from '@fluentui/react';
 import React, { FC, useEffect, useState } from 'react';
 
 import { PropertyPaneFieldType, logger } from '@spfx-local-workbench/shared';
-
 import type { IActiveWebPart } from '@spfx-local-workbench/shared';
+
 import styles from './PropertyPanePanel.module.css';
 import {
   ButtonComponent,

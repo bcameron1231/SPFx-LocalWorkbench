@@ -1,7 +1,6 @@
 {
   "displayName": "Workbench SPFx local",
-  "description": "Un workbench local pour tester les composants WebPart SharePoint Framework (SPFx) sans déployer sur SharePoint"
-  ,
+  "description": "Un workbench local pour tester les composants WebPart SharePoint Framework (SPFx) sans déployer sur SharePoint",
   "icons.fluentui-testbeaker.description": "Test Beaker",
   "icons.fluentui-testbeakersolid.description": "Test Beaker solide",
   "icons.fluentui-teststep.description": "Étape de test",

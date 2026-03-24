@@ -115,7 +115,6 @@
         "category": "SPFx Local Workbench",
         "icon": "$(fluentui-sync)"
       },
-
       {
         "command": "spfx-local-workbench.openDevTools",
         "title": "%command.spfx-local-workbench.openDevTools.title%",
@@ -128,7 +127,6 @@
         "category": "SPFx Local Workbench",
         "icon": "$(gear)"
       },
-
       {
         "command": "spfx-local-workbench.openStorybook",
         "title": "%command.spfx-local-workbench.openStorybook.title%",
@@ -153,7 +151,6 @@
         "category": "SPFx Local Workbench",
         "icon": "$(fluentui-broom)"
       },
-
       {
         "command": "spfx-local-workbench.scaffoldMockConfig",
         "title": "%command.spfx-local-workbench.scaffoldMockConfig.title%",
@@ -316,7 +313,6 @@
           }
         }
       },
-
       {
         "title": "%configuration.spfxLocalWorkbench.group.theme.title%",
         "properties": {
@@ -384,40 +380,137 @@
                 "palette": {
                   "type": "object",
                   "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.description%",
-                  "required": ["themePrimary"],
-                  "additionalProperties": { "type": "string" },
+                  "required": [
+                    "themePrimary"
+                  ],
+                  "additionalProperties": {
+                    "type": "string"
+                  },
                   "properties": {
-                    "themePrimary":     { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themePrimary.description%" },
-                    "accent":           { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.accent.description%" },
-                    "themeDarker":      { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeDarker.description%" },
-                    "themeDark":        { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeDark.description%" },
-                    "themeDarkAlt":     { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeDarkAlt.description%" },
-                    "themeSecondary":   { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeSecondary.description%" },
-                    "themeTertiary":    { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeTertiary.description%" },
-                    "themeLight":       { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeLight.description%" },
-                    "themeLighter":     { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeLighter.description%" },
-                    "themeLighterAlt":  { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeLighterAlt.description%" },
-                    "white":            { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.white.description%" },
-                    "black":            { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.black.description%" },
-                    "neutralDark":      { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralDark.description%" },
-                    "neutralPrimary":   { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralPrimary.description%" },
-                    "neutralPrimaryAlt":{ "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralPrimaryAlt.description%" },
-                    "neutralSecondary": { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralSecondary.description%" },
-                    "neutralSecondaryAlt": { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralSecondaryAlt.description%" },
-                    "neutralTertiary":  { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralTertiary.description%" },
-                    "neutralTertiaryAlt": { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralTertiaryAlt.description%" },
-                    "neutralQuaternary":  { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralQuaternary.description%" },
-                    "neutralQuaternaryAlt": { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralQuaternaryAlt.description%" },
-                    "neutralLight":     { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralLight.description%" },
-                    "neutralLighter":   { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralLighter.description%" },
-                    "neutralLighterAlt":{ "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralLighterAlt.description%" },
-                    "primaryBackground":{ "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.primaryBackground.description%" },
-                    "primaryText":      { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.primaryText.description%" },
-                    "bodyBackground":   { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.bodyBackground.description%" },
-                    "bodyText":         { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.bodyText.description%" },
-                    "disabledBackground": { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.disabledBackground.description%" },
-                    "disabledText":     { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.disabledText.description%" },
-                    "error":            { "type": "string", "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.error.description%" }
+                    "themePrimary": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themePrimary.description%"
+                    },
+                    "accent": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.accent.description%"
+                    },
+                    "themeDarker": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeDarker.description%"
+                    },
+                    "themeDark": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeDark.description%"
+                    },
+                    "themeDarkAlt": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeDarkAlt.description%"
+                    },
+                    "themeSecondary": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeSecondary.description%"
+                    },
+                    "themeTertiary": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeTertiary.description%"
+                    },
+                    "themeLight": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeLight.description%"
+                    },
+                    "themeLighter": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeLighter.description%"
+                    },
+                    "themeLighterAlt": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeLighterAlt.description%"
+                    },
+                    "white": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.white.description%"
+                    },
+                    "black": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.black.description%"
+                    },
+                    "neutralDark": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralDark.description%"
+                    },
+                    "neutralPrimary": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralPrimary.description%"
+                    },
+                    "neutralPrimaryAlt": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralPrimaryAlt.description%"
+                    },
+                    "neutralSecondary": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralSecondary.description%"
+                    },
+                    "neutralSecondaryAlt": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralSecondaryAlt.description%"
+                    },
+                    "neutralTertiary": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralTertiary.description%"
+                    },
+                    "neutralTertiaryAlt": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralTertiaryAlt.description%"
+                    },
+                    "neutralQuaternary": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralQuaternary.description%"
+                    },
+                    "neutralQuaternaryAlt": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralQuaternaryAlt.description%"
+                    },
+                    "neutralLight": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralLight.description%"
+                    },
+                    "neutralLighter": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralLighter.description%"
+                    },
+                    "neutralLighterAlt": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralLighterAlt.description%"
+                    },
+                    "primaryBackground": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.primaryBackground.description%"
+                    },
+                    "primaryText": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.primaryText.description%"
+                    },
+                    "bodyBackground": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.bodyBackground.description%"
+                    },
+                    "bodyText": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.bodyText.description%"
+                    },
+                    "disabledBackground": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.disabledBackground.description%"
+                    },
+                    "disabledText": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.disabledText.description%"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.error.description%"
+                    }
                   }
                 }
               }
@@ -425,7 +518,6 @@
           }
         }
       },
-
       {
         "title": "%configuration.spfxLocalWorkbench.group.context.title%",
         "properties": {
@@ -538,7 +630,6 @@
           }
         }
       },
-      
       {
         "title": "%configuration.spfxLocalWorkbench.group.storybook.title%",
         "properties": {
@@ -602,7 +693,11 @@
           "spfxLocalWorkbench.proxy.mode": {
             "type": "string",
             "default": "mock",
-            "enum": ["mock", "passthrough", "record"],
+            "enum": [
+              "mock",
+              "passthrough",
+              "record"
+            ],
             "enumDescriptions": [
               "%configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.mock%",
               "%configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.passthrough%",
@@ -632,7 +727,9 @@
           },
           "spfxLocalWorkbench.proxy.allowedOrigins": {
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string"
+            },
             "default": [],
             "description": "%configuration.spfxLocalWorkbench.proxy.allowedOrigins.description%"
           },
@@ -645,7 +742,6 @@
       }
     ]
   },
-
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "npm run packages:build && npm run check-types && npm run lint && npm run generate:css-types && npm-run-all compile:*",
@@ -680,7 +776,6 @@
     "i18n:generate": "npx vscode-nls-dev create-package -s package.nls.json -d i18n -o i18n-packages || echo 'Install vscode-nls-dev to run generation'",
     "i18n:help": "echo 'Use npx vscode-nls-dev extract/create-package or install vscode-nls-dev as a devDependency'"
   },
-
   "dependencies": {
     "@spfx-local-workbench/shared": "file:./packages/shared",
     "vscode-nls": "^5.0.0"

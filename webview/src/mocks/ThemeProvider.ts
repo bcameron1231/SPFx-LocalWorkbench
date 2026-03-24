@@ -1,7 +1,12 @@
 import { loadTheme as loadFluentUiTheme } from '@fluentui/react';
+
 import { DEFAULT_THEME_NAME, MICROSOFT_THEMES, loadTheme } from '@spfx-local-workbench/shared';
 import type { ITheme } from '@spfx-local-workbench/shared';
-import { applyPaletteAsCssVars, buildFlatTheme, buildFluentTheme } from '@spfx-local-workbench/shared/fluent';
+import {
+  applyPaletteAsCssVars,
+  buildFlatTheme,
+  buildFluentTheme,
+} from '@spfx-local-workbench/shared/fluent';
 
 /**
  * Provides theme services for SPFx web parts in the local workbench.
