@@ -26,7 +26,12 @@ export class ManifestLoader {
       const script = document.createElement('script');
       script.src = `${this.serveUrl}/temp/build/manifests.js?_v=${Date.now()}`;
 
+      const cleanup = () => {
+        script.remove();
+      };
+
       script.onload = () => {
+        cleanup();
         const win = window as any;
         if (win.debugManifests?.getManifests) {
           const manifests = win.debugManifests.getManifests();
@@ -57,7 +62,11 @@ export class ManifestLoader {
         }
       };
 
-      script.onerror = () => reject(new Error('Failed to load manifests.js'));
+      script.onerror = () => {
+        cleanup();
+        reject(new Error('Failed to load manifests.js'));
+      };
+
       document.head.appendChild(script);
     });
   }
