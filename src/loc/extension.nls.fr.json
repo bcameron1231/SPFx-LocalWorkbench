@@ -22,7 +22,7 @@
   "detect.found": "{0} composant(s) WebPart trouvé(s) : {1}",
 
   "mock.title": "Données mock",
-  "mock.placeholder": "Choisissez une action!!",
+  "mock.placeholder": "Choisissez une action",
   "mock.scaffold.label": "Générer la configuration mock",
   "mock.scaffold.description": "Créer un fichier api-mocks.json de démarrage",
   "mock.scaffolded": "Configuration mock d'API générée dans .spfx-workbench/api-mocks.json",

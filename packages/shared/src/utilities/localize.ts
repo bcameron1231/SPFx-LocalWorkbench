@@ -23,8 +23,9 @@ import * as path from 'path';
  * ```
  */
 
-let strings: Record<string, string> = {};
-let initialized = false;
+// Map of bundle name to loaded strings
+const bundles = new Map<string, Record<string, string>>();
+let activeBundleName: string | null = null;
 
 /**
  * Initialize localization for a specific bundle.
@@ -38,9 +39,9 @@ export function initializeLocalization(
   baseDir: string,
   getLocale: () => string,
 ): void {
-  if (initialized) {
+  if (bundles.has(bundleName)) {
     console.warn(
-      `Localization already initialized. Skipping re-initialization for bundle: ${bundleName}`,
+      `Localization bundle "${bundleName}" already initialized. Skipping re-initialization.`,
     );
     return;
   }
@@ -48,21 +49,45 @@ export function initializeLocalization(
   const locale = getLocale() || 'en';
   const bundlePath = path.join(baseDir, bundleName);
 
-  // Try locale-specific file first (e.g., extension.nls.fr.json)
-  let nlsFile = `${bundlePath}.nls.${locale}.json`;
-  if (!fs.existsSync(nlsFile)) {
-    // Fall back to default (e.g., extension.nls.json)
-    nlsFile = `${bundlePath}.nls.json`;
+  // Build fallback chain: exact locale -> base language -> default
+  const localeChain: string[] = [];
+  if (locale.includes('-')) {
+    // Try full locale (e.g., fr-FR)
+    localeChain.push(locale);
+    // Try base language (e.g., fr)
+    localeChain.push(locale.split('-')[0]);
+  } else {
+    localeChain.push(locale);
+  }
+  // Always fall back to default
+  localeChain.push('default');
+
+  let loadedStrings: Record<string, string> = {};
+  let loaded = false;
+
+  for (const loc of localeChain) {
+    const nlsFile = loc === 'default' ? `${bundlePath}.nls.json` : `${bundlePath}.nls.${loc}.json`;
+
+    if (fs.existsSync(nlsFile)) {
+      try {
+        const content = fs.readFileSync(nlsFile, 'utf-8');
+        loadedStrings = JSON.parse(content);
+        loaded = true;
+        break;
+      } catch (error) {
+        console.error(`Failed to parse localization file: ${nlsFile}`, error);
+        // Continue to next fallback
+      }
+    }
   }
 
-  try {
-    const content = fs.readFileSync(nlsFile, 'utf-8');
-    strings = JSON.parse(content);
-    initialized = true;
-  } catch (error) {
-    console.error(`Failed to load localization file: ${nlsFile}`, error);
-    strings = {};
-    initialized = true; // Mark as initialized even on error to prevent retries
+  if (!loaded) {
+    console.warn(`No localization files found for bundle "${bundleName}". Using empty bundle.`);
+  }
+
+  bundles.set(bundleName, loadedStrings);
+  if (!activeBundleName) {
+    activeBundleName = bundleName;
   }
 }
 
@@ -79,13 +104,14 @@ export function initializeLocalization(
  * localize('error.notFound', 'File not found: {0}', filename)
  */
 export function localize(key: string, defaultMessage: string, ...args: any[]): string {
-  if (!initialized) {
+  if (!activeBundleName) {
     console.warn(
       'Localization not initialized. Call initializeLocalization() first. Using default message.',
     );
     return formatMessage(defaultMessage, args);
   }
 
+  const strings = bundles.get(activeBundleName) || {};
   const message = strings[key] || defaultMessage;
   return formatMessage(message, args);
 }
@@ -106,7 +132,20 @@ function formatMessage(message: string, args: any[]): string {
  * Useful for testing or conditional initialization.
  */
 export function isLocalizationInitialized(): boolean {
-  return initialized;
+  return activeBundleName !== null;
+}
+
+/**
+ * Set the active bundle for localization lookups.
+ *
+ * @param bundleName The bundle to make active, or null to clear
+ */
+export function setActiveBundle(bundleName: string | null): void {
+  if (bundleName && !bundles.has(bundleName)) {
+    console.warn(`Bundle "${bundleName}" not found. Call initializeLocalization() first.`);
+    return;
+  }
+  activeBundleName = bundleName;
 }
 
 /**
@@ -114,6 +153,6 @@ export function isLocalizationInitialized(): boolean {
  * NOT recommended for production use.
  */
 export function resetLocalization(): void {
-  strings = {};
-  initialized = false;
+  bundles.clear();
+  activeBundleName = null;
 }

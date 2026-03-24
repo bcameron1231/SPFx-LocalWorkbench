@@ -22,7 +22,7 @@
   "detect.found": "Found {0} web part(s): {1}",
 
   "mock.title": "Mock Data",
-  "mock.placeholder": "Choose an action, idiot!",
+  "mock.placeholder": "Choose an action",
   "mock.scaffold.label": "Scaffold Mock Config",
   "mock.scaffold.description": "Create a starter api-mocks.json file",
   "mock.scaffolded": "API mock configuration scaffolded at .spfx-workbench/api-mocks.json",
@@ -36,7 +36,7 @@
   "mock.importCsv.description": "Parse CSV rows into a JSON mock response",
   "mock.importCsv.success": "CSV file imported as mock rule.",
   "mock.record.label": "Record Requests",
-  "mock.record.description": "Capture unmatched requests and generate rules!",
+  "mock.record.description": "Capture unmatched requests and generate rules",
 
   "record.openFirst": "Open the workbench first, then start recording.",
   "record.noRequests": "No unmatched requests were recorded. All requests may have matched existing rules.",
