@@ -1,19 +1,14 @@
 {
-  "workbench.loading": "Initializing...",
-  "workbench.openDevTools": "Open developer tools",
-  "workbench.detectedComponents": "{0} detected",
-  "workbench.locale": "Locale",
-  "workbench.configMissing": "Workbench configuration not found",
-  "workbench.rootMissing": "Root element not found",
-  "workbench.fatalTitle": "Fatal Error:",
-  "workbench.fatalBody": "The workbench failed to initialize. Please check the console for details.",
   "displayName": "SPFx Local Workbench",
-  "description": "A Local Workbench for testing SharePoint Framework (SPFx) web parts without deploying to SharePoint"
-  ,
+  "description": "A Local Workbench for testing SharePoint Framework (SPFx) web parts without deploying to SharePoint",
+
   "icons.fluentui-testbeaker.description": "Test beaker",
+  "icons.fluentui-testbeakersolid.description": "Test beaker solid",
+  "icons.fluentui-teststep.description": "Test step",
   "icons.fluentui-localelanguage.description": "Locale language",
   "icons.fluentui-sync.description": "Sync",
   "icons.fluentui-developertools.description": "Developer tools",
+  "icons.fluentui-broom.description": "Broom",
 
   "command.spfx-local-workbench.openWorkbench.title": "Open Local Workbench",
   "command.spfx-local-workbench.startServe.title": "Start SPFx Serve and Open Workbench",
@@ -33,13 +28,11 @@
 
   "submenu.spfx-local-workbench.mockData.label": "Mock Data",
 
-  "configuration.spfxLocalWorkbench.title": "SPFx Local Workbench",
-
   "configuration.spfxLocalWorkbench.group.general.title": "General",
   "configuration.spfxLocalWorkbench.serveUrl.description": "The URL where the SPFx serve is running",
+  "configuration.spfxLocalWorkbench.statusBarWorkbenchAction.description": "Action to perform when clicking the SPFx Workbench status bar button",
   "configuration.spfxLocalWorkbench.autoOpenWorkbench.description": "Automatically open the workbench when starting serve",
   "configuration.spfxLocalWorkbench.serveCommand.mdDescription": "The command to run when starting the SPFx serve from the extension. Common options:\n- `heft start --clean --nobrowser`, `heft start --clean --nobrowser --locales=fr-fr`, `npm run start`",
-  "configuration.spfxLocalWorkbench.statusBarWorkbenchAction.description": "Action to perform when clicking the SPFx Workbench status bar button",
   "configuration.spfxLocalWorkbench.statusBarWorkbenchAction.mdEnumDescriptions.openWorkbench": "$(fluentui-testbeaker) Open the Local Workbench panel",
   "configuration.spfxLocalWorkbench.statusBarWorkbenchAction.mdEnumDescriptions.startServe": "$(fluentui-testbeakersolid) Start serve and open the Local Workbench panel",
   "configuration.spfxLocalWorkbench.statusBarStorybookAction.description": "Action to perform when clicking the SPFx Storybook status bar button",
@@ -144,74 +137,5 @@
   "configuration.spfxLocalWorkbench.proxy.fallbackStatus.description": "HTTP status code returned when no Mock rule matches in mock mode",
   "configuration.spfxLocalWorkbench.proxy.logRequests.description": "Log all proxied API requests to the 'SPFx API Proxy' output channel",
   "configuration.spfxLocalWorkbench.proxy.allowedOrigins.description": "URL patterns allowed in passthrough mode (empty = all)",
-  "configuration.spfxLocalWorkbench.proxy.serveMocksWhileRecording.description": "When in record mode, also serve existing mock rules for matched requests",
-
-  "extension.noWorkspace": "No workspace folder open",
-  "extension.notSpfx": "This does not appear to be an SPFx project",
-
-  "serve.title": "SPFx Serve",
-  "serve.waiting": "Waiting for serve to start…",
-  "serve.waitingElapsed": "Waiting for serve to start… ({0}s)",
-  "serve.timedout": "SPFx serve did not start in time. Open workbench anyway?",
-  "common.open": "Open",
-  "common.cancel": "Cancel",
-
-  "detect.noWebParts": "No web parts found in this project",
-  "detect.found": "Found {0} web part(s): {1}",
-
-  "mock.scaffold.label": "Scaffold Mock Config",
-  "mock.scaffold.description": "Create a starter api-mocks.json file",
-  "mock.scaffolded": "API Mock configuration scaffolded at .spfx-workbench/api-mocks.json",
-  "mock.generate.label": "Generate status code stubs",
-  "mock.generate.description": "Create rules for 200, 401, 404, 500, etc.",
-  "mock.generated": "Mock rules generated successfully.",
-  "mock.importJson.label": "Import JSON file",
-  "mock.importJson.description": "Use a JSON file as a Mock response body",
-  "mock.importJson.success": "JSON file imported as Mock rule.",
-  "mock.importCsv.label": "Import CSV file",
-  "mock.importCsv.description": "Parse CSV rows into a JSON Mock response",
-  "mock.importCsv.success": "CSV file imported as Mock rule.",
-  "mock.record.label": "Record requests",
-  "mock.record.description": "Capture unmatched requests and generate rules",
-
-  "record.openFirst": "Open the workbench first, then start recording.",
-  "record.noRequests": "No unmatched requests were recorded. All requests may have matched existing rules.",
-  "record.generated": "Generated rules from {0} recorded request(s).",
-  "recording.statusText": "Recording API Requests...",
-  "recording.tooltip": "Select to stop recording and generate Mock rules",
-
-  "recording.inProgress": "Recording API requests. Web parts are being refreshed. Select the status bar or run this command again to stop and generate Mock rules.",
-  "workbench.noComponents": "No web parts or extensions found in this SPFx project.",
-
-  "importJson.title": "Import JSON File as Mock Response Body",
-  "importJson.invalidJson": "The selected file is not valid JSON.",
-  "importJson.promptTitle": "Import JSON",
-  "importJson.inlineLabel": "Inline body",
-  "importJson.inlineDesc": "Embed the JSON directly in the Mock rule",
-  "importJson.referenceLabel": "Reference file",
-  "importJson.referenceDesc": "Point the rule to this file via bodyFile path",
-  "importJson.storageTitle": "How should the response body be stored?",
-
-  "importCsv.title": "Import CSV File as Mock Response Body",
-  "importCsv.empty": "The CSV file is empty or has no data rows.",
-  "importCsv.previewMessage": "Parsed {0} row(s) from CSV.\n\nPreview:\n{1}{2}",
-  "importCsv.continue": "Continue",
-  "importCsv.wrap.array": "Array",
-  "importCsv.wrap.arrayDesc": "Wrap rows in a plain JSON array: [...]",
-  "importCsv.wrap.sprest": "SharePoint REST",
-  "importCsv.wrap.sprestDesc": "Wrap in { d: { results: [...] } }",
-  "importCsv.wrap.graph": "Graph / OData",
-  "importCsv.wrap.graphDesc": "Wrap in { value: [...] }",
-  "importCsv.formatTitle": "Response body format",
-  "importCsv.promptTitle": "Import CSV",
-
-  "record.noRecordedRequests": "No unmatched requests have been recorded yet. Run your web part first, then try again.",
-  "record.pickTitle": "Generate rules from {0} recorded request(s)",
-  "record.statusTitle": "Default status code for generated rules",
-
-  "status.spfxWorkbench": "SPFx Workbench",
-  "status.spfxDetected": "SPFx project detected",
-  "status.spfxDetectedWithVersion": "SPFx project detected ({0})",
-  "status.clickToOpen": "Select to open Local Workbench",
-  "panel.title": "SPFx Local Workbench"
+  "configuration.spfxLocalWorkbench.proxy.serveMocksWhileRecording.description": "When in record mode, also serve existing mock rules for matched requests"
 }

@@ -4,14 +4,13 @@
 // It handles the lifecycle of the webview and communication between the
 // extension and the webview.
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 
 import { LIVE_RELOAD_DEBOUNCE_MS } from '@spfx-local-workbench/shared';
 import type { IExtensionManifest, IWebPartManifest } from '@spfx-local-workbench/shared';
+import { localize } from '@spfx-local-workbench/shared/utilities/localize';
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
 import { getNonce } from '@spfx-local-workbench/shared/utils/securityUtils';
 
-import { loadPackageNls } from '../i18nLoader';
 import type { IExternalDependency } from './SpfxProjectDetector';
 import { SpfxProjectDetector } from './SpfxProjectDetector';
 import {
@@ -26,9 +25,6 @@ import { generateWorkbenchHtml } from './html';
 import { ApiProxyService } from './proxy';
 
 const log = logger.createChild('WorkbenchPanel');
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone });
-const localize = nls.loadMessageBundle();
 
 // WorkbenchPanel manages the webview that hosts the SPFx local workbench.
 export class WorkbenchPanel {
@@ -59,9 +55,7 @@ export class WorkbenchPanel {
       ? vscode.window.activeTextEditor.viewColumn
       : undefined;
 
-    const translations = loadPackageNls(extensionUri.fsPath, vscode.env.language);
-    const panelTitle =
-      translations['panel.title'] ?? localize('panel.title', 'SPFx Local Workbench');
+    const panelTitle = localize('panel.title', 'SPFx Local Workbench');
 
     // If we already have a panel, show it
     if (WorkbenchPanel.currentPanel) {
@@ -99,8 +93,7 @@ export class WorkbenchPanel {
 
   // Revives the panel from a previous session
   public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri): void {
-    const translations = loadPackageNls(extensionUri.fsPath, vscode.env.language);
-    panel.title = translations['panel.title'] ?? localize('panel.title', 'SPFx Local Workbench');
+    panel.title = localize('panel.title', 'SPFx Local Workbench');
     WorkbenchPanel.currentPanel = new WorkbenchPanel(panel, extensionUri);
   }
 
@@ -109,10 +102,7 @@ export class WorkbenchPanel {
    */
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
     this._panel = panel;
-    const translations = loadPackageNls(extensionUri.fsPath, vscode.env.language);
-    this._panel.title =
-      translations['panel.title'] ??
-      localize('panel.title', this._panel.title ?? 'SPFx Local Workbench');
+    this._panel.title = localize('panel.title', this._panel.title ?? 'SPFx Local Workbench');
     this._extensionUri = extensionUri;
     this._settings = getWorkbenchSettings();
     void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.isWorkbench', true);

@@ -35,6 +35,42 @@ const copyTemplatesPlugin = {
 };
 
 /**
+ * Plugin to copy localization files
+ */
+const copyLocalizationPlugin = {
+  name: 'copy-localization',
+  setup(build) {
+    build.onEnd(() => {
+      const distDir = path.join(__dirname, 'dist');
+
+      // Ensure dist directory exists
+      if (!fs.existsSync(distDir)) {
+        fs.mkdirSync(distDir, { recursive: true });
+      }
+
+      // Copy extension.nls.json and extension.nls.*.json files
+      // These must match the bundle output filename (extension.js -> extension.nls.json)
+      const nlsDir = path.join(__dirname, 'src', 'loc');
+      const nlsFiles = fs.existsSync(nlsDir)
+        ? fs
+            .readdirSync(nlsDir)
+            .filter((file) => file.startsWith('extension.nls') && file.endsWith('.json'))
+        : [];
+
+      nlsFiles.forEach((file) => {
+        const src = path.join(nlsDir, file);
+        const dest = path.join(distDir, file);
+        fs.copyFileSync(src, dest);
+      });
+
+      if (nlsFiles.length > 0) {
+        console.log(`[nls] Copied ${nlsFiles.length} localization file(s)`);
+      }
+    });
+  },
+};
+
+/**
  * @type {import('esbuild').Plugin}
  */
 const esbuildProblemMatcherPlugin = {
@@ -68,6 +104,7 @@ async function main() {
     logLevel: 'silent',
     plugins: [
       copyTemplatesPlugin,
+      copyLocalizationPlugin,
       /* add to the end of plugins array */
       esbuildProblemMatcherPlugin,
     ],

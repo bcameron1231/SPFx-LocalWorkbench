@@ -1,8 +1,8 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 
 import { DEFAULT_SPFX_SERVE_PORT } from '@spfx-local-workbench/shared';
+import { initializeLocalization, localize } from '@spfx-local-workbench/shared/utilities/localize';
 import {
   getErrorMessage,
   isFileNotFoundError,
@@ -10,7 +10,6 @@ import {
 import { logger } from '@spfx-local-workbench/shared/utils/logger';
 import { isPortReachable } from '@spfx-local-workbench/shared/utils/networkUtils';
 
-//import { loadPackageNls } from './i18nLoader';
 import {
   ApiProxyService,
   MockConfigGenerator,
@@ -23,17 +22,19 @@ import {
   getWorkbenchSettings,
 } from './workbench';
 
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone });
-const localize = nls.loadMessageBundle();
-
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
-  // runtime localization via vscode-nls; also load package nls for development-time strings
-  // const translations = loadPackageNls(context.extensionPath, vscode.env.language); // temp disable until localization fix
+  // Initialize localization
+  initializeLocalization(
+    'extension',
+    path.join(context.extensionPath, 'dist'),
+    () => vscode.env.language,
+  );
+
   const log = logger.createChild('Extension');
 
   // Shared detector instance — workspace path rarely changes
@@ -411,8 +412,8 @@ export function activate(context: vscode.ExtensionContext) {
       ];
 
       const pick = await vscode.window.showQuickPick(items, {
-        title: 'Mock Data',
-        placeHolder: 'Choose an action',
+        title: localize('mock.title', 'Mock Data'),
+        placeHolder: localize('mock.placeholder', 'Choose an action'),
       });
 
       if (pick) {

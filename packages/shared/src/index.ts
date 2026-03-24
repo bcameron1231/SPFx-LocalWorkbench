@@ -12,6 +12,7 @@ export * from './mocks';
 export { initializeSpfxMocks, buildMockPageContext } from './mocks'; // Explicit re-exports
 export * from './types';
 export * from './utilities';
+// Note: localize is Node.js-only - import from '@spfx-local-workbench/shared/utilities/localize'
 export { getLocalizedString, buildThemeList } from './utilities'; // Explicit re-exports
 // Export browser-compatible utilities only (Node.js-specific utils are in utils/ but not exported here)
 export { setupProperty } from './utils/componentUtils';

@@ -54,14 +54,14 @@
         }
       },
       "fluentui-testbeakersolid": {
-        "description": "Test Beaker Solid",
+        "description": "%icons.fluentui-testbeakersolid.description%",
         "default": {
           "fontPath": "media/icons.woff",
           "fontCharacter": "\\F3A6"
         }
       },
       "fluentui-teststep": {
-        "description": "Test Step",
+        "description": "%icons.fluentui-teststep.description%",
         "default": {
           "fontPath": "media/icons.woff",
           "fontCharacter": "\\F3AC"
@@ -89,7 +89,7 @@
         }
       },
       "fluentui-broom": {
-        "description": "Broom",
+        "description": "%icons.fluentui-broom.description%",
         "default": {
           "fontPath": "media/icons.woff",
           "fontCharacter": "\\EA99"
@@ -158,10 +158,7 @@
         "command": "spfx-local-workbench.scaffoldMockConfig",
         "title": "%command.spfx-local-workbench.scaffoldMockConfig.title%",
         "category": "SPFx Local Workbench",
-        "icon": {
-          "light": "media/sync-light.svg",
-          "dark": "media/sync-dark.svg"
-        }
+        "icon": "$(file-add)"
       },
       {
         "command": "spfx-local-workbench.mockDataMenu",
@@ -172,22 +169,26 @@
       {
         "command": "spfx-local-workbench.generateStatusStubs",
         "title": "%command.spfx-local-workbench.generateStatusStubs.title%",
-        "category": "SPFx Mock Data"
+        "category": "SPFx Mock Data",
+        "icon": "$(symbol-number)"
       },
       {
         "command": "spfx-local-workbench.importJsonMock",
         "title": "%command.spfx-local-workbench.importJsonMock.title%",
-        "category": "SPFx Mock Data"
+        "category": "SPFx Mock Data",
+        "icon": "$(json)"
       },
       {
         "command": "spfx-local-workbench.importCsvMock",
         "title": "%command.spfx-local-workbench.importCsvMock.title%",
-        "category": "SPFx Mock Data"
+        "category": "SPFx Mock Data",
+        "icon": "$(table)"
       },
       {
         "command": "spfx-local-workbench.recordRequests",
         "title": "%command.spfx-local-workbench.recordRequests.title%",
-        "category": "SPFx Mock Data"
+        "category": "SPFx Mock Data",
+        "icon": "$(record)"
       }
     ],
     "submenus": [
@@ -279,11 +280,11 @@
               "startServeWorkbench"
             ],
             "markdownEnumDescriptions": [
-              "configuration.spfxLocalWorkbench.statusBarWorkbenchAction.mdEnumDescriptions.openWorkbench",
-              "configuration.spfxLocalWorkbench.statusBarWorkbenchAction.mdEnumDescriptions.startServe"
+              "%configuration.spfxLocalWorkbench.statusBarWorkbenchAction.mdEnumDescriptions.openWorkbench%",
+              "%configuration.spfxLocalWorkbench.statusBarWorkbenchAction.mdEnumDescriptions.startServe%"
             ],
             "default": "openWorkbench",
-            "description": "Action to perform when clicking the SPFx Workbench status bar button"
+            "description": "%configuration.spfxLocalWorkbench.statusBarWorkbenchAction.description%"
           },
           "spfxLocalWorkbench.statusBarStorybookAction": {
             "type": "string",
@@ -292,8 +293,8 @@
               "startServeStorybook"
             ],
             "markdownEnumDescriptions": [
-              "configuration.spfxLocalWorkbench.statusBarStorybookAction.mdEnumDescriptions.openStorybook",
-              "configuration.spfxLocalWorkbench.statusBarStorybookAction.mdEnumDescriptions.startServeStorybook"
+              "%configuration.spfxLocalWorkbench.statusBarStorybookAction.mdEnumDescriptions.openStorybook%",
+              "%configuration.spfxLocalWorkbench.statusBarStorybookAction.mdEnumDescriptions.startServeStorybook%"
             ],
             "default": "openStorybook",
             "description": "%configuration.spfxLocalWorkbench.statusBarStorybookAction.description%"
@@ -306,9 +307,9 @@
               "hidden"
             ],
             "markdownEnumDescriptions": [
-              "configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.iconAndText",
-              "configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.iconOnly",
-              "configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.hidden"
+              "%configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.iconAndText%",
+              "%configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.iconOnly%",
+              "%configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.hidden%"
             ],
             "default": "iconAndText",
             "description": "%configuration.spfxLocalWorkbench.statusBarDisplay.description%"
