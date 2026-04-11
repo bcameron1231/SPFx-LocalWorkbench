@@ -1,120 +1,144 @@
 // Workbench Configuration
-// 
+//
 // This module handles reading and providing extension settings to the workbench.
-
 import * as vscode from 'vscode';
 
+import {
+  DEFAULT_PAGE_CONTEXT,
+  DEFAULT_THEME_NAME,
+  type IPageContextConfig,
+  type ITheme,
+  MICROSOFT_THEMES,
+} from '@spfx-local-workbench/shared';
+
 // Context configuration for SharePoint mock
+// NOTE: Default values come from @spfx-local-workbench/shared package (DEFAULT_PAGE_CONTEXT).
+// This ensures consistency across extension, webview, and Storybook addon.
+// package.json still duplicates these for VS Code settings UI schema (JSON limitation).
 export interface IContextConfig {
-    siteUrl: string;
-    webUrl: string;
-    userDisplayName: string;
-    userEmail: string;
-    userLoginName: string;
-    culture: string;
-    isAnonymousGuestUser: boolean;
-    customContext: Record<string, unknown>;
-}
-
-// Page context configuration
-export interface IPageContextConfig {
-    webTitle: string;
-    webDescription: string;
-    webTemplate: string;
-    isNoScriptEnabled: boolean;
-    isSPO: boolean;
-}
-
-// Theme configuration
-export interface IThemeConfig {
-    preset: 'teamSite' | 'communicationSite' | 'dark' | 'highContrast' | 'custom';
-    customColors: Record<string, string>;
+  pageContext: IPageContextConfig;
 }
 
 // Complete workbench configuration
 export interface IWorkbenchSettings {
-    serveUrl: string;
-    autoOpenWorkbench: boolean;
-    context: IContextConfig;
-    pageContext: IPageContextConfig;
-    theme: IThemeConfig;
+  serveUrl: string;
+  autoOpenWorkbench: boolean;
+  serveCommand: string;
+  context: IContextConfig;
 }
 
 // Default configuration values
-const defaults: IWorkbenchSettings = {
-    serveUrl: 'https://localhost:4321',
-    autoOpenWorkbench: false,
-    context: {
-        siteUrl: 'https://contoso.sharepoint.com/sites/devsite',
-        webUrl: 'https://contoso.sharepoint.com/sites/devsite',
-        userDisplayName: 'Local Workbench User',
-        userEmail: 'user@contoso.onmicrosoft.com',
-        userLoginName: 'i:0#.f|membership|user@contoso.onmicrosoft.com',
-        culture: 'en-US',
-        isAnonymousGuestUser: false,
-        customContext: {}
-    },
-    pageContext: {
-        webTitle: 'Local Workbench',
-        webDescription: 'Local development workbench for SPFx web parts',
-        webTemplate: 'STS#3',
-        isNoScriptEnabled: false,
-        isSPO: true
-    },
-    theme: {
-        preset: 'teamSite',
-        customColors: {}
-    }
+const defaults = {
+  serveUrl: 'https://localhost:4321',
+  autoOpenWorkbench: false,
+  serveCommand: 'heft start --clean --nobrowser',
+  context: {
+    pageContext: DEFAULT_PAGE_CONTEXT,
+  },
 };
 
 // Gets the current workbench configuration from VS Code settings
 export function getWorkbenchSettings(): IWorkbenchSettings {
-    const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
+  const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
 
-    return {
-        serveUrl: config.get<string>('serveUrl', defaults.serveUrl),
-        autoOpenWorkbench: config.get<boolean>('autoOpenWorkbench', defaults.autoOpenWorkbench),
-        context: {
-            siteUrl: config.get<string>('context.siteUrl', defaults.context.siteUrl),
-            webUrl: config.get<string>('context.webUrl', defaults.context.webUrl),
-            userDisplayName: config.get<string>('context.userDisplayName', defaults.context.userDisplayName),
-            userEmail: config.get<string>('context.userEmail', defaults.context.userEmail),
-            userLoginName: config.get<string>('context.userLoginName', defaults.context.userLoginName),
-            culture: config.get<string>('context.culture', defaults.context.culture),
-            isAnonymousGuestUser: config.get<boolean>('context.isAnonymousGuestUser', defaults.context.isAnonymousGuestUser),
-            customContext: config.get<Record<string, unknown>>('context.customContext', defaults.context.customContext)
-        },
-        pageContext: {
-            webTitle: config.get<string>('pageContext.webTitle', defaults.pageContext.webTitle),
-            webDescription: config.get<string>('pageContext.webDescription', defaults.pageContext.webDescription),
-            webTemplate: config.get<string>('pageContext.webTemplate', defaults.pageContext.webTemplate),
-            isNoScriptEnabled: config.get<boolean>('pageContext.isNoScriptEnabled', defaults.pageContext.isNoScriptEnabled),
-            isSPO: config.get<boolean>('pageContext.isSPO', defaults.pageContext.isSPO)
-        },
-        theme: {
-            preset: config.get<IThemeConfig['preset']>('theme.preset', defaults.theme.preset),
-            customColors: config.get<Record<string, string>>('theme.customColors', defaults.theme.customColors)
-        }
-    };
+  // Get pageContext and wrap it in context object structure
+  const pageContext = config.get<IPageContextConfig>(
+    'context.pageContext',
+    defaults.context.pageContext,
+  );
+
+  return {
+    serveUrl: config.get<string>('serveUrl', defaults.serveUrl),
+    autoOpenWorkbench: config.get<boolean>('autoOpenWorkbench', defaults.autoOpenWorkbench),
+    serveCommand: config.get<string>('serveCommand', defaults.serveCommand),
+    context: {
+      pageContext,
+    },
+  };
 }
 
 // Creates a configuration change listener
 // @param callback Function to call when configuration changes
 // @returns Disposable to unsubscribe
-export function onConfigurationChanged(callback: (settings: IWorkbenchSettings) => void): vscode.Disposable {
-    return vscode.workspace.onDidChangeConfiguration((e) => {
-        if (e.affectsConfiguration('spfxLocalWorkbench')) {
-            callback(getWorkbenchSettings());
-        }
-    });
+export function onConfigurationChanged(
+  callback: (settings: IWorkbenchSettings) => void,
+): vscode.Disposable {
+  return vscode.workspace.onDidChangeConfiguration((e) => {
+    if (e.affectsConfiguration('spfxLocalWorkbench')) {
+      callback(getWorkbenchSettings());
+    }
+  });
 }
 
 // Opens the settings UI filtered to SPFx Local Workbench settings
 export async function openWorkbenchSettings(): Promise<void> {
-    await vscode.commands.executeCommand('workbench.action.openSettings', '@ext:BeauCameron.spfx-local-workbench');
+  await vscode.commands.executeCommand(
+    'workbench.action.openSettings',
+    '@ext:BeauCameron.spfx-local-workbench',
+  );
 }
 
 // Serializes the settings to JSON for passing to the webview
 export function serializeSettings(settings: IWorkbenchSettings): string {
-    return JSON.stringify(settings);
+  return JSON.stringify(settings);
+}
+
+// ============================================================================
+// Theme Management Functions
+// ============================================================================
+
+/**
+ * Gets all available themes (Microsoft default + custom)
+ * @returns Array of all themes
+ */
+export function getThemes(): ITheme[] {
+  const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
+  const customThemes = config.get<ITheme[]>('theme.custom', []);
+
+  // Merge Microsoft themes with custom themes
+  // Custom themes have isCustom: true
+  return [...MICROSOFT_THEMES, ...customThemes.map((theme) => ({ ...theme, isCustom: true }))];
+}
+
+/**
+ * Gets the currently selected theme
+ * @returns Current theme (defaults to Teal if not set)
+ */
+export function getCurrentTheme(): ITheme {
+  const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
+  const theme = config.get<string>('theme.current', DEFAULT_THEME_NAME);
+  const customTheme = config.get<string>('theme.customName', '');
+
+  // Use custom theme name if theme.current is set to 'Custom'
+  const currentThemeName = theme === 'Custom' ? customTheme : theme;
+
+  const allThemes = getThemes();
+  const foundTheme = allThemes.find((t) => t.name === currentThemeName);
+
+  // Default to Teal if theme not found
+  return foundTheme || MICROSOFT_THEMES[0];
+}
+
+/**
+ * Sets the current theme
+ * @param themeName Name of the theme to set as current
+ */
+export async function setCurrentTheme(themeName: string, isCustom: boolean): Promise<void> {
+  const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
+
+  if (!isCustom) {
+    await config.update('theme.current', themeName, vscode.ConfigurationTarget.Workspace);
+  } else {
+    await config.update('theme.current', 'Custom', vscode.ConfigurationTarget.Workspace);
+    await config.update('theme.customName', themeName, vscode.ConfigurationTarget.Workspace);
+  }
+}
+
+/**
+ * Gets custom themes from configuration
+ * @returns Array of custom themes only
+ */
+export function getCustomThemes(): ITheme[] {
+  const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
+  return config.get<ITheme[]>('theme.custom', []).map((theme) => ({ ...theme, isCustom: true }));
 }

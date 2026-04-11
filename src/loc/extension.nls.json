@@ -1,0 +1,50 @@
+{
+  "extension.noWorkspace": "No workspace folder open",
+  "extension.notSpfx": "This does not appear to be an SPFx project",
+
+  "workbench.loading": "Initializing...",
+  "workbench.openDevTools": "Open developer tools",
+  "workbench.detectedComponents": "{0} detected",
+  "workbench.locale": "Locale",
+  "workbench.configMissing": "Workbench configuration not found",
+  "workbench.rootMissing": "Root element not found",
+  "workbench.fatalTitle": "Fatal Error:",
+  "workbench.fatalBody": "The workbench failed to initialize. Please check the console for details.",
+
+  "serve.waiting": "Waiting for serve to start…",
+  "serve.waitingElapsed": "Waiting for serve to start… ({0}s)",
+  "serve.timedout": "SPFx serve did not start in time. Open workbench anyway?",
+
+  "common.open": "Open",
+  "common.cancel": "Cancel",
+
+  "detect.noWebParts": "No web parts found in this project",
+  "detect.found": "Found {0} web part(s): {1}",
+
+  "mock.title": "Mock Data",
+  "mock.placeholder": "Choose an action",
+  "mock.scaffold.label": "Scaffold Mock Config",
+  "mock.scaffold.description": "Create a starter api-mocks.json file",
+  "mock.scaffolded": "API mock configuration scaffolded at .spfx-workbench/api-mocks.json",
+  "mock.generate.label": "Generate Status Code Stubs",
+  "mock.generate.description": "Create rules for 200, 401, 404, 500, etc.",
+  "mock.generated": "Mock rules generated successfully.",
+  "mock.importJson.label": "Import JSON File",
+  "mock.importJson.description": "Use a JSON file as a mock response body",
+  "mock.importJson.success": "JSON file imported as mock rule.",
+  "mock.importCsv.label": "Import CSV File",
+  "mock.importCsv.description": "Parse CSV rows into a JSON mock response",
+  "mock.importCsv.success": "CSV file imported as mock rule.",
+  "mock.record.label": "Record Requests",
+  "mock.record.description": "Capture unmatched requests and generate rules",
+
+  "record.openFirst": "Open the workbench first, then start recording.",
+  "record.noRequests": "No unmatched requests were recorded. All requests may have matched existing rules.",
+  "record.generated": "Generated rules from {0} recorded request(s).",
+
+  "recording.statusText": "Recording API Requests...",
+  "recording.tooltip": "Click to stop recording and generate mock rules",
+  "recording.inProgress": "Recording API requests. Web parts are being refreshed. Click the status bar or run this command again to stop and generate rules.",
+
+  "panel.title": "SPFx Local Workbench"
+}

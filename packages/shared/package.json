@@ -1,0 +1,75 @@
+{
+  "name": "@spfx-local-workbench/shared",
+  "version": "0.0.1",
+  "description": "Shared code for SPFx Local Workbench extension and Storybook addon",
+  "author": {
+    "name": "Chris Kent",
+    "url": "https://github.com/thechriskent"
+  },
+  "contributors": [
+    {
+      "name": "Beau Cameron",
+      "url": "https://github.com/bcameron1231"
+    },
+    {
+      "name": "Hugo Bernier",
+      "url": "https://github.com/hugoabernier"
+    }
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./fluent": {
+      "types": "./dist/utils/buildFluentTheme.d.ts",
+      "default": "./dist/utils/buildFluentTheme.js"
+    },
+    "./utils/node": {
+      "types": "./dist/utils/node/index.d.ts",
+      "default": "./dist/utils/node/index.js"
+    },
+    "./*": {
+      "types": "./dist/*/index.d.ts",
+      "default": "./dist/*/index.js"
+    }
+  },
+  "scripts": {
+    "build": "npm run generate:css-types && tsc && npm run copy-assets",
+    "generate:css-types": "tcm src",
+    "copy-assets": "rsync -a --include='*/' --include='*.css' --include='*.css.d.ts' --exclude='*' src/ dist/",
+    "watch": "npm-run-all -p watch:*",
+    "watch:tsc": "tsc --watch",
+    "watch:css-types": "tcm src --watch"
+  },
+  "keywords": [
+    "spfx",
+    "mock",
+    "testing"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@fluentui/react": "^8.0.0"
+  },
+  "peerDependencies": {
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0"
+  },
+  "overrides": {
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "npm-run-all": "^4.1.5",
+    "typed-css-modules": "^0.9.1",
+    "typescript": "^5.9.3"
+  }
+}

@@ -9,7 +9,7 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 ### Web Parts
 
 - **Automatic SPFx Detection**: Automatically detects SPFx projects in your workspace
-- **Web Part Discovery**: Parses all web part manifests from your project  
+- **Web Part Discovery**: Parses all web part manifests from your project
 - **SPFx Runtime Environment**: Custom-built workbench that simulates the SPFx runtime with AMD module loading
 - **Property Pane**: Full property pane support for configuring web parts
 - **Live Reload Support**: Works with `heft start` for real-time development
@@ -24,6 +24,14 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 - **Property Editing**: Click the edit (pencil) icon on a loaded extension to modify its `ClientSideComponentProperties` and re-render
 - **PlaceholderProvider Mock**: Full mock of `context.placeholderProvider` including `tryCreateContent()` and `changedEvent`
 
+### Storybook Integration (Beta)
+
+- **Auto-Generated Stories**: Automatically generates Storybook stories from your SPFx component manifests
+- **Locale Variants**: Creates story variants for each locale defined in your component
+- **SPFx Context**: Custom Storybook addon provides full SPFx context and theme switching
+- **Visual Testing**: Test components in isolation with different themes and contexts
+- **Live Development**: Run Storybook alongside your SPFx project for component development
+
 ### API Proxy & Mock System
 
 - **Drop-in HTTP client replacements**: `SPHttpClient`, `HttpClient`, and `AadHttpClient` are replaced with proxy-aware classes — no code changes needed in your web parts
@@ -34,9 +42,9 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 - **Request logging**: All proxied calls are logged to the "SPFx API Proxy" output channel
 - **Fully optional**: Disable the proxy to use real `fetch()` calls with external tools like Dev Proxy
 
->**[Full proxy documentation →](PROXY.md)** — architecture, setup guide, mock rule reference, and examples.
+> **[Full proxy documentation →](PROXY.md)** — architecture, setup guide, mock rule reference, and examples.
 >
->**[Mock data generation →](MOCK-DATA.md)** — status code stubs, JSON/CSV import, request recording, and more.
+> **[Mock data generation →](MOCK-DATA.md)** — status code stubs, JSON/CSV import, request recording, and more.
 
 ## Requirements
 
@@ -79,60 +87,115 @@ This extension provides a **custom-built workbench environment** that simulates 
 6. Your web parts render in a simulated SharePoint environment
 7. Application Customizers are loaded the same way, with mocked `Top`/`Bottom` placeholder zones rendered above and below the canvas
 
+### Using Storybook for Component Development
+
+The extension includes **Storybook integration** for visual testing and component development:
+
+1. **Generate Stories**: Run "SPFx: Generate Storybook Stories" from the Command Palette
+   - Stories are auto-generated from your component manifests
+   - Each localized variant gets its own story
+   - Stories are created in `src/**/*.stories.ts` next to your components
+
+2. **Open Storybook**: Run "SPFx: Open Storybook" to launch the Storybook dev server
+   - Server runs at `http://localhost:6006` by default
+   - View opens in a VS Code webview panel
+   - Includes toolbar for theme switching and context customization
+
+3. **SPFx Addon**: The custom `@spfx-local-workbench/storybook-addon-spfx` addon provides:
+   - Full SPFx context mock (same as workbench)
+   - Theme switcher with 10 Microsoft 365 themes
+   - Hot reload support during development
+
+4. **Story Structure**: Auto-generated stories follow CSF 3.0 format:
+
+   ```typescript
+   import type { Meta, StoryObj } from '@storybook/react';
+
+   import HelloWorldWebPart from './HelloWorldWebPart';
+
+   const meta: Meta<typeof HelloWorldWebPart> = {
+     title: 'WebParts/HelloWorld',
+     component: HelloWorldWebPart,
+     parameters: {
+       spfxContext: {
+         /* ... */
+       },
+     },
+   };
+
+   export const Default: StoryObj = {};
+   ```
+
 ## Commands
 
-| Command | Description |
-| --------- | ------------- |
-| `SPFx: Open Local Workbench` | Opens the local workbench panel |
-| `SPFx: Start Serve & Open Workbench` | Starts serve and opens workbench |
-| `SPFx: Detect Web Parts` | Shows detected web parts in the project |
+| Command                              | Description                                 |
+| ------------------------------------ | ------------------------------------------- |
+| `SPFx: Open Local Workbench`         | Opens the local workbench panel             |
+| `SPFx: Start Serve & Open Workbench` | Starts serve and opens workbench            |
+| `SPFx: Detect Web Parts`             | Shows detected web parts in the project     |
+| `SPFx: Open Storybook`               | Starts Storybook dev server and opens panel |
+| `SPFx: Generate Storybook Stories`   | Generates stories from SPFx manifests       |
+| `SPFx: Open Developer Tools`         | Opens webview developer tools               |
 
 ## Configuration
 
-### Basic Settings
+### General Settings
 
-| Setting | Default | Description |
-| --------- | --------- | ------------- |
-| `spfxLocalWorkbench.serveUrl` | `https://localhost:4321` | The URL where SPFx serve is running |
-| `spfxLocalWorkbench.autoOpenWorkbench` | `false` | Auto-open workbench when starting serve |
+| Setting                                | Default                  | Description                                                                                      |
+| -------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `spfxLocalWorkbench.serveUrl`          | `https://localhost:4321` | The URL where SPFx serve is running                                                              |
+| `spfxLocalWorkbench.autoOpenWorkbench` | `false`                  | Auto-open workbench when starting serve                                                          |
+| `spfxLocalWorkbench.statusBarAction`   | `openWorkbench`          | Action when clicking the SPFx status bar item: `openWorkbench`, `startServe`, or `openStorybook` |
+
+### Theme Settings
+
+| Setting                               | Default  | Description                                                                                                                        |
+| ------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `spfxLocalWorkbench.theme.current`    | `"Teal"` | Select a Microsoft theme by name (e.g. `"Teal"`, `"Blue"`) or `"Custom"` to use a custom theme                                     |
+| `spfxLocalWorkbench.theme.customName` | `""`     | Custom theme name when `theme.current` is set to `"Custom"`. Must match a `name` defined in `theme.custom`                         |
+| `spfxLocalWorkbench.theme.custom`     | `[]`     | Custom themes to add alongside the default Microsoft themes. Each theme should have `name`, `isInverted`, and `palette` properties |
+
+> **Note**: The extension includes 10 default Microsoft 365 themes: `Teal`, `Blue`, `Orange`, `Red`, `Purple`, `Green`, `Periwinkle`, `Cobalt`, `Dark Teal`, `Dark Blue`. Themes are identified by their `name` property (case-sensitive). Custom themes defined here also appear in the Storybook theme toolbar under "From your organization".
 
 ### Context Settings
 
 Customize the mock SharePoint context:
 
-| Setting | Default | Description |
-| --------- | --------- | ------------- |
-| `spfxLocalWorkbench.context.siteUrl` | `https://contoso.sharepoint.com/sites/devsite` | SharePoint site URL |
-| `spfxLocalWorkbench.context.webUrl` | `https://contoso.sharepoint.com/sites/devsite` | SharePoint web URL |
-| `spfxLocalWorkbench.context.userDisplayName` | `Local Workbench User` | Display name of the current user |
-| `spfxLocalWorkbench.context.userEmail` | `user@contoso.onmicrosoft.com` | Email address of the current user |
-| `spfxLocalWorkbench.context.culture` | `en-US` | Culture/locale (e.g., en-US, de-DE, fr-FR) |
-| `spfxLocalWorkbench.context.customContext` | `{}` | Additional custom context properties (JSON object) |
+| Setting                                  | Default   | Description                                                                   |
+| ---------------------------------------- | --------- | ----------------------------------------------------------------------------- |
+| `spfxLocalWorkbench.context.pageContext` | See below | SharePoint page context object (mirrors SPFx `context.pageContext` structure) |
 
-### Theme Settings
+The `pageContext` object includes:
 
-| Setting | Default | Description |
-| --------- | --------- | ------------- |
-| `spfxLocalWorkbench.theme.preset` | `teamSite` | Theme preset: `teamSite`, `communicationSite`, `dark`, `highContrast`, or `custom` |
-| `spfxLocalWorkbench.theme.customColors` | `{}` | Custom theme colors when using `custom` preset |
+- `site`: Site collection information (absoluteUrl, id)
+- `web`: Web information (absoluteUrl, title, description, templateName, id)
+- `user`: User information (displayName, email, loginName, isAnonymousGuestUser)
+- `cultureInfo`: Culture/locale information (currentCultureName)
+- `isNoScriptEnabled`: Whether NoScript is enabled
+- `isSPO`: Whether this is SharePoint Online
 
-### Page Context Settings
+You can add additional properties as needed to match your SPFx solution requirements.
 
-| Setting | Default | Description |
-| --------- | --------- | ------------- |
-| `spfxLocalWorkbench.pageContext.webTitle` | `Local Workbench` | Title of the web |
-| `spfxLocalWorkbench.pageContext.webTemplate` | `STS#3` | Web template ID |
-| `spfxLocalWorkbench.pageContext.isSPO` | `true` | Whether this is SharePoint Online |
+### Storybook Settings
+
+| Setting                                              | Default               | Description                                                    |
+| ---------------------------------------------------- | --------------------- | -------------------------------------------------------------- |
+| `spfxLocalWorkbench.storybook.port`                  | `6006`                | Port for the Storybook dev server                              |
+| `spfxLocalWorkbench.storybook.autoGenerate`          | `true`                | Automatically generate stories from SPFx manifests             |
+| `spfxLocalWorkbench.storybook.generateLocaleStories` | `true`                | Generate story variants for each locale                        |
+| `spfxLocalWorkbench.storybook.storiesPattern`        | `src/**/*.stories.ts` | Glob pattern for custom story files                            |
+| `spfxLocalWorkbench.storybook.autoDocs`              | `false`               | Enable auto-generated documentation pages for stories          |
+| `spfxLocalWorkbench.storybook.skipInstallPrompt`     | `false`               | Automatically install Storybook dependencies without prompting |
 
 ### Proxy Settings
 
-| Setting | Default | Description |
-| --------- | --------- | ------------- |
-| `spfxLocalWorkbench.proxy.enabled` | `true` | Enable the API proxy. When `false`, HTTP clients make real `fetch()` calls so you can use external tools like [Dev Proxy](https://learn.microsoft.com/microsoft-cloud/dev/dev-proxy/overview). **Requires closing and reopening the workbench to take effect.** |
-| `spfxLocalWorkbench.proxy.mockFile` | `.spfx-workbench/api-mocks.json` | Path to the mock rules configuration file (relative to workspace root) |
-| `spfxLocalWorkbench.proxy.defaultDelay` | `0` | Default simulated latency (ms) for mock responses |
-| `spfxLocalWorkbench.proxy.fallbackStatus` | `404` | HTTP status returned when no mock rule matches |
-| `spfxLocalWorkbench.proxy.logRequests` | `true` | Log proxied requests to the "SPFx API Proxy" output channel |
+| Setting                                   | Default                          | Description                                                                                                                                                                                                                                                     |
+| ----------------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `spfxLocalWorkbench.proxy.enabled`        | `true`                           | Enable the API proxy. When `false`, HTTP clients make real `fetch()` calls so you can use external tools like [Dev Proxy](https://learn.microsoft.com/microsoft-cloud/dev/dev-proxy/overview). **Requires closing and reopening the workbench to take effect.** |
+| `spfxLocalWorkbench.proxy.mockFile`       | `.spfx-workbench/api-mocks.json` | Path to the mock rules configuration file (relative to workspace root)                                                                                                                                                                                          |
+| `spfxLocalWorkbench.proxy.defaultDelay`   | `0`                              | Default simulated latency (ms) for mock responses                                                                                                                                                                                                               |
+| `spfxLocalWorkbench.proxy.fallbackStatus` | `404`                            | HTTP status returned when no mock rule matches                                                                                                                                                                                                                  |
+| `spfxLocalWorkbench.proxy.logRequests`    | `true`                           | Log proxied requests to the "SPFx API Proxy" output channel                                                                                                                                                                                                     |
 
 > See [PROXY.md](PROXY.md) for the full mock rule reference, architecture details, and examples.
 

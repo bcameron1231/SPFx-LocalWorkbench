@@ -1,0 +1,14 @@
+# Build outputs
+dist/
+lib/
+lib-commonjs/
+release/
+temp/
+
+# Dependencies
+node_modules/
+
+# Lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock

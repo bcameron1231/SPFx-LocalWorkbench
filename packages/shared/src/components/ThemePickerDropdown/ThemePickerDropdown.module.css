@@ -1,0 +1,17 @@
+.themeDropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  color: inherit;
+}
+
+.themeGroupHeader {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 4px 4px;
+  color: inherit;
+  opacity: 0.8;
+}

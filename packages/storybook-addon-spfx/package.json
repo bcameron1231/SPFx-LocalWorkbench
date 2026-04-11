@@ -1,0 +1,75 @@
+{
+  "name": "@spfx-local-workbench/storybook-addon-spfx",
+  "version": "1.0.0",
+  "description": "Storybook addon for SharePoint Framework components",
+  "author": {
+    "name": "Chris Kent",
+    "url": "https://github.com/thechriskent"
+  },
+  "contributors": [
+    {
+      "name": "Beau Cameron",
+      "url": "https://github.com/bcameron1231"
+    },
+    {
+      "name": "Hugo Bernier",
+      "url": "https://github.com/hugoabernier"
+    }
+  ],
+  "main": "dist/storybook-addon-spfx/src/preset.js",
+  "types": "dist/storybook-addon-spfx/src/preset.d.ts",
+  "exports": {
+    ".": "./dist/storybook-addon-spfx/src/preset.js",
+    "./manager": "./dist/storybook-addon-spfx/src/manager.js",
+    "./preview": "./dist/storybook-addon-spfx/src/preview.js",
+    "./package.json": "./package.json"
+  },
+  "keywords": [
+    "storybook",
+    "spfx",
+    "sharepoint",
+    "addon"
+  ],
+  "files": [
+    "dist/**/*",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "npm run generate:css-types && tsc && npm run copy-assets",
+    "generate:css-types": "tcm src",
+    "copy-assets": "rsync -a --include='*/' --include='*.css' --include='*.css.d.ts' --exclude='*' src/ dist/storybook-addon-spfx/src/",
+    "watch": "npm-run-all -p watch:*",
+    "watch:tsc": "tsc --watch",
+    "watch:css-types": "tcm src --watch"
+  },
+  "peerDependencies": {
+    "@storybook/addon-toolbars": "^7.0.0 || ^8.0.0",
+    "@storybook/blocks": "^7.0.0 || ^8.0.0",
+    "@storybook/components": "^7.0.0 || ^8.0.0",
+    "@storybook/manager-api": "^7.0.0 || ^8.0.0",
+    "@storybook/preview-api": "^7.0.0 || ^8.0.0",
+    "@storybook/theming": "^7.0.0 || ^8.0.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0"
+  },
+  "dependencies": {
+    "@spfx-local-workbench/shared": "file:../shared"
+  },
+  "devDependencies": {
+    "@storybook/addon-toolbars": "^8.0.0",
+    "@storybook/blocks": "^8.0.0",
+    "@storybook/components": "^8.0.0",
+    "@storybook/manager-api": "^8.0.0",
+    "@storybook/preview-api": "^8.0.0",
+    "@storybook/react": "^8.0.0",
+    "@storybook/theming": "^8.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "npm-run-all": "^4.1.5",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "typed-css-modules": "^0.9.1",
+    "typescript": "^5.0.0"
+  }
+}

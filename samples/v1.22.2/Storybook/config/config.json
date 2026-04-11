@@ -1,0 +1,27 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "hello-storybook-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/helloStorybook/HelloStorybookWebPart.js",
+          "manifest": "./src/webparts/helloStorybook/HelloStorybookWebPart.manifest.json"
+        }
+      ]
+    },
+    "hello-teams-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/helloTeams/HelloTeamsWebPart.js",
+          "manifest": "./src/webparts/helloTeams/HelloTeamsWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "HelloStorybookWebPartStrings": "lib/webparts/helloStorybook/loc/{locale}.js",
+    "HelloTeamsWebPartStrings": "lib/webparts/helloTeams/loc/{locale}.js"
+  }
+}

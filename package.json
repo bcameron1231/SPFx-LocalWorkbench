@@ -4,6 +4,20 @@
   "description": "%description%",
   "version": "0.0.1",
   "publisher": "BeauCameron",
+  "author": {
+    "name": "Beau Cameron",
+    "url": "https://github.com/bcameron1231"
+  },
+  "contributors": [
+    {
+      "name": "Chris Kent",
+      "url": "https://github.com/thechriskent"
+    },
+    {
+      "name": "Hugo Bernier",
+      "url": "https://github.com/hugoabernier"
+    }
+  ],
   "icon": "media/icon.png",
   "repository": {
     "type": "git",
@@ -39,6 +53,20 @@
           "fontCharacter": "\\F3A5"
         }
       },
+      "fluentui-testbeakersolid": {
+        "description": "%icons.fluentui-testbeakersolid.description%",
+        "default": {
+          "fontPath": "media/icons.woff",
+          "fontCharacter": "\\F3A6"
+        }
+      },
+      "fluentui-teststep": {
+        "description": "%icons.fluentui-teststep.description%",
+        "default": {
+          "fontPath": "media/icons.woff",
+          "fontCharacter": "\\F3AC"
+        }
+      },
       "fluentui-localelanguage": {
         "description": "%icons.fluentui-localelanguage.description%",
         "default": {
@@ -59,6 +87,13 @@
           "fontPath": "media/icons.woff",
           "fontCharacter": "\\EC7A"
         }
+      },
+      "fluentui-broom": {
+        "description": "%icons.fluentui-broom.description%",
+        "default": {
+          "fontPath": "media/icons.woff",
+          "fontCharacter": "\\EA99"
+        }
       }
     },
     "commands": [
@@ -69,10 +104,10 @@
         "icon": "$(fluentui-testbeaker)"
       },
       {
-        "command": "spfx-local-workbench.startServe",
+        "command": "spfx-local-workbench.startServeWorkbench",
         "title": "%command.spfx-local-workbench.startServe.title%",
         "category": "SPFx Local Workbench",
-        "icon": "$(play)"
+        "icon": "$(fluentui-testbeakersolid)"
       },
       {
         "command": "spfx-local-workbench.detectWebParts",
@@ -81,19 +116,46 @@
         "icon": "$(fluentui-sync)"
       },
       {
-        "command": "spfx-local-workbench.scaffoldMockConfig",
-        "title": "%command.spfx-local-workbench.scaffoldMockConfig.title%",
-        "category": "SPFx Local Workbench",
-        "icon": {
-          "light": "media/sync-light.svg",
-          "dark": "media/sync-dark.svg"
-        }
-      },
-      {
         "command": "spfx-local-workbench.openDevTools",
         "title": "%command.spfx-local-workbench.openDevTools.title%",
         "category": "SPFx Local Workbench",
         "icon": "$(fluentui-developertools)"
+      },
+      {
+        "command": "spfx-local-workbench.openSettings",
+        "title": "%command.spfx-local-workbench.openSettings.title%",
+        "category": "SPFx Local Workbench",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "spfx-local-workbench.openStorybook",
+        "title": "%command.spfx-local-workbench.openStorybook.title%",
+        "category": "SPFx Local Workbench",
+        "icon": "$(fluentui-teststep)"
+      },
+      {
+        "command": "spfx-local-workbench.startServeStorybook",
+        "title": "%command.spfx-local-workbench.startServeStorybook.title%",
+        "category": "SPFx Local Workbench",
+        "icon": "$(fluentui-teststep)"
+      },
+      {
+        "command": "spfx-local-workbench.generateStories",
+        "title": "%command.spfx-local-workbench.generateStories.title%",
+        "category": "SPFx Local Workbench",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "spfx-local-workbench.cleanStorybook",
+        "title": "%command.spfx-local-workbench.cleanStorybook.title%",
+        "category": "SPFx Local Workbench",
+        "icon": "$(fluentui-broom)"
+      },
+      {
+        "command": "spfx-local-workbench.scaffoldMockConfig",
+        "title": "%command.spfx-local-workbench.scaffoldMockConfig.title%",
+        "category": "SPFx Local Workbench",
+        "icon": "$(file-add)"
       },
       {
         "command": "spfx-local-workbench.mockDataMenu",
@@ -104,22 +166,26 @@
       {
         "command": "spfx-local-workbench.generateStatusStubs",
         "title": "%command.spfx-local-workbench.generateStatusStubs.title%",
-        "category": "SPFx Mock Data"
+        "category": "SPFx Mock Data",
+        "icon": "$(symbol-number)"
       },
       {
         "command": "spfx-local-workbench.importJsonMock",
         "title": "%command.spfx-local-workbench.importJsonMock.title%",
-        "category": "SPFx Mock Data"
+        "category": "SPFx Mock Data",
+        "icon": "$(json)"
       },
       {
         "command": "spfx-local-workbench.importCsvMock",
         "title": "%command.spfx-local-workbench.importCsvMock.title%",
-        "category": "SPFx Mock Data"
+        "category": "SPFx Mock Data",
+        "icon": "$(table)"
       },
       {
         "command": "spfx-local-workbench.recordRequests",
         "title": "%command.spfx-local-workbench.recordRequests.title%",
-        "category": "SPFx Mock Data"
+        "category": "SPFx Mock Data",
+        "icon": "$(record)"
       }
     ],
     "submenus": [
@@ -142,30 +208,23 @@
           "group": "navigation"
         },
         {
-          "command": "spfx-local-workbench.openDevTools",
-          "when": "spfxLocalWorkbench.isWorkbench",
-          "group": "navigation"
-        },
-        {
           "command": "spfx-local-workbench.mockDataMenu",
           "when": "spfxLocalWorkbench.isWorkbench",
-          "group": "navigation"
-        }
-      ],
-      "webview/title": [
-        {
-          "command": "spfx-local-workbench.detectWebParts",
-          "when": "webviewType == spfxLocalWorkbench",
           "group": "navigation"
         },
         {
           "command": "spfx-local-workbench.openDevTools",
-          "when": "webviewType == spfxLocalWorkbench",
-          "group": "navigation"
+          "when": "spfxLocalWorkbench.isWorkbench || spfxLocalWorkbench.isStorybook",
+          "group": "navigation@1"
         },
         {
-          "command": "spfx-local-workbench.mockDataMenu",
-          "when": "webviewType == spfxLocalWorkbench",
+          "command": "spfx-local-workbench.openSettings",
+          "when": "spfxLocalWorkbench.isWorkbench || spfxLocalWorkbench.isStorybook",
+          "group": "navigation@2"
+        },
+        {
+          "command": "spfx-local-workbench.generateStories",
+          "when": "spfxLocalWorkbench.isStorybook",
           "group": "navigation"
         }
       ],
@@ -192,165 +251,500 @@
         }
       ]
     },
-    "configuration": {
-      "title": "%configuration.spfxLocalWorkbench.title%",
-      "properties": {
-        "spfxLocalWorkbench.serveUrl": {
-          "type": "string",
-          "default": "https://localhost:4321",
-          "description": "%configuration.spfxLocalWorkbench.serveUrl.description%"
-        },
-        "spfxLocalWorkbench.autoOpenWorkbench": {
-          "type": "boolean",
-          "default": false,
-          "description": "%configuration.spfxLocalWorkbench.autoOpenWorkbench.description%"
-        },
-        "spfxLocalWorkbench.context.siteUrl": {
-          "type": "string",
-          "default": "https://contoso.sharepoint.com/sites/devsite",
-          "description": "%configuration.spfxLocalWorkbench.context.siteUrl.description%"
-        },
-        "spfxLocalWorkbench.context.webUrl": {
-          "type": "string",
-          "default": "https://contoso.sharepoint.com/sites/devsite",
-          "description": "%configuration.spfxLocalWorkbench.context.webUrl.description%"
-        },
-        "spfxLocalWorkbench.context.userDisplayName": {
-          "type": "string",
-          "default": "Local Workbench User",
-          "description": "%configuration.spfxLocalWorkbench.context.userDisplayName.description%"
-        },
-        "spfxLocalWorkbench.context.userEmail": {
-          "type": "string",
-          "default": "user@contoso.onmicrosoft.com",
-          "description": "%configuration.spfxLocalWorkbench.context.userEmail.description%"
-        },
-        "spfxLocalWorkbench.context.userLoginName": {
-          "type": "string",
-          "default": "i:0#.f|membership|user@contoso.onmicrosoft.com",
-          "description": "%configuration.spfxLocalWorkbench.context.userLoginName.description%"
-        },
-        "spfxLocalWorkbench.context.culture": {
-          "type": "string",
-          "default": "en-US",
-          "description": "%configuration.spfxLocalWorkbench.context.culture.description%"
-        },
-        "spfxLocalWorkbench.context.isAnonymousGuestUser": {
-          "type": "boolean",
-          "default": false,
-          "description": "%configuration.spfxLocalWorkbench.context.isAnonymousGuestUser.description%"
-        },
-        "spfxLocalWorkbench.context.customContext": {
-          "type": "object",
-          "default": {},
-          "description": "%configuration.spfxLocalWorkbench.context.customContext.description%",
-          "additionalProperties": true
-        },
-        "spfxLocalWorkbench.theme.preset": {
-          "type": "string",
-          "default": "teamSite",
-          "enum": [
-            "teamSite",
-            "communicationSite",
-            "dark",
-            "highContrast",
-            "custom"
-          ],
-          "enumDescriptions": [
-            "%configuration.spfxLocalWorkbench.theme.preset.enumDescriptions.teamSite%",
-            "%configuration.spfxLocalWorkbench.theme.preset.enumDescriptions.communicationSite%",
-            "%configuration.spfxLocalWorkbench.theme.preset.enumDescriptions.dark%",
-            "%configuration.spfxLocalWorkbench.theme.preset.enumDescriptions.highContrast%",
-            "%configuration.spfxLocalWorkbench.theme.preset.enumDescriptions.custom%"
-          ],
-          "description": "%configuration.spfxLocalWorkbench.theme.preset.description%"
-        },
-        "spfxLocalWorkbench.theme.customColors": {
-          "type": "object",
-          "default": {},
-          "description": "%configuration.spfxLocalWorkbench.theme.customColors.description%",
-          "additionalProperties": {
-            "type": "string"
+    "configuration": [
+      {
+        "title": "%configuration.spfxLocalWorkbench.group.general.title%",
+        "properties": {
+          "spfxLocalWorkbench.serveUrl": {
+            "type": "string",
+            "default": "https://localhost:4321",
+            "description": "%configuration.spfxLocalWorkbench.serveUrl.description%"
+          },
+          "spfxLocalWorkbench.autoOpenWorkbench": {
+            "type": "boolean",
+            "default": false,
+            "description": "%configuration.spfxLocalWorkbench.autoOpenWorkbench.description%"
+          },
+          "spfxLocalWorkbench.serveCommand": {
+            "type": "string",
+            "default": "heft start --clean --nobrowser",
+            "markdownDescription": "%configuration.spfxLocalWorkbench.serveCommand.mdDescription%"
+          },
+          "spfxLocalWorkbench.statusBarWorkbenchAction": {
+            "type": "string",
+            "enum": [
+              "openWorkbench",
+              "startServeWorkbench"
+            ],
+            "markdownEnumDescriptions": [
+              "%configuration.spfxLocalWorkbench.statusBarWorkbenchAction.mdEnumDescriptions.openWorkbench%",
+              "%configuration.spfxLocalWorkbench.statusBarWorkbenchAction.mdEnumDescriptions.startServe%"
+            ],
+            "default": "openWorkbench",
+            "description": "%configuration.spfxLocalWorkbench.statusBarWorkbenchAction.description%"
+          },
+          "spfxLocalWorkbench.statusBarStorybookAction": {
+            "type": "string",
+            "enum": [
+              "openStorybook",
+              "startServeStorybook"
+            ],
+            "markdownEnumDescriptions": [
+              "%configuration.spfxLocalWorkbench.statusBarStorybookAction.mdEnumDescriptions.openStorybook%",
+              "%configuration.spfxLocalWorkbench.statusBarStorybookAction.mdEnumDescriptions.startServeStorybook%"
+            ],
+            "default": "openStorybook",
+            "description": "%configuration.spfxLocalWorkbench.statusBarStorybookAction.description%"
+          },
+          "spfxLocalWorkbench.statusBarDisplay": {
+            "type": "string",
+            "enum": [
+              "iconAndText",
+              "iconOnly",
+              "hidden"
+            ],
+            "markdownEnumDescriptions": [
+              "%configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.iconAndText%",
+              "%configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.iconOnly%",
+              "%configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.hidden%"
+            ],
+            "default": "iconAndText",
+            "description": "%configuration.spfxLocalWorkbench.statusBarDisplay.description%"
           }
-        },
-        "spfxLocalWorkbench.pageContext.webTitle": {
-          "type": "string",
-          "default": "Local Workbench",
-          "description": "%configuration.spfxLocalWorkbench.pageContext.webTitle.description%"
-        },
-        "spfxLocalWorkbench.pageContext.webDescription": {
-          "type": "string",
-          "default": "Local development workbench for SPFx web parts",
-          "description": "%configuration.spfxLocalWorkbench.pageContext.webDescription.description%"
-        },
-        "spfxLocalWorkbench.pageContext.webTemplate": {
-          "type": "string",
-          "default": "STS#3",
-          "description": "%configuration.spfxLocalWorkbench.pageContext.webTemplate.description%"
-        },
-        "spfxLocalWorkbench.pageContext.isNoScriptEnabled": {
-          "type": "boolean",
-          "default": false,
-          "description": "%configuration.spfxLocalWorkbench.pageContext.isNoScriptEnabled.description%"
-        },
-        "spfxLocalWorkbench.pageContext.isSPO": {
-          "type": "boolean",
-          "default": true,
-          "description": "%configuration.spfxLocalWorkbench.pageContext.isSPO.description%"
-        },
-        "spfxLocalWorkbench.proxy.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "%configuration.spfxLocalWorkbench.proxy.enabled.description%"
-        },
-        "spfxLocalWorkbench.proxy.mode": {
-          "type": "string",
-          "default": "mock",
-          "enum": ["mock", "passthrough", "record"],
-          "enumDescriptions": [
-            "Intercept API calls and return mock responses based on configured rules",
-            "Forward all API calls to their real endpoints",
-            "Serve existing mock rules and capture unmatched requests for stub generation"
-          ],
-          "description": "Proxy operating mode"
-        },
-        "spfxLocalWorkbench.proxy.mockFile": {
-          "type": "string",
-          "default": ".spfx-workbench/api-mocks.json",
-          "description": "%configuration.spfxLocalWorkbench.proxy.mockFile.description%"
-        },
-        "spfxLocalWorkbench.proxy.defaultDelay": {
-          "type": "number",
-          "default": 0,
-          "description": "%configuration.spfxLocalWorkbench.proxy.defaultDelay.description%"
-        },
-        "spfxLocalWorkbench.proxy.fallbackStatus": {
-          "type": "number",
-          "default": 404,
-          "description": "%configuration.spfxLocalWorkbench.proxy.fallbackStatus.description%"
-        },
-        "spfxLocalWorkbench.proxy.logRequests": {
-          "type": "boolean",
-          "default": true,
-          "description": "%configuration.spfxLocalWorkbench.proxy.logRequests.description%"
-        },
-        "spfxLocalWorkbench.proxy.allowedOrigins": {
-          "type": "array",
-          "items": { "type": "string" },
-          "default": [],
-          "description": "URL patterns allowed in passthrough mode (empty = all)"
-        },
-        "spfxLocalWorkbench.proxy.serveMocksWhileRecording": {
-          "type": "boolean",
-          "default": true,
-          "description": "When in record mode, also serve existing mock rules for matched requests"
+        }
+      },
+      {
+        "title": "%configuration.spfxLocalWorkbench.group.theme.title%",
+        "properties": {
+          "spfxLocalWorkbench.theme.current": {
+            "type": "string",
+            "enum": [
+              "Teal",
+              "Blue",
+              "Orange",
+              "Red",
+              "Purple",
+              "Green",
+              "Periwinkle",
+              "Cobalt",
+              "Dark Teal",
+              "Dark Blue",
+              "Custom"
+            ],
+            "enumDescriptions": [
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.teal%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.blue%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.orange%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.red%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.purple%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.green%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.periwinkle%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.cobalt%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.darkTeal%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.darkBlue%",
+              "%configuration.spfxLocalWorkbench.theme.current.enumDescriptions.custom%"
+            ],
+            "default": "Teal",
+            "description": "%configuration.spfxLocalWorkbench.theme.current.description%"
+          },
+          "spfxLocalWorkbench.theme.customName": {
+            "type": "string",
+            "default": "",
+            "markdownDescription": "%configuration.spfxLocalWorkbench.theme.customName.mdDescription%"
+          },
+          "spfxLocalWorkbench.theme.custom": {
+            "type": "array",
+            "default": [],
+            "markdownDescription": "%configuration.spfxLocalWorkbench.theme.custom.mdDescription%",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "palette"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.name.description%"
+                },
+                "isInverted": {
+                  "type": "boolean",
+                  "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.isInverted.description%",
+                  "default": false
+                },
+                "backgroundImageUri": {
+                  "type": "string",
+                  "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.backgroundImageUri.description%",
+                  "default": ""
+                },
+                "palette": {
+                  "type": "object",
+                  "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.description%",
+                  "required": [
+                    "themePrimary"
+                  ],
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "properties": {
+                    "themePrimary": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themePrimary.description%"
+                    },
+                    "accent": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.accent.description%"
+                    },
+                    "themeDarker": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeDarker.description%"
+                    },
+                    "themeDark": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeDark.description%"
+                    },
+                    "themeDarkAlt": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeDarkAlt.description%"
+                    },
+                    "themeSecondary": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeSecondary.description%"
+                    },
+                    "themeTertiary": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeTertiary.description%"
+                    },
+                    "themeLight": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeLight.description%"
+                    },
+                    "themeLighter": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeLighter.description%"
+                    },
+                    "themeLighterAlt": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.themeLighterAlt.description%"
+                    },
+                    "white": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.white.description%"
+                    },
+                    "black": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.black.description%"
+                    },
+                    "neutralDark": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralDark.description%"
+                    },
+                    "neutralPrimary": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralPrimary.description%"
+                    },
+                    "neutralPrimaryAlt": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralPrimaryAlt.description%"
+                    },
+                    "neutralSecondary": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralSecondary.description%"
+                    },
+                    "neutralSecondaryAlt": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralSecondaryAlt.description%"
+                    },
+                    "neutralTertiary": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralTertiary.description%"
+                    },
+                    "neutralTertiaryAlt": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralTertiaryAlt.description%"
+                    },
+                    "neutralQuaternary": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralQuaternary.description%"
+                    },
+                    "neutralQuaternaryAlt": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralQuaternaryAlt.description%"
+                    },
+                    "neutralLight": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralLight.description%"
+                    },
+                    "neutralLighter": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralLighter.description%"
+                    },
+                    "neutralLighterAlt": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.neutralLighterAlt.description%"
+                    },
+                    "primaryBackground": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.primaryBackground.description%"
+                    },
+                    "primaryText": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.primaryText.description%"
+                    },
+                    "bodyBackground": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.bodyBackground.description%"
+                    },
+                    "bodyText": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.bodyText.description%"
+                    },
+                    "disabledBackground": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.disabledBackground.description%"
+                    },
+                    "disabledText": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.disabledText.description%"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "%configuration.spfxLocalWorkbench.theme.custom.items.properties.palette.properties.error.description%"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "title": "%configuration.spfxLocalWorkbench.group.context.title%",
+        "properties": {
+          "spfxLocalWorkbench.context.pageContext": {
+            "type": "object",
+            "default": {
+              "site": {
+                "absoluteUrl": "https://contoso.sharepoint.com/sites/devsite",
+                "id": "00000000-0000-4000-b000-666666666666"
+              },
+              "web": {
+                "absoluteUrl": "https://contoso.sharepoint.com/sites/devsite",
+                "title": "Local Workbench",
+                "description": "Local development workbench for SPFx",
+                "templateName": "STS#3",
+                "id": "00000000-0000-4000-b000-777777777777"
+              },
+              "user": {
+                "displayName": "Local Workbench User",
+                "email": "user@contoso.onmicrosoft.com",
+                "loginName": "i:0#.f|membership|user@contoso.onmicrosoft.com",
+                "isAnonymousGuestUser": false
+              },
+              "cultureInfo": {
+                "currentCultureName": "en-US"
+              },
+              "isNoScriptEnabled": false,
+              "isSPO": true
+            },
+            "markdownDescription": "%configuration.spfxLocalWorkbench.context.pageContext.mdDescription%",
+            "properties": {
+              "site": {
+                "type": "object",
+                "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.site.description%",
+                "properties": {
+                  "absoluteUrl": {
+                    "type": "string",
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.site.properties.absoluteUrl.description%"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "web": {
+                "type": "object",
+                "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.web.description%",
+                "properties": {
+                  "absoluteUrl": {
+                    "type": "string",
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.web.properties.absoluteUrl.description%"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.web.properties.title.description%"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.web.properties.description.description%"
+                  },
+                  "templateName": {
+                    "type": "string",
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.web.properties.templateName.description%"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "user": {
+                "type": "object",
+                "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.user.description%",
+                "properties": {
+                  "displayName": {
+                    "type": "string",
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.user.properties.displayName.description%"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.user.properties.email.description%"
+                  },
+                  "loginName": {
+                    "type": "string",
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.user.properties.loginName.description%"
+                  },
+                  "isAnonymousGuestUser": {
+                    "type": "boolean",
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.user.properties.isAnonymousGuestUser.description%"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "cultureInfo": {
+                "type": "object",
+                "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.cultureInfo.description%",
+                "properties": {
+                  "currentCultureName": {
+                    "type": "string",
+                    "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.cultureInfo.properties.currentCultureName.description%"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "isNoScriptEnabled": {
+                "type": "boolean",
+                "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.isNoScriptEnabled.description%"
+              },
+              "isSPO": {
+                "type": "boolean",
+                "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.isSPO.description%"
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      {
+        "title": "%configuration.spfxLocalWorkbench.group.storybook.title%",
+        "properties": {
+          "spfxLocalWorkbench.storybook.port": {
+            "type": "number",
+            "default": 6006,
+            "description": "%configuration.spfxLocalWorkbench.storybook.port.description%"
+          },
+          "spfxLocalWorkbench.storybook.autoGenerate": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.spfxLocalWorkbench.storybook.autoGenerate.description%"
+          },
+          "spfxLocalWorkbench.storybook.storiesPattern": {
+            "type": "string",
+            "default": "src/**/*.stories.ts",
+            "description": "%configuration.spfxLocalWorkbench.storybook.storiesPattern.description%"
+          },
+          "spfxLocalWorkbench.storybook.generateLocaleStories": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.spfxLocalWorkbench.storybook.generateLocaleStories.description%"
+          },
+          "spfxLocalWorkbench.storybook.autoDocs": {
+            "type": "boolean",
+            "default": false,
+            "description": "%configuration.spfxLocalWorkbench.storybook.autoDocs.description%"
+          },
+          "spfxLocalWorkbench.storybook.skipInstallPrompt": {
+            "type": "boolean",
+            "default": false,
+            "description": "%configuration.spfxLocalWorkbench.storybook.skipInstallPrompt.description%"
+          },
+          "spfxLocalWorkbench.storybook.theme": {
+            "type": "string",
+            "default": "matchVsCode",
+            "enum": [
+              "matchVsCode",
+              "peacock",
+              "light",
+              "dark"
+            ],
+            "enumDescriptions": [
+              "%configuration.spfxLocalWorkbench.storybook.theme.enumDescriptions.matchVsCode%",
+              "%configuration.spfxLocalWorkbench.storybook.theme.enumDescriptions.peacock%",
+              "%configuration.spfxLocalWorkbench.storybook.theme.enumDescriptions.light%",
+              "%configuration.spfxLocalWorkbench.storybook.theme.enumDescriptions.dark%"
+            ],
+            "description": "%configuration.spfxLocalWorkbench.storybook.theme.description%"
+          }
+        }
+      },
+      {
+        "title": "%configuration.spfxLocalWorkbench.group.proxy.title%",
+        "properties": {
+          "spfxLocalWorkbench.proxy.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.spfxLocalWorkbench.proxy.enabled.description%"
+          },
+          "spfxLocalWorkbench.proxy.mode": {
+            "type": "string",
+            "default": "mock",
+            "enum": [
+              "mock",
+              "passthrough",
+              "record"
+            ],
+            "enumDescriptions": [
+              "%configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.mock%",
+              "%configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.passthrough%",
+              "%configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.record%"
+            ],
+            "description": "%configuration.spfxLocalWorkbench.proxy.mode.description%"
+          },
+          "spfxLocalWorkbench.proxy.mockFile": {
+            "type": "string",
+            "default": ".spfx-workbench/api-mocks.json",
+            "description": "%configuration.spfxLocalWorkbench.proxy.mockFile.description%"
+          },
+          "spfxLocalWorkbench.proxy.defaultDelay": {
+            "type": "number",
+            "default": 0,
+            "description": "%configuration.spfxLocalWorkbench.proxy.defaultDelay.description%"
+          },
+          "spfxLocalWorkbench.proxy.fallbackStatus": {
+            "type": "number",
+            "default": 404,
+            "description": "%configuration.spfxLocalWorkbench.proxy.fallbackStatus.description%"
+          },
+          "spfxLocalWorkbench.proxy.logRequests": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.spfxLocalWorkbench.proxy.logRequests.description%"
+          },
+          "spfxLocalWorkbench.proxy.allowedOrigins": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "%configuration.spfxLocalWorkbench.proxy.allowedOrigins.description%"
+          },
+          "spfxLocalWorkbench.proxy.serveMocksWhileRecording": {
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.spfxLocalWorkbench.proxy.serveMocksWhileRecording.description%"
+          }
         }
       }
-    }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
-    "compile": "npm run check-types && npm run lint && npm run generate:css-types && npm-run-all compile:*",
+    "compile": "npm run packages:build && npm run check-types && npm run lint && npm run generate:css-types && npm-run-all compile:*",
     "compile:extension": "node esbuild.js",
     "compile:webview": "node webview/esbuild.config.js",
     "generate:css-types": "tcm webview/src",
@@ -359,29 +753,49 @@
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
     "watch:webview": "node webview/esbuild.config.js --watch",
     "watch:css-types": "tcm webview/src --watch",
-    "package": "npm run check-types && npm run lint && npm-run-all package:*",
+    "package": "npm run packages:build && npm run check-types && npm run lint && npm-run-all package:*",
     "package:extension": "node esbuild.js --production",
     "package:webview": "node webview/esbuild.config.js --production",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src",
+    "lint": "eslint src webview/src packages/*/src",
+    "format": "prettier --write \"src/**/*.ts\" \"webview/src/**/*.{ts,tsx}\" \"packages/*/src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"webview/src/**/*.{ts,tsx}\" \"packages/*/src/**/*.{ts,tsx}\"",
     "generate:icons": "node scripts/generateIcons.js",
+    "packages:build": "npm run packages:build:shared && npm run packages:build:addon",
+    "packages:build:shared": "cd packages/shared && npm run build",
+    "packages:build:addon": "cd packages/storybook-addon-spfx && npm run build",
+    "packages:watch": "npm-run-all -p packages:watch:*",
+    "packages:watch:shared": "cd packages/shared && npm run watch",
+    "packages:watch:addon": "cd packages/storybook-addon-spfx && npm run watch",
+    "packages:clean": "rm -rf packages/*/dist packages/*/temp",
+    "packages:install": "cd packages/shared && npm install && cd ../storybook-addon-spfx && npm install",
+    "clean": "rm -rf dist temp && npm run packages:clean",
+    "clean:full": "npm run clean && rm -rf node_modules packages/*/node_modules",
+    "postinstall": "npm run packages:install",
     "i18n:extract": "npx vscode-nls-dev extract -i src -o i18n -l package.nls.json || echo 'Install vscode-nls-dev to run extraction'",
     "i18n:generate": "npx vscode-nls-dev create-package -s package.nls.json -d i18n -o i18n-packages || echo 'Install vscode-nls-dev to run generation'",
     "i18n:help": "echo 'Use npx vscode-nls-dev extract/create-package or install vscode-nls-dev as a devDependency'"
   },
-
   "dependencies": {
+    "@spfx-local-workbench/shared": "file:./packages/shared",
     "vscode-nls": "^5.0.0"
   },
   "devDependencies": {
     "@fluentui/react": "^8.110.10",
+    "@storybook/manager-api": "^8.0.0",
+    "@storybook/react": "^8.0.0",
+    "@storybook/react-vite": "^8.0.0",
+    "@storybook/theming": "^8.0.0",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/node": "22.x",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/vscode": "^1.100.0",
     "esbuild": "^0.27.2",
     "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
     "npm-run-all": "^4.1.5",
+    "prettier": "^3.8.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "subset-font": "^1.4.10",

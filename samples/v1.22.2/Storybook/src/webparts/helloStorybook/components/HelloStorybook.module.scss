@@ -1,0 +1,63 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.helloStorybook {
+  overflow: hidden;
+  padding: 1em;
+  color: "[theme:bodyText, default: #323130]";
+  color: var(--bodyText);
+
+  &.teams {
+    font-family: $ms-font-family-fallbacks;
+  }
+}
+
+.context {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.properties {
+  flex-grow: 1;
+  border-radius: 4px;
+  background-color: "[theme:neutralLighter, default: red]"; /* Use a noticeable default color to identify missing theme variables */
+  padding: 0.5rem 1rem;
+}
+
+.welcome {
+  text-align: center;
+  margin-bottom: 1em;
+  min-width: 6rem;
+  width: 30%;
+  overflow: hidden;
+}
+
+.welcomeImage {
+  display: block;
+  width: 100%;
+  max-width: 10rem;
+  height: auto;
+  object-fit: contain;
+}
+
+.environmentMessage {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: "[theme:neutralSecondary, default: #605e5c]";
+}
+
+.section {
+  margin-top: 1.5em;
+
+  &.horizontal {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .sectionTitle {
+    margin-bottom: 0.5em;
+    font-weight: 600;
+    font-size: 18px;
+  }
+}

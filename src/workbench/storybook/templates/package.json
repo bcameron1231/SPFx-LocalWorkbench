@@ -1,0 +1,22 @@
+{
+  "name": "spfx-storybook-isolated",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Isolated Storybook installation for SPFx project",
+  "scripts": {
+    "storybook": "storybook dev -p 6006"
+  },
+  "devDependencies": {
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "storybook": "8.6.17",
+    "@storybook/react-vite": "8.6.17",
+    "@storybook/addon-essentials": "8.6.17",
+    "@storybook/addon-a11y": "8.6.17",
+    "@spfx-local-workbench/storybook-addon-spfx": "{{ADDON_REF}}"
+  },
+  "overrides": {
+    "@types/react": "17.0.45",
+    "@types/react-dom": "17.0.17"
+  }
+}
