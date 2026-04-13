@@ -4,6 +4,7 @@
 import {
   COMPONENT_REMOVAL_DELAY_MS,
   DOM_RENDER_DELAY_MS,
+  DisplayMode,
   ManifestLoader,
   amdLoader,
   getErrorMessage,
@@ -41,6 +42,7 @@ export class WorkbenchRuntime {
   private loadedManifests: IComponentManifest[] = [];
   private activeWebParts: IWebPartConfig[] = [];
   private activeExtensions: IExtensionConfig[] = [];
+  private displayMode: DisplayMode = DisplayMode.Edit;
 
   constructor(config: IWorkbenchConfig, vscodeApi: IVsCodeApi) {
     this.vscode = vscodeApi;
@@ -270,6 +272,8 @@ export class WorkbenchRuntime {
     insertIndex: number,
     manifestIndex: number,
     preconfiguredEntryIndex: number = 0,
+    instanceId?: string,
+    properties?: any,
   ): Promise<void> {
     const webParts = this.loadedManifests.filter(
       (m): m is IWebPartManifest => m.componentType === 'WebPart',
@@ -280,16 +284,18 @@ export class WorkbenchRuntime {
       return;
     }
 
-    const instanceId = `wp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const finalInstanceId =
+      instanceId || `wp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const entry =
       manifest.preconfiguredEntries?.[preconfiguredEntryIndex] ??
       manifest.preconfiguredEntries?.[0];
-    const properties = entry?.properties || {};
+    const defaultProperties = entry?.properties || {};
+    const finalProperties = properties || JSON.parse(JSON.stringify(defaultProperties));
 
     const config: IWebPartConfig = {
       manifest: manifest,
-      instanceId: instanceId,
-      properties: JSON.parse(JSON.stringify(properties)),
+      instanceId: finalInstanceId,
+      properties: finalProperties,
     };
 
     this.activeWebParts.splice(insertIndex, 0, config);
@@ -331,6 +337,49 @@ export class WorkbenchRuntime {
     // Update React app
     if (this.appHandlers) {
       this.appHandlers.setActiveWebParts([...this.activeWebParts]);
+    }
+  }
+
+  /**
+   * Clear all components (used by discard command)
+   */
+  clearAllComponents(): void {
+    this.log.debug('Clearing all components');
+
+    // Dispose all web part instances
+    for (const webPart of this.activeWebParts) {
+      if (isActiveWebPart(webPart)) {
+        if (typeof webPart.instance.onDispose === 'function') {
+          try {
+            webPart.instance.onDispose();
+          } catch (error: unknown) {
+            this.log.warn('Error disposing web part:', error);
+          }
+        }
+      }
+    }
+
+    // Dispose all extension instances
+    for (const extension of this.activeExtensions) {
+      if (isActiveExtension(extension)) {
+        if (typeof extension.instance.onDispose === 'function') {
+          try {
+            extension.instance.onDispose();
+          } catch (error: unknown) {
+            this.log.warn('Error disposing extension:', error);
+          }
+        }
+      }
+    }
+
+    // Clear arrays
+    this.activeWebParts = [];
+    this.activeExtensions = [];
+
+    // Update React app
+    if (this.appHandlers) {
+      this.appHandlers.setActiveWebParts([]);
+      this.appHandlers.setActiveExtensions([]);
     }
   }
 
@@ -590,5 +639,80 @@ export class WorkbenchRuntime {
 
   getLoadedManifests(): IComponentManifest[] {
     return this.loadedManifests;
+  }
+
+  /**
+   * Set the display mode for all active web parts
+   */
+  setDisplayMode(displayMode: DisplayMode): void {
+    // Check if display mode is already set to avoid unnecessary updates
+    if (this.displayMode === displayMode) {
+      return;
+    }
+
+    this.log.debug('Setting display mode to', displayMode);
+    this.displayMode = displayMode;
+
+    // Update all active web parts with the new display mode
+    for (const webPart of this.activeWebParts) {
+      if (isActiveWebPart(webPart)) {
+        this.webPartManager.updateWebPartDisplayMode(webPart, displayMode);
+      }
+    }
+  }
+
+  /**
+   * Send current component configurations to extension for save/restore
+   */
+  /**
+   * Preserve current component configurations before refresh
+   */
+  preserveComponentConfigs(): void {
+    this.log.debug('Preserving component configs for refresh');
+
+    const configs = this.activeWebParts.map((wp) => ({
+      manifestId: wp.manifest.id,
+      instanceId: wp.instanceId,
+      properties: JSON.parse(JSON.stringify(wp.properties)), // Deep clone
+      preconfiguredEntryIndex: (wp as any).preconfiguredEntryIndex ?? 0,
+    }));
+
+    this.vscode.postMessage({
+      command: 'componentConfigsPreserved',
+      configs: configs,
+    });
+  }
+
+  /**
+   * Restore components from preserved configurations (after refresh)
+   */
+  async restoreComponents(configs: any[]): Promise<void> {
+    this.log.debug('Restoring components from preserved configs', configs.length);
+
+    const webParts = this.loadedManifests.filter(
+      (m): m is IWebPartManifest => m.componentType === 'WebPart',
+    );
+
+    for (const config of configs) {
+      // Find the manifest in the filtered webParts array (same array addWebPartAt uses)
+      const manifestIndex = webParts.findIndex((m) => m.id === config.manifestId);
+
+      if (manifestIndex >= 0) {
+        try {
+          // Restore with original instanceId and properties
+          await this.addWebPartAt(
+            this.activeWebParts.length,
+            manifestIndex,
+            config.preconfiguredEntryIndex,
+            config.instanceId,
+            config.properties,
+          );
+        } catch (error) {
+          this.log.error('Failed to restore component:', error);
+        }
+      } else {
+        this.log.warn('Failed to restore component: manifest not found', config.manifestId);
+      }
+    }
   }
 }

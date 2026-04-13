@@ -12,7 +12,7 @@
 
   "command.spfx-local-workbench.openWorkbench.title": "Open Local Workbench",
   "command.spfx-local-workbench.startServe.title": "Start SPFx Serve and Open Workbench",
-  "command.spfx-local-workbench.detectWebParts.title": "Refresh Web Parts",
+  "command.spfx-local-workbench.detectWebParts.title": "Refresh",
   "command.spfx-local-workbench.openDevTools.title": "Open Developer Tools",
   "command.spfx-local-workbench.openSettings.title": "Open SPFx Workbench Settings",
   "command.spfx-local-workbench.openStorybook.title": "Open SPFx Storybook",
@@ -25,6 +25,9 @@
   "command.spfx-local-workbench.importJsonMock.title": "Import JSON File as Mock",
   "command.spfx-local-workbench.importCsvMock.title": "Import CSV File as Mock",
   "command.spfx-local-workbench.recordRequests.title": "Record Requests and Generate Rules",
+  "command.spfx-local-workbench.switchToDisplayMode.title": "Switch to Preview Mode",
+  "command.spfx-local-workbench.switchToEditMode.title": "Switch to Edit Mode",
+  "command.spfx-local-workbench.discardComponents.title": "Discard Components (reset workbench)",
 
   "submenu.spfx-local-workbench.mockData.label": "Mock Data",
 

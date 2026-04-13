@@ -5,6 +5,7 @@ import {
   AMD_REGISTRATION_DELAY_MS,
   BundleLoader,
   ComponentResolver,
+  DisplayMode,
   StringsLoader,
   getErrorMessage,
   logger,
@@ -26,6 +27,7 @@ export class WebPartManager {
   private componentResolver: ComponentResolver;
   private contextProvider: SpfxContext;
   private themeProvider: ThemeProvider;
+  private currentDisplayMode: DisplayMode = DisplayMode.Edit;
 
   constructor(
     _vscode: IVsCodeApi,
@@ -117,8 +119,9 @@ export class WebPartManager {
         },
       );
 
-      instance._displayMode = 2; // Edit mode
-      setupProperty(instance, 'displayMode', () => 2);
+      // Display mode comes from the global WebPartManager state
+      instance._displayMode = this.currentDisplayMode;
+      setupProperty(instance, 'displayMode', () => this.currentDisplayMode);
 
       // Call onInit if available
       if (typeof instance.onInit === 'function') {
@@ -170,6 +173,28 @@ export class WebPartManager {
       this.log.error('Setup error:', error);
       domElement.innerHTML = `<div class="error-message">Setup error: ${getErrorMessage(error)}</div>`;
       throw error;
+    }
+  }
+
+  /**
+   * Updates the global display mode for all web parts and triggers re-render for a specific web part
+   */
+  updateWebPartDisplayMode(webPart: IActiveWebPart, displayMode: DisplayMode): void {
+    this.log.debug(`Updating display mode for ${webPart.instanceId} to ${displayMode}`);
+    
+    // Update the global display mode (affects all web part instances via their property getter)
+    this.currentDisplayMode = displayMode;
+    
+    // Update the instance's internal property
+    (webPart.instance as any)._displayMode = displayMode;
+    
+    // Re-render if the web part has a render method
+    if (typeof webPart.instance.render === 'function') {
+      try {
+        webPart.instance.render();
+      } catch (error: unknown) {
+        this.log.error('Render error after display mode change:', error);
+      }
     }
   }
 

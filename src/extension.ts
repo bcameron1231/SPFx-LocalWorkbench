@@ -211,9 +211,39 @@ export function activate(context: vscode.ExtensionContext) {
     'spfx-local-workbench.openSettings',
     () => {
       vscode.commands.executeCommand(
-        'workbench.action.openSettings',
+        'workbench.action.openWorkspaceSettings',
         '@ext:BeauCameron.spfx-local-workbench',
       );
+    },
+  );
+
+  // Register the Switch to Display Mode command
+  const switchToDisplayModeCommand = vscode.commands.registerCommand(
+    'spfx-local-workbench.switchToDisplayMode',
+    () => {
+      if (WorkbenchPanel.currentPanel) {
+        WorkbenchPanel.currentPanel.switchToDisplayMode();
+      }
+    },
+  );
+
+  // Register the Switch to Edit Mode command
+  const switchToEditModeCommand = vscode.commands.registerCommand(
+    'spfx-local-workbench.switchToEditMode',
+    () => {
+      if (WorkbenchPanel.currentPanel) {
+        WorkbenchPanel.currentPanel.switchToEditMode();
+      }
+    },
+  );
+
+  // Register the Discard Components command
+  const discardComponentsCommand = vscode.commands.registerCommand(
+    'spfx-local-workbench.discardComponents',
+    () => {
+      if (WorkbenchPanel.currentPanel) {
+        void WorkbenchPanel.currentPanel.discardComponents();
+      }
     },
   );
 
@@ -664,6 +694,9 @@ export function activate(context: vscode.ExtensionContext) {
     detectWebPartsCommand,
     openDevToolsCommand,
     openSettingsCommand,
+    switchToDisplayModeCommand,
+    switchToEditModeCommand,
+    discardComponentsCommand,
     openStorybookCommand,
     generateStoriesCommand,
     cleanStorybookCommand,

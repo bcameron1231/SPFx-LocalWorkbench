@@ -66,34 +66,6 @@
           "fontPath": "media/icons.woff",
           "fontCharacter": "\\F3AC"
         }
-      },
-      "fluentui-localelanguage": {
-        "description": "%icons.fluentui-localelanguage.description%",
-        "default": {
-          "fontPath": "media/icons.woff",
-          "fontCharacter": "\\F2B7"
-        }
-      },
-      "fluentui-sync": {
-        "description": "%icons.fluentui-sync.description%",
-        "default": {
-          "fontPath": "media/icons.woff",
-          "fontCharacter": "\\E895"
-        }
-      },
-      "fluentui-developertools": {
-        "description": "%icons.fluentui-developertools.description%",
-        "default": {
-          "fontPath": "media/icons.woff",
-          "fontCharacter": "\\EC7A"
-        }
-      },
-      "fluentui-broom": {
-        "description": "%icons.fluentui-broom.description%",
-        "default": {
-          "fontPath": "media/icons.woff",
-          "fontCharacter": "\\EA99"
-        }
       }
     },
     "commands": [
@@ -113,13 +85,31 @@
         "command": "spfx-local-workbench.detectWebParts",
         "title": "%command.spfx-local-workbench.detectWebParts.title%",
         "category": "SPFx Local Workbench",
-        "icon": "$(fluentui-sync)"
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "spfx-local-workbench.switchToDisplayMode",
+        "title": "%command.spfx-local-workbench.switchToDisplayMode.title%",
+        "category": "SPFx Local Workbench",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "spfx-local-workbench.switchToEditMode",
+        "title": "%command.spfx-local-workbench.switchToEditMode.title%",
+        "category": "SPFx Local Workbench",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "spfx-local-workbench.discardComponents",
+        "title": "%command.spfx-local-workbench.discardComponents.title%",
+        "category": "SPFx Local Workbench",
+        "icon": "$(discard)"
       },
       {
         "command": "spfx-local-workbench.openDevTools",
         "title": "%command.spfx-local-workbench.openDevTools.title%",
         "category": "SPFx Local Workbench",
-        "icon": "$(fluentui-developertools)"
+        "icon": "$(tools)"
       },
       {
         "command": "spfx-local-workbench.openSettings",
@@ -149,7 +139,7 @@
         "command": "spfx-local-workbench.cleanStorybook",
         "title": "%command.spfx-local-workbench.cleanStorybook.title%",
         "category": "SPFx Local Workbench",
-        "icon": "$(fluentui-broom)"
+        "icon": "$(flame)"
       },
       {
         "command": "spfx-local-workbench.scaffoldMockConfig",
@@ -203,6 +193,16 @@
           "group": "navigation"
         },
         {
+          "command": "spfx-local-workbench.switchToDisplayMode",
+          "when": "spfxLocalWorkbench.isWorkbench && spfxLocalWorkbench.displayMode == 'edit'",
+          "group": "navigation"
+        },
+        {
+          "command": "spfx-local-workbench.switchToEditMode",
+          "when": "spfxLocalWorkbench.isWorkbench && spfxLocalWorkbench.displayMode == 'display'",
+          "group": "navigation"
+        },
+        {
           "command": "spfx-local-workbench.detectWebParts",
           "when": "spfxLocalWorkbench.isWorkbench",
           "group": "navigation"
@@ -210,22 +210,27 @@
         {
           "command": "spfx-local-workbench.mockDataMenu",
           "when": "spfxLocalWorkbench.isWorkbench",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
           "command": "spfx-local-workbench.openDevTools",
           "when": "spfxLocalWorkbench.isWorkbench || spfxLocalWorkbench.isStorybook",
-          "group": "navigation@1"
+          "group": "navigation@2"
         },
         {
           "command": "spfx-local-workbench.openSettings",
           "when": "spfxLocalWorkbench.isWorkbench || spfxLocalWorkbench.isStorybook",
-          "group": "navigation@2"
+          "group": "navigation@3"
         },
         {
           "command": "spfx-local-workbench.generateStories",
           "when": "spfxLocalWorkbench.isStorybook",
           "group": "navigation"
+        },
+        {
+          "command": "spfx-local-workbench.discardComponents",
+          "when": "spfxLocalWorkbench.isWorkbench",
+          "group": "1_overflow@1"
         }
       ],
       "spfx-local-workbench.mockData": [
