@@ -116,6 +116,7 @@ export async function importCsvFile(): Promise<IMockRule[] | undefined> {
   }
 
   const rule: IMockRule = {
+    ...(ruleOptions.name ? { name: ruleOptions.name } : {}),
     match: {
       url: ruleOptions.url,
       ...(ruleOptions.method ? { method: ruleOptions.method } : {}),
