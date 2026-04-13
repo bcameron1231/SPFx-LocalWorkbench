@@ -24,6 +24,7 @@ import { ExtensionManager } from './ExtensionManager';
 import { WebPartManager } from './WebPartManager';
 import type { IAppHandlers } from './components/App';
 import { SpfxContext, ThemeProvider } from './mocks';
+import { registerProxyHttpClients } from './proxy';
 import type { IVsCodeApi, IWorkbenchConfig } from './types';
 
 export class WorkbenchRuntime {
@@ -130,6 +131,12 @@ export class WorkbenchRuntime {
       // Initialize SPFx mocks
       initializeSpfxMocks();
       this.log.debug('SPFx mocks initialized');
+
+      // Override AMD HTTP client stubs with proxy clients (if proxy enabled)
+      if (this.config.proxyEnabled !== false) {
+        registerProxyHttpClients();
+        this.log.debug('Proxy HTTP clients registered in AMD modules');
+      }
 
       // Update status
       this.updateStatus(`Connecting to serve at ${this.config.serveUrl}...`);
@@ -464,6 +471,12 @@ export class WorkbenchRuntime {
     }
 
     initializeSpfxMocks();
+
+    // Override AMD HTTP client stubs with proxy clients (if proxy enabled)
+    if (this.config.proxyEnabled !== false) {
+      registerProxyHttpClients();
+      this.log.debug('Proxy HTTP clients registered in AMD modules (live reload)');
+    }
 
     const serveOrigin = new URL(this.config.serveUrl).origin;
     document.querySelectorAll('script[src]').forEach((script) => {
