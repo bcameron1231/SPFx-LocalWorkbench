@@ -40,7 +40,7 @@
   "scripts": {
     "build": "npm run generate:css-types && tsc && npm run copy-assets",
     "generate:css-types": "tcm src",
-    "copy-assets": "rsync -a --include='*/' --include='*.css' --include='*.css.d.ts' --exclude='*' src/ dist/",
+    "copy-assets": "copyfiles -u 1 \"src/**/*.css\" \"src/**/*.css.d.ts\" dist",
     "watch": "npm-run-all -p watch:*",
     "watch:tsc": "tsc --watch",
     "watch:css-types": "tcm src --watch"
@@ -66,6 +66,7 @@
   },
   "devDependencies": {
     "@types/node": "^18.0.0",
+    "copyfiles": "^2.4.1",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "npm-run-all": "^4.1.5",
