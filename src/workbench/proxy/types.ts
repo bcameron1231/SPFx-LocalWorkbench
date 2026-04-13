@@ -36,6 +36,8 @@ export interface IMockRule {
   match: IMockRuleMatch;
   // The response to return when matched
   response: IMockRuleResponse;
+  // Optional friendly name for the rule (used in logs and diagnostics)
+  name?: string;
   // When true, the rule is skipped during matching
   disabled?: boolean;
 }

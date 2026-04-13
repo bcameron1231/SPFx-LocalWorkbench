@@ -26,6 +26,7 @@ The SPFx Local Workbench includes tools to help you **generate and populate** yo
     - [What It Generates](#what-it-generates-1)
     - [Typical Workflow](#typical-workflow)
   - [How Rules Are Merged](#how-rules-are-merged)
+  - [Rule Names](#rule-names)
   - [Disabled Rules](#disabled-rules)
   - [URL Matching Behavior](#url-matching-behavior)
   - [All Commands](#all-commands)
@@ -161,6 +162,7 @@ This keeps your `api-mocks.json` small and lets you manage large response payloa
 Parse a `.csv` file and use its rows as the JSON response body for a mock rule. This is useful when you have tabular data in a spreadsheet that you want to serve as a mock API response.
 
 <!-- markdownlint-disable MD024 -->
+
 ### Workflow
 
 1. **Pick a CSV file** — the first row is treated as column headers
@@ -262,6 +264,27 @@ After generation, the file is opened in the editor so you can review and adjust 
 
 ---
 
+## Rule Names
+
+Rules can include an optional `"name"` property to provide a friendly identifier. When a request matches a rule with a name, the name is displayed in the logs instead of the URL pattern:
+
+```json
+{
+  "name": "Get site lists",
+  "match": { "url": "/_api/web/lists", "method": "GET" },
+  "response": { "status": 200, "body": { "value": [] } }
+},
+{
+  "name": "List items endpoint",
+  "match": { "url": "/_api/web/lists/getbytitle('*')/items", "urlPattern": true },
+  "response": { "status": 200, "body": { "d": { "results": [] } } }
+}
+```
+
+This is especially useful when working with glob patterns or long URLs, making it easier to identify which rule matched in the proxy logs.
+
+---
+
 ## Disabled Rules
 
 Rules can include a `"disabled": true` property. Disabled rules are **skipped** during matching, allowing you to keep multiple response variants for the same URL and toggle between them:
@@ -301,12 +324,12 @@ For **glob pattern** rules (`"urlPattern": true`), first match wins — specific
 
 ## All Commands
 
-| Command | Description |
-| --- | --- |
-| `SPFx Mock Data: Scaffold API Mock Configuration` | Create a starter `api-mocks.json` file |
-| `SPFx Mock Data: Generate Status Code Stubs` | Generate rules for multiple status codes via wizard |
-| `SPFx Mock Data: Import JSON File as Mock` | Import a JSON file as a mock response body |
-| `SPFx Mock Data: Import CSV File as Mock` | Parse a CSV file into a JSON mock response |
-| `SPFx Mock Data: Record Requests & Generate Rules` | Capture unmatched requests and generate stub rules |
+| Command                                            | Description                                         |
+| -------------------------------------------------- | --------------------------------------------------- |
+| `SPFx Mock Data: Scaffold API Mock Configuration`  | Create a starter `api-mocks.json` file              |
+| `SPFx Mock Data: Generate Status Code Stubs`       | Generate rules for multiple status codes via wizard |
+| `SPFx Mock Data: Import JSON File as Mock`         | Import a JSON file as a mock response body          |
+| `SPFx Mock Data: Import CSV File as Mock`          | Parse a CSV file into a JSON mock response          |
+| `SPFx Mock Data: Record Requests & Generate Rules` | Capture unmatched requests and generate stub rules  |
 
 All commands are also accessible from the **Command Palette** (`Ctrl+Shift+P`).

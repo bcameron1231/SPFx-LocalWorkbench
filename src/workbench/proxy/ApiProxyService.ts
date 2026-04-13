@@ -154,7 +154,7 @@ export class ApiProxyService implements vscode.Disposable {
       const rule = this._ruleEngine.match(request);
 
       if (rule) {
-        this._log(`  Matched rule: ${rule.match.url}`);
+        this._log(`  Matched rule: ${rule.name || rule.match.url}`);
         return await this._respondFromRule(request, rule);
       }
 
@@ -351,6 +351,7 @@ export class ApiProxyService implements vscode.Disposable {
       delay: 0,
       rules: [
         {
+          name: 'Get site lists',
           match: {
             url: '/_api/web/lists',
             method: 'GET',
