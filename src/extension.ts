@@ -237,6 +237,16 @@ export function activate(context: vscode.ExtensionContext) {
     },
   );
 
+  // Register the Discard Components command
+  const discardComponentsCommand = vscode.commands.registerCommand(
+    'spfx-local-workbench.discardComponents',
+    () => {
+      if (WorkbenchPanel.currentPanel) {
+        void WorkbenchPanel.currentPanel.discardComponents();
+      }
+    },
+  );
+
   // Register the Open Storybook command
   const openStorybookCommand = vscode.commands.registerCommand(
     'spfx-local-workbench.openStorybook',
@@ -686,6 +696,7 @@ export function activate(context: vscode.ExtensionContext) {
     openSettingsCommand,
     switchToDisplayModeCommand,
     switchToEditModeCommand,
+    discardComponentsCommand,
     openStorybookCommand,
     generateStoriesCommand,
     cleanStorybookCommand,

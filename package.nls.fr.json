@@ -26,6 +26,7 @@
   "command.spfx-local-workbench.recordRequests.title": "Enregistrer les requêtes et générer des règles",
   "command.spfx-local-workbench.switchToDisplayMode.title": "Passer en mode Aperçu",
   "command.spfx-local-workbench.switchToEditMode.title": "Passer en mode Édition",
+  "command.spfx-local-workbench.discardComponents.title": "Abandonner les composants (réinitialiser le workbench)",
 
   "submenu.spfx-local-workbench.mockData.label": "Données simulées",
 

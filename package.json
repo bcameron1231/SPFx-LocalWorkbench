@@ -100,6 +100,12 @@
         "icon": "$(edit)"
       },
       {
+        "command": "spfx-local-workbench.discardComponents",
+        "title": "%command.spfx-local-workbench.discardComponents.title%",
+        "category": "SPFx Local Workbench",
+        "icon": "$(discard)"
+      },
+      {
         "command": "spfx-local-workbench.openDevTools",
         "title": "%command.spfx-local-workbench.openDevTools.title%",
         "category": "SPFx Local Workbench",
@@ -220,6 +226,11 @@
           "command": "spfx-local-workbench.generateStories",
           "when": "spfxLocalWorkbench.isStorybook",
           "group": "navigation"
+        },
+        {
+          "command": "spfx-local-workbench.discardComponents",
+          "when": "spfxLocalWorkbench.isWorkbench",
+          "group": "1_overflow@1"
         }
       ],
       "spfx-local-workbench.mockData": [

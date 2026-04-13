@@ -109,6 +109,14 @@ function initialize() {
         case 'refresh':
           runtime.handleRefresh();
           return;
+        case 'requestComponentPreservation':
+          runtime.preserveComponentConfigs();
+          return;
+        case 'restoreComponents':
+          if (message.configs && Array.isArray(message.configs)) {
+            runtime.restoreComponents(message.configs);
+          }
+          return;
         case 'openDevTools':
           runtime.handleOpenDevTools();
           return;
@@ -140,6 +148,8 @@ function initialize() {
           runtime.initialize().catch((error) => {
             log.error('Initialization error:', error);
           });
+          // Request component restoration if extension has saved configs
+          vscodeApi.postMessage({ command: 'requestComponentRestore' });
         },
       }),
       root,

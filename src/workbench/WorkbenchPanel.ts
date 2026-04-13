@@ -43,6 +43,7 @@ export class WorkbenchPanel {
     .getConfiguration('spfxLocalWorkbench.proxy')
     .get<boolean>('enabled', true);
   private _displayMode: DisplayMode = DisplayMode.Edit;
+  private _preservedComponentConfigs: any[] | undefined;
 
   // Expose the proxy service for recording commands
   public get apiProxyService(): ApiProxyService | undefined {
@@ -71,6 +72,15 @@ export class WorkbenchPanel {
       command: 'displayModeChanged',
       displayMode: this._displayMode,
     });
+  }
+
+  /**
+   * Discard all components and reload fresh
+   */
+  public async discardComponents(): Promise<void> {
+    this._preservedComponentConfigs = undefined;
+    await this._loadComponents();
+    this._update();
   }
 
   // Creates or reveals the workbench panel
@@ -236,8 +246,27 @@ export class WorkbenchPanel {
         return;
 
       case 'refresh':
+        // Request current component configs from webview before refreshing
+        this._panel.webview.postMessage({ command: 'requestComponentPreservation' });
+        return;
+
+      case 'componentConfigsPreserved':
+        // Webview sent us the configs, now we can reload
+        this._preservedComponentConfigs = message.configs || [];
         await this._loadComponents();
         this._update();
+        // After HTML regenerates, the webview will request restoration
+        return;
+
+      case 'requestComponentRestore':
+        // New webview is ready, send preserved configs if any
+        if (this._preservedComponentConfigs && this._preservedComponentConfigs.length > 0) {
+          this._panel.webview.postMessage({
+            command: 'restoreComponents',
+            configs: this._preservedComponentConfigs,
+          });
+          this._preservedComponentConfigs = undefined;
+        }
         return;
 
       case 'openDevTools':

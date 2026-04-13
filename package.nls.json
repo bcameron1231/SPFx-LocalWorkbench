@@ -27,6 +27,7 @@
   "command.spfx-local-workbench.recordRequests.title": "Record Requests and Generate Rules",
   "command.spfx-local-workbench.switchToDisplayMode.title": "Switch to Preview Mode",
   "command.spfx-local-workbench.switchToEditMode.title": "Switch to Edit Mode",
+  "command.spfx-local-workbench.discardComponents.title": "Discard Components (reset workbench)",
 
   "submenu.spfx-local-workbench.mockData.label": "Mock Data",
 
