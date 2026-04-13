@@ -211,7 +211,7 @@ export function activate(context: vscode.ExtensionContext) {
     'spfx-local-workbench.openSettings',
     () => {
       vscode.commands.executeCommand(
-        'workbench.action.openSettings',
+        'workbench.action.openWorkspaceSettings',
         '@ext:BeauCameron.spfx-local-workbench',
       );
     },
