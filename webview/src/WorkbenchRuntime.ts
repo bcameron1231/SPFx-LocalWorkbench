@@ -671,7 +671,7 @@ export class WorkbenchRuntime {
     this.log.debug('Preserving component configs for refresh');
 
     const configs = this.activeWebParts.map((wp) => ({
-      manifestIndex: this.loadedManifests.findIndex((m) => m.id === wp.manifest.id),
+      manifestId: wp.manifest.id,
       instanceId: wp.instanceId,
       properties: JSON.parse(JSON.stringify(wp.properties)), // Deep clone
       preconfiguredEntryIndex: (wp as any).preconfiguredEntryIndex ?? 0,
@@ -689,13 +689,20 @@ export class WorkbenchRuntime {
   async restoreComponents(configs: any[]): Promise<void> {
     this.log.debug('Restoring components from preserved configs', configs.length);
 
+    const webParts = this.loadedManifests.filter(
+      (m): m is IWebPartManifest => m.componentType === 'WebPart',
+    );
+
     for (const config of configs) {
-      if (config.manifestIndex >= 0 && config.manifestIndex < this.loadedManifests.length) {
+      // Find the manifest in the filtered webParts array (same array addWebPartAt uses)
+      const manifestIndex = webParts.findIndex((m) => m.id === config.manifestId);
+
+      if (manifestIndex >= 0) {
         try {
           // Restore with original instanceId and properties
           await this.addWebPartAt(
             this.activeWebParts.length,
-            config.manifestIndex,
+            manifestIndex,
             config.preconfiguredEntryIndex,
             config.instanceId,
             config.properties,
@@ -703,6 +710,8 @@ export class WorkbenchRuntime {
         } catch (error) {
           this.log.error('Failed to restore component:', error);
         }
+      } else {
+        this.log.warn('Failed to restore component: manifest not found', config.manifestId);
       }
     }
   }
