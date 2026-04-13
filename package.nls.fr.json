@@ -11,7 +11,7 @@
 
   "command.spfx-local-workbench.openWorkbench.title": "Ouvrir le workbench local",
   "command.spfx-local-workbench.startServe.title": "Démarrer SPFx serve et ouvrir le workbench",
-  "command.spfx-local-workbench.detectWebParts.title": "Actualiser les WebParts",
+  "command.spfx-local-workbench.detectWebParts.title": "Actualiser",
   "command.spfx-local-workbench.openDevTools.title": "Ouvrir les outils de développement",
   "command.spfx-local-workbench.openSettings.title": "Ouvrir les paramètres du workbench SPFx",
   "command.spfx-local-workbench.openStorybook.title": "Ouvrir le storybook SPFx",

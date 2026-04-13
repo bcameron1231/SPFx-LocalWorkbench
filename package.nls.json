@@ -12,7 +12,7 @@
 
   "command.spfx-local-workbench.openWorkbench.title": "Open Local Workbench",
   "command.spfx-local-workbench.startServe.title": "Start SPFx Serve and Open Workbench",
-  "command.spfx-local-workbench.detectWebParts.title": "Refresh Web Parts",
+  "command.spfx-local-workbench.detectWebParts.title": "Refresh",
   "command.spfx-local-workbench.openDevTools.title": "Open Developer Tools",
   "command.spfx-local-workbench.openSettings.title": "Open SPFx Workbench Settings",
   "command.spfx-local-workbench.openStorybook.title": "Open SPFx Storybook",
