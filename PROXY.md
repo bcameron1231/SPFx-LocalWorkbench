@@ -17,13 +17,14 @@ The workbench replaces the real SPFx HTTP clients with proxy-aware versions:
 | `SPHttpClient`  | `ProxySPHttpClient`  | `spHttp`        |
 | `HttpClient`    | `ProxyHttpClient`    | `http`          |
 | `AadHttpClient` | `ProxyAadHttpClient` | `aadHttp`       |
+| global `fetch()`| `ProxyFetchClient`   | `fetch`         |
 
 Each proxy class exposes the same methods your web parts already use — `get()`, `post()`, `put()`, `patch()`, `delete()`, `fetch()`, etc. — so **no code changes** are required in your web part.
 
 Under the hood, every method call:
 
 1. Serializes the request (URL, method, headers, body) into a plain object.
-2. Tags it with a **client type** (`spHttp`, `http`, or `aadHttp`) so mock rules can distinguish between SharePoint REST calls, generic HTTP calls, and AAD-protected API calls.
+2. Tags it with a **client type** (`spHttp`, `http`, `aadHttp`, or `fetch`) so mock rules can distinguish between SharePoint REST calls, generic HTTP calls, AAD-protected API calls, and global `fetch()` calls.
 3. Sends it through the **Proxy Bridge**.
 
 ### 2. Proxy Bridge (Webview ↔ Extension Host)
