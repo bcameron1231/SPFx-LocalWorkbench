@@ -17,7 +17,6 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "ignoreDeprecations": "6.0",
     "paths": {
       "@spfx-local-workbench/shared": ["../packages/shared/src"],
       "@spfx-local-workbench/shared/fluent": ["../packages/shared/src/utils/buildFluentTheme"]
