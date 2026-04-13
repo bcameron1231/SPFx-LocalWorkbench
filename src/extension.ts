@@ -217,6 +217,26 @@ export function activate(context: vscode.ExtensionContext) {
     },
   );
 
+  // Register the Switch to Display Mode command
+  const switchToDisplayModeCommand = vscode.commands.registerCommand(
+    'spfx-local-workbench.switchToDisplayMode',
+    () => {
+      if (WorkbenchPanel.currentPanel) {
+        WorkbenchPanel.currentPanel.switchToDisplayMode();
+      }
+    },
+  );
+
+  // Register the Switch to Edit Mode command
+  const switchToEditModeCommand = vscode.commands.registerCommand(
+    'spfx-local-workbench.switchToEditMode',
+    () => {
+      if (WorkbenchPanel.currentPanel) {
+        WorkbenchPanel.currentPanel.switchToEditMode();
+      }
+    },
+  );
+
   // Register the Open Storybook command
   const openStorybookCommand = vscode.commands.registerCommand(
     'spfx-local-workbench.openStorybook',
@@ -664,6 +684,8 @@ export function activate(context: vscode.ExtensionContext) {
     detectWebPartsCommand,
     openDevToolsCommand,
     openSettingsCommand,
+    switchToDisplayModeCommand,
+    switchToEditModeCommand,
     openStorybookCommand,
     generateStoriesCommand,
     cleanStorybookCommand,

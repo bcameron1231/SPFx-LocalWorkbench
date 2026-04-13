@@ -4,6 +4,7 @@
 import {
   COMPONENT_REMOVAL_DELAY_MS,
   DOM_RENDER_DELAY_MS,
+  DisplayMode,
   ManifestLoader,
   amdLoader,
   getErrorMessage,
@@ -41,6 +42,7 @@ export class WorkbenchRuntime {
   private loadedManifests: IComponentManifest[] = [];
   private activeWebParts: IWebPartConfig[] = [];
   private activeExtensions: IExtensionConfig[] = [];
+  private displayMode: DisplayMode = DisplayMode.Edit;
 
   constructor(config: IWorkbenchConfig, vscodeApi: IVsCodeApi) {
     this.vscode = vscodeApi;
@@ -590,5 +592,25 @@ export class WorkbenchRuntime {
 
   getLoadedManifests(): IComponentManifest[] {
     return this.loadedManifests;
+  }
+
+  /**
+   * Set the display mode for all active web parts
+   */
+  setDisplayMode(displayMode: DisplayMode): void {
+    // Check if display mode is already set to avoid unnecessary updates
+    if (this.displayMode === displayMode) {
+      return;
+    }
+
+    this.log.debug('Setting display mode to', displayMode);
+    this.displayMode = displayMode;
+
+    // Update all active web parts with the new display mode
+    for (const webPart of this.activeWebParts) {
+      if (isActiveWebPart(webPart)) {
+        this.webPartManager.updateWebPartDisplayMode(webPart, displayMode);
+      }
+    }
   }
 }

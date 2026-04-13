@@ -5,7 +5,7 @@
 // extension and the webview.
 import * as vscode from 'vscode';
 
-import { LIVE_RELOAD_DEBOUNCE_MS } from '@spfx-local-workbench/shared';
+import { LIVE_RELOAD_DEBOUNCE_MS, DisplayMode } from '@spfx-local-workbench/shared';
 import type { IExtensionManifest, IWebPartManifest } from '@spfx-local-workbench/shared';
 import { logger } from '@spfx-local-workbench/shared';
 import { getNonce, localize } from '@spfx-local-workbench/shared/utils/node';
@@ -42,10 +42,35 @@ export class WorkbenchPanel {
   private _lastProxyEnabled: boolean = vscode.workspace
     .getConfiguration('spfxLocalWorkbench.proxy')
     .get<boolean>('enabled', true);
+  private _displayMode: DisplayMode = DisplayMode.Edit;
 
   // Expose the proxy service for recording commands
   public get apiProxyService(): ApiProxyService | undefined {
     return this._apiProxyService;
+  }
+
+  /**
+   * Switch to Display/Preview mode
+   */
+  public switchToDisplayMode(): void {
+    this._displayMode = DisplayMode.Read;
+    void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.displayMode', 'display');
+    this._panel.webview.postMessage({
+      command: 'displayModeChanged',
+      displayMode: this._displayMode,
+    });
+  }
+
+  /**
+   * Switch to Edit mode
+   */
+  public switchToEditMode(): void {
+    this._displayMode = DisplayMode.Edit;
+    void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.displayMode', 'edit');
+    this._panel.webview.postMessage({
+      command: 'displayModeChanged',
+      displayMode: this._displayMode,
+    });
   }
 
   // Creates or reveals the workbench panel
@@ -105,6 +130,7 @@ export class WorkbenchPanel {
     this._extensionUri = extensionUri;
     this._settings = getWorkbenchSettings();
     void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.isWorkbench', true);
+    void vscode.commands.executeCommand('setContext', 'spfxLocalWorkbench.displayMode', 'edit');
 
     // Set initial content
     this._update();

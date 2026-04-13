@@ -88,6 +88,18 @@
         "icon": "$(refresh)"
       },
       {
+        "command": "spfx-local-workbench.switchToDisplayMode",
+        "title": "%command.spfx-local-workbench.switchToDisplayMode.title%",
+        "category": "SPFx Local Workbench",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "spfx-local-workbench.switchToEditMode",
+        "title": "%command.spfx-local-workbench.switchToEditMode.title%",
+        "category": "SPFx Local Workbench",
+        "icon": "$(edit)"
+      },
+      {
         "command": "spfx-local-workbench.openDevTools",
         "title": "%command.spfx-local-workbench.openDevTools.title%",
         "category": "SPFx Local Workbench",
@@ -175,6 +187,16 @@
           "group": "navigation"
         },
         {
+          "command": "spfx-local-workbench.switchToDisplayMode",
+          "when": "spfxLocalWorkbench.isWorkbench && spfxLocalWorkbench.displayMode == 'edit'",
+          "group": "navigation"
+        },
+        {
+          "command": "spfx-local-workbench.switchToEditMode",
+          "when": "spfxLocalWorkbench.isWorkbench && spfxLocalWorkbench.displayMode == 'display'",
+          "group": "navigation"
+        },
+        {
           "command": "spfx-local-workbench.detectWebParts",
           "when": "spfxLocalWorkbench.isWorkbench",
           "group": "navigation"
@@ -182,17 +204,17 @@
         {
           "command": "spfx-local-workbench.mockDataMenu",
           "when": "spfxLocalWorkbench.isWorkbench",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
           "command": "spfx-local-workbench.openDevTools",
           "when": "spfxLocalWorkbench.isWorkbench || spfxLocalWorkbench.isStorybook",
-          "group": "navigation@1"
+          "group": "navigation@2"
         },
         {
           "command": "spfx-local-workbench.openSettings",
           "when": "spfxLocalWorkbench.isWorkbench || spfxLocalWorkbench.isStorybook",
-          "group": "navigation@2"
+          "group": "navigation@3"
         },
         {
           "command": "spfx-local-workbench.generateStories",

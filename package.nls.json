@@ -25,6 +25,8 @@
   "command.spfx-local-workbench.importJsonMock.title": "Import JSON File as Mock",
   "command.spfx-local-workbench.importCsvMock.title": "Import CSV File as Mock",
   "command.spfx-local-workbench.recordRequests.title": "Record Requests and Generate Rules",
+  "command.spfx-local-workbench.switchToDisplayMode.title": "Switch to Preview Mode",
+  "command.spfx-local-workbench.switchToEditMode.title": "Switch to Edit Mode",
 
   "submenu.spfx-local-workbench.mockData.label": "Mock Data",
 

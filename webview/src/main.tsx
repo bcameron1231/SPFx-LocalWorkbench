@@ -112,6 +112,11 @@ function initialize() {
         case 'openDevTools':
           runtime.handleOpenDevTools();
           return;
+        case 'displayModeChanged':
+          if (typeof message.displayMode !== 'undefined') {
+            runtime.setDisplayMode(message.displayMode);
+          }
+          return;
       }
       if (message && message.command === 'settingsChanged' && message.settings) {
         runtime.updateSettings(message.settings);

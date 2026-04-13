@@ -2,6 +2,9 @@
  * Constants for the SPFx Storybook addon
  */
 
+// Re-export DisplayMode from shared package for backwards compatibility
+export { DisplayMode } from '@spfx-local-workbench/shared';
+
 export const ADDON_ID = 'spfx-addon';
 export const PANEL_ID = `${ADDON_ID}/property-pane`;
 
@@ -12,11 +15,6 @@ export const TOOLBAR_IDS = {
   THEME: `${ADDON_ID}/theme`,
   LOCALE: `${ADDON_ID}/locale`,
 } as const;
-
-export enum DisplayMode {
-  Read = 1,
-  Edit = 2,
-}
 
 export const EVENTS = {
   UPDATE_PROPERTIES: `${ADDON_ID}/update-properties`,
