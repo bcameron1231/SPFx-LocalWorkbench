@@ -12,18 +12,19 @@ The proxy system has three layers:
 
 The workbench replaces the real SPFx HTTP clients with proxy-aware versions:
 
-| Real SPFx Class | Proxy Replacement | Client Type Tag |
-| --- | --- | --- |
-| `SPHttpClient` | `ProxySPHttpClient` | `spHttp` |
-| `HttpClient` | `ProxyHttpClient` | `http` |
-| `AadHttpClient` | `ProxyAadHttpClient` | `aadHttp` |
+| Real SPFx Class | Proxy Replacement    | Client Type Tag |
+| --------------- | -------------------- | --------------- |
+| `SPHttpClient`  | `ProxySPHttpClient`  | `spHttp`        |
+| `HttpClient`    | `ProxyHttpClient`    | `http`          |
+| `AadHttpClient` | `ProxyAadHttpClient` | `aadHttp`       |
+| global `fetch()`| `ProxyFetchClient`   | `fetch`         |
 
 Each proxy class exposes the same methods your web parts already use — `get()`, `post()`, `put()`, `patch()`, `delete()`, `fetch()`, etc. — so **no code changes** are required in your web part.
 
 Under the hood, every method call:
 
 1. Serializes the request (URL, method, headers, body) into a plain object.
-2. Tags it with a **client type** (`spHttp`, `http`, or `aadHttp`) so mock rules can distinguish between SharePoint REST calls, generic HTTP calls, and AAD-protected API calls.
+2. Tags it with a **client type** (`spHttp`, `http`, `aadHttp`, or `fetch`) so mock rules can distinguish between SharePoint REST calls, generic HTTP calls, AAD-protected API calls, and global `fetch()` calls.
 3. Sends it through the **Proxy Bridge**.
 
 ### 2. Proxy Bridge (Webview ↔ Extension Host)
@@ -128,10 +129,10 @@ Create a file at `.spfx-workbench/api-mocks.json` in your project root (or run t
 
 ### 2. Configuration File Structure
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `delay` | `number` | Global default delay (ms) applied to all responses unless overridden per-rule. |
-| `rules` | `IMockRule[]` | Array of mock rules. Evaluated in order; first match wins. |
+| Property | Type          | Description                                                                    |
+| -------- | ------------- | ------------------------------------------------------------------------------ |
+| `delay`  | `number`      | Global default delay (ms) applied to all responses unless overridden per-rule. |
+| `rules`  | `IMockRule[]` | Array of mock rules. Evaluated in order; first match wins.                     |
 
 ### 3. Mock Rule Structure
 
@@ -139,24 +140,31 @@ Each rule has a **match** section and a **response** section:
 
 #### Match
 
-| Property | Type | Required | Description |
-| --- | --- | --- | --- |
-| `url` | `string` | Yes | URL substring to match against the request URL. |
-| `method` | `string` | No | HTTP method filter (`GET`, `POST`, etc.). If omitted, matches any method. |
-| `clientType` | `string` | No | Restrict to a specific client: `spHttp`, `http`, or `aadHttp`. |
-| `urlPattern` | `boolean` | No | When `true`, `url` is treated as a glob pattern instead of a substring. |
+| Property     | Type      | Required | Description                                                               |
+| ------------ | --------- | -------- | ------------------------------------------------------------------------- |
+| `url`        | `string`  | Yes      | URL substring to match against the request URL.                           |
+| `method`     | `string`  | No       | HTTP method filter (`GET`, `POST`, etc.). If omitted, matches any method. |
+| `clientType` | `string`  | No       | Restrict to a specific client: `spHttp`, `http`, or `aadHttp`.            |
+| `urlPattern` | `boolean` | No       | When `true`, `url` is treated as a glob pattern instead of a substring.   |
 
 #### Response
 
-| Property | Type | Required | Description |
-| --- | --- | --- | --- |
-| `status` | `number` | Yes | HTTP status code to return (e.g., `200`, `404`, `500`). |
-| `headers` | `object` | No | Response headers. Defaults to `{ "content-type": "application/json" }`. |
-| `body` | `any` | No | Inline response body. Can be an object (auto-serialized to JSON) or a string. |
-| `bodyFile` | `string` | No | Path to a file containing the response body (relative to workspace root). Use this for large responses. |
-| `delay` | `number` | No | Per-rule delay in milliseconds (overrides the global `delay`). |
+| Property   | Type     | Required | Description                                                                                             |
+| ---------- | -------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| `status`   | `number` | Yes      | HTTP status code to return (e.g., `200`, `404`, `500`).                                                 |
+| `headers`  | `object` | No       | Response headers. Defaults to `{ "content-type": "application/json" }`.                                 |
+| `body`     | `any`    | No       | Inline response body. Can be an object (auto-serialized to JSON) or a string.                           |
+| `bodyFile` | `string` | No       | Path to a file containing the response body (relative to workspace root). Use this for large responses. |
+| `delay`    | `number` | No       | Per-rule delay in milliseconds (overrides the global `delay`).                                          |
 
 > **Note:** `body` and `bodyFile` are mutually exclusive. If both are specified, `bodyFile` takes precedence.
+
+#### Top-Level Rule Properties
+
+| Property   | Type      | Required | Description                                                                                                                                                                |
+| ---------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`     | `string`  | No       | Optional friendly name for the rule. When provided, this name is displayed in logs instead of the URL pattern. Helps identify rules when debugging or monitoring requests. |
+| `disabled` | `boolean` | No       | When `true`, the rule is skipped during matching. Useful for keeping multiple response variants for testing different scenarios.                                           |
 
 ## Examples
 
@@ -208,6 +216,32 @@ Only matches POST requests made through `SPHttpClient`:
   }
 }
 ```
+
+### Named rule for easier debugging
+
+Add a friendly `name` to identify rules in logs:
+
+```json
+{
+  "name": "Get Documents library items",
+  "match": {
+    "url": "/_api/web/lists/getbytitle('Documents')/items"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "d": {
+        "results": [
+          { "Id": 1, "Title": "Report.docx" },
+          { "Id": 2, "Title": "Presentation.pptx" }
+        ]
+      }
+    }
+  }
+}
+```
+
+When this rule matches, the logs will show `Matched rule: Get Documents library items` instead of the full URL.
 
 ### Respond with an external file
 
@@ -277,13 +311,13 @@ Target calls made through `AadHttpClient` to a custom backend:
 
 You can customize proxy behavior through VS Code settings:
 
-| Setting | Default | Description |
-| --- | --- | --- |
-| `spfxLocalWorkbench.proxy.enabled` | `true` | Enable or disable the API proxy system. When disabled, HTTP client calls make real `fetch()` requests instead of routing through the mock rule engine, allowing external tools like Dev Proxy to handle them. **Requires closing and reopening the workbench to take effect.** |
-| `spfxLocalWorkbench.proxy.mockFile` | `.spfx-workbench/api-mocks.json` | Path to the mock config file (relative to workspace root). |
-| `spfxLocalWorkbench.proxy.defaultDelay` | `0` | Default delay (ms) for all mock responses. |
-| `spfxLocalWorkbench.proxy.fallbackStatus` | `404` | HTTP status returned when no mock rule matches a request. |
-| `spfxLocalWorkbench.proxy.logRequests` | `true` | Log all proxied requests to the **SPFx API Proxy** output channel. |
+| Setting                                   | Default                          | Description                                                                                                                                                                                                                                                                    |
+| ----------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `spfxLocalWorkbench.proxy.enabled`        | `true`                           | Enable or disable the API proxy system. When disabled, HTTP client calls make real `fetch()` requests instead of routing through the mock rule engine, allowing external tools like Dev Proxy to handle them. **Requires closing and reopening the workbench to take effect.** |
+| `spfxLocalWorkbench.proxy.mockFile`       | `.spfx-workbench/api-mocks.json` | Path to the mock config file (relative to workspace root).                                                                                                                                                                                                                     |
+| `spfxLocalWorkbench.proxy.defaultDelay`   | `0`                              | Default delay (ms) for all mock responses.                                                                                                                                                                                                                                     |
+| `spfxLocalWorkbench.proxy.fallbackStatus` | `404`                            | HTTP status returned when no mock rule matches a request.                                                                                                                                                                                                                      |
+| `spfxLocalWorkbench.proxy.logRequests`    | `true`                           | Log all proxied requests to the **SPFx API Proxy** output channel.                                                                                                                                                                                                             |
 
 ## Viewing Proxy Logs
 
@@ -293,13 +327,13 @@ All proxied requests are logged to the **SPFx API Proxy** output channel (access
 
 The `MockProxyResponse` returned to your web part mirrors the SPFx `SPHttpClientResponse` interface:
 
-| Property / Method | Description |
-| --- | --- |
-| `.ok` | `true` if status is 200–299. |
-| `.status` | The HTTP status code. |
-| `.headers` | Response headers object. |
-| `.json()` | Returns a `Promise` that resolves to the parsed JSON body. |
-| `.text()` | Returns a `Promise` that resolves to the raw string body. |
+| Property / Method | Description                                                |
+| ----------------- | ---------------------------------------------------------- |
+| `.ok`             | `true` if status is 200–299.                               |
+| `.status`         | The HTTP status code.                                      |
+| `.headers`        | Response headers object.                                   |
+| `.json()`         | Returns a `Promise` that resolves to the parsed JSON body. |
+| `.text()`         | Returns a `Promise` that resolves to the raw string body.  |
 
 Your existing web part code like `response.json().then(data => ...)` works without modification.
 

@@ -37,6 +37,8 @@
   "mock.importCsv.success": "Fichier CSV importé en tant que règle mock.",
   "mock.record.label": "Enregistrer les requêtes",
   "mock.record.description": "Capturer les requêtes non appariées et générer des règles",
+  "mock.showLog.label": "Afficher le journal du proxy API",
+  "mock.showLog.description": "Ouvrir le canal de sortie « SPFx API Proxy »",
 
   "record.openFirst": "Ouvrez d'abord le workbench, puis démarrez l'enregistrement.",
   "record.noRequests": "Aucune requête non appariée n'a été enregistrée. Toutes les requêtes ont peut-être correspondu à des règles existantes.",

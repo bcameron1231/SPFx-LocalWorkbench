@@ -90,12 +90,20 @@ export async function promptRuleOptions(titlePrefix: string): Promise<
       method: string | undefined;
       clientType: ApiClientType | undefined;
       status: number;
+      name?: string;
     }
   | undefined
 > {
+  const name = await vscode.window.showInputBox({
+    title: `${titlePrefix} — Rule Name (optional)`,
+    prompt: 'Enter a friendly name for this rule (used in logs and diagnostics)',
+    placeHolder: 'e.g. "Get site lists"',
+    ignoreFocusOut: true,
+  });
+
   const url = await vscode.window.showInputBox({
     title: `${titlePrefix} — URL Pattern`,
-    prompt: 'Enter the URL or URL pattern this rule should match',
+    prompt: 'Enter the URL this rule should match (case-insensitive substring match)',
     placeHolder: '/api/data  or  /_api/web/lists',
     ignoreFocusOut: true,
   });
@@ -148,5 +156,6 @@ export async function promptRuleOptions(titlePrefix: string): Promise<
     method: methodPick.label === 'ANY' ? undefined : methodPick.label,
     clientType: (clientTypePick as { label: string; value: ApiClientType | undefined }).value,
     status: statusPick.status,
+    name: name?.trim() ? name.trim() : undefined,
   };
 }

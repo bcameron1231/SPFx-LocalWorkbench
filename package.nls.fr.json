@@ -24,11 +24,10 @@
   "command.spfx-local-workbench.importJsonMock.title": "Importer un fichier JSON en tant que mock",
   "command.spfx-local-workbench.importCsvMock.title": "Importer un fichier CSV en tant que mock",
   "command.spfx-local-workbench.recordRequests.title": "Enregistrer les requêtes et générer des règles",
+  "command.spfx-local-workbench.showApiProxyLog.title": "Afficher le journal du proxy API",
   "command.spfx-local-workbench.switchToDisplayMode.title": "Passer en mode Aperçu",
   "command.spfx-local-workbench.switchToEditMode.title": "Passer en mode Édition",
   "command.spfx-local-workbench.discardComponents.title": "Abandonner les composants (réinitialiser le workbench)",
-
-  "submenu.spfx-local-workbench.mockData.label": "Données simulées",
 
   "configuration.spfxLocalWorkbench.group.general.title": "Général",
   "configuration.spfxLocalWorkbench.serveUrl.description": "L'URL où le service SPFx est en cours d'exécution",

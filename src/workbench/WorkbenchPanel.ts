@@ -29,6 +29,7 @@ const log = logger.createChild('WorkbenchPanel');
 export class WorkbenchPanel {
   public static currentPanel: WorkbenchPanel | undefined;
   private static readonly viewType = 'spfxLocalWorkbench';
+  private static _apiProxyOutputChannel: vscode.OutputChannel | undefined;
 
   private readonly _panel: vscode.WebviewPanel;
   private readonly _extensionUri: vscode.Uri;
@@ -84,7 +85,8 @@ export class WorkbenchPanel {
   }
 
   // Creates or reveals the workbench panel
-  public static createOrShow(extensionUri: vscode.Uri): void {
+  public static createOrShow(extensionUri: vscode.Uri, apiProxyOutputChannel?: vscode.OutputChannel): void {
+    WorkbenchPanel._apiProxyOutputChannel = apiProxyOutputChannel;
     const column = vscode.window.activeTextEditor
       ? vscode.window.activeTextEditor.viewColumn
       : undefined;
@@ -126,7 +128,8 @@ export class WorkbenchPanel {
   }
 
   // Revives the panel from a previous session
-  public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri): void {
+  public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, apiProxyOutputChannel?: vscode.OutputChannel): void {
+    WorkbenchPanel._apiProxyOutputChannel = apiProxyOutputChannel;
     panel.title = localize('panel.title', 'SPFx Local Workbench');
     WorkbenchPanel.currentPanel = new WorkbenchPanel(panel, extensionUri);
   }
@@ -205,7 +208,10 @@ export class WorkbenchPanel {
     // Initialize the API proxy service
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     if (workspaceFolder) {
-      this._apiProxyService = new ApiProxyService(workspaceFolder.uri.fsPath);
+      this._apiProxyService = new ApiProxyService(
+        workspaceFolder.uri.fsPath,
+        WorkbenchPanel._apiProxyOutputChannel,
+      );
       this._disposables.push(this._apiProxyService);
     }
 

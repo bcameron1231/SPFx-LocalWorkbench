@@ -44,10 +44,17 @@ export class ApiProxyService implements vscode.Disposable {
   private _configWatcher: vscode.FileSystemWatcher | undefined;
   private _recordedRequests: IRecordedRequest[] = [];
 
-  constructor(workspaceRoot: string) {
+  constructor(workspaceRoot: string, outputChannel?: vscode.OutputChannel) {
     this._workspaceRoot = workspaceRoot;
     this._settings = ApiProxyService.readSettings();
-    this._outputChannel = vscode.window.createOutputChannel('SPFx API Proxy');
+
+    // If no output channel provided, create one and add to disposables
+    if (outputChannel) {
+      this._outputChannel = outputChannel;
+    } else {
+      this._outputChannel = vscode.window.createOutputChannel('SPFx API Proxy');
+      this._disposables.push(this._outputChannel);
+    }
 
     // Load initial config
     this._loadConfig();
@@ -154,7 +161,7 @@ export class ApiProxyService implements vscode.Disposable {
       const rule = this._ruleEngine.match(request);
 
       if (rule) {
-        this._log(`  Matched rule: ${rule.match.url}`);
+        this._log(`  Matched rule: ${rule.name || rule.match.url}`);
         return await this._respondFromRule(request, rule);
       }
 
@@ -351,6 +358,7 @@ export class ApiProxyService implements vscode.Disposable {
       delay: 0,
       rules: [
         {
+          name: 'Get site lists',
           match: {
             url: '/_api/web/lists',
             method: 'GET',
@@ -383,7 +391,6 @@ export class ApiProxyService implements vscode.Disposable {
   }
 
   dispose(): void {
-    this._outputChannel.dispose();
     for (const d of this._disposables) {
       d.dispose();
     }

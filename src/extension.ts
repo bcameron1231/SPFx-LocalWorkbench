@@ -37,6 +37,10 @@ export function activate(context: vscode.ExtensionContext) {
 
   const log = logger.createChild('Extension');
 
+  // Create a shared output channel for API Proxy logging
+  const apiProxyOutputChannel = vscode.window.createOutputChannel('SPFx API Proxy');
+  context.subscriptions.push(apiProxyOutputChannel);
+
   // Shared detector instance — workspace path rarely changes
   let detector: SpfxProjectDetector | undefined;
   function getDetector(): SpfxProjectDetector | undefined {
@@ -140,7 +144,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.window.registerWebviewPanelSerializer(
       'spfxLocalWorkbench',
-      new WorkbenchPanelSerializer(context.extensionUri, getDetector),
+      new WorkbenchPanelSerializer(context.extensionUri, getDetector, apiProxyOutputChannel),
     ),
     vscode.window.registerWebviewPanelSerializer(
       'spfxStorybook',
@@ -152,7 +156,7 @@ export function activate(context: vscode.ExtensionContext) {
   const openWorkbenchCommand = vscode.commands.registerCommand(
     'spfx-local-workbench.openWorkbench',
     () => {
-      WorkbenchPanel.createOrShow(context.extensionUri);
+      WorkbenchPanel.createOrShow(context.extensionUri, apiProxyOutputChannel);
     },
   );
 
@@ -162,7 +166,7 @@ export function activate(context: vscode.ExtensionContext) {
     async () => {
       const ready = await startServeIfNeeded();
       if (ready) {
-        WorkbenchPanel.createOrShow(context.extensionUri);
+        WorkbenchPanel.createOrShow(context.extensionUri, apiProxyOutputChannel);
       }
     },
   );
@@ -380,7 +384,7 @@ export function activate(context: vscode.ExtensionContext) {
         );
         return;
       }
-      const proxy = new ApiProxyService(wsFolder.uri.fsPath);
+      const proxy = new ApiProxyService(wsFolder.uri.fsPath, apiProxyOutputChannel);
       await proxy.scaffoldMockConfig();
       proxy.dispose();
       vscode.window.showInformationMessage(
@@ -438,6 +442,14 @@ export function activate(context: vscode.ExtensionContext) {
             'Capture unmatched requests and generate rules',
           ),
           commandId: 'spfx-local-workbench.recordRequests',
+        },
+        {
+          label: `$(output) ${localize('mock.showLog.label', 'Show API Proxy Log')}`,
+          description: localize(
+            'mock.showLog.description',
+            'Open the SPFx API Proxy output channel',
+          ),
+          commandId: 'spfx-local-workbench.showApiProxyLog',
         },
       ];
 
@@ -592,6 +604,14 @@ export function activate(context: vscode.ExtensionContext) {
     },
   );
 
+  // Command to show the SPFx API Proxy output channel
+  const showApiProxyLogCommand = vscode.commands.registerCommand(
+    'spfx-local-workbench.showApiProxyLog',
+    () => {
+      apiProxyOutputChannel.show();
+    },
+  );
+
   // Auto-detect SPFx projects and show status bar items
   const workbenchStatusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Left,
@@ -706,6 +726,7 @@ export function activate(context: vscode.ExtensionContext) {
     importJsonCommand,
     importCsvCommand,
     recordRequestsCommand,
+    showApiProxyLogCommand,
     workbenchStatusBarItem,
     storybookStatusBarItem,
   );
@@ -716,6 +737,7 @@ class WorkbenchPanelSerializer implements vscode.WebviewPanelSerializer {
   constructor(
     private readonly _extensionUri: vscode.Uri,
     private readonly _getDetector: () => SpfxProjectDetector | undefined,
+    private readonly _apiProxyOutputChannel: vscode.OutputChannel,
   ) {}
 
   async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, _state: any): Promise<void> {
@@ -726,7 +748,7 @@ class WorkbenchPanelSerializer implements vscode.WebviewPanelSerializer {
 
       if (isSpfx) {
         // Revive the panel
-        WorkbenchPanel.revive(webviewPanel, this._extensionUri);
+        WorkbenchPanel.revive(webviewPanel, this._extensionUri, this._apiProxyOutputChannel);
         return;
       }
     }
