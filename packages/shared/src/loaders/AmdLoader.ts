@@ -159,6 +159,19 @@ export class AmdLoader {
         }
       }
     }
+    // Try stripping subpaths to find a parent package registration.
+    if (!mod) {
+      const parts = dep.split('/');
+      // For scoped packages (@org/pkg/sub/path), the package name is the first two segments
+      const startIndex = dep.startsWith('@') ? 2 : 1;
+      for (let i = parts.length - 1; i >= startIndex; i--) {
+        const parentKey = parts.slice(0, i).join('/');
+        if (this.amdModules[parentKey]) {
+          mod = this.amdModules[parentKey];
+          break;
+        }
+      }
+    }
     if (!mod) mod = win[dep];
     // Handle localized strings modules (e.g. 'HeaderApplicationCustomizerStrings')
     // SPFx generates these as AMD modules; provide a Proxy that returns the key name

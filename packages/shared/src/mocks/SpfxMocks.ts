@@ -192,13 +192,15 @@ export function initializeSpfxMocks(): void {
   amdModules['@microsoft/load-themed-styles'] = loadThemedStylesModule;
 
   amdModules['@microsoft/sp-lodash-subset'] = {
-    escape: (s: string) => s,
+    escape: (s: string) =>
+      s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'),
     cloneDeep: (o: any) => JSON.parse(JSON.stringify(o)),
     isEqual: (a: any, b: any) => JSON.stringify(a) === JSON.stringify(b),
     merge: deepMerge,
     find: (arr: any[], pred: any) => arr.find(pred),
     findIndex: (arr: any[], pred: any) => arr.findIndex(pred),
   };
+  amdModules['@microsoft/sp-lodash-subset/lib/index'] = amdModules['@microsoft/sp-lodash-subset'];
 
   amdModules['@fluentui/react'] = {
     initializeIcons: () => {},
