@@ -37,6 +37,8 @@
   "mock.importCsv.success": "CSV file imported as mock rule.",
   "mock.record.label": "Record Requests",
   "mock.record.description": "Capture unmatched requests and generate rules",
+  "mock.showLog.label": "Show API Proxy Log",
+  "mock.showLog.description": "Open the SPFx API Proxy output channel",
 
   "record.openFirst": "Open the workbench first, then start recording.",
   "record.noRequests": "No unmatched requests were recorded. All requests may have matched existing rules.",

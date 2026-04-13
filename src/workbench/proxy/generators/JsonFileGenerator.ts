@@ -72,6 +72,7 @@ export async function importJsonFile(workspaceRoot: string): Promise<IMockRule[]
   }
 
   const rule: IMockRule = {
+    ...(ruleOptions.name ? { name: ruleOptions.name } : {}),
     match: {
       url: ruleOptions.url,
       ...(ruleOptions.method ? { method: ruleOptions.method } : {}),
