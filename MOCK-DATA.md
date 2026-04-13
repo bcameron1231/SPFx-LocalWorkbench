@@ -331,5 +331,6 @@ For **glob pattern** rules (`"urlPattern": true`), first match wins — specific
 | `SPFx Mock Data: Import JSON File as Mock`         | Import a JSON file as a mock response body          |
 | `SPFx Mock Data: Import CSV File as Mock`          | Parse a CSV file into a JSON mock response          |
 | `SPFx Mock Data: Record Requests & Generate Rules` | Capture unmatched requests and generate stub rules  |
+| `SPFx Local Workbench: Show API Proxy Log`         | Open the API proxy log                              |
 
 All commands are also accessible from the **Command Palette** (`Ctrl+Shift+P`).
