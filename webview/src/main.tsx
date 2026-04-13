@@ -10,7 +10,7 @@ import type { ITheme, IThemeGroup } from '@spfx-local-workbench/shared';
 import { WorkbenchRuntime } from './WorkbenchRuntime';
 import { App, IAppHandlers } from './components/App';
 import { StatusBarThemePicker } from './components/StatusBarThemePicker';
-import { initializeProxyBridge } from './proxy';
+import { initializeProxyBridge, installFetchProxy } from './proxy';
 import './styles/global.css';
 
 const log = logger.createChild('Main');
@@ -39,6 +39,7 @@ function initialize() {
     // tools like Dev Proxy can intercept network traffic.
     if (config.proxyEnabled !== false) {
       initializeProxyBridge(vscodeApi);
+      installFetchProxy();
     }
 
     // Create the workbench runtime

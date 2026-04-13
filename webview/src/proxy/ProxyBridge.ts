@@ -60,6 +60,7 @@ class ProxyBridge {
   // Initialize with the VS Code API handle and start listening for responses
   initialize(vscodeApi: IVsCodeApi): void {
     if (this._initialized) {
+      console.log('[ProxyBridge] Already initialized');
       return;
     }
     this._vscodeApi = vscodeApi;
@@ -84,6 +85,7 @@ class ProxyBridge {
   ): Promise<IProxyResponse> {
     if (!this._vscodeApi) {
       // If bridge not initialized, return an empty mock (graceful fallback)
+      console.warn('[ProxyBridge] NOT INITIALIZED - returning fallback response for:', method, url);
       return Promise.resolve({
         id: 'fallback',
         status: 200,

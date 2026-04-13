@@ -204,6 +204,8 @@ export class WorkbenchPanel {
             command: 'apiResponse',
             ...response,
           });
+        } else {
+          log.error('apiRequest received but _apiProxyService is not initialized');
         }
         return;
 
