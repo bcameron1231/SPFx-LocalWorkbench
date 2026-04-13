@@ -101,6 +101,7 @@ const OWN_CSS_VARS: ReadonlyArray<[cssVar: string, themeKey: string]> = [
   // Palette slots
   ['--themePrimary', 'themePrimary'],
   ['--themeDark', 'themeDark'],
+  ['--themeLight', 'themeLight'],
   ['--neutralPrimary', 'neutralPrimary'],
   ['--neutralSecondary', 'neutralSecondary'],
   ['--neutralTertiary', 'neutralTertiary'],

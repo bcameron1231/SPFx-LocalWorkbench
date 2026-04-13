@@ -10,6 +10,7 @@ import {
   buildMockPageContext,
   buildThemeList,
   loadTheme,
+  StatusRenderer,
 } from '@spfx-local-workbench/shared';
 import {
   applyPaletteAsCssVars,
@@ -300,6 +301,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
             isRenderedByWebPart: () => true,
             isPropertyPaneOpen: () => false,
           },
+          statusRenderer: new StatusRenderer(),
         };
 
         // Call onInit if it exists
