@@ -153,12 +153,14 @@ export class WebPartManager {
           instance.render();
 
           if (domElement.innerHTML.length === 0) {
+            // Wait 2000ms to allow statusRenderer.displayLoadingIndicator() to appear
+            // (StatusRenderer has a default 1500ms delay before showing the loading indicator)
             setTimeout(() => {
               if (domElement.innerHTML.length === 0) {
                 domElement.innerHTML =
                   '<div style="padding:20px;color:#605e5c;text-align:center;"><p>Web part rendered but produced no visible content.</p></div>';
               }
-            }, 500);
+            }, 2000);
           }
         } catch (error: unknown) {
           this.log.error('Render error:', error);
