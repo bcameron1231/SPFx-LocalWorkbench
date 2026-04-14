@@ -19,8 +19,9 @@ export const DisplayModeToolbar: React.FC = () => {
   };
 
   const isEditMode = displayMode === DisplayMode.Edit;
+  // Show icon of the mode we'll switch TO (matching Workbench behavior)
   const title = isEditMode ? 'Switch to Preview' : 'Switch to Edit mode';
-  const Icon = isEditMode ? EditIcon : EyeIcon;
+  const Icon = isEditMode ? EyeIcon : EditIcon;
 
   return (
     <>

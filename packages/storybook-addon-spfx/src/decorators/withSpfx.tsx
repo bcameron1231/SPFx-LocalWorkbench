@@ -397,6 +397,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
       if (componentInstanceRef.current?.onDispose) {
         componentInstanceRef.current.onDispose();
       }
+      componentInstanceRef.current = null;
     };
   }, [parameters.componentId, parameters.serveUrl]);
 
