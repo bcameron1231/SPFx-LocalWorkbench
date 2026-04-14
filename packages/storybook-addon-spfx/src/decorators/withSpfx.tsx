@@ -7,6 +7,7 @@ import {
   DEFAULT_THEME_NAME,
   type ITheme,
   type IWebPartManifest,
+  StatusRenderer,
   buildMockPageContext,
   buildThemeList,
   loadTheme,
@@ -300,6 +301,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
             isRenderedByWebPart: () => true,
             isPropertyPaneOpen: () => false,
           },
+          statusRenderer: new StatusRenderer(),
         };
 
         // Call onInit if it exists
@@ -378,6 +380,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
       if (componentInstanceRef.current?.onDispose) {
         componentInstanceRef.current.onDispose();
       }
+      componentInstanceRef.current = null;
     };
   }, [parameters.componentId, parameters.serveUrl]);
 

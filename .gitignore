@@ -2,6 +2,7 @@ out
 dist
 node_modules
 *.vsix
+*.tsbuildinfo
 # Generated CSS type declarations
 *.css.d.ts
 # TypeScript build artifacts in source directories

@@ -1,4 +1,4 @@
-import { buildMockPageContext } from '@spfx-local-workbench/shared';
+import { buildMockPageContext, StatusRenderer } from '@spfx-local-workbench/shared';
 
 import { PassthroughHttpClient } from '../proxy/PassthroughHttpClient';
 import { ProxyAadHttpClient } from '../proxy/ProxyAadHttpClient';
@@ -15,10 +15,12 @@ import type { IContextSettings } from '../types';
 export class SpfxContext {
   private contextSettings: IContextSettings;
   private proxyEnabled: boolean;
+  private statusRenderer: StatusRenderer;
 
   constructor(contextSettings: IContextSettings, proxyEnabled: boolean = true) {
     this.contextSettings = contextSettings;
     this.proxyEnabled = proxyEnabled;
+    this.statusRenderer = new StatusRenderer();
   }
 
   createMockContext(webPartId: string, instanceId: string): any {
@@ -69,6 +71,7 @@ export class SpfxContext {
         isRenderedByWebPart: () => true,
         isPropertyPaneOpen: () => false,
       },
+      statusRenderer: this.statusRenderer,
     };
   }
 }

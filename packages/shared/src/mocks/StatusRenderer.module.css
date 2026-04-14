@@ -1,0 +1,130 @@
+/**
+ * StatusRenderer module CSS - Matching Microsoft's SPFx implementation
+ * @copyright Microsoft Corporation. All rights reserved.
+ */
+
+@keyframes spin {
+  from {
+    transform: rotate(-45deg);
+  }
+
+  to {
+    transform: rotate(315deg);
+  }
+}
+
+.spinnerContainer {
+  position: relative;
+  width: 100%;
+  padding: 164px 0;
+}
+
+.spinner {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin: auto;
+}
+
+.spinnerRing,
+.spinnerSlice {
+  position: absolute;
+}
+
+.spinnerRing {
+  z-index: 0;
+  color: var(--themeLight, #c7e0f4);
+}
+
+.spinnerSlice {
+  z-index: 10;
+  color: var(--themePrimary, #0078d4);
+  animation: spin 1.5s infinite;
+  animation-timing-function: ease-in-out;
+}
+
+.spinnerLoadingMessage {
+  margin-top: 10px;
+  text-align: center;
+  color: var(--themePrimary, #0078d4);
+}
+
+.spinnerAccessibilityMessage {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border-width: 0;
+  overflow: hidden;
+}
+
+/* Error message styles */
+.errorBox {
+  padding: 12px 0px;
+  overflow: hidden;
+  position: relative;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: inline-block;
+}
+
+[dir='ltr'] .errorBox {
+  text-align: left;
+}
+
+[dir='rtl'] .errorBox {
+  text-align: right;
+}
+
+.errorBoxText {
+  position: relative;
+  display: inline-block;
+  white-space: pre-wrap;
+  color: #605e5c;
+  font-weight: bold;
+}
+
+.detailsButton {
+  text-transform: uppercase;
+  color: var(--themePrimary, #0078d4);
+  border: none;
+  background: none;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+[dir='ltr'] .detailsButton {
+  padding-left: 0px;
+}
+
+[dir='rtl'] .detailsButton {
+  padding-right: 0px;
+}
+
+.detailsButton:hover {
+  text-decoration: underline;
+}
+
+.somethingWentWrongText {
+  font-weight: normal;
+  color: var(--themePrimary, #0078d4);
+}
+
+.siteAdminText {
+  font-weight: bold;
+  color: var(--themePrimary, #0078d4);
+}
+
+.screenReaderOnly {
+  position: absolute;
+  text-indent: -9999px;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  border: 0;
+}
