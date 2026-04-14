@@ -33,7 +33,7 @@ interface ICacheEntry {
  */
 export class StatusRenderer {
   private readonly _errorId = 'cswp-error';
-  private readonly _activeIndicatorCache = new Map<Element, ICacheEntry>();
+  private readonly _activeIndicatorCache = new WeakMap<Element, ICacheEntry>();
 
   /**
    * Display a loading spinner.
