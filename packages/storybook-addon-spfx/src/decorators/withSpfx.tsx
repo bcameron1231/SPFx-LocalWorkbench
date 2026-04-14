@@ -301,24 +301,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
             isRenderedByWebPart: () => true,
             isPropertyPaneOpen: () => false,
           },
-          statusRenderer: (() => {
-            try {
-              console.log('StatusRenderer type:', typeof StatusRenderer);
-              console.log('StatusRenderer:', StatusRenderer);
-              const renderer = new StatusRenderer();
-              console.log('Created StatusRenderer instance:', renderer);
-              return renderer;
-            } catch (e) {
-              console.error('Failed to create StatusRenderer:', e);
-              // Return a fallback with stub methods
-              return {
-                displayLoadingIndicator: () => {},
-                clearLoadingIndicator: () => {},
-                renderError: () => {},
-                clearError: () => {},
-              };
-            }
-          })(),
+          statusRenderer: new StatusRenderer(),
         };
 
         // Call onInit if it exists
