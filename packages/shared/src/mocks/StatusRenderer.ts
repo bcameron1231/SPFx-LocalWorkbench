@@ -334,7 +334,8 @@ export class StatusRenderer {
    * Create error component based on DEBUG mode
    */
   private _createErrorComponent(errorMessage: string): HTMLElement {
-    const isDebug = process.env.NODE_ENV === 'development';
+    const isDebug =
+      typeof process !== 'undefined' && process.env?.NODE_ENV === 'development';
 
     if (!isDebug) {
       return this._createFriendlyErrorMessage(errorMessage);
