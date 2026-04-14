@@ -9,7 +9,12 @@ export {
   ComponentResolver,
 } from './loaders'; // Explicit re-exports
 export * from './mocks';
-export { initializeSpfxMocks, buildMockPageContext } from './mocks'; // Explicit re-exports
+export {
+  initializeSpfxMocks,
+  buildMockPageContext,
+  StatusRenderer,
+  StatusRendererStrings,
+} from './mocks'; // Explicit re-exports
 export * from './types';
 export * from './utils';
 // Note: Node.js-only utils (localize, securityUtils) are in utils/node/
