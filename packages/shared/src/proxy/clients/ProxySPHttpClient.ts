@@ -8,8 +8,8 @@ import { ProxyHttpClient } from './ProxyHttpClient';
  * Tags all requests with clientType 'spHttp' so mock rules can target SharePoint REST API calls specifically.
  */
 export class ProxySPHttpClient extends ProxyHttpClient {
-  /** SPFx SPHttpClient requires this property */
-  public readonly configurations = {
+  /** SPFx SPHttpClient requires this as a static property (accessed as SPHttpClient.configurations.v1) */
+  static configurations = {
     v1: { flags: {} },
   };
 
