@@ -181,7 +181,17 @@ export class MockRuleEngine {
             `[MockRuleEngine] Failed to load body file ${rule.response.bodyFile}:`,
             error,
           );
-          body = '{}';
+          return {
+            id: request.id,
+            status: 500,
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              error: 'Failed to load bodyFile',
+              bodyFile: rule.response.bodyFile,
+              message: error instanceof Error ? error.message : String(error),
+            }),
+            matched: true,
+          };
         }
       }
     } else if (rule.response.body !== undefined) {

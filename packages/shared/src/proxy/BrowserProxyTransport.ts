@@ -58,7 +58,7 @@ export class BrowserProxyTransport implements IProxyTransport {
 
       const url = `${this._bodyFileBaseUrl}${filename}`;
       try {
-        const response = await fetch(url);
+        const response = await this._passthroughFetch(url);
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
@@ -85,7 +85,7 @@ export class BrowserProxyTransport implements IProxyTransport {
     }
 
     try {
-      const response = await fetch(this._mockConfigUrl);
+      const response = await this._passthroughFetch(this._mockConfigUrl);
       if (!response.ok) {
         console.warn(
           `[BrowserProxyTransport] Failed to load mock config from ${this._mockConfigUrl}: HTTP ${response.status}`,

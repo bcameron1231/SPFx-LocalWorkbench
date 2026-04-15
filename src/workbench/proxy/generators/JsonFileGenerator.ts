@@ -88,8 +88,10 @@ export async function importJsonFile(workspaceRoot: string): Promise<IMockRule[]
     // Compute relative path from workspace root
     const relativePath = path.relative(workspaceRoot, fileUri.fsPath).replace(/\\/g, '/');
 
-    // Guard: file must be inside the workspace (path.relative produces '../' for outside paths)
-    if (relativePath.startsWith('../') || relativePath.startsWith('..\\')) {
+    // Guard: file must be inside the workspace.
+    // path.relative() returns '../'-prefixed paths for files above the workspace root,
+    // and absolute paths (e.g. 'D:/file.json') when crossing drives on Windows.
+    if (relativePath.startsWith('../') || path.isAbsolute(relativePath)) {
       vscode.window.showErrorMessage(
         localize(
           'importJson.outsideWorkspace',
