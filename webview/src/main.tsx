@@ -10,7 +10,7 @@ import type { ITheme, IThemeGroup } from '@spfx-local-workbench/shared';
 import { WorkbenchRuntime } from './WorkbenchRuntime';
 import { App, IAppHandlers } from './components/App';
 import { StatusBarThemePicker } from './components/StatusBarThemePicker';
-import { initializeProxyBridge, installFetchProxy } from './proxy';
+import { initializeProxyBridge, initializeVsCodeProxyTransport, installFetchProxy } from './proxy';
 import './styles/global.css';
 
 const log = logger.createChild('Main');
@@ -38,7 +38,8 @@ function initialize() {
     // When disabled, HTTP clients use real fetch() calls so external
     // tools like Dev Proxy can intercept network traffic.
     if (config.proxyEnabled !== false) {
-      initializeProxyBridge(vscodeApi);
+      initializeVsCodeProxyTransport(vscodeApi); // New transport for proxy clients
+      initializeProxyBridge(vscodeApi); // Legacy bridge for fetch proxy (TODO: refactor)
       installFetchProxy();
     }
 

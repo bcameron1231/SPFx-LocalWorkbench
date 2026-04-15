@@ -11,7 +11,6 @@ import { MockRuleEngine } from '@spfx-local-workbench/shared';
 import type { IRecordedRequest } from './MockConfigGenerator';
 import type {
   IMockConfig,
-  IMockRule,
   IProxyRequest,
   IProxyResponse,
   IProxySettings,
@@ -35,7 +34,7 @@ const defaultProxySettings: IProxySettings = {
 };
 
 export class ApiProxyService implements vscode.Disposable {
-  private readonly _ruleEngine = new MockRuleEngine();
+  private readonly _ruleEngine: MockRuleEngine;
   private readonly _disposables: vscode.Disposable[] = [];
   private readonly _outputChannel: vscode.OutputChannel;
   private readonly _workspaceRoot: string;
@@ -48,6 +47,21 @@ export class ApiProxyService implements vscode.Disposable {
   constructor(workspaceRoot: string, outputChannel?: vscode.OutputChannel) {
     this._workspaceRoot = workspaceRoot;
     this._settings = ApiProxyService.readSettings();
+
+    // Create body file loader for MockRuleEngine (reads files from workspace)
+    const bodyFileLoader = async (relativePath: string): Promise<string> => {
+      const filePath = path.join(this._workspaceRoot, relativePath);
+      try {
+        const raw = await vscode.workspace.fs.readFile(vscode.Uri.file(filePath));
+        return Buffer.from(raw).toString('utf-8');
+      } catch (error) {
+        this._log(`Warning: Could not read body file: ${relativePath}`);
+        throw new Error(`Mock body file not found: ${relativePath}`);
+      }
+    };
+
+    // Initialize MockRuleEngine with body file loader
+    this._ruleEngine = new MockRuleEngine(bodyFileLoader);
 
     // If no output channel provided, create one and add to disposables
     if (outputChannel) {
@@ -159,26 +173,40 @@ export class ApiProxyService implements vscode.Disposable {
     this._log(`${request.method} ${request.url} [${request.clientType}]`);
 
     try {
-      const rule = this._ruleEngine.match(request);
+      // Use MockRuleEngine to process the request
+      const response = await this._ruleEngine.processRequest(request);
 
-      if (rule) {
-        this._log(`  Matched rule: ${rule.name || rule.match.url}`);
-        return await this._respondFromRule(request, rule);
+      if (response.matched) {
+        const rule = this._ruleEngine.match(request);
+        this._log(`  Matched rule: ${rule?.name || rule?.match.url}`);
+      } else {
+        this._log(`  No match - fallback ${this._fallbackStatus}`);
+
+        // Record unmatched requests when in record mode
+        if (this._settings.activeMode.mode === 'record') {
+          this._recordedRequests.push({
+            url: request.url,
+            method: request.method,
+            clientType: request.clientType,
+            timestamp: Date.now(),
+          });
+          this._log(`  Recorded unmatched request (${this._recordedRequests.length} total)`);
+        }
+
+        // Override the fallback status from settings
+        return {
+          ...response,
+          status: this._fallbackStatus,
+          body: JSON.stringify({
+            error: 'No mock rule matched',
+            url: request.url,
+            method: request.method,
+            clientType: request.clientType,
+          }),
+        };
       }
 
-      // Record unmatched requests when in record mode
-      if (this._settings.activeMode.mode === 'record') {
-        this._recordedRequests.push({
-          url: request.url,
-          method: request.method,
-          clientType: request.clientType,
-          timestamp: Date.now(),
-        });
-        this._log(`  Recorded unmatched request (${this._recordedRequests.length} total)`);
-      }
-
-      this._log(`  No match - fallback ${this._fallbackStatus}`);
-      return this._fallbackResponse(request);
+      return response;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       this._log(`  Error: ${message}`);
@@ -202,7 +230,8 @@ export class ApiProxyService implements vscode.Disposable {
       const raw = await vscode.workspace.fs.readFile(uri);
       const text = Buffer.from(raw).toString('utf-8');
       this._config = JSON.parse(text) as IMockConfig;
-      this._ruleEngine.setRules(this._config.rules || []);
+      // Use setConfig to pass both rules and default delay to the engine
+      this._ruleEngine.setConfig(this._config);
       this._log(`Loaded ${this._config.rules?.length ?? 0} mock rules from ${this._mockFile}`);
     } catch {
       // Config file doesn't exist yet — that's fine
@@ -236,61 +265,6 @@ export class ApiProxyService implements vscode.Disposable {
     });
 
     this._disposables.push(this._configWatcher);
-  }
-
-  // ── Response Builders ───────────────────────────────────────────
-
-  // Build a response from a matched mock rule
-  private async _respondFromRule(request: IProxyRequest, rule: IMockRule): Promise<IProxyResponse> {
-    // Determine delay
-    const delay = rule.response.delay ?? this._config?.delay ?? this._defaultDelay;
-    if (delay > 0) {
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
-
-    // Read body from file or use inline body
-    let body: string;
-    if (rule.response.bodyFile) {
-      const filePath = path.join(this._workspaceRoot, rule.response.bodyFile);
-      try {
-        const raw = await vscode.workspace.fs.readFile(vscode.Uri.file(filePath));
-        body = Buffer.from(raw).toString('utf-8');
-      } catch {
-        this._log(`  Warning: Could not read body file: ${rule.response.bodyFile}`);
-        body = JSON.stringify({ error: `Mock body file not found: ${rule.response.bodyFile}` });
-      }
-    } else if (rule.response.body !== undefined) {
-      body =
-        typeof rule.response.body === 'string'
-          ? rule.response.body
-          : JSON.stringify(rule.response.body);
-    } else {
-      body = '{}';
-    }
-
-    return {
-      id: request.id,
-      status: rule.response.status,
-      headers: rule.response.headers ?? { 'content-type': 'application/json' },
-      body,
-      matched: true,
-    };
-  }
-
-  // Return a fallback response when no rule matches
-  private _fallbackResponse(request: IProxyRequest): IProxyResponse {
-    return {
-      id: request.id,
-      status: this._fallbackStatus,
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        error: 'No mock rule matched',
-        url: request.url,
-        method: request.method,
-        clientType: request.clientType,
-      }),
-      matched: false,
-    };
   }
 
   // ── Request Recording ────────────────────────────────────────────
