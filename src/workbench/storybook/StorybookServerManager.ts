@@ -377,9 +377,21 @@ export class StorybookServerManager {
           if (rule.response?.bodyFile) {
             const bodyFilePath = rule.response.bodyFile;
             
-            // Resolve the body file path relative to the mock config directory
-            const mockConfigDir = path.dirname(mockSourcePath);
-            const bodyFileSourcePath = path.join(mockConfigDir, bodyFilePath);
+            // Resolve body file path: absolute or relative to workspace root
+            const bodyFileSourcePath = path.isAbsolute(bodyFilePath)
+              ? bodyFilePath
+              : path.join(this.workspacePath, bodyFilePath);
+
+            // Check if file exists
+            try {
+              await vscode.workspace.fs.stat(vscode.Uri.file(bodyFileSourcePath));
+            } catch {
+              this.log.warn(`Body file not found: ${bodyFilePath}`);
+              this.outputChannel.appendLine(
+                `WARNING: Body file not found: ${bodyFilePath} (resolved to: ${bodyFileSourcePath})`,
+              );
+              continue;
+            }
 
             // Check if we've already copied this file
             if (copiedFiles.has(bodyFileSourcePath)) {

@@ -1,4 +1,5 @@
 /** Proxy SPHttpClient */
+import type { IProxyTransport } from '../IProxyTransport';
 import type { ApiClientType } from '../types';
 import { ProxyHttpClient } from './ProxyHttpClient';
 
@@ -7,7 +8,14 @@ import { ProxyHttpClient } from './ProxyHttpClient';
  * Tags all requests with clientType 'spHttp' so mock rules can target SharePoint REST API calls specifically.
  */
 export class ProxySPHttpClient extends ProxyHttpClient {
-  static configurations = { v1: {} };
+  /** SPFx SPHttpClient requires this property */
+  public readonly configurations = {
+    v1: { flags: {} },
+  };
 
   protected readonly clientType: ApiClientType = 'spHttp';
+
+  constructor(transport?: IProxyTransport) {
+    super(transport);
+  }
 }

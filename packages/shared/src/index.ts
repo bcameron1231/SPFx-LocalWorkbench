@@ -19,6 +19,7 @@ export * from './proxy/types';
 export * from './proxy/IProxyTransport';
 export * from './proxy/MockProxyResponse';
 export * from './proxy/MockRuleEngine';
+export * from './proxy/BrowserProxyTransport';
 export * from './proxy/clients/ProxyHttpClient';
 export * from './proxy/clients/ProxySPHttpClient';
 export * from './proxy/clients/ProxyAadHttpClient';
@@ -37,6 +38,9 @@ export {
 export {
   MockRuleEngine,
 } from './proxy/MockRuleEngine';
+export {
+  BrowserProxyTransport,
+} from './proxy/BrowserProxyTransport';
 export type {
   IProxyTransport,
 } from './proxy/IProxyTransport';

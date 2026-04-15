@@ -4,9 +4,13 @@ import type { Decorator, StoryContext } from '@storybook/react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import {
+  BrowserProxyTransport,
   DEFAULT_THEME_NAME,
   type ITheme,
   type IWebPartManifest,
+  ProxyAadHttpClient,
+  ProxyHttpClient,
+  ProxySPHttpClient,
   StatusRenderer,
   buildMockPageContext,
   buildThemeList,
@@ -79,6 +83,102 @@ function createMockSpHttpClient(): any {
 }
 
 /**
+ * Install a fetch interceptor that routes API requests through BrowserProxyTransport.
+ * Similar to webview/src/proxy/ProxyFetchClient.ts but routes through BrowserProxyTransport
+ * instead of ProxyBridge (VS Code postMessage).
+ */
+function installFetchInterceptor(transport: BrowserProxyTransport): void {
+  // Save the original fetch if not already saved
+  if (!(window as any).__originalFetch) {
+    (window as any).__originalFetch = window.fetch.bind(window);
+  }
+
+  const originalFetch = (window as any).__originalFetch;
+
+  // Intercept fetch calls
+  window.fetch = async function interceptedFetch(
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ): Promise<Response> {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+    const method = init?.method || 'GET';
+
+    // Check if this request should be proxied (matches /_api/ or /_vti_bin/)
+    if (url.includes('/_api/') || url.includes('/_vti_bin/')) {
+      try {
+        const headers = extractHeaders(init?.headers);
+        const body = serializeBody(init?.body);
+
+        // Send through BrowserProxyTransport
+        const proxyResponse = await transport.sendRequest({
+          id: `fetch-${Date.now()}`,
+          url,
+          method,
+          headers,
+          body,
+          clientType: 'fetch',
+        });
+
+        // Convert proxy response to native Response (match workbench ProxyFetchClient pattern)
+        const responseBody = proxyResponse.body || '{}';
+        const responseHeaders = new Headers(proxyResponse.headers || {});
+
+        return new Response(responseBody, {
+          status: proxyResponse.status,
+          statusText: proxyResponse.status >= 200 && proxyResponse.status < 300 ? 'OK' : 'Error',
+          headers: responseHeaders,
+        });
+      } catch (error) {
+        console.warn('[FetchInterceptor] Proxy error, falling back to network:', error);
+        // Fall through to real fetch if proxy fails
+      }
+    }
+
+    // Pass through to original fetch for non-API requests
+    return originalFetch.call(window, input, init);
+  };
+}
+
+function extractHeaders(raw: HeadersInit | undefined): Record<string, string> | undefined {
+  if (!raw) {
+    return undefined;
+  }
+  const headers: Record<string, string> = {};
+  if (raw instanceof Headers) {
+    raw.forEach((value, key) => {
+      headers[key] = value;
+    });
+  } else if (Array.isArray(raw)) {
+    for (const [key, value] of raw) {
+      headers[key] = value;
+    }
+  } else {
+    return raw as Record<string, string>;
+  }
+  return headers;
+}
+
+function serializeBody(raw: BodyInit | null | undefined): string | undefined {
+  // eslint-disable-next-line eqeqeq -- nullish check for both null and undefined
+  if (raw == null) {
+    return undefined;
+  }
+  if (typeof raw === 'string') {
+    return raw;
+  }
+  if (raw instanceof ArrayBuffer) {
+    return new TextDecoder().decode(raw);
+  }
+  if (raw instanceof Uint8Array) {
+    return new TextDecoder().decode(raw);
+  }
+  if (typeof raw.toString === 'function') {
+    return raw.toString();
+  }
+  return String(raw);
+}
+
+/**
  * SPFx decorator that wraps stories with SPFx context
  */
 export const withSpfx: Decorator = (Story, context: StoryContext) => {
@@ -121,6 +221,32 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const componentInstanceRef = useRef<any>(null);
+  const proxyTransportRef = useRef<BrowserProxyTransport | null>(null);
+
+  // Initialize proxy transport on mount
+  useEffect(() => {
+    // Create transport instance (uses default /proxy/ paths)
+    proxyTransportRef.current = new BrowserProxyTransport();
+
+    // Initialize the transport to load mock configuration
+    proxyTransportRef.current
+      .initialize()
+      .then(() => {
+        installFetchInterceptor(proxyTransportRef.current!);
+      })
+      .catch((error) => {
+        console.warn('[withSpfx] Proxy initialization failed:', error.message || error);
+        console.warn('[withSpfx] API mocking will not be available.');
+      });
+
+    // Cleanup: restore original fetch on unmount
+    return () => {
+      if ((window as any).__originalFetch) {
+        window.fetch = (window as any).__originalFetch;
+        delete (window as any).__originalFetch;
+      }
+    };
+  }, []);
 
   // Reset seed flag whenever the story target changes so the new manifest entry's
   // properties are picked up from the serve on the next load.
@@ -258,6 +384,13 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
 
         // Set up the component context (mock SPFx context)
         // Match the structure from webview/src/mocks/SpfxContext.ts
+        // Use proxy-aware HTTP clients if transport is initialized, otherwise fall back to stubs
+        const transport = proxyTransportRef.current;
+        const httpClient = transport ? new ProxyHttpClient(transport) : createMockHttpClient();
+        const spHttpClient = transport
+          ? new ProxySPHttpClient(transport)
+          : createMockSpHttpClient();
+
         instance._context = {
           pageContext: mockPageContext,
           manifest: {
@@ -277,10 +410,13 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
             }),
             finish: () => {},
           },
-          httpClient: createMockHttpClient(),
-          spHttpClient: createMockSpHttpClient(),
+          httpClient: httpClient,
+          spHttpClient: spHttpClient,
           aadHttpClientFactory: {
-            getClient: () => Promise.resolve(createMockHttpClient()),
+            getClient: () =>
+              Promise.resolve(
+                transport ? new ProxyAadHttpClient(transport) : createMockHttpClient(),
+              ),
           },
           msGraphClientFactory: {
             getClient: () =>
