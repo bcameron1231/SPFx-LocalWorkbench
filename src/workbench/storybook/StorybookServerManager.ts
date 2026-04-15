@@ -357,7 +357,13 @@ export class StorybookServerManager {
         return;
       }
 
-      // Create proxy directory if it doesn't exist
+      // Clean out the proxy directory before copying to remove stale files,
+      // then recreate it ready for the new set of files
+      try {
+        await vscode.workspace.fs.delete(vscode.Uri.file(proxyDir), { recursive: true });
+      } catch {
+        // Directory didn't exist yet — that's fine
+      }
       await vscode.workspace.fs.createDirectory(vscode.Uri.file(proxyDir));
 
       // Parse the mock config to extract bodyFile references
@@ -366,7 +372,9 @@ export class StorybookServerManager {
         mockConfig = JSON.parse(mockConfigContent);
       } catch (error: unknown) {
         this.log.warn('Failed to parse mock config:', error);
-        this.outputChannel.appendLine(`WARNING: Failed to parse mock config: ${getErrorMessage(error)}`);
+        this.outputChannel.appendLine(
+          `WARNING: Failed to parse mock config: ${getErrorMessage(error)}`,
+        );
         return;
       }
 
@@ -379,11 +387,30 @@ export class StorybookServerManager {
         for (const rule of mockConfig.rules) {
           if (rule.response?.bodyFile) {
             const bodyFilePath = rule.response.bodyFile;
-            
-            // Resolve body file path: absolute or relative to workspace root
-            const bodyFileSourcePath = path.isAbsolute(bodyFilePath)
-              ? bodyFilePath
-              : path.join(this.workspacePath, bodyFilePath);
+
+            // Reject absolute paths — bodyFile must be relative to the workspace
+            if (path.isAbsolute(bodyFilePath)) {
+              this.log.warn(`Skipping bodyFile with absolute path: ${bodyFilePath}`);
+              this.outputChannel.appendLine(
+                `WARNING: Skipping bodyFile with absolute path (must be relative to workspace): ${bodyFilePath}`,
+              );
+              delete rule.response.bodyFile;
+              continue;
+            }
+
+            // Resolve and validate that the path stays within the workspace root
+            const bodyFileSourcePath = path.resolve(this.workspacePath, bodyFilePath);
+            if (
+              !bodyFileSourcePath.startsWith(this.workspacePath + path.sep) &&
+              bodyFileSourcePath !== this.workspacePath
+            ) {
+              this.log.warn(`Skipping bodyFile outside workspace: ${bodyFilePath}`);
+              this.outputChannel.appendLine(
+                `WARNING: Skipping bodyFile that resolves outside workspace root: ${bodyFilePath}`,
+              );
+              delete rule.response.bodyFile;
+              continue;
+            }
 
             // Check if file exists
             try {
@@ -422,7 +449,7 @@ export class StorybookServerManager {
                 vscode.Uri.file(bodyFileDestPath),
                 { overwrite: true },
               );
-              
+
               copiedFiles.set(bodyFileSourcePath, uniqueName);
               rule.response.bodyFile = uniqueName;
             } catch (error: unknown) {

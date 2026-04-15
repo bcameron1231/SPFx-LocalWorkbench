@@ -15,8 +15,8 @@ import {
   buildMockPageContext,
   buildThemeList,
   installFetchInterceptor,
-  uninstallFetchInterceptor,
   loadTheme,
+  uninstallFetchInterceptor,
 } from '@spfx-local-workbench/shared';
 import {
   applyPaletteAsCssVars,

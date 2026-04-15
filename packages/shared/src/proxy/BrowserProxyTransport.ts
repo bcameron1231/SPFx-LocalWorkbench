@@ -36,6 +36,13 @@ export class BrowserProxyTransport implements IProxyTransport {
 
     // Create body file loader that uses fetch
     const bodyFileLoader = async (filename: string): Promise<string> => {
+      // Reject absolute URL paths and path traversal segments — these could
+      // reach files outside the /proxy/ static directory on the dev server
+      if (filename.startsWith('/') || filename.includes('..')) {
+        console.warn(`[BrowserProxyTransport] Skipping bodyFile with unsafe path: ${filename}`);
+        throw new Error(`Unsafe bodyFile path: ${filename}`);
+      }
+
       const url = `${this._bodyFileBaseUrl}${filename}`;
       try {
         const response = await fetch(url);

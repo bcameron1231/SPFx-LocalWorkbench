@@ -50,7 +50,20 @@ export class ApiProxyService implements vscode.Disposable {
 
     // Create body file loader for MockRuleEngine (reads files from workspace)
     const bodyFileLoader = async (relativePath: string): Promise<string> => {
-      const filePath = path.join(this._workspaceRoot, relativePath);
+      // Reject absolute paths
+      if (path.isAbsolute(relativePath)) {
+        this._log(`Warning: Skipping bodyFile with absolute path: ${relativePath}`);
+        throw new Error(`Mock body file must be relative to workspace: ${relativePath}`);
+      }
+
+      // Resolve and validate that the path stays within the workspace root
+      const filePath = path.resolve(this._workspaceRoot, relativePath);
+      const workspacePrefix = this._workspaceRoot + path.sep;
+      if (!filePath.startsWith(workspacePrefix) && filePath !== this._workspaceRoot) {
+        this._log(`Warning: Skipping bodyFile outside workspace root: ${relativePath}`);
+        throw new Error(`Mock body file resolves outside workspace root: ${relativePath}`);
+      }
+
       try {
         const raw = await vscode.workspace.fs.readFile(vscode.Uri.file(filePath));
         return Buffer.from(raw).toString('utf-8');
