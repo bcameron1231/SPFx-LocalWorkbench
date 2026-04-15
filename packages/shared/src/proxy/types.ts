@@ -113,15 +113,3 @@ export interface IMockConfig {
   /** Mock rules evaluated in order; first match wins */
   rules: IMockRule[];
 }
-
-/** Story-level proxy configuration parameters */
-export interface ISpfxProxyParameters {
-  /** Disable proxy for this story (uses stub responses) */
-  disabled?: boolean;
-
-  /** Path to alternate mock config file (relative to mock-data folder) */
-  mockFile?: string;
-
-  /** Inline mock configuration (overrides file-based config) */
-  config?: IMockConfig;
-}

@@ -39,7 +39,6 @@ export type {
   IMockRule,
   IMockRuleMatch,
   IMockRuleResponse,
-  ISpfxProxyParameters,
   ApiClientType,
 } from './proxy/types';
 export type { BodyFileLoader } from './proxy/MockRuleEngine';
