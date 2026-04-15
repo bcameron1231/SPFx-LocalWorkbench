@@ -4,7 +4,9 @@
  * Shared fetch interception logic that routes API requests through an IProxyTransport.
  * Works in both webview (VsCodeProxyTransport) and Storybook (BrowserProxyTransport).
  *
- * Overrides window.fetch to intercept SharePoint API calls (/_api/, /_vti_bin/).
+ * Overrides window.fetch and passes every request to the transport. If the transport
+ * returns matched:false (no rule matched), the request falls through to the real network.
+ * This allows mocking any URL — SharePoint REST, Graph, custom APIs, etc.
  * Handles Request objects correctly, extracting method, headers, and body.
  */
 import type { IProxyTransport } from '../IProxyTransport';
@@ -59,33 +61,32 @@ export function installFetchInterceptor(transport: IProxyTransport): void {
       body = await input.clone().text();
     }
 
-    // Check if this request should be proxied (SharePoint API calls)
-    if (url.includes('/_api/') || url.includes('/_vti_bin/')) {
-      try {
-        // Send through the proxy transport
-        const proxyResponse = await transport.sendRequest({
-          id: `fetch-${Date.now()}`,
-          url,
-          method,
-          headers,
-          body,
-          clientType: 'fetch',
-        });
+    try {
+      // Send every request through the transport — the rule engine decides what matches.
+      // If no rule matches (matched:false), fall through to the real network below.
+      const proxyResponse = await transport.sendRequest({
+        id: `fetch-${Date.now()}`,
+        url,
+        method,
+        headers,
+        body,
+        clientType: 'fetch',
+      });
 
-        // Convert proxy response to native Response object
+      if (proxyResponse.matched) {
+        // A mock rule matched — return the mocked response
         const responseHeaders = new Headers(proxyResponse.headers || {});
         return new Response(proxyResponse.body || '{}', {
           status: proxyResponse.status,
           statusText: proxyResponse.status >= 200 && proxyResponse.status < 300 ? 'OK' : 'Error',
           headers: responseHeaders,
         });
-      } catch (error) {
-        console.warn('[FetchInterceptor] Proxy error, falling back to network:', error);
-        // Fall through to real fetch if proxy fails
       }
+    } catch (error) {
+      console.warn('[FetchInterceptor] Proxy error, falling back to network:', error);
     }
 
-    // Pass through to original fetch for non-API requests or on error
+    // No rule matched or proxy errored — pass through to the real network
     return originalFetch!.call(window, input, init);
   };
 }
