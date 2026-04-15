@@ -304,7 +304,10 @@ export class StorybookServerManager {
 
     const customThemes = getCustomThemes();
     const defaultThemeName = getCurrentTheme().name;
-    previewConfig += `\n// Injected by VS Code extension at startup\nexport const globals = {\n  spfxTheme: ${JSON.stringify(defaultThemeName)},\n  spfxCustomThemes: ${JSON.stringify(customThemes)},\n};\n`;
+    const proxyEnabled = vscode.workspace
+      .getConfiguration('spfxLocalWorkbench.proxy')
+      .get<boolean>('enabled', true);
+    previewConfig += `\n// Injected by VS Code extension at startup\nexport const globals = {\n  spfxTheme: ${JSON.stringify(defaultThemeName)},\n  spfxCustomThemes: ${JSON.stringify(customThemes)},\n  spfxProxyEnabled: ${JSON.stringify(proxyEnabled)},\n};\n`;
 
     await vscode.workspace.fs.writeFile(
       vscode.Uri.file(previewTs),

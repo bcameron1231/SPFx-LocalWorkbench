@@ -130,6 +130,10 @@ export class VsCodeProxyTransport implements IProxyTransport {
   /**
    * Reset state (called during live reload)
    * Rejects all pending requests and clears the queue
+   *
+   * NOTE: Currently not called during liveReload() because pending requests
+   * naturally timeout after 30s and rejecting them prematurely could break
+   * in-flight API calls during bundle reload.
    */
   reset(): void {
     for (const [id, pending] of this._pending) {
@@ -150,7 +154,14 @@ export function initializeVsCodeProxyTransport(vscodeApi: IVsCodeApi): void {
   VsCodeProxyTransport.getInstance().initialize(vscodeApi);
 }
 
-/** Reset the VS Code proxy transport (for live reload) */
+/**
+ * Reset the VS Code proxy transport (for live reload)
+ *
+ * NOTE: Currently exported but not called. May be needed for:
+ * - Tests that need to reset transport state
+ * - Manual cleanup scenarios
+ * Not called during liveReload() because pending requests naturally timeout.
+ */
 export function resetVsCodeProxyTransport(): void {
   VsCodeProxyTransport.getInstance().reset();
 }

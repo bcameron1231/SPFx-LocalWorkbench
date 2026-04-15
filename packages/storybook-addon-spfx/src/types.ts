@@ -78,6 +78,33 @@ export interface ISpfxParameters {
    * without having to specify the full context object.
    */
   context?: ISpfxContextConfig;
+
+  /**
+   * Per-story proxy configuration.
+   * Overrides the global `spfxLocalWorkbench.proxy.enabled` VS Code setting.
+   */
+  proxy?: ISpfxProxyConfig;
+}
+
+/**
+ * Per-story proxy configuration for the SPFx Storybook addon.
+ */
+export interface ISpfxProxyConfig {
+  /**
+   * Whether to enable API mocking for this story.
+   * Overrides the global `spfxLocalWorkbench.proxy.enabled` VS Code setting.
+   * When `false`, all API calls pass through to the real network (or Dev Proxy).
+   * Defaults to the VS Code setting, which itself defaults to `true`.
+   */
+  enabled?: boolean;
+
+  /**
+   * URL path to a custom mock config JSON file, relative to the Storybook server.
+   * Defaults to `/proxy/api-mocks.json` (the file copied from the workspace by the extension).
+   * Use this to provide story-specific mock responses without affecting other stories.
+   * Example: `/proxy/my-story-mocks.json`
+   */
+  mockFile?: string;
 }
 
 /**

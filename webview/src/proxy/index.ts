@@ -1,11 +1,4 @@
 export {
-  MockProxyResponse,
-  getProxyBridge,
-  initializeProxyBridge,
-  resetProxyBridge,
-} from './ProxyBridge';
-export type { ApiClientType, IProxyRequest, IProxyResponse } from './ProxyBridge';
-export {
   VsCodeProxyTransport,
   getVsCodeProxyTransport,
   initializeVsCodeProxyTransport,

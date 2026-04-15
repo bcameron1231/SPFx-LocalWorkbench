@@ -2,17 +2,7 @@
 import type { IProxyTransport } from '../IProxyTransport';
 import { MockProxyResponse } from '../MockProxyResponse';
 import type { ApiClientType } from '../types';
-
-/** Extracts body and headers from an SPFx-style options object. */
-function extractOptions(options?: any): { body?: string; headers?: Record<string, string> } {
-  const body = options?.body
-    ? typeof options.body === 'string'
-      ? options.body
-      : JSON.stringify(options.body)
-    : undefined;
-  const headers = options?.headers;
-  return { body, headers };
-}
+import { extractOptions } from '../utils/clientHelpers';
 
 let requestCounter = 0;
 

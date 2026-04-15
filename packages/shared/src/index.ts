@@ -23,27 +23,15 @@ export * from './proxy/BrowserProxyTransport';
 export * from './proxy/clients/ProxyHttpClient';
 export * from './proxy/clients/ProxySPHttpClient';
 export * from './proxy/clients/ProxyAadHttpClient';
-export {
-  ProxyHttpClient,
-} from './proxy/clients/ProxyHttpClient';
-export {
-  ProxySPHttpClient,
-} from './proxy/clients/ProxySPHttpClient';
-export {
-  ProxyAadHttpClient,
-} from './proxy/clients/ProxyAadHttpClient';
-export {
-  MockProxyResponse,
-} from './proxy/MockProxyResponse';
-export {
-  MockRuleEngine,
-} from './proxy/MockRuleEngine';
-export {
-  BrowserProxyTransport,
-} from './proxy/BrowserProxyTransport';
-export type {
-  IProxyTransport,
-} from './proxy/IProxyTransport';
+export { ProxyHttpClient } from './proxy/clients/ProxyHttpClient';
+export { ProxySPHttpClient } from './proxy/clients/ProxySPHttpClient';
+export { ProxyAadHttpClient } from './proxy/clients/ProxyAadHttpClient';
+export { extractOptions } from './proxy/utils/clientHelpers';
+export { MockProxyResponse } from './proxy/MockProxyResponse';
+export { MockRuleEngine } from './proxy/MockRuleEngine';
+export { BrowserProxyTransport } from './proxy/BrowserProxyTransport';
+export { installFetchInterceptor, uninstallFetchInterceptor } from './proxy/utils/fetchInterceptor';
+export type { IProxyTransport } from './proxy/IProxyTransport';
 export type {
   IProxyRequest,
   IProxyResponse,
@@ -54,9 +42,7 @@ export type {
   ISpfxProxyParameters,
   ApiClientType,
 } from './proxy/types';
-export type {
-  BodyFileLoader,
-} from './proxy/MockRuleEngine';
+export type { BodyFileLoader } from './proxy/MockRuleEngine';
 export * from './types';
 export * from './utils';
 // Note: Node.js-only utils (localize, securityUtils) are in utils/node/

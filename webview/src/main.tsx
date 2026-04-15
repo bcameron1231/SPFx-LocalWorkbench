@@ -10,7 +10,7 @@ import type { ITheme, IThemeGroup } from '@spfx-local-workbench/shared';
 import { WorkbenchRuntime } from './WorkbenchRuntime';
 import { App, IAppHandlers } from './components/App';
 import { StatusBarThemePicker } from './components/StatusBarThemePicker';
-import { initializeProxyBridge, initializeVsCodeProxyTransport, installFetchProxy } from './proxy';
+import { initializeVsCodeProxyTransport, installFetchProxy } from './proxy';
 import './styles/global.css';
 
 const log = logger.createChild('Main');
@@ -34,13 +34,12 @@ function initialize() {
     // Acquire VS Code API once - must only be called once per webview
     const vscodeApi = window.acquireVsCodeApi();
 
-    // Only initialize the proxy bridge when the proxy is enabled.
+    // Only initialize the proxy when enabled.
     // When disabled, HTTP clients use real fetch() calls so external
     // tools like Dev Proxy can intercept network traffic.
     if (config.proxyEnabled !== false) {
-      initializeVsCodeProxyTransport(vscodeApi); // New transport for proxy clients
-      initializeProxyBridge(vscodeApi); // Legacy bridge for fetch proxy (TODO: refactor)
-      installFetchProxy();
+      initializeVsCodeProxyTransport(vscodeApi); // Used by proxy HTTP clients AND fetch interceptor
+      installFetchProxy(); // Intercepts fetch() for libraries like PnPjs
     }
 
     // Create the workbench runtime
