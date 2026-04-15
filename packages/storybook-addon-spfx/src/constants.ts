@@ -31,4 +31,8 @@ export const STORYBOOK_GLOBAL_KEYS = {
   CUSTOM_THEMES: `${PARAM_KEY}CustomThemes`,
   /** Set by the VS Code extension from `spfxLocalWorkbench.proxy.enabled`. Defaults to `true`. */
   PROXY_ENABLED: `${PARAM_KEY}ProxyEnabled`,
+  /** Set by the VS Code extension from `spfxLocalWorkbench.proxy.fallbackStatus`. Defaults to `404`. */
+  PROXY_FALLBACK_STATUS: `${PARAM_KEY}ProxyFallbackStatus`,
+  /** Set by the VS Code extension from `spfxLocalWorkbench.proxy.mode`. Defaults to `'mock'`. */
+  PROXY_MODE: `${PARAM_KEY}ProxyMode`,
 } as const;

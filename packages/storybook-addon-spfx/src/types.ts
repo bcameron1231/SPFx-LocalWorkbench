@@ -105,6 +105,22 @@ export interface ISpfxProxyConfig {
    * Example: `/proxy/my-story-mocks.json`
    */
   mockFile?: string;
+
+  /**
+   * HTTP status to return when no mock rule matches a request.
+   * Overrides the global `spfxLocalWorkbench.proxy.fallbackStatus` VS Code setting.
+   * Defaults to the VS Code setting, which itself defaults to `404`.
+   * Set to `200` to silently absorb unmatched requests (useful during story development).
+   */
+  fallbackStatus?: number;
+
+  /**
+   * Proxy mode for this story.
+   * - `'mock'`: unmatched requests return the fallback status (default).
+   * - `'mock-passthrough'`: unmatched requests pass through to the real network.
+   * Overrides the global `spfxLocalWorkbench.proxy.mode` VS Code setting.
+   */
+  mode?: 'mock' | 'mock-passthrough';
 }
 
 /**

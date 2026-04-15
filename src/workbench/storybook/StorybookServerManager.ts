@@ -307,7 +307,13 @@ export class StorybookServerManager {
     const proxyEnabled = vscode.workspace
       .getConfiguration('spfxLocalWorkbench.proxy')
       .get<boolean>('enabled', true);
-    previewConfig += `\n// Injected by VS Code extension at startup\nexport const globals = {\n  spfxTheme: ${JSON.stringify(defaultThemeName)},\n  spfxCustomThemes: ${JSON.stringify(customThemes)},\n  spfxProxyEnabled: ${JSON.stringify(proxyEnabled)},\n};\n`;
+    const proxyFallbackStatus = vscode.workspace
+      .getConfiguration('spfxLocalWorkbench.proxy')
+      .get<number>('fallbackStatus', 404);
+    const proxyMode = vscode.workspace
+      .getConfiguration('spfxLocalWorkbench.proxy')
+      .get<string>('mode', 'mock');
+    previewConfig += `\n// Injected by VS Code extension at startup\nexport const globals = {\n  spfxTheme: ${JSON.stringify(defaultThemeName)},\n  spfxCustomThemes: ${JSON.stringify(customThemes)},\n  spfxProxyEnabled: ${JSON.stringify(proxyEnabled)},\n  spfxProxyFallbackStatus: ${JSON.stringify(proxyFallbackStatus)},\n  spfxProxyMode: ${JSON.stringify(proxyMode)},\n};\n`;
 
     await vscode.workspace.fs.writeFile(
       vscode.Uri.file(previewTs),

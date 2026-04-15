@@ -134,6 +134,15 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
   const proxyEnabled = parameters.proxy?.enabled ?? globalProxyEnabled;
   // Custom mock file URL (e.g. '/proxy/my-story-mocks.json'), or undefined for default
   const proxyMockFile = parameters.proxy?.mockFile;
+  // Fallback status: story-level override → VS Code global setting → default 404
+  const globalProxyFallbackStatus: number =
+    globals[STORYBOOK_GLOBAL_KEYS.PROXY_FALLBACK_STATUS] ?? 404;
+  const proxyFallbackStatus = parameters.proxy?.fallbackStatus ?? globalProxyFallbackStatus;
+  // Proxy mode: story-level override → VS Code global setting → default 'mock'
+  const globalProxyMode = (globals[STORYBOOK_GLOBAL_KEYS.PROXY_MODE] ?? 'mock') as
+    | 'mock'
+    | 'mock-passthrough';
+  const proxyMode = parameters.proxy?.mode ?? globalProxyMode;
 
   // Initialize proxy transport when proxy is enabled (or when config changes between stories)
   useEffect(() => {
@@ -141,8 +150,13 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
       return;
     }
 
-    // Create transport — pass custom mockFile URL if the story specifies one
-    proxyTransportRef.current = new BrowserProxyTransport(proxyMockFile);
+    // Create transport — pass custom mockFile URL, fallback status, and proxy mode if specified
+    proxyTransportRef.current = new BrowserProxyTransport(
+      proxyMockFile,
+      undefined,
+      proxyFallbackStatus,
+      proxyMode,
+    );
 
     // Initialize the transport to load mock configuration
     proxyTransportRef.current
@@ -160,7 +174,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
       uninstallFetchInterceptor();
       proxyTransportRef.current = null;
     };
-  }, [proxyEnabled, proxyMockFile]);
+  }, [proxyEnabled, proxyMockFile, proxyFallbackStatus, proxyMode]);
 
   // Reset seed flag whenever the story target changes so the new manifest entry's
   // properties are picked up from the serve on the next load.

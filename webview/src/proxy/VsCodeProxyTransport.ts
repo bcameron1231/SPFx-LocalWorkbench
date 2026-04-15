@@ -34,6 +34,8 @@ export class VsCodeProxyTransport implements IProxyTransport {
   private _vscodeApi: IVsCodeApi | undefined;
   private _pending = new Map<string, IPendingRequest>();
   private _initialized = false;
+  /** Original window.fetch captured before the interceptor is installed, for passthrough calls */
+  private _passthroughFetch: typeof window.fetch | undefined;
 
   /** Get the singleton instance */
   static getInstance(): VsCodeProxyTransport {
@@ -53,6 +55,8 @@ export class VsCodeProxyTransport implements IProxyTransport {
       return;
     }
     this._vscodeApi = vscodeApi;
+    // Capture window.fetch before installFetchProxy() replaces it
+    this._passthroughFetch = window.fetch.bind(window);
     this._initialized = true;
 
     // Listen for apiResponse messages from the extension host
@@ -106,6 +110,34 @@ export class VsCodeProxyTransport implements IProxyTransport {
         command: 'apiRequest',
         ...requestWithId,
       });
+    }).then(async (response) => {
+      // If the extension signaled passthrough, make the real network call from the webview
+      // (webview has the user's auth session; extension host does not)
+      if (response.passthrough && this._passthroughFetch) {
+        try {
+          const fetchResponse = await this._passthroughFetch(requestWithId.url, {
+            method: requestWithId.method,
+            headers: requestWithId.headers,
+            body: requestWithId.body,
+          });
+          const body = await fetchResponse.text();
+          const headers: Record<string, string> = {};
+          fetchResponse.headers.forEach((v, k) => {
+            headers[k] = v;
+          });
+          return {
+            id: requestWithId.id,
+            status: fetchResponse.status,
+            headers,
+            body,
+            matched: false,
+          };
+        } catch (err) {
+          console.warn('[VsCodeProxyTransport] Passthrough fetch failed, returning fallback:', err);
+          return { ...response, passthrough: false };
+        }
+      }
+      return response;
     });
   }
 
@@ -123,6 +155,7 @@ export class VsCodeProxyTransport implements IProxyTransport {
         headers: message.headers,
         body: message.body,
         matched: message.matched,
+        passthrough: message.passthrough,
       });
     }
   }

@@ -24,15 +24,28 @@ export class BrowserProxyTransport implements IProxyTransport {
   private _initialized = false;
   private _mockConfigUrl: string;
   private _bodyFileBaseUrl: string;
+  private _mode: 'mock' | 'mock-passthrough';
+  /** Original window.fetch captured before the interceptor is installed, for passthrough calls */
+  private _passthroughFetch: typeof window.fetch;
 
   /**
    * Create a new BrowserProxyTransport
    * @param mockConfigUrl URL to fetch the mock configuration from (default: /proxy/api-mocks.json)
    * @param bodyFileBaseUrl Base URL for body files (default: /proxy/)
+   * @param fallbackStatus HTTP status returned when no rule matches (default: 404)
+   * @param mode 'mock' returns fallback for unmatched; 'mock-passthrough' calls real network (default: 'mock')
    */
-  constructor(mockConfigUrl?: string, bodyFileBaseUrl?: string) {
+  constructor(
+    mockConfigUrl?: string,
+    bodyFileBaseUrl?: string,
+    fallbackStatus?: number,
+    mode?: 'mock' | 'mock-passthrough',
+  ) {
     this._mockConfigUrl = mockConfigUrl || DEFAULT_MOCK_CONFIG_URL;
     this._bodyFileBaseUrl = bodyFileBaseUrl || DEFAULT_BODY_FILE_BASE_URL;
+    this._mode = mode ?? 'mock';
+    // Capture window.fetch now, before installFetchInterceptor replaces it
+    this._passthroughFetch = window.fetch.bind(window);
 
     // Create body file loader that uses fetch
     const bodyFileLoader = async (filename: string): Promise<string> => {
@@ -57,6 +70,9 @@ export class BrowserProxyTransport implements IProxyTransport {
     };
 
     this._ruleEngine = new MockRuleEngine(bodyFileLoader);
+    if (fallbackStatus !== undefined) {
+      this._ruleEngine.setFallbackStatus(fallbackStatus);
+    }
   }
 
   /**
@@ -106,8 +122,31 @@ export class BrowserProxyTransport implements IProxyTransport {
       await this.initialize();
     }
 
-    // Use MockRuleEngine to process the request
-    return await this._ruleEngine.processRequest(request);
+    const response = await this._ruleEngine.processRequest(request);
+
+    // In mock-passthrough mode, pass unmatched requests to the real network
+    if (!response.matched && this._mode === 'mock-passthrough') {
+      try {
+        const fetchResponse = await this._passthroughFetch(request.url, {
+          method: request.method,
+          headers: request.headers,
+          body: request.body,
+        });
+        const body = await fetchResponse.text();
+        const headers: Record<string, string> = {};
+        fetchResponse.headers.forEach((v, k) => {
+          headers[k] = v;
+        });
+        return { id: request.id, status: fetchResponse.status, headers, body, matched: false };
+      } catch (err) {
+        console.warn(
+          '[BrowserProxyTransport] Passthrough request failed, returning fallback:',
+          err,
+        );
+      }
+    }
+
+    return response;
   }
 
   /**

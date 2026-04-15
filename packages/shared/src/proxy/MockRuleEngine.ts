@@ -69,6 +69,7 @@ export class MockRuleEngine {
   private _rules: IMockRule[] = [];
   private _bodyFileLoader: BodyFileLoader | undefined;
   private _defaultDelay: number = 0;
+  private _fallbackStatus: number = 404;
 
   /**
    * Create a new MockRuleEngine
@@ -85,6 +86,11 @@ export class MockRuleEngine {
   setConfig(config: IMockConfig): void {
     this._rules = config.rules;
     this._defaultDelay = config.delay ?? 0;
+  }
+
+  /** Set the HTTP status returned when no rule matches. Defaults to 404. */
+  setFallbackStatus(status: number): void {
+    this._fallbackStatus = status;
   }
 
   /**
@@ -144,12 +150,16 @@ export class MockRuleEngine {
     const rule = this.match(request);
 
     if (!rule) {
-      /** No match - return empty JSON response */
       return {
         id: request.id,
-        status: 200,
+        status: this._fallbackStatus,
         headers: { 'content-type': 'application/json' },
-        body: '{}',
+        body: JSON.stringify({
+          error: 'No mock rule matched',
+          url: request.url,
+          method: request.method,
+          clientType: request.clientType,
+        }),
         matched: false,
       };
     }

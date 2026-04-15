@@ -4,9 +4,10 @@
  * Shared fetch interception logic that routes API requests through an IProxyTransport.
  * Works in both webview (VsCodeProxyTransport) and Storybook (BrowserProxyTransport).
  *
- * Overrides window.fetch and passes every request to the transport. If the transport
- * returns matched:false (no rule matched), the request falls through to the real network.
- * This allows mocking any URL — SharePoint REST, Graph, custom APIs, etc.
+ * Overrides window.fetch and passes every request to the transport. The transport is
+ * responsible for returning either a mock response or a real network response depending
+ * on its configured mode — the interceptor always uses whatever the transport returns.
+ * On transport error the interceptor falls back to the real network.
  * Handles Request objects correctly, extracting method, headers, and body.
  */
 import type { IProxyTransport } from '../IProxyTransport';
@@ -14,6 +15,12 @@ import { extractHeaders, serializeBody } from './fetchHelpers';
 
 // Store the original fetch so we can restore it later
 let originalFetch: typeof window.fetch | null = null;
+
+// Monotonic counter for unique request IDs — matches the pattern used in ProxyHttpClient
+let requestCounter = 0;
+function generateRequestId(): string {
+  return `fetch-${++requestCounter}-${Date.now()}`;
+}
 
 /**
  * Install a fetch interceptor that routes API requests through the provided transport
@@ -62,10 +69,11 @@ export function installFetchInterceptor(transport: IProxyTransport): void {
     }
 
     try {
-      // Send every request through the transport — the rule engine decides what matches.
-      // If no rule matches (matched:false), fall through to the real network below.
+      // Send every request through the transport.
+      // In mock mode, unmatched requests return the configured fallback status.
+      // In mock-passthrough mode, the transport handles real network calls internally for unmatched requests.
       const proxyResponse = await transport.sendRequest({
-        id: `fetch-${Date.now()}`,
+        id: generateRequestId(),
         url,
         method,
         headers,
@@ -73,20 +81,18 @@ export function installFetchInterceptor(transport: IProxyTransport): void {
         clientType: 'fetch',
       });
 
-      if (proxyResponse.matched) {
-        // A mock rule matched — return the mocked response
-        const responseHeaders = new Headers(proxyResponse.headers || {});
-        return new Response(proxyResponse.body || '{}', {
-          status: proxyResponse.status,
-          statusText: proxyResponse.status >= 200 && proxyResponse.status < 300 ? 'OK' : 'Error',
-          headers: responseHeaders,
-        });
-      }
+      // The transport always returns a complete response — use it directly
+      const responseHeaders = new Headers(proxyResponse.headers || {});
+      return new Response(proxyResponse.body || '{}', {
+        status: proxyResponse.status,
+        statusText: proxyResponse.status >= 200 && proxyResponse.status < 300 ? 'OK' : 'Error',
+        headers: responseHeaders,
+      });
     } catch (error) {
       console.warn('[FetchInterceptor] Proxy error, falling back to network:', error);
     }
 
-    // No rule matched or proxy errored — pass through to the real network
+    // Transport errored — fall through to real network as last resort
     return originalFetch!.call(window, input, init);
   };
 }

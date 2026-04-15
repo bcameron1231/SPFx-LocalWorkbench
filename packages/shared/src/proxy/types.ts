@@ -43,6 +43,13 @@ export interface IProxyResponse {
 
   /** Whether this response matched a mock rule */
   matched: boolean;
+
+  /**
+   * When true, the caller should pass this request through to the real network.
+   * Set by ApiProxyService in mock-passthrough mode when no rule matched.
+   * Handled by VsCodeProxyTransport in the webview — not returned to web part code.
+   */
+  passthrough?: boolean;
 }
 
 /** Request matching criteria */
@@ -111,10 +118,10 @@ export interface IMockConfig {
 export interface ISpfxProxyParameters {
   /** Disable proxy for this story (uses stub responses) */
   disabled?: boolean;
-  
+
   /** Path to alternate mock config file (relative to mock-data folder) */
   mockFile?: string;
-  
+
   /** Inline mock configuration (overrides file-based config) */
   config?: IMockConfig;
 }

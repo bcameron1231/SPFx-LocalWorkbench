@@ -26,7 +26,7 @@ export type {
 };
 
 /** Proxy operating modes */
-export type ProxyMode = 'mock' | 'passthrough' | 'record';
+export type ProxyMode = 'mock' | 'mock-passthrough' | 'passthrough' | 'record';
 
 export interface IMockModeOptions {
   mockFile: string;
@@ -50,6 +50,7 @@ export interface IRecordModeOptions {
 
 export type ProxyModeOptions =
   | { mode: 'mock'; options: IMockModeOptions }
+  | { mode: 'mock-passthrough'; options: IMockModeOptions }
   | { mode: 'passthrough'; options: IPassthroughModeOptions }
   | { mode: 'record'; options: IRecordModeOptions };
 

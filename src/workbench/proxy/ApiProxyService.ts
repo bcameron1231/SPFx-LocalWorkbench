@@ -123,6 +123,15 @@ export class ApiProxyService implements vscode.Disposable {
               serveMocksWhileRecording: config.get<boolean>('serveMocksWhileRecording', true),
             },
           };
+        case 'mock-passthrough':
+          return {
+            mode: 'mock-passthrough',
+            options: {
+              mockFile,
+              defaultDelay: config.get<number>('defaultDelay', 0),
+              fallbackStatus,
+            },
+          };
         case 'mock':
         default:
           return {
@@ -150,7 +159,7 @@ export class ApiProxyService implements vscode.Disposable {
   // Helpers to extract mode-specific options with safe fallbacks
   private get _mockFile(): string {
     const { activeMode } = this._settings;
-    if (activeMode.mode === 'mock') {
+    if (activeMode.mode === 'mock' || activeMode.mode === 'mock-passthrough') {
       return activeMode.options.mockFile;
     }
     if (activeMode.mode === 'record') {
@@ -161,12 +170,14 @@ export class ApiProxyService implements vscode.Disposable {
 
   private get _defaultDelay(): number {
     const { activeMode } = this._settings;
-    return activeMode.mode === 'mock' ? activeMode.options.defaultDelay : 0;
+    return activeMode.mode === 'mock' || activeMode.mode === 'mock-passthrough'
+      ? activeMode.options.defaultDelay
+      : 0;
   }
 
   private get _fallbackStatus(): number {
     const { activeMode } = this._settings;
-    if (activeMode.mode === 'mock') {
+    if (activeMode.mode === 'mock' || activeMode.mode === 'mock-passthrough') {
       return activeMode.options.fallbackStatus;
     }
     if (activeMode.mode === 'record') {
@@ -193,6 +204,12 @@ export class ApiProxyService implements vscode.Disposable {
         const rule = this._ruleEngine.match(request);
         this._log(`  Matched rule: ${rule?.name || rule?.match.url}`);
       } else {
+        // In mock-passthrough mode, signal the webview to make the real network call
+        if (this._settings.activeMode.mode === 'mock-passthrough') {
+          this._log(`  No match - passing through to real network`);
+          return { ...response, passthrough: true };
+        }
+
         this._log(`  No match - fallback ${this._fallbackStatus}`);
 
         // Record unmatched requests when in record mode
