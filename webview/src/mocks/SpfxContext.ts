@@ -1,9 +1,7 @@
 import { buildMockPageContext, StatusRenderer } from '@spfx-local-workbench/shared';
 
 import { PassthroughHttpClient } from '../proxy/PassthroughHttpClient';
-import { ProxyAadHttpClient } from '../proxy/ProxyAadHttpClient';
-import { ProxyHttpClient } from '../proxy/ProxyHttpClient';
-import { ProxySPHttpClient } from '../proxy/ProxySPHttpClient';
+import { ProxyAadHttpClient, ProxyHttpClient, ProxySPHttpClient } from '@spfx-local-workbench/shared';
 import type { IContextSettings } from '../types';
 
 /**

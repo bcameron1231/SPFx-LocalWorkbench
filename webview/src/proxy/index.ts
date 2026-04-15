@@ -5,9 +5,7 @@ export {
   resetProxyBridge,
 } from './ProxyBridge';
 export type { ApiClientType, IProxyRequest, IProxyResponse } from './ProxyBridge';
-export { ProxyHttpClient } from './ProxyHttpClient';
-export { ProxySPHttpClient } from './ProxySPHttpClient';
-export { ProxyAadHttpClient } from './ProxyAadHttpClient';
+export { ProxyHttpClient, ProxySPHttpClient, ProxyAadHttpClient } from '@spfx-local-workbench/shared';
 export { PassthroughHttpClient } from './PassthroughHttpClient';
 export { installFetchProxy, uninstallFetchProxy } from './ProxyFetchClient';
 export { registerProxyHttpClients } from './registerProxyHttpClients';

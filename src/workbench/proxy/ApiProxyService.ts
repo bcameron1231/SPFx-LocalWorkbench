@@ -6,8 +6,9 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import { MockRuleEngine } from '@spfx-local-workbench/shared';
+
 import type { IRecordedRequest } from './MockConfigGenerator';
-import { MockRuleEngine } from './MockRuleEngine';
 import type {
   IMockConfig,
   IMockRule,
