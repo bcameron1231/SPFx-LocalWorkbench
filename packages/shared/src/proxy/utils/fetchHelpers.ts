@@ -28,10 +28,14 @@ export function extractHeaders(raw: HeadersInit | undefined): Record<string, str
 }
 
 /**
- * Best-effort serialization of a fetch body to a string.
- * Handles the most common cases (string, ArrayBuffer, Uint8Array, ReadableStream).
+ * Serializes a fetch body to a string.
+ * Handles strings, ArrayBuffer/Uint8Array (decoded as UTF-8), and Blob (async).
+ * URLSearchParams and FormData fall back to toString() — sufficient for
+ * matching purposes since SharePoint REST API calls always use JSON strings.
+ * Note: Do NOT pass Request.body (a ReadableStream) here — use
+ * input.clone().text() in the caller to avoid consuming the original stream.
  */
-export function serializeBody(raw: BodyInit | null | undefined): string | undefined {
+export async function serializeBody(raw: BodyInit | null | undefined): Promise<string | undefined> {
   // eslint-disable-next-line eqeqeq -- nullish check for both null and undefined
   if (raw == null) {
     return undefined;
@@ -39,15 +43,12 @@ export function serializeBody(raw: BodyInit | null | undefined): string | undefi
   if (typeof raw === 'string') {
     return raw;
   }
-  if (raw instanceof ArrayBuffer) {
+  if (raw instanceof ArrayBuffer || raw instanceof Uint8Array) {
     return new TextDecoder().decode(raw);
   }
-  if (raw instanceof Uint8Array) {
-    return new TextDecoder().decode(raw);
+  if (raw instanceof Blob) {
+    return await raw.text();
   }
-  // URLSearchParams, FormData, Blob, ReadableStream – best effort
-  if (typeof raw.toString === 'function') {
-    return raw.toString();
-  }
-  return String(raw);
+  // URLSearchParams, FormData – best effort (not used in SharePoint REST calls)
+  return raw.toString();
 }

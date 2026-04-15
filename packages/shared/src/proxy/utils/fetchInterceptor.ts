@@ -48,8 +48,16 @@ export function installFetchInterceptor(transport: IProxyTransport): void {
     }
     const headers = extractHeaders(resolvedHeaders);
 
-    // Extract body - handle Request objects when init.body is undefined
-    const body = serializeBody(init?.body ?? (input instanceof Request ? input.body : undefined));
+    // Extract body - handle Request objects when init.body is undefined.
+    // When input is a Request, use clone().text() rather than input.body directly:
+    // passing the ReadableStream to serializeBody would consume it, breaking
+    // the originalFetch passthrough for non-API URLs.
+    let body: string | undefined;
+    if (init?.body !== null && init?.body !== undefined) {
+      body = await serializeBody(init.body);
+    } else if (input instanceof Request && input.body !== null) {
+      body = await input.clone().text();
+    }
 
     // Check if this request should be proxied (SharePoint API calls)
     if (url.includes('/_api/') || url.includes('/_vti_bin/')) {
