@@ -12,6 +12,7 @@ import { getErrorMessage, logger } from '@spfx-local-workbench/shared';
 
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
 import { getCurrentTheme, getCustomThemes } from '../config';
+import { ApiProxyService } from '../proxy/ApiProxyService';
 import type { IStorybookThemeColors } from '../types';
 import { StoryGenerator } from './StoryGenerator';
 
@@ -131,6 +132,9 @@ export class StorybookServerManager {
       // written into preview.ts would become stale until a clean + reinstall.)
       await this.writeVsCodeThemeJson();
       await this.updatePreviewGlobals();
+
+      // Copy mock files to Storybook's public directory so they're accessible to the addon
+      await this.copyMockFiles();
 
       // Start the server
       this.statusCallback?.('Starting Storybook...', 'Launching the development server');
@@ -310,6 +314,129 @@ export class StorybookServerManager {
     this.outputChannel.appendLine(
       `✓ Updated preview.ts globals (default theme: ${defaultThemeName}, customThemes: ${customThemes.length})`,
     );
+  }
+
+  /**
+   * Copy mock files from workspace to Storybook static directory.
+   * Copies the mock config to a fixed location (public/proxy/api-mocks.json) and
+   * flattens all referenced body files into public/proxy/ with unique names.
+   */
+  private async copyMockFiles(): Promise<void> {
+    // Read proxy settings to get the mock file location
+    const proxySettings = ApiProxyService.readSettings();
+
+    // Extract the mock file path from settings
+    let mockFile: string;
+    const { activeMode } = proxySettings;
+    if (activeMode.mode === 'mock') {
+      mockFile = activeMode.options.mockFile;
+    } else if (activeMode.mode === 'record') {
+      mockFile = activeMode.options.mockFile;
+    } else {
+      // Passthrough mode - no mocks to copy
+      this.outputChannel.appendLine('Proxy in passthrough mode, skipping mock file copy');
+      return;
+    }
+
+    const mockSourcePath = path.join(this.workspacePath, mockFile);
+    const proxyDir = path.join(this.storybookDir, 'public', 'proxy');
+    const mockDestPath = path.join(proxyDir, 'api-mocks.json');
+
+    try {
+      // Check if source mock config exists
+      let mockConfigContent: string;
+      try {
+        const raw = await vscode.workspace.fs.readFile(vscode.Uri.file(mockSourcePath));
+        mockConfigContent = Buffer.from(raw).toString('utf-8');
+      } catch {
+        // No mock config exists yet - that's fine, skip copying
+        this.outputChannel.appendLine(`No mock config found at ${mockFile}, skipping copy`);
+        return;
+      }
+
+      // Create proxy directory if it doesn't exist
+      await vscode.workspace.fs.createDirectory(vscode.Uri.file(proxyDir));
+
+      // Parse the mock config to extract bodyFile references
+      let mockConfig: any;
+      try {
+        mockConfig = JSON.parse(mockConfigContent);
+      } catch (error: unknown) {
+        this.log.warn('Failed to parse mock config:', error);
+        this.outputChannel.appendLine(`WARNING: Failed to parse mock config: ${getErrorMessage(error)}`);
+        return;
+      }
+
+      // Track copied files and their new names to avoid duplicates
+      const copiedFiles = new Map<string, string>(); // source path -> dest filename
+      const usedNames = new Set<string>();
+
+      // Process each rule and copy its bodyFile if present
+      if (mockConfig.rules && Array.isArray(mockConfig.rules)) {
+        for (const rule of mockConfig.rules) {
+          if (rule.response?.bodyFile) {
+            const bodyFilePath = rule.response.bodyFile;
+            
+            // Resolve the body file path relative to the mock config directory
+            const mockConfigDir = path.dirname(mockSourcePath);
+            const bodyFileSourcePath = path.join(mockConfigDir, bodyFilePath);
+
+            // Check if we've already copied this file
+            if (copiedFiles.has(bodyFileSourcePath)) {
+              rule.response.bodyFile = copiedFiles.get(bodyFileSourcePath);
+              continue;
+            }
+
+            // Generate a unique filename
+            const originalName = path.basename(bodyFilePath);
+            let uniqueName = originalName;
+            let counter = 1;
+            while (usedNames.has(uniqueName)) {
+              const ext = path.extname(originalName);
+              const base = path.basename(originalName, ext);
+              uniqueName = `${base}-${counter}${ext}`;
+              counter++;
+            }
+            usedNames.add(uniqueName);
+
+            // Copy the body file
+            try {
+              const bodyFileDestPath = path.join(proxyDir, uniqueName);
+              await vscode.workspace.fs.copy(
+                vscode.Uri.file(bodyFileSourcePath),
+                vscode.Uri.file(bodyFileDestPath),
+                { overwrite: true },
+              );
+              
+              copiedFiles.set(bodyFileSourcePath, uniqueName);
+              rule.response.bodyFile = uniqueName;
+            } catch (error: unknown) {
+              this.log.warn(`Failed to copy body file ${bodyFilePath}:`, error);
+              this.outputChannel.appendLine(
+                `WARNING: Failed to copy body file ${bodyFilePath}: ${getErrorMessage(error)}`,
+              );
+              // Leave the bodyFile reference as-is if copy fails
+            }
+          }
+        }
+      }
+
+      // Write the updated mock config to the fixed location
+      await vscode.workspace.fs.writeFile(
+        vscode.Uri.file(mockDestPath),
+        Buffer.from(JSON.stringify(mockConfig, null, 2), 'utf-8'),
+      );
+
+      this.outputChannel.appendLine(
+        `✓ Copied mock config to proxy/api-mocks.json (${copiedFiles.size} body files)`,
+      );
+    } catch (error: unknown) {
+      this.log.warn('Failed to copy mock files:', error);
+      this.outputChannel.appendLine(
+        `WARNING: Failed to copy mock files: ${getErrorMessage(error)}`,
+      );
+      // Don't throw - allow server to start even if mock copying fails
+    }
   }
 
   /**

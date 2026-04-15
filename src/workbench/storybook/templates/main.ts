@@ -20,6 +20,10 @@ const config: StorybookConfig = {
     disableTelemetry: true,
     disableWhatsNewNotifications: true,
   },
+  staticDirs: [
+    // Serve mock files from the public directory
+    '../public',
+  ],
 };
 
 export default config;
