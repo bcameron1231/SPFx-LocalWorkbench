@@ -61,9 +61,15 @@ export function installFetchInterceptor(transport: IProxyTransport): void {
     // When input is a Request, use clone().text() rather than input.body directly:
     // passing the ReadableStream to serializeBody would consume it, breaking
     // the originalFetch passthrough for non-API URLs.
+    // If 'body' is an own key on init (even when null), it takes precedence over
+    // the Request body — explicitly passing { body: null } means "no body".
     let body: string | undefined;
-    if (init?.body !== null && init?.body !== undefined) {
-      body = await serializeBody(init.body);
+    if (init && 'body' in init) {
+      // Caller explicitly set body (possibly null to clear it)
+      if (init.body !== null && init.body !== undefined) {
+        body = await serializeBody(init.body);
+      }
+      // null/undefined → no body (body remains undefined)
     } else if (input instanceof Request && input.body !== null) {
       body = await input.clone().text();
     }

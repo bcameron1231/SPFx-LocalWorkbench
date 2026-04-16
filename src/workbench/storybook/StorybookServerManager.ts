@@ -337,12 +337,12 @@ export class StorybookServerManager {
     // Extract the mock file path from settings
     let mockFile: string;
     const { activeMode } = proxySettings;
-    if (activeMode.mode === 'mock') {
+    if (activeMode.mode === 'mock' || activeMode.mode === 'mock-passthrough') {
       mockFile = activeMode.options.mockFile;
     } else if (activeMode.mode === 'record') {
       mockFile = activeMode.options.mockFile;
     } else {
-      // Passthrough mode - no mocks to copy
+      // Pure passthrough mode - no mocks to copy
       this.outputChannel.appendLine('Proxy in passthrough mode, skipping mock file copy');
       return;
     }

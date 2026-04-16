@@ -235,11 +235,13 @@ export class ApiProxyService implements vscode.Disposable {
       }
 
       // Use MockRuleEngine to process the request
-      const response = await this._ruleEngine.processRequest(request);
+      // Match once up front so the result can be used for both logging and processing
+      // without a second O(n) rule scan.
+      const matchedRule = this._ruleEngine.match(request);
+      const response = await this._ruleEngine.processRequest(request, matchedRule);
 
       if (response.matched) {
-        const rule = this._ruleEngine.match(request);
-        this._log(`  Matched rule: ${rule?.name || rule?.match.url}`);
+        this._log(`  Matched rule: ${matchedRule?.name || matchedRule?.match.url}`);
       } else {
         // In mock-passthrough mode, signal the webview to make the real network call
         if (this._settings.activeMode.mode === 'mock-passthrough') {

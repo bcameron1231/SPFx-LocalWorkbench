@@ -144,10 +144,14 @@ export class MockRuleEngine {
   /**
    * Process a request through the mock rule engine and return a response.
    * @param request The proxy request to process
+   * @param preMatchedRule Optional pre-matched rule to skip the internal rule scan
    * @returns Promise resolving to the mock response
    */
-  async processRequest(request: IProxyRequest): Promise<IProxyResponse> {
-    const rule = this.match(request);
+  async processRequest(
+    request: IProxyRequest,
+    preMatchedRule?: IMockRule,
+  ): Promise<IProxyResponse> {
+    const rule = preMatchedRule ?? this.match(request);
 
     if (!rule) {
       return {

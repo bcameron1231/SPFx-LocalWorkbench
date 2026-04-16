@@ -139,9 +139,12 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     globals[STORYBOOK_GLOBAL_KEYS.PROXY_FALLBACK_STATUS] ?? 404;
   const proxyFallbackStatus = parameters.proxy?.fallbackStatus ?? globalProxyFallbackStatus;
   // Proxy mode: story-level override → VS Code global setting → default 'mock'
-  const globalProxyMode = (globals[STORYBOOK_GLOBAL_KEYS.PROXY_MODE] ?? 'mock') as
-    | 'mock'
-    | 'mock-passthrough';
+  // Sanitize at runtime: BrowserProxyTransport only supports 'mock' and 'mock-passthrough'.
+  // Extension modes like 'passthrough' and 'record' are extension-host–only concepts and
+  // have no meaning in Storybook — fall back to 'mock' rather than silently misbehaving.
+  const rawGlobalProxyMode = globals[STORYBOOK_GLOBAL_KEYS.PROXY_MODE] ?? 'mock';
+  const globalProxyMode: 'mock' | 'mock-passthrough' =
+    rawGlobalProxyMode === 'mock-passthrough' ? 'mock-passthrough' : 'mock';
   const proxyMode = parameters.proxy?.mode ?? globalProxyMode;
 
   // Initialize proxy transport when proxy is enabled (or when config changes between stories)
