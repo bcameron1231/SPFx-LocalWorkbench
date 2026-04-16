@@ -132,6 +132,7 @@
   "configuration.spfxLocalWorkbench.proxy.enabled.description": "Enable the API proxy system. When disabled, HTTP client calls make real fetch() requests instead of routing through the mock rule engine. Requires closing and reopening the workbench to take effect.",
   "configuration.spfxLocalWorkbench.proxy.mode.description": "Proxy operating mode",
   "configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.mock": "Intercept API calls and return mock responses based on configured rules",
+  "configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.mock-passthrough": "Intercept API calls: matched requests return mock responses, unmatched pass through to real network",
   "configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.passthrough": "Forward all API calls to their real endpoints",
   "configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.record": "Serve existing mock rules and capture unmatched requests for stub generation",
   "configuration.spfxLocalWorkbench.proxy.mockFile.description": "Path to the Mock rules configuration file (relative to workspace root)",

@@ -1,9 +1,12 @@
-import { buildMockPageContext, StatusRenderer } from '@spfx-local-workbench/shared';
+import { StatusRenderer, buildMockPageContext } from '@spfx-local-workbench/shared';
+import {
+  ProxyAadHttpClient,
+  ProxyHttpClient,
+  ProxySPHttpClient,
+} from '@spfx-local-workbench/shared';
 
+import { getVsCodeProxyTransport } from '../proxy';
 import { PassthroughHttpClient } from '../proxy/PassthroughHttpClient';
-import { ProxyAadHttpClient } from '../proxy/ProxyAadHttpClient';
-import { ProxyHttpClient } from '../proxy/ProxyHttpClient';
-import { ProxySPHttpClient } from '../proxy/ProxySPHttpClient';
 import type { IContextSettings } from '../types';
 
 /**
@@ -26,6 +29,9 @@ export class SpfxContext {
   createMockContext(webPartId: string, instanceId: string): any {
     const mockPageContext = buildMockPageContext(this.contextSettings.pageContext);
 
+    // Get the VS Code proxy transport for routing API calls through the extension
+    const transport = this.proxyEnabled ? getVsCodeProxyTransport() : undefined;
+
     return {
       instanceId: instanceId,
       manifest: { id: webPartId },
@@ -40,12 +46,14 @@ export class SpfxContext {
         }),
         finish: () => {},
       },
-      httpClient: this.proxyEnabled ? new ProxyHttpClient() : new PassthroughHttpClient(),
-      spHttpClient: this.proxyEnabled ? new ProxySPHttpClient() : new PassthroughHttpClient(),
+      httpClient: this.proxyEnabled ? new ProxyHttpClient(transport) : new PassthroughHttpClient(),
+      spHttpClient: this.proxyEnabled
+        ? new ProxySPHttpClient(transport)
+        : new PassthroughHttpClient(),
       aadHttpClientFactory: {
         getClient: () =>
           Promise.resolve(
-            this.proxyEnabled ? new ProxyAadHttpClient() : new PassthroughHttpClient(),
+            this.proxyEnabled ? new ProxyAadHttpClient(transport) : new PassthroughHttpClient(),
           ),
       },
       msGraphClientFactory: {

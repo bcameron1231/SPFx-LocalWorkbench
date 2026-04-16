@@ -86,7 +86,22 @@ export async function importJsonFile(workspaceRoot: string): Promise<IMockRule[]
 
   if (storageChoice.label === 'Reference file') {
     // Compute relative path from workspace root
-    rule.response.bodyFile = path.relative(workspaceRoot, fileUri.fsPath).replace(/\\/g, '/');
+    const relativePath = path.relative(workspaceRoot, fileUri.fsPath).replace(/\\/g, '/');
+
+    // Guard: file must be inside the workspace.
+    // path.relative() returns '../'-prefixed paths for files above the workspace root,
+    // and absolute paths (e.g. 'D:/file.json') when crossing drives on Windows.
+    if (relativePath.startsWith('../') || path.isAbsolute(relativePath)) {
+      vscode.window.showErrorMessage(
+        localize(
+          'importJson.outsideWorkspace',
+          'The selected file is outside the workspace. Only files within the workspace can be referenced as bodyFile.',
+        ),
+      );
+      return undefined;
+    }
+
+    rule.response.bodyFile = relativePath;
   } else {
     rule.response.body = parsed;
   }

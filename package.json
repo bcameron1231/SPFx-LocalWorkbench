@@ -677,11 +677,13 @@
             "default": "mock",
             "enum": [
               "mock",
+              "mock-passthrough",
               "passthrough",
               "record"
             ],
             "enumDescriptions": [
               "%configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.mock%",
+              "%configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.mock-passthrough%",
               "%configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.passthrough%",
               "%configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.record%"
             ],

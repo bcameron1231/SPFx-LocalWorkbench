@@ -4,9 +4,7 @@
 // proxy-aware implementations so web parts that import classes from '@microsoft/sp-http'
 // get the proxy clients instead of the stubs.
 
-import { ProxyAadHttpClient } from './ProxyAadHttpClient';
-import { ProxyHttpClient } from './ProxyHttpClient';
-import { ProxySPHttpClient } from './ProxySPHttpClient';
+import { ProxyAadHttpClient, ProxyHttpClient, ProxySPHttpClient } from '@spfx-local-workbench/shared';
 
 export function registerProxyHttpClients(): void {
   if (!window.__amdModules) {

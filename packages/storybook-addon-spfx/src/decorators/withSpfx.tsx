@@ -4,13 +4,19 @@ import type { Decorator, StoryContext } from '@storybook/react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import {
+  BrowserProxyTransport,
   DEFAULT_THEME_NAME,
   type ITheme,
   type IWebPartManifest,
+  ProxyAadHttpClient,
+  ProxyHttpClient,
+  ProxySPHttpClient,
   StatusRenderer,
   buildMockPageContext,
   buildThemeList,
+  installFetchInterceptor,
   loadTheme,
+  uninstallFetchInterceptor,
 } from '@spfx-local-workbench/shared';
 import {
   applyPaletteAsCssVars,
@@ -121,6 +127,68 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const componentInstanceRef = useRef<any>(null);
+  const proxyTransportRef = useRef<BrowserProxyTransport | null>(null);
+
+  // Proxy enabled: story-level override → VS Code global setting → default true
+  const globalProxyEnabled: boolean = globals[STORYBOOK_GLOBAL_KEYS.PROXY_ENABLED] ?? true;
+  const proxyEnabled = parameters.proxy?.enabled ?? globalProxyEnabled;
+  // Custom mock file URL (e.g. '/proxy/my-story-mocks.json'), or undefined for default
+  const proxyMockFile = parameters.proxy?.mockFile;
+  // Fallback status: story-level override → VS Code global setting → default 404
+  const globalProxyFallbackStatus: number =
+    globals[STORYBOOK_GLOBAL_KEYS.PROXY_FALLBACK_STATUS] ?? 404;
+  const proxyFallbackStatus = parameters.proxy?.fallbackStatus ?? globalProxyFallbackStatus;
+  // Proxy mode: story-level override → VS Code global setting → default 'mock'
+  // Sanitize at runtime: BrowserProxyTransport only supports 'mock' and 'mock-passthrough'.
+  // Extension modes like 'passthrough' and 'record' are extension-host–only concepts and
+  // have no meaning in Storybook — fall back to 'mock' rather than silently misbehaving.
+  const rawGlobalProxyMode = globals[STORYBOOK_GLOBAL_KEYS.PROXY_MODE] ?? 'mock';
+  const globalProxyMode: 'mock' | 'mock-passthrough' =
+    rawGlobalProxyMode === 'mock-passthrough' ? 'mock-passthrough' : 'mock';
+  const proxyMode = parameters.proxy?.mode ?? globalProxyMode;
+
+  // Initialize proxy transport when proxy is enabled (or when config changes between stories)
+  useEffect(() => {
+    if (!proxyEnabled) {
+      return;
+    }
+
+    // Create transport — pass custom mockFile URL, fallback status, and proxy mode if specified
+    const transport = new BrowserProxyTransport(
+      proxyMockFile,
+      undefined,
+      proxyFallbackStatus,
+      proxyMode,
+    );
+    proxyTransportRef.current = transport;
+
+    // Guard against the effect being cleaned up before initialize() resolves.
+    // If the story unmounts or proxy config changes mid-flight, cleanup sets
+    // cancelled=true so the .then() callback skips installing a stale interceptor.
+    let cancelled = false;
+
+    // Initialize the transport to load mock configuration
+    transport
+      .initialize()
+      .then(() => {
+        if (!cancelled) {
+          installFetchInterceptor(transport);
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          console.warn('[withSpfx] Proxy initialization failed:', error.message || error);
+          console.warn('[withSpfx] API mocking will not be available.');
+        }
+      });
+
+    // Cleanup: restore original fetch when unmounting or when proxy config changes
+    return () => {
+      cancelled = true;
+      uninstallFetchInterceptor();
+      proxyTransportRef.current = null;
+    };
+  }, [proxyEnabled, proxyMockFile, proxyFallbackStatus, proxyMode]);
 
   // Reset seed flag whenever the story target changes so the new manifest entry's
   // properties are picked up from the serve on the next load.
@@ -258,6 +326,13 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
 
         // Set up the component context (mock SPFx context)
         // Match the structure from webview/src/mocks/SpfxContext.ts
+        // Use proxy-aware HTTP clients if transport is initialized, otherwise fall back to stubs
+        const transport = proxyTransportRef.current;
+        const httpClient = transport ? new ProxyHttpClient(transport) : createMockHttpClient();
+        const spHttpClient = transport
+          ? new ProxySPHttpClient(transport)
+          : createMockSpHttpClient();
+
         instance._context = {
           pageContext: mockPageContext,
           manifest: {
@@ -277,10 +352,13 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
             }),
             finish: () => {},
           },
-          httpClient: createMockHttpClient(),
-          spHttpClient: createMockSpHttpClient(),
+          httpClient: httpClient,
+          spHttpClient: spHttpClient,
           aadHttpClientFactory: {
-            getClient: () => Promise.resolve(createMockHttpClient()),
+            getClient: () =>
+              Promise.resolve(
+                transport ? new ProxyAadHttpClient(transport) : createMockHttpClient(),
+              ),
           },
           msGraphClientFactory: {
             getClient: () =>

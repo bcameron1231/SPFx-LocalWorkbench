@@ -3,7 +3,7 @@
 // Re-exports all proxy-related types and classes.
 
 export { ApiProxyService } from './ApiProxyService';
-export { MockRuleEngine } from './MockRuleEngine';
+export { MockRuleEngine } from '@spfx-local-workbench/shared';
 export { MockConfigGenerator } from './MockConfigGenerator';
 export type { IRecordedRequest } from './generators';
 export type {
