@@ -7,7 +7,7 @@
  */
 import type { IProxyTransport } from './IProxyTransport';
 import { MockRuleEngine } from './MockRuleEngine';
-import type { IMockConfig, IProxyRequest, IProxyResponse } from './types';
+import type { IMockConfig, IMockRule, IProxyRequest, IProxyResponse } from './types';
 
 /** Default location for mock config in Storybook static directory */
 const DEFAULT_MOCK_CONFIG_URL = '/proxy/api-mocks.json';
@@ -49,9 +49,11 @@ export class BrowserProxyTransport implements IProxyTransport {
 
     // Create body file loader that uses fetch
     const bodyFileLoader = async (filename: string): Promise<string> => {
-      // Reject absolute URL paths and path traversal segments — these could
-      // reach files outside the /proxy/ static directory on the dev server
-      if (filename.startsWith('/') || filename.includes('..')) {
+      // Reject absolute paths and path traversal segments (e.g. `..`) — these
+      // could reach files outside the /proxy/ static directory on the dev server.
+      // Split on both / and \ to catch Windows-style traversal as well.
+      const segments = filename.split(/[/\\]/);
+      if (filename.startsWith('/') || segments.some((seg) => seg === '..')) {
         console.warn(`[BrowserProxyTransport] Skipping bodyFile with unsafe path: ${filename}`);
         throw new Error(`Unsafe bodyFile path: ${filename}`);
       }
@@ -160,7 +162,7 @@ export class BrowserProxyTransport implements IProxyTransport {
   /**
    * Get the current mock rules (for diagnostics)
    */
-  getRules(): readonly any[] {
+  getRules(): readonly IMockRule[] {
     return this._ruleEngine.getRules();
   }
 }

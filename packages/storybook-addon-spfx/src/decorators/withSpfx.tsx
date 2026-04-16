@@ -151,26 +151,37 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     }
 
     // Create transport — pass custom mockFile URL, fallback status, and proxy mode if specified
-    proxyTransportRef.current = new BrowserProxyTransport(
+    const transport = new BrowserProxyTransport(
       proxyMockFile,
       undefined,
       proxyFallbackStatus,
       proxyMode,
     );
+    proxyTransportRef.current = transport;
+
+    // Guard against the effect being cleaned up before initialize() resolves.
+    // If the story unmounts or proxy config changes mid-flight, cleanup sets
+    // cancelled=true so the .then() callback skips installing a stale interceptor.
+    let cancelled = false;
 
     // Initialize the transport to load mock configuration
-    proxyTransportRef.current
+    transport
       .initialize()
       .then(() => {
-        installFetchInterceptor(proxyTransportRef.current!);
+        if (!cancelled) {
+          installFetchInterceptor(transport);
+        }
       })
       .catch((error) => {
-        console.warn('[withSpfx] Proxy initialization failed:', error.message || error);
-        console.warn('[withSpfx] API mocking will not be available.');
+        if (!cancelled) {
+          console.warn('[withSpfx] Proxy initialization failed:', error.message || error);
+          console.warn('[withSpfx] API mocking will not be available.');
+        }
       });
 
     // Cleanup: restore original fetch when unmounting or when proxy config changes
     return () => {
+      cancelled = true;
       uninstallFetchInterceptor();
       proxyTransportRef.current = null;
     };

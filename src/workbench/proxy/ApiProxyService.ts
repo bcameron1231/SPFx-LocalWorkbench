@@ -197,6 +197,43 @@ export class ApiProxyService implements vscode.Disposable {
     this._log(`${request.method} ${request.url} [${request.clientType}]`);
 
     try {
+      // In pure passthrough mode every request goes straight to the real network
+      if (this._settings.activeMode.mode === 'passthrough') {
+        this._log(`  Passthrough mode - forwarding to real network`);
+        return {
+          id: request.id,
+          status: 0,
+          headers: {},
+          body: '',
+          matched: false,
+          passthrough: true,
+        };
+      }
+
+      // In record mode without serveMocksWhileRecording, skip the mock engine and
+      // always forward to the real network (the response will be captured for recording)
+      if (
+        this._settings.activeMode.mode === 'record' &&
+        !this._settings.activeMode.options.serveMocksWhileRecording
+      ) {
+        this._log(`  Record mode (no mocks) - forwarding to real network`);
+        this._recordedRequests.push({
+          url: request.url,
+          method: request.method,
+          clientType: request.clientType,
+          timestamp: Date.now(),
+        });
+        this._log(`  Recorded request (${this._recordedRequests.length} total)`);
+        return {
+          id: request.id,
+          status: 0,
+          headers: {},
+          body: '',
+          matched: false,
+          passthrough: true,
+        };
+      }
+
       // Use MockRuleEngine to process the request
       const response = await this._ruleEngine.processRequest(request);
 

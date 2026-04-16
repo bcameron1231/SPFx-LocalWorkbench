@@ -443,11 +443,11 @@ export class MockRuleEngine {
 
 **Guidelines**:
 
-- Use `/** ... */` for public APIs (interfaces, classes, exported functions)
+- Use `/** ... */` for public APIs (interfaces, classes, exported functions, and their members)
+- **Never use `/** */` inside a function or method body** — use `//` for all logic annotations within a function
 - Use `@param` to document parameters when helpful for clarity
 - Include examples for complicated or non-obvious methods/classes
 - Avoid redundant tags like `@returns` unless the return value needs explanation
-- Inline implementation comments can use `//` when they're just clarifying logic
 
 ### TypeScript
 

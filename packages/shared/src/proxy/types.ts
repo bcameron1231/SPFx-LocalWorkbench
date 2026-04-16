@@ -1,7 +1,9 @@
-// API Proxy Types
-//
-// Type definitions for the API proxy/mock system that intercepts
-// SPFx HTTP client calls and returns configurable mock responses.
+/**
+ * API Proxy Types
+ *
+ * Type definitions for the API proxy/mock system that intercepts
+ * SPFx HTTP client calls and returns configurable mock responses.
+ */
 
 /** Client type identifier for matching rules */
 export type ApiClientType = 'spHttp' | 'http' | 'aadHttp' | 'fetch';

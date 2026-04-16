@@ -41,23 +41,23 @@ function matchUrl(requestUrl: string, match: IMockRuleMatch): boolean {
     const regex = globToRegex(match.url);
     return regex.test(requestUrl);
   }
-  /** Default: case-insensitive substring match */
+  // Default: case-insensitive substring match
   return requestUrl.toLowerCase().includes(match.url.toLowerCase());
 }
 
 /** Tests whether a request matches a single rule. */
 function matchRule(request: IProxyRequest, rule: IMockRule): boolean {
-  /** URL match is required */
+  // URL match is required
   if (!matchUrl(request.url, rule.match)) {
     return false;
   }
 
-  /** Method match (if specified) */
+  // Method match (if specified)
   if (rule.match.method && rule.match.method.toUpperCase() !== request.method.toUpperCase()) {
     return false;
   }
 
-  /** Client type match (if specified) */
+  // Client type match (if specified)
   if (rule.match.clientType && rule.match.clientType !== request.clientType) {
     return false;
   }
@@ -125,12 +125,12 @@ export class MockRuleEngine {
         continue;
       }
 
-      /** Glob patterns: return immediately (first match wins) */
+      // Glob patterns: return immediately (first match wins)
       if (rule.match.urlPattern) {
         return rule;
       }
 
-      /** Substring matches: pick the longest (most specific) URL pattern */
+      // Substring matches: pick the longest (most specific) URL pattern
       const len = rule.match.url.length;
       if (len > bestLength) {
         bestMatch = rule;
@@ -164,10 +164,10 @@ export class MockRuleEngine {
       };
     }
 
-    /** Get response body */
+    // Get response body
     let body: string;
     if (rule.response.bodyFile) {
-      /** Load body from file */
+      // Load body from file
       if (!this._bodyFileLoader) {
         console.warn(
           `[MockRuleEngine] No bodyFileLoader configured, returning empty object for ${rule.response.bodyFile}`,
@@ -195,17 +195,17 @@ export class MockRuleEngine {
         }
       }
     } else if (rule.response.body !== undefined) {
-      /** Inline body */
+      // Inline body
       body =
         typeof rule.response.body === 'string'
           ? rule.response.body
           : JSON.stringify(rule.response.body);
     } else {
-      /** No body specified */
+      // No body specified
       body = '{}';
     }
 
-    /** Apply delay if specified */
+    // Apply delay if specified
     const delay = rule.response.delay ?? this._defaultDelay;
     if (delay > 0) {
       await new Promise((resolve) => setTimeout(resolve, delay));

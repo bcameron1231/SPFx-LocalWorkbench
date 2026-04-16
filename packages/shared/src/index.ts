@@ -15,14 +15,6 @@ export {
   StatusRenderer,
   StatusRendererStrings,
 } from './mocks'; // Explicit re-exports
-export * from './proxy/types';
-export * from './proxy/IProxyTransport';
-export * from './proxy/MockProxyResponse';
-export * from './proxy/MockRuleEngine';
-export * from './proxy/BrowserProxyTransport';
-export * from './proxy/clients/ProxyHttpClient';
-export * from './proxy/clients/ProxySPHttpClient';
-export * from './proxy/clients/ProxyAadHttpClient';
 export { ProxyHttpClient } from './proxy/clients/ProxyHttpClient';
 export { ProxySPHttpClient } from './proxy/clients/ProxySPHttpClient';
 export { ProxyAadHttpClient } from './proxy/clients/ProxyAadHttpClient';
