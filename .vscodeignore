@@ -9,6 +9,7 @@ src/**
 .gitignore
 .yarnrc
 esbuild.js
+CONTRIBUTING.md
 vsc-extension-quickstart.md
 **/tsconfig.json
 **/eslint.config.mjs

@@ -4,6 +4,8 @@
 
 **SPFx LocalWorkbench** is an open-source VS Code extension created by the PnP team that provides a local development environment for SharePoint Framework (SPFx) web parts and extensions. It offers features unavailable in Microsoft's standard workbench:
 
+**⚠️ Private Repository**: This is currently a private repository. Avoid including repository URLs or links in generated documentation, changelogs, or user-facing content.
+
 - **Integrated local workbench** directly within VS Code
 - **Robust API proxy system** for SharePoint API mocking
 - **Storybook integration** for component-driven development
