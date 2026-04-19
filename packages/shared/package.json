@@ -1,6 +1,6 @@
 {
   "name": "@spfx-local-workbench/shared",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Shared code for SPFx Local Workbench extension and Storybook addon",
   "author": {
     "name": "Chris Kent",
@@ -17,6 +17,14 @@
     }
   ],
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bcameron1231/SPFx-LocalWorkbench.git",
+    "directory": "packages/shared"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -51,6 +59,10 @@
     "testing"
   ],
   "license": "MIT",
+  "files": [
+    "dist/**/*",
+    "README.md"
+  ],
   "dependencies": {
     "@fluentui/react": "^8.0.0"
   },

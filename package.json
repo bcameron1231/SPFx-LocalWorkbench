@@ -2,7 +2,7 @@
   "name": "spfx-local-workbench",
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "publisher": "thechriskent",
   "homepage": "https://pnp.github.io/",
   "author": {

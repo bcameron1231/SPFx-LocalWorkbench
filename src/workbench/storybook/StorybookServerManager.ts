@@ -698,7 +698,7 @@ export class StorybookServerManager {
     let addonRef: string;
     if (this.extensionMode === vscode.ExtensionMode.Production) {
       // Installed from the marketplace — resolve the addon from the npm registry.
-      addonRef = '^0.0.1'; // TODO: update to the published version before each release
+      addonRef = '^0.1.0'; // TODO: update to the published version before each release
     } else {
       // Running from source (F5 launch or extension tests) — link directly to the
       // local packages/ directory so changes are reflected without republishing.

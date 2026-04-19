@@ -1,6 +1,6 @@
 {
   "name": "@spfx-local-workbench/storybook-addon-spfx",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Storybook addon for SharePoint Framework components",
   "author": {
     "name": "Chris Kent",
@@ -16,6 +16,14 @@
       "url": "https://github.com/hugoabernier"
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bcameron1231/SPFx-LocalWorkbench.git",
+    "directory": "packages/storybook-addon-spfx"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/preset.js",
   "types": "dist/preset.d.ts",
   "exports": {
@@ -24,6 +32,7 @@
     "./preview": "./dist/preview.js",
     "./package.json": "./package.json"
   },
+  "license": "MIT",
   "keywords": [
     "storybook",
     "spfx",
@@ -53,7 +62,7 @@
     "react-dom": "^17.0.0 || ^18.0.0"
   },
   "dependencies": {
-    "@spfx-local-workbench/shared": "file:../shared"
+    "@spfx-local-workbench/shared": "^0.1.0"
   },
   "devDependencies": {
     "@storybook/addon-toolbars": "^8.0.0",
