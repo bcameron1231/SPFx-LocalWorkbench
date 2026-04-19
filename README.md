@@ -2,7 +2,9 @@
 
 A Visual Studio Code extension that brings back the **local workbench** for testing SharePoint Framework (SPFx) web parts and **Application Customizers** without deploying to SharePoint.
 
-> **Background**: Microsoft removed the local workbench in SPFx 1.13+. This extension restores that functionality with a custom-built workbench environment that simulates the SPFx runtime.
+> Microsoft removed the local workbench in SPFx 1.13+. This extension restores that functionality with a custom-built workbench environment that simulates the SPFx runtime and adds additional developer tooling.
+
+![Screenshot of the SPFx Local Workbench in action](media/SPFxLocalWorkbench.gif)
 
 ## Features
 
@@ -14,7 +16,7 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 - **Property Pane**: Full property pane support for configuring web parts
 - **Live Reload Support**: Works with `heft start` for real-time development
 - **Multiple Web Parts**: Add, configure, and test multiple web parts simultaneously on the canvas
-- **Theme Support**: Choose from multiple SharePoint theme presets (Team Site, Communication Site, Dark Mode)
+- **Theme Support**: Choose from standard SharePoint themes and even use your own directly within the workbench
 
 ### Application Customizers
 
@@ -27,7 +29,8 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 ### Storybook Integration (Beta)
 
 - **Auto-Generated Stories**: Automatically generates Storybook stories from your SPFx component manifests
-- **Locale Variants**: Creates story variants for each locale defined in your component
+  - **Locales**: Creates story variants for each locale defined in your component
+  - **Preconfigured Entries**: Creates story variants for each preconfigured web part entry in your manifest
 - **SPFx Context**: Custom Storybook addon provides full SPFx context and theme switching
 - **Visual Testing**: Test components in isolation with different themes and contexts
 - **Live Development**: Run Storybook alongside your SPFx project for component development
@@ -55,8 +58,8 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 ## Getting Started
 
 1. Open your SPFx project in VS Code
-2. Start your SPFx development server: Run `heft start` in a terminal
-3. Use the Command Palette (`Ctrl+Shift+P`) and search for "SPFx: Open Local Workbench"
+2. Start your SPFx development server: Run `heft start --nobrowser` in a terminal
+3. Use the Command Palette (`Ctrl+Shift+P`) and search for "SPFx: Open Local Workbench" or click the button in the task bar
 
 ## Usage
 
@@ -94,19 +97,23 @@ The extension includes **Storybook integration** for visual testing and componen
 1. **Generate Stories**: Run "SPFx: Generate Storybook Stories" from the Command Palette
    - Stories are auto-generated from your component manifests
    - Each localized variant gets its own story
-   - Stories are created in `src/**/*.stories.ts` next to your components
+   - When enabled (default), stories are generated automatically when starting the server but there is also a dedicated button in the panel's title bar
 
-2. **Open Storybook**: Run "SPFx: Open Storybook" to launch the Storybook dev server
-   - Server runs at `http://localhost:6006` by default
+1. **Add Your Own Stories**: Add additional stories to your project as needed
+   - Any `stories.ts` files anywhere within your `src` directory will be picked up
+   - Vary by property values, mock config, theme, locale, and more
+
+1. **Open Storybook**: Run "SPFx: Open Storybook" to launch the Storybook dev server
    - View opens in a VS Code webview panel
-   - Includes toolbar for theme switching and context customization
+   - Includes toolbar for theme and display mode switching
 
-3. **SPFx Addon**: The custom `@spfx-local-workbench/storybook-addon-spfx` addon provides:
+1. **SPFx Addon**: The custom `@spfx-local-workbench/storybook-addon-spfx` addon provides:
    - Full SPFx context mock (same as workbench)
-   - Theme switcher with 10 Microsoft 365 themes
+     - Including per story mock configurations
+   - Theme switcher with all Microsoft 365 themes and support for custom themes
    - Hot reload support during development
 
-4. **Story Structure**: Auto-generated stories follow CSF 3.0 format:
+1. **Story Structure**: Auto-generated stories follow CSF 3.0 format:
 
    ```typescript
    import type { Meta, StoryObj } from '@storybook/react';
@@ -128,24 +135,40 @@ The extension includes **Storybook integration** for visual testing and componen
 
 ## Commands
 
-| Command                              | Description                                 |
-| ------------------------------------ | ------------------------------------------- |
-| `SPFx: Open Local Workbench`         | Opens the local workbench panel             |
-| `SPFx: Start Serve & Open Workbench` | Starts serve and opens workbench            |
-| `SPFx: Detect Web Parts`             | Shows detected web parts in the project     |
-| `SPFx: Open Storybook`               | Starts Storybook dev server and opens panel |
-| `SPFx: Generate Storybook Stories`   | Generates stories from SPFx manifests       |
-| `SPFx: Open Developer Tools`         | Opens webview developer tools               |
+| Command                                      | Description                                         |
+| -------------------------------------------- | --------------------------------------------------- |
+| `SPFx: Open Local Workbench`                 | Opens the local workbench panel                     |
+| `SPFx: Start SPFx Serve and Open Workbench`  | Starts serve and opens workbench                    |
+| `SPFx: Refresh`                              | Refreshes detected web parts in the project         |
+| `SPFx: Switch to Preview Mode`               | Switches workbench to display/preview mode          |
+| `SPFx: Switch to Edit Mode`                  | Switches workbench to edit mode                     |
+| `SPFx: Discard Components (reset workbench)` | Removes all loaded components and resets the canvas |
+| `SPFx: Open SPFx Storybook`                  | Opens the Storybook panel (starts server if needed) |
+| `SPFx: Start SPFx Serve & Open Storybook`    | Starts serve and opens Storybook                    |
+| `SPFx: Generate SPFx Storybook Stories`      | Generates stories from SPFx manifests               |
+| `SPFx: Clean SPFx Storybook`                 | Removes auto-generated Storybook story files        |
+| `SPFx: Scaffold API Mock Configuration`      | Creates a starter mock config file                  |
+| `SPFx: Mock Data`                            | Opens the mock data menu                            |
+| `SPFx: Generate Status Code Stubs`           | Generates mock stubs for HTTP status codes          |
+| `SPFx: Import JSON File as Mock`             | Imports a JSON file as a mock rule response         |
+| `SPFx: Import CSV File as Mock`              | Imports a CSV file as a mock rule response          |
+| `SPFx: Record Requests and Generate Rules`   | Records live API requests and generates mock rules  |
+| `SPFx: Show API Proxy Log`                   | Opens the API Proxy output channel                  |
+| `SPFx: Open Developer Tools`                 | Opens webview developer tools                       |
+| `SPFx: Open SPFx Workbench Settings`         | Opens the extension settings in VS Code             |
 
 ## Configuration
 
 ### General Settings
 
-| Setting                                | Default                  | Description                                                                                      |
-| -------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------ |
-| `spfxLocalWorkbench.serveUrl`          | `https://localhost:4321` | The URL where SPFx serve is running                                                              |
-| `spfxLocalWorkbench.autoOpenWorkbench` | `false`                  | Auto-open workbench when starting serve                                                          |
-| `spfxLocalWorkbench.statusBarAction`   | `openWorkbench`          | Action when clicking the SPFx status bar item: `openWorkbench`, `startServe`, or `openStorybook` |
+| Setting                                       | Default                          | Description                                                                                    |
+| --------------------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `spfxLocalWorkbench.serveUrl`                 | `https://localhost:4321`         | The URL where SPFx serve is running                                                            |
+| `spfxLocalWorkbench.autoOpenWorkbench`        | `false`                          | Auto-open workbench when starting serve                                                        |
+| `spfxLocalWorkbench.serveCommand`             | `heft start --clean --nobrowser` | The command run when starting SPFx serve from the extension                                    |
+| `spfxLocalWorkbench.statusBarWorkbenchAction` | `openWorkbench`                  | Action when clicking the workbench status bar button: `openWorkbench` or `startServeWorkbench` |
+| `spfxLocalWorkbench.statusBarStorybookAction` | `openStorybook`                  | Action when clicking the Storybook status bar button: `openStorybook` or `startServeStorybook` |
+| `spfxLocalWorkbench.statusBarDisplay`         | `iconAndText`                    | Controls status bar button display: `iconAndText`, `iconOnly`, or `hidden`                     |
 
 ### Theme Settings
 
@@ -202,50 +225,6 @@ You can add additional properties as needed to match your SPFx solution requirem
 ## Troubleshooting
 
 Having issues? See the [Troubleshooting Guide](TROUBLESHOOTING.md).
-
-## Contributing
-
-Contributions are welcome! See the [Contributing Guide](CONTRIBUTING.md) for development setup, project structure, and more.
-
-## Development
-
-### Building the Extension
-
-```bash
-npm install
-npm run compile
-```
-
-### Sample SPFx Projects
-
-If you keep test SPFx projects under `samples/`, they are excluded from VSIX packaging and VS Code search to keep the extension lean. The folder is still visible in the explorer. For the most reliable detection and debugging, open a sample project folder directly in its own VS Code window (or Extension Host) when testing.
-
-### Project Structure
-
-```text
-src/
-  extension.ts              # Main extension entry point
-  workbench/
-    WorkbenchPanel.ts       # Webview panel that hosts the workbench
-    SpfxProjectDetector.ts  # SPFx project detection and manifest parsing
-    html/                   # HTML and CSS generation for webview
-    config/                 # Configuration management
-    proxy/                  # API proxy service and mock rule engine
-    types/                  # Type definitions
-webview/
-  src/
-    main.tsx                # React-based webview entry point
-    main.ts                 # Alternative non-React entry point
-    WorkbenchRuntime.ts     # Main workbench orchestrator
-    WebPartManager.ts       # Web part loading and lifecycle
-    ExtensionManager.ts     # Application Customizer loading and lifecycle
-    amd/                    # AMD module loader for SPFx bundles
-    components/             # React components (App, Canvas, PropertyPane, ExtensionPicker, etc.)
-    mocks/                  # SharePoint API mocks (Context, Theme, PropertyPane, sp-application-base)
-    proxy/                  # Proxy HTTP client replacements and bridge
-    ui/                     # UI utilities (CanvasRenderer)
-    types/                  # Webview-specific type definitions
-```
 
 ## License
 
