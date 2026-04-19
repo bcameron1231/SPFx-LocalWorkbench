@@ -2,7 +2,7 @@
   "name": "spfx-local-workbench",
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "publisher": "thechriskent",
   "homepage": "https://pnp.github.io/",
   "author": {
@@ -21,7 +21,8 @@
   ],
   "icon": "media/icon.png",
   "galleryBanner": {
-    "color": "#0D1E37"
+    "color": "#0D1E37",
+    "theme": "dark"
   },
   "repository": {
     "type": "git",

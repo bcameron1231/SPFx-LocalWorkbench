@@ -9,10 +9,10 @@
   "devDependencies": {
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "storybook": "8.6.17",
-    "@storybook/react-vite": "8.6.17",
-    "@storybook/addon-essentials": "8.6.17",
-    "@storybook/addon-a11y": "8.6.17",
+    "storybook": "8.6.18",
+    "@storybook/react-vite": "8.6.18",
+    "@storybook/addon-essentials": "8.6.18",
+    "@storybook/addon-a11y": "8.6.18",
     "@spfx-local-workbench/storybook-addon-spfx": "{{ADDON_REF}}"
   },
   "overrides": {
