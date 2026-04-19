@@ -3,7 +3,8 @@
   "displayName": "%displayName%",
   "description": "%description%",
   "version": "0.0.1",
-  "publisher": "BeauCameron",
+  "publisher": "thechriskent",
+  "homepage": "https://pnp.github.io/",
   "author": {
     "name": "Beau Cameron",
     "url": "https://github.com/bcameron1231"
@@ -19,6 +20,9 @@
     }
   ],
   "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#0D1E37"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/bcameron1231/SPFx-LocalWorkbench"
