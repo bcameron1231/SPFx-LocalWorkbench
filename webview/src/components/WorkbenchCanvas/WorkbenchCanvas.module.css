@@ -1,17 +1,5 @@
 /* WorkbenchCanvas component styles */
 
-:global {
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-
-    to {
-      transform: rotate(360deg);
-    }
-  }
-}
-
 .canvas {
   max-width: 1028px;
   margin: 0 auto;

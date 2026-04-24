@@ -5,7 +5,7 @@
 // extension and the webview.
 import * as vscode from 'vscode';
 
-import { LIVE_RELOAD_DEBOUNCE_MS, DisplayMode } from '@spfx-local-workbench/shared';
+import { DisplayMode, LIVE_RELOAD_DEBOUNCE_MS } from '@spfx-local-workbench/shared';
 import type { IExtensionManifest, IWebPartManifest } from '@spfx-local-workbench/shared';
 import { logger } from '@spfx-local-workbench/shared';
 import { getNonce, localize } from '@spfx-local-workbench/shared/utils/node';
@@ -85,7 +85,10 @@ export class WorkbenchPanel {
   }
 
   // Creates or reveals the workbench panel
-  public static createOrShow(extensionUri: vscode.Uri, apiProxyOutputChannel?: vscode.OutputChannel): void {
+  public static createOrShow(
+    extensionUri: vscode.Uri,
+    apiProxyOutputChannel?: vscode.OutputChannel,
+  ): void {
     WorkbenchPanel._apiProxyOutputChannel = apiProxyOutputChannel;
     const column = vscode.window.activeTextEditor
       ? vscode.window.activeTextEditor.viewColumn
@@ -128,7 +131,11 @@ export class WorkbenchPanel {
   }
 
   // Revives the panel from a previous session
-  public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, apiProxyOutputChannel?: vscode.OutputChannel): void {
+  public static revive(
+    panel: vscode.WebviewPanel,
+    extensionUri: vscode.Uri,
+    apiProxyOutputChannel?: vscode.OutputChannel,
+  ): void {
     WorkbenchPanel._apiProxyOutputChannel = apiProxyOutputChannel;
     panel.title = localize('panel.title', 'SPFx Local Workbench');
     WorkbenchPanel.currentPanel = new WorkbenchPanel(panel, extensionUri);
@@ -280,10 +287,7 @@ export class WorkbenchPanel {
         return;
 
       case 'openSettings':
-        vscode.commands.executeCommand(
-          'workbench.action.openSettings',
-          '@ext:thechriskent.spfx-local-workbench',
-        );
+        vscode.commands.executeCommand('spfx-local-workbench.openSettings');
         return;
 
       case 'startServe':
