@@ -29,6 +29,8 @@ export interface IHtmlGeneratorConfig {
   contextSettings?: Partial<IContextConfig>;
   // Whether the API proxy is enabled (default true)
   proxyEnabled?: boolean;
+  // Whether opening the property pane should shrink the canvas (default true)
+  propertyPaneShrinkCanvas?: boolean;
   // External dependencies resolved from the SPFx project's node_modules
   externalDependencies?: IExternalDependency[];
 }
@@ -124,6 +126,7 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
     customThemes: config.customThemes ?? [],
     context: config.contextSettings,
     proxyEnabled: config.proxyEnabled !== false,
+    propertyPaneShrinkCanvas: config.propertyPaneShrinkCanvas !== false,
     externalDependencies: (config.externalDependencies || []).map((dep) => ({
       moduleName: dep.moduleName,
       globalName: dep.globalName,

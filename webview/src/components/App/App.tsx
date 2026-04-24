@@ -32,7 +32,7 @@ export interface IAppHandlers {
   updateWebPartProperties: (instanceId: string, properties: any) => void;
 }
 
-export const App: FC<IAppProps> = ({ config: _config, onInitialized }) => {
+export const App: FC<IAppProps> = ({ config, onInitialized }) => {
   const [manifests, setManifests] = useState<IComponentManifest[]>([]);
   const [activeWebParts, setActiveWebParts] = useState<IWebPartConfig[]>([]);
   const [activeExtensions, setActiveExtensions] = useState<IExtensionConfig[]>([]);
@@ -68,9 +68,11 @@ export const App: FC<IAppProps> = ({ config: _config, onInitialized }) => {
     onInitialized(handlers);
   }, [onInitialized]);
 
+  const shrinkCanvas = config.propertyPaneShrinkCanvas !== false;
+
   return (
     <ErrorBoundary>
-      <div className={styles.workbenchApp}>
+      <div className={css(styles.workbenchApp, shrinkCanvas && selectedWebPart && styles.panelOpen)}>
         {/* Application Customizer Header Placeholder */}
         <div
           id="app-customizer-header"

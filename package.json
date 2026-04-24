@@ -687,6 +687,17 @@
         }
       },
       {
+        "title": "%configuration.spfxLocalWorkbench.group.workbench.title%",
+        "properties": {
+          "spfxLocalWorkbench.propertyPane.shrinkCanvas": {
+            "order": 10,
+            "type": "boolean",
+            "default": true,
+            "description": "%configuration.spfxLocalWorkbench.propertyPane.shrinkCanvas.description%"
+          }
+        }
+      },
+      {
         "title": "%configuration.spfxLocalWorkbench.group.proxy.title%",
         "properties": {
           "spfxLocalWorkbench.proxy.enabled": {

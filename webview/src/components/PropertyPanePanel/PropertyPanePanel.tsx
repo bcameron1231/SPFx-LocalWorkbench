@@ -1,10 +1,9 @@
-import { IconButton, PrimaryButton, Separator, Stack, Text } from '@fluentui/react';
+import { Panel, PanelType, PrimaryButton, Separator, Stack, Text } from '@fluentui/react';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 
 import { PropertyPaneFieldType, logger } from '@spfx-local-workbench/shared';
 import type { IActiveWebPart } from '@spfx-local-workbench/shared';
 
-import styles from './PropertyPanePanel.module.css';
 import {
   ButtonComponent,
   CheckboxComponent,
@@ -90,29 +89,30 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
 
   const hasPendingChanges = Object.keys(pendingChanges).length > 0;
 
-  return (
-    <div
-      id="property-pane"
-      className={`${styles.panel} ${webPart ? styles.open : ''}`}
-      style={{ display: 'flex', flexDirection: 'column' }}
-    >
-      <Stack
-        horizontal
-        horizontalAlign="space-between"
-        verticalAlign="center"
-        styles={{ root: { padding: '12px 16px', flexShrink: 0 } }}
-      >
-        <Text variant="large" styles={{ root: { fontWeight: 600 } }}>
-          {webPart?.manifest.alias ?? 'Properties'}
-        </Text>
-        <IconButton
-          iconProps={{ iconName: 'Cancel' }}
-          title="Close"
-          ariaLabel="Close"
-          onClick={onClose}
+  const renderFooter = isNonReactive
+    ? () => (
+        <PrimaryButton
+          text="Apply"
+          onClick={handleApply}
+          disabled={!hasPendingChanges}
+          styles={{ root: { width: 'fit-content' } }}
         />
-      </Stack>
-      <div id="property-pane-content" style={{ flex: 1, overflowY: 'auto' }}>
+      )
+    : undefined;
+
+  return (
+    <Panel
+      id="property-pane"
+      isOpen={!!webPart}
+      type={PanelType.custom}
+      customWidth="340px"
+      headerText={webPart?.manifest.alias ?? 'Properties'}
+      onDismiss={onClose}
+      isBlocking={false}
+      isFooterAtBottom={isNonReactive}
+      onRenderFooterContent={renderFooter}
+    >
+      <div id="property-pane-content">
         {config && config.pages && config.pages.length > 0 && webPart ? (
           <PropertyPaneContent
             config={config}
@@ -128,17 +128,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
           </Stack>
         )}
       </div>
-      {isNonReactive && (
-        <Stack styles={{ root: { padding: '12px 16px', flexShrink: 0 } }}>
-          <PrimaryButton
-            text="Apply"
-            onClick={handleApply}
-            disabled={!hasPendingChanges}
-            styles={{ root: { width: 'fit-content' } }}
-          />
-        </Stack>
-      )}
-    </div>
+    </Panel>
   );
 };
 

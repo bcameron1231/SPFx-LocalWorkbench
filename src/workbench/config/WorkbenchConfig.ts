@@ -25,6 +25,8 @@ export interface IWorkbenchSettings {
   autoOpenWorkbench: boolean;
   serveCommand: string;
   context: IContextConfig;
+  /** Whether opening the property pane shrinks the canvas width to make room (default true). */
+  propertyPaneShrinkCanvas: boolean;
 }
 
 // Default configuration values
@@ -35,6 +37,7 @@ const defaults = {
   context: {
     pageContext: DEFAULT_PAGE_CONTEXT,
   },
+  propertyPaneShrinkCanvas: true,
 };
 
 // Gets the current workbench configuration from VS Code settings
@@ -54,6 +57,10 @@ export function getWorkbenchSettings(): IWorkbenchSettings {
     context: {
       pageContext,
     },
+    propertyPaneShrinkCanvas: config.get<boolean>(
+      'propertyPane.shrinkCanvas',
+      defaults.propertyPaneShrinkCanvas,
+    ),
   };
 }
 

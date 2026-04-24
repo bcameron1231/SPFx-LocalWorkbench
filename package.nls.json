@@ -140,5 +140,7 @@
   "configuration.spfxLocalWorkbench.proxy.fallbackStatus.description": "HTTP status code returned when no Mock rule matches in mock mode",
   "configuration.spfxLocalWorkbench.proxy.logRequests.description": "Log all proxied API requests to the 'SPFx API Proxy' output channel",
   "configuration.spfxLocalWorkbench.proxy.allowedOrigins.description": "URL patterns allowed in passthrough mode (empty = all)",
-  "configuration.spfxLocalWorkbench.proxy.serveMocksWhileRecording.description": "When in record mode, also serve existing mock rules for matched requests"
+  "configuration.spfxLocalWorkbench.proxy.serveMocksWhileRecording.description": "When in record mode, also serve existing mock rules for matched requests",
+  "configuration.spfxLocalWorkbench.group.workbench.title": "Workbench",
+  "configuration.spfxLocalWorkbench.propertyPane.shrinkCanvas.description": "When the property pane is open, shrink the canvas width (matches online workbench), disable to instead overlay the property pane."
 }

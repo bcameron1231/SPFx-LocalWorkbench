@@ -274,6 +274,16 @@ node -e "import('@spfx-local-workbench/shared').then(m => console.log(Object.key
 1. **Storybook UI**: Match Storybook's design system and practices
 2. **SPFx surfaces**: Use Fluent UI styles, must be themeable
 3. **VS Code UI**: Match VS Code conventions for commands, panels, etc.
+4. **Combining CSS module classes**: Always use the Fluent UI `css()` utility (from `@fluentui/react`) when combining CSS module class names in components where Fluent is already available — it handles falsy/undefined values cleanly:
+
+   ```tsx
+   // ✅ Correct
+   import { css } from '@fluentui/react';
+   <div className={css(styles.root, isOpen && styles.open)} />
+
+   // ❌ Avoid
+   <div className={`${styles.root}${isOpen ? ` ${styles.open}` : ''}`} />
+   ```
 
 ### Build Requirements
 

@@ -430,6 +430,7 @@ export class WorkbenchPanel {
       customThemes: getCustomThemes(),
       contextSettings: this._settings.context,
       proxyEnabled: this._apiProxyService?.enabled ?? true,
+      propertyPaneShrinkCanvas: this._settings.propertyPaneShrinkCanvas,
       externalDependencies: this._externalDependencies,
     });
   }

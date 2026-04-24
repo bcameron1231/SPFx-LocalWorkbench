@@ -25,6 +25,8 @@ export interface IWorkbenchConfig {
   customThemes?: ITheme[];
   context: IContextSettings; // Always provided by extension (from WorkbenchConfig defaults)
   proxyEnabled?: boolean;
+  /** When true, the canvas shrinks to make room when the property pane is open (default true). */
+  propertyPaneShrinkCanvas?: boolean;
   externalDependencies?: Array<{ moduleName: string; globalName: string }>;
 }
 
