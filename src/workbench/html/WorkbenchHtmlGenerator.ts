@@ -12,6 +12,7 @@ import type { IContextConfig } from '../config/WorkbenchConfig';
 export interface IHtmlGeneratorConfig {
   nonce: string;
   serveUrl: string;
+  serveCommand: string;
   webPartsJson: string;
   extensionsJson?: string;
   cspSource: string;
@@ -116,6 +117,7 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
   // Prepare configuration object to inject
   const workbenchConfig = {
     serveUrl: config.serveUrl,
+    serveCommand: config.serveCommand,
     webParts: webParts,
     extensions: extensions,
     theme: config.currentTheme,

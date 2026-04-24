@@ -279,6 +279,17 @@ export class WorkbenchPanel {
         vscode.commands.executeCommand('workbench.action.webview.openDeveloperTools');
         return;
 
+      case 'openSettings':
+        vscode.commands.executeCommand(
+          'workbench.action.openSettings',
+          '@ext:thechriskent.spfx-local-workbench',
+        );
+        return;
+
+      case 'startServe':
+        vscode.commands.executeCommand('spfx-local-workbench.startServeWorkbench');
+        return;
+
       case 'mockDataMenu':
         vscode.commands.executeCommand('spfx-local-workbench.mockDataMenu');
         return;
@@ -406,6 +417,7 @@ export class WorkbenchPanel {
     return generateWorkbenchHtml({
       nonce,
       serveUrl: this._settings.serveUrl,
+      serveCommand: this._settings.serveCommand,
       webPartsJson,
       extensionsJson,
       cspSource: webview.cspSource,

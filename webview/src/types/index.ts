@@ -16,6 +16,7 @@ export interface IVsCodeApi {
 
 export interface IWorkbenchConfig {
   serveUrl: string;
+  serveCommand: string;
   webParts: IWebPartManifest[];
   extensions?: IExtensionManifest[];
   /** The active SharePoint theme. Comes from `spfxLocalWorkbench.theme.current` (+ custom). */

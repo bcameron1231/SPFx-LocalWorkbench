@@ -6,6 +6,8 @@ export interface IWebviewMessage {
     | 'refresh'
     | 'setServeUrl'
     | 'openDevTools'
+    | 'openSettings'
+    | 'startServe'
     | 'log'
     | 'error'
     | 'vscodeThemeColors'

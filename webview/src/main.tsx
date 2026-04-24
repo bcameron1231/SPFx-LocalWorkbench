@@ -95,6 +95,14 @@ function initialize() {
       runtime.handleMockData();
     }) as EventListener);
 
+    window.addEventListener('startServe', (() => {
+      runtime.handleStartServe();
+    }) as EventListener);
+
+    window.addEventListener('openSettings', (() => {
+      runtime.handleOpenSettings();
+    }) as EventListener);
+
     // Listen for live reload messages from the extension
     window.addEventListener('message', (event: MessageEvent) => {
       const message = event.data;
