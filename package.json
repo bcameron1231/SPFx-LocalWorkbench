@@ -243,21 +243,25 @@
         "title": "%configuration.spfxLocalWorkbench.group.general.title%",
         "properties": {
           "spfxLocalWorkbench.serveUrl": {
+            "order": 10,
             "type": "string",
             "default": "https://localhost:4321",
             "description": "%configuration.spfxLocalWorkbench.serveUrl.description%"
           },
           "spfxLocalWorkbench.autoOpenWorkbench": {
+            "order": 20,
             "type": "boolean",
             "default": false,
             "description": "%configuration.spfxLocalWorkbench.autoOpenWorkbench.description%"
           },
           "spfxLocalWorkbench.serveCommand": {
+            "order": 30,
             "type": "string",
             "default": "heft start --clean --nobrowser",
             "markdownDescription": "%configuration.spfxLocalWorkbench.serveCommand.mdDescription%"
           },
           "spfxLocalWorkbench.statusBarWorkbenchAction": {
+            "order": 40,
             "type": "string",
             "enum": [
               "openWorkbench",
@@ -271,6 +275,7 @@
             "description": "%configuration.spfxLocalWorkbench.statusBarWorkbenchAction.description%"
           },
           "spfxLocalWorkbench.statusBarStorybookAction": {
+            "order": 50,
             "type": "string",
             "enum": [
               "openStorybook",
@@ -284,6 +289,7 @@
             "description": "%configuration.spfxLocalWorkbench.statusBarStorybookAction.description%"
           },
           "spfxLocalWorkbench.statusBarDisplay": {
+            "order": 60,
             "type": "string",
             "enum": [
               "iconAndText",
@@ -304,6 +310,7 @@
         "title": "%configuration.spfxLocalWorkbench.group.theme.title%",
         "properties": {
           "spfxLocalWorkbench.theme.current": {
+            "order": 10,
             "type": "string",
             "enum": [
               "Teal",
@@ -335,11 +342,13 @@
             "description": "%configuration.spfxLocalWorkbench.theme.current.description%"
           },
           "spfxLocalWorkbench.theme.customName": {
+            "order": 20,
             "type": "string",
             "default": "",
             "markdownDescription": "%configuration.spfxLocalWorkbench.theme.customName.mdDescription%"
           },
           "spfxLocalWorkbench.theme.custom": {
+            "order": 30,
             "type": "array",
             "default": [],
             "markdownDescription": "%configuration.spfxLocalWorkbench.theme.custom.mdDescription%",
@@ -509,6 +518,7 @@
         "title": "%configuration.spfxLocalWorkbench.group.context.title%",
         "properties": {
           "spfxLocalWorkbench.context.pageContext": {
+            "order": 10,
             "type": "object",
             "default": {
               "site": {
@@ -621,36 +631,43 @@
         "title": "%configuration.spfxLocalWorkbench.group.storybook.title%",
         "properties": {
           "spfxLocalWorkbench.storybook.port": {
+            "order": 10,
             "type": "number",
             "default": 6006,
             "description": "%configuration.spfxLocalWorkbench.storybook.port.description%"
           },
           "spfxLocalWorkbench.storybook.autoGenerate": {
+            "order": 20,
             "type": "boolean",
             "default": true,
             "description": "%configuration.spfxLocalWorkbench.storybook.autoGenerate.description%"
           },
           "spfxLocalWorkbench.storybook.storiesPattern": {
+            "order": 30,
             "type": "string",
             "default": "src/**/*.stories.ts",
             "description": "%configuration.spfxLocalWorkbench.storybook.storiesPattern.description%"
           },
           "spfxLocalWorkbench.storybook.generateLocaleStories": {
+            "order": 40,
             "type": "boolean",
             "default": true,
             "description": "%configuration.spfxLocalWorkbench.storybook.generateLocaleStories.description%"
           },
           "spfxLocalWorkbench.storybook.autoDocs": {
+            "order": 50,
             "type": "boolean",
             "default": false,
             "description": "%configuration.spfxLocalWorkbench.storybook.autoDocs.description%"
           },
           "spfxLocalWorkbench.storybook.skipInstallPrompt": {
+            "order": 60,
             "type": "boolean",
             "default": false,
             "description": "%configuration.spfxLocalWorkbench.storybook.skipInstallPrompt.description%"
           },
           "spfxLocalWorkbench.storybook.theme": {
+            "order": 70,
             "type": "string",
             "default": "matchVsCode",
             "enum": [
@@ -673,11 +690,13 @@
         "title": "%configuration.spfxLocalWorkbench.group.proxy.title%",
         "properties": {
           "spfxLocalWorkbench.proxy.enabled": {
+            "order": 10,
             "type": "boolean",
             "default": true,
             "description": "%configuration.spfxLocalWorkbench.proxy.enabled.description%"
           },
           "spfxLocalWorkbench.proxy.mode": {
+            "order": 20,
             "type": "string",
             "default": "mock",
             "enum": [
@@ -695,26 +714,31 @@
             "description": "%configuration.spfxLocalWorkbench.proxy.mode.description%"
           },
           "spfxLocalWorkbench.proxy.mockFile": {
+            "order": 30,
             "type": "string",
             "default": ".spfx-workbench/api-mocks.json",
             "description": "%configuration.spfxLocalWorkbench.proxy.mockFile.description%"
           },
           "spfxLocalWorkbench.proxy.defaultDelay": {
+            "order": 40,
             "type": "number",
             "default": 0,
             "description": "%configuration.spfxLocalWorkbench.proxy.defaultDelay.description%"
           },
           "spfxLocalWorkbench.proxy.fallbackStatus": {
+            "order": 50,
             "type": "number",
             "default": 404,
             "description": "%configuration.spfxLocalWorkbench.proxy.fallbackStatus.description%"
           },
           "spfxLocalWorkbench.proxy.logRequests": {
+            "order": 60,
             "type": "boolean",
             "default": true,
             "description": "%configuration.spfxLocalWorkbench.proxy.logRequests.description%"
           },
           "spfxLocalWorkbench.proxy.allowedOrigins": {
+            "order": 70,
             "type": "array",
             "items": {
               "type": "string"
@@ -723,6 +747,7 @@
             "description": "%configuration.spfxLocalWorkbench.proxy.allowedOrigins.description%"
           },
           "spfxLocalWorkbench.proxy.serveMocksWhileRecording": {
+            "order": 80,
             "type": "boolean",
             "default": true,
             "description": "%configuration.spfxLocalWorkbench.proxy.serveMocksWhileRecording.description%"

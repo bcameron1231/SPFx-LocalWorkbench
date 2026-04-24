@@ -118,7 +118,7 @@
   "configuration.spfxLocalWorkbench.group.storybook.title": "Storybook",
   "configuration.spfxLocalWorkbench.storybook.port.description": "Port for the Storybook dev server",
   "configuration.spfxLocalWorkbench.storybook.autoGenerate.description": "Automatically generate stories from SPFx component manifests",
-  "configuration.spfxLocalWorkbench.storybook.storiesPattern.description": "Glob pattern for discovering custom story files in the SPFx project",
+  "configuration.spfxLocalWorkbench.storybook.storiesPattern.description": "Glob pattern for discovering custom story files in the SPFx project (relative to workspace root, e.g. `src/**/*.stories.{ts,tsx}`)",
   "configuration.spfxLocalWorkbench.storybook.generateLocaleStories.description": "Automatically generate story variants for each supported locale",
   "configuration.spfxLocalWorkbench.storybook.autoDocs.description": "Enable auto-generated documentation pages for stories in Storybook",
   "configuration.spfxLocalWorkbench.storybook.skipInstallPrompt.description": "Automatically install Storybook dependencies without prompting",
