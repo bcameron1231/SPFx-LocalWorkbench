@@ -72,7 +72,10 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
           tokens={{ childrenGap: 16 }}
           styles={{ root: { padding: '24px' } }}
         >
-          <Text variant="large" styles={{ root: { color: '#a80000', marginBottom: 16 } }}>
+          <Text
+            variant="large"
+            styles={{ root: { color: '#a80000', marginBottom: 16, textAlign: 'center' } }}
+          >
             No SPFx components found. Make sure your project is served / running.
           </Text>
           <PrimaryButton

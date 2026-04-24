@@ -93,7 +93,7 @@ function generateStatusBar(
     <div class="status-bar">
         <div class="status-indicator">
             <div class="status-dot" id="status-dot"></div>
-            <span id="status-text">Initializing...</span>
+            <div id="status-text">Initializing...</div>
         </div>
         <span id="component-count">${countText}</span>
         <div class="separator"></div>
