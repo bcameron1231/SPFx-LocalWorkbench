@@ -105,6 +105,33 @@ function generateStatusBar(
     `;
 }
 
+/**
+ * Escapes a string for safe embedding as HTML text content.
+ * Prevents an untrusted message from injecting tags or entities into the page.
+ */
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Serializes a value to JSON that is safe to embed directly in an HTML `<script>` tag.
+ * `JSON.stringify` does not escape `<`, `>`, or `&`, so a string like `</script>`
+ * inside a config value would prematurely close the script tag. Replacing those
+ * characters with their Unicode escape sequences produces valid JSON that the HTML
+ * parser cannot misinterpret.
+ */
+function safeJsonStringify(value: unknown): string {
+  return JSON.stringify(value)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
+}
+
 // Generates the scripts section HTML
 function generateScripts(config: IHtmlGeneratorConfig): string {
   // Get URI for the bundled webview script
@@ -179,7 +206,7 @@ ${externalScripts ? `    <!-- SPFx project externals (loaded from project node_m
     
     <!-- Inject workbench configuration -->
     <script nonce="${config.nonce}">
-        window.__workbenchConfig = ${JSON.stringify(workbenchConfig)};
+        window.__workbenchConfig = ${safeJsonStringify(workbenchConfig)};
     </script>
     
     <!-- Bundled workbench runtime -->
@@ -242,7 +269,7 @@ export function generateErrorHtml(errorMessage: string): string {
 <body>
     <div class="error-box">
         <h2>⚠️ Workbench Error</h2>
-        <p>${errorMessage}</p>
+        <p>${escapeHtml(errorMessage)}</p>
     </div>
 </body>
 </html>`;

@@ -1,5 +1,5 @@
 import { IconButton, Link, PrimaryButton, Stack, Text } from '@fluentui/react';
-import React, { FC, Fragment, useMemo, useState } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
 
 import type {
   IComponentManifest,
@@ -57,6 +57,17 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
     setServeClicked(true);
     window.dispatchEvent(new CustomEvent('startServe'));
   };
+
+  // Re-enable the Serve button after a timeout so the user can retry if the
+  // serve command fails. On success the manifests will load and this empty
+  // state unmounts entirely, so the reset is only relevant on failure.
+  useEffect(() => {
+    if (!serveClicked) {
+      return;
+    }
+    const timer = setTimeout(() => setServeClicked(false), 30_000);
+    return () => clearTimeout(timer);
+  }, [serveClicked]);
 
   const handleOpenSettings = () => {
     window.dispatchEvent(new CustomEvent('openSettings'));
