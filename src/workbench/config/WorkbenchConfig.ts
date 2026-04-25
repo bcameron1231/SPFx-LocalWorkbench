@@ -25,6 +25,7 @@ export interface IWorkbenchSettings {
   autoOpenWorkbench: boolean;
   serveCommand: string;
   context: IContextConfig;
+  propertyPaneShrinkCanvas: boolean;
 }
 
 // Default configuration values
@@ -35,6 +36,7 @@ const defaults = {
   context: {
     pageContext: DEFAULT_PAGE_CONTEXT,
   },
+  propertyPaneShrinkCanvas: true,
 };
 
 // Gets the current workbench configuration from VS Code settings
@@ -54,6 +56,10 @@ export function getWorkbenchSettings(): IWorkbenchSettings {
     context: {
       pageContext,
     },
+    propertyPaneShrinkCanvas: config.get<boolean>(
+      'propertyPane.shrinkCanvas',
+      defaults.propertyPaneShrinkCanvas,
+    ),
   };
 }
 

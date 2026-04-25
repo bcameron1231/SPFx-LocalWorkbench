@@ -1,5 +1,5 @@
-import { IconButton, Stack, Text } from '@fluentui/react';
-import React, { FC, Fragment, useMemo, useState } from 'react';
+import { IconButton, Link, PrimaryButton, Stack, Text } from '@fluentui/react';
+import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
 
 import type {
   IComponentManifest,
@@ -34,6 +34,7 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
   locale,
 }) => {
   const [openPickerIndex, setOpenPickerIndex] = useState<number | null>(null);
+  const [serveClicked, setServeClicked] = useState(false);
 
   const handleAddClick = (insertIndex: number) => {
     setOpenPickerIndex(openPickerIndex === insertIndex ? null : insertIndex);
@@ -52,13 +53,72 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
     setOpenPickerIndex(null);
   };
 
+  const handleStartServe = () => {
+    setServeClicked(true);
+    window.dispatchEvent(new CustomEvent('startServe'));
+  };
+
+  // Re-enable the Serve button after a timeout so the user can retry if the
+  // serve command fails. On success the manifests will load and this empty
+  // state unmounts entirely, so the reset is only relevant on failure.
+  useEffect(() => {
+    if (!serveClicked) {
+      return;
+    }
+    const timer = setTimeout(() => setServeClicked(false), 30_000);
+    return () => clearTimeout(timer);
+  }, [serveClicked]);
+
+  const handleOpenSettings = () => {
+    window.dispatchEvent(new CustomEvent('openSettings'));
+  };
+
   if (manifests.length === 0) {
+    const serveCommand = window.__workbenchConfig?.serveCommand || 'heft start --clean --nobrowser';
+
     return (
       <div id="canvas">
-        <Stack horizontalAlign="center" styles={{ root: { padding: '24px' } }}>
-          <Text variant="large" styles={{ root: { color: '#a80000' } }}>
+        <Stack
+          horizontalAlign="center"
+          tokens={{ childrenGap: 16 }}
+          styles={{ root: { padding: '24px' } }}
+        >
+          <Text
+            variant="large"
+            styles={{ root: { color: '#a80000', marginBottom: 16, textAlign: 'center' } }}
+          >
             No SPFx components found. Make sure your project is served / running.
           </Text>
+          <PrimaryButton
+            text="Serve"
+            onClick={handleStartServe}
+            disabled={serveClicked}
+            iconProps={serveClicked ? { iconName: 'Sync' } : undefined}
+            styles={
+              serveClicked
+                ? {
+                    icon: {
+                      animation: 'spin 1.5s linear infinite',
+                    },
+                  }
+                : undefined
+            }
+          />
+          <Stack
+            horizontal
+            tokens={{ childrenGap: 4 }}
+            styles={{ root: { alignItems: 'flex-end' } }}
+          >
+            <Text variant="small" styles={{ root: { color: '#605e5c', marginRight: 4 } }}>
+              Command:
+            </Text>
+            <Text variant="small" styles={{ root: { fontFamily: 'monospace', color: '#323130' } }}>
+              {serveCommand}
+            </Text>
+          </Stack>
+          <Link onClick={handleOpenSettings} styles={{ root: { fontSize: 12 } }}>
+            Open Extension Settings
+          </Link>
         </Stack>
       </div>
     );

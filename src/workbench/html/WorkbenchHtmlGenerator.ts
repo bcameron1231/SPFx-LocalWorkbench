@@ -12,6 +12,7 @@ import type { IContextConfig } from '../config/WorkbenchConfig';
 export interface IHtmlGeneratorConfig {
   nonce: string;
   serveUrl: string;
+  serveCommand: string;
   webPartsJson: string;
   extensionsJson?: string;
   cspSource: string;
@@ -28,6 +29,8 @@ export interface IHtmlGeneratorConfig {
   contextSettings?: Partial<IContextConfig>;
   // Whether the API proxy is enabled (default true)
   proxyEnabled?: boolean;
+  // Whether opening the property pane should shrink the canvas (default true)
+  propertyPaneShrinkCanvas?: boolean;
   // External dependencies resolved from the SPFx project's node_modules
   externalDependencies?: IExternalDependency[];
 }
@@ -92,7 +95,7 @@ function generateStatusBar(
     <div class="status-bar">
         <div class="status-indicator">
             <div class="status-dot" id="status-dot"></div>
-            <span id="status-text">Initializing...</span>
+            <div id="status-text">Initializing...</div>
         </div>
         <span id="component-count">${countText}</span>
         <div class="separator"></div>
@@ -100,6 +103,33 @@ function generateStatusBar(
         <div id="theme-picker"></div>
     </div>
     `;
+}
+
+/**
+ * Escapes a string for safe embedding as HTML text content.
+ * Prevents an untrusted message from injecting tags or entities into the page.
+ */
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Serializes a value to JSON that is safe to embed directly in an HTML `<script>` tag.
+ * `JSON.stringify` does not escape `<`, `>`, or `&`, so a string like `</script>`
+ * inside a config value would prematurely close the script tag. Replacing those
+ * characters with their Unicode escape sequences produces valid JSON that the HTML
+ * parser cannot misinterpret.
+ */
+function safeJsonStringify(value: unknown): string {
+  return JSON.stringify(value)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
 }
 
 // Generates the scripts section HTML
@@ -116,12 +146,14 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
   // Prepare configuration object to inject
   const workbenchConfig = {
     serveUrl: config.serveUrl,
+    serveCommand: config.serveCommand,
     webParts: webParts,
     extensions: extensions,
     theme: config.currentTheme,
     customThemes: config.customThemes ?? [],
     context: config.contextSettings,
     proxyEnabled: config.proxyEnabled !== false,
+    propertyPaneShrinkCanvas: config.propertyPaneShrinkCanvas !== false,
     externalDependencies: (config.externalDependencies || []).map((dep) => ({
       moduleName: dep.moduleName,
       globalName: dep.globalName,
@@ -174,7 +206,7 @@ ${externalScripts ? `    <!-- SPFx project externals (loaded from project node_m
     
     <!-- Inject workbench configuration -->
     <script nonce="${config.nonce}">
-        window.__workbenchConfig = ${JSON.stringify(workbenchConfig)};
+        window.__workbenchConfig = ${safeJsonStringify(workbenchConfig)};
     </script>
     
     <!-- Bundled workbench runtime -->
@@ -237,7 +269,7 @@ export function generateErrorHtml(errorMessage: string): string {
 <body>
     <div class="error-box">
         <h2>⚠️ Workbench Error</h2>
-        <p>${errorMessage}</p>
+        <p>${escapeHtml(errorMessage)}</p>
     </div>
 </body>
 </html>`;

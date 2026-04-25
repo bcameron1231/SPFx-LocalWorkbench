@@ -1,10 +1,9 @@
-import { IconButton, Separator, Stack, Text } from '@fluentui/react';
-import React, { FC, useEffect, useState } from 'react';
+import { Panel, PanelType, PrimaryButton, Separator, Stack, Text } from '@fluentui/react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 
 import { PropertyPaneFieldType, logger } from '@spfx-local-workbench/shared';
 import type { IActiveWebPart } from '@spfx-local-workbench/shared';
 
-import styles from './PropertyPanePanel.module.css';
 import {
   ButtonComponent,
   CheckboxComponent,
@@ -32,6 +31,15 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
 }) => {
   const [config, setConfig] = useState<any>(null);
 
+  // Check if the web part has disabled reactive property changes
+  const isNonReactive =
+    webPart?.instance &&
+    'disableReactivePropertyChanges' in webPart.instance &&
+    (webPart.instance as any).disableReactivePropertyChanges === true;
+
+  // Buffer for pending property changes in non-reactive mode
+  const [pendingChanges, setPendingChanges] = useState<Record<string, any>>({});
+
   useEffect(() => {
     if (webPart?.instance && typeof webPart.instance.getPropertyPaneConfiguration === 'function') {
       try {
@@ -44,32 +52,73 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
     } else {
       setConfig(null);
     }
+    // Reset pending changes when web part changes
+    setPendingChanges({});
   }, [webPart]);
 
-  return (
-    <div id="property-pane" className={`${styles.panel} ${webPart ? styles.open : ''}`}>
-      <Stack
-        horizontal
-        horizontalAlign="space-between"
-        verticalAlign="center"
-        styles={{ root: { padding: '12px 16px', borderBottom: '1px solid #edebe9' } }}
-      >
-        <Text variant="large" styles={{ root: { fontWeight: 600 } }}>
-          {webPart?.manifest.alias ?? 'Properties'}
-        </Text>
-        <IconButton
-          iconProps={{ iconName: 'Cancel' }}
-          title="Close"
-          ariaLabel="Close"
-          onClick={onClose}
+  // Handle property change - either buffer it or apply it immediately
+  const handlePropertyChange = useCallback(
+    (targetProperty: string, newValue: any) => {
+      if (isNonReactive) {
+        setPendingChanges((prev) => ({ ...prev, [targetProperty]: newValue }));
+      } else {
+        onPropertyChange(targetProperty, newValue);
+      }
+    },
+    [isNonReactive, onPropertyChange],
+  );
+
+  // Apply all pending changes
+  const handleApply = useCallback(() => {
+    Object.entries(pendingChanges).forEach(([targetProperty, newValue]) => {
+      onPropertyChange(targetProperty, newValue);
+    });
+    setPendingChanges({});
+  }, [pendingChanges, onPropertyChange]);
+
+  // Get the current value for a field (considering pending changes)
+  const getCurrentValue = useCallback(
+    (targetProperty: string) => {
+      if (isNonReactive && targetProperty in pendingChanges) {
+        return pendingChanges[targetProperty];
+      }
+      return targetProperty ? webPart?.properties[targetProperty] : undefined;
+    },
+    [isNonReactive, pendingChanges, webPart?.properties],
+  );
+
+  const hasPendingChanges = Object.keys(pendingChanges).length > 0;
+
+  const renderFooter = isNonReactive
+    ? () => (
+        <PrimaryButton
+          text="Apply"
+          onClick={handleApply}
+          disabled={!hasPendingChanges}
+          styles={{ root: { width: 'fit-content' } }}
         />
-      </Stack>
+      )
+    : undefined;
+
+  return (
+    <Panel
+      id="property-pane"
+      isOpen={!!webPart}
+      type={PanelType.custom}
+      customWidth="340px"
+      headerText={webPart?.manifest.alias ?? 'Properties'}
+      onDismiss={onClose}
+      isBlocking={false}
+      isFooterAtBottom={isNonReactive}
+      onRenderFooterContent={renderFooter}
+    >
       <div id="property-pane-content">
         {config && config.pages && config.pages.length > 0 && webPart ? (
           <PropertyPaneContent
             config={config}
             webPart={webPart}
-            onPropertyChange={onPropertyChange}
+            onPropertyChange={handlePropertyChange}
+            getCurrentValue={getCurrentValue}
           />
         ) : (
           <Stack horizontalAlign="center" styles={{ root: { padding: '16px' } }}>
@@ -79,7 +128,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
           </Stack>
         )}
       </div>
-    </div>
+    </Panel>
   );
 };
 
@@ -87,12 +136,14 @@ interface IPropertyPaneContentProps {
   config: any;
   webPart: IActiveWebPart;
   onPropertyChange: (targetProperty: string, newValue: any) => void;
+  getCurrentValue: (targetProperty: string) => any;
 }
 
 const PropertyPaneContent: FC<IPropertyPaneContentProps> = ({
   config,
   webPart,
   onPropertyChange,
+  getCurrentValue,
 }) => {
   const page = config.pages[0];
 
@@ -102,12 +153,9 @@ const PropertyPaneContent: FC<IPropertyPaneContentProps> = ({
       {(page.groups || []).map((group: any, groupIndex: number) => (
         <Stack key={groupIndex} tokens={{ childrenGap: 12 }}>
           {!group.isGroupNameHidden && group.groupName && (
-            <>
-              <Text variant="mediumPlus" styles={{ root: { fontWeight: 600 } }}>
-                {group.groupName}
-              </Text>
-              <Separator />
-            </>
+            <Text variant="mediumPlus" styles={{ root: { fontWeight: 600 } }}>
+              {group.groupName}
+            </Text>
           )}
           <Stack tokens={{ childrenGap: 8 }}>
             {(group.groupFields || []).map((field: any, fieldIndex: number) => (
@@ -115,6 +163,7 @@ const PropertyPaneContent: FC<IPropertyPaneContentProps> = ({
                 key={fieldIndex}
                 field={field}
                 webPart={webPart}
+                currentValue={getCurrentValue(field.targetProperty)}
                 onPropertyChange={onPropertyChange}
               />
             ))}
@@ -128,16 +177,20 @@ const PropertyPaneContent: FC<IPropertyPaneContentProps> = ({
 interface IPropertyPaneFieldProps {
   field: any;
   webPart: IActiveWebPart;
+  currentValue: any;
   onPropertyChange: (targetProperty: string, newValue: any) => void;
 }
 
-const PropertyPaneField: FC<IPropertyPaneFieldProps> = ({ field, webPart, onPropertyChange }) => {
+const PropertyPaneField: FC<IPropertyPaneFieldProps> = ({
+  field,
+  webPart,
+  currentValue,
+  onPropertyChange,
+}) => {
   // Guard against null webPart
   if (!webPart) {
     return null;
   }
-
-  const currentValue = field.targetProperty ? webPart.properties[field.targetProperty] : undefined;
 
   const handleChange = (newValue: any) => {
     if (field.targetProperty) {

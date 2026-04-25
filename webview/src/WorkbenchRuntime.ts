@@ -598,6 +598,14 @@ export class WorkbenchRuntime {
     this.vscode.postMessage({ command: 'mockDataMenu' });
   }
 
+  handleStartServe(): void {
+    this.vscode.postMessage({ command: 'startServe' });
+  }
+
+  handleOpenSettings(): void {
+    this.vscode.postMessage({ command: 'openSettings' });
+  }
+
   private updateStatus(message: string): void {
     const loadingStatus = document.getElementById('loading-status');
     const statusText = document.getElementById('status-text');

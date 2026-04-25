@@ -117,7 +117,7 @@
   "configuration.spfxLocalWorkbench.group.storybook.title": "Storybook",
   "configuration.spfxLocalWorkbench.storybook.port.description": "Port du serveur de développement Storybook",
   "configuration.spfxLocalWorkbench.storybook.autoGenerate.description": "Générer automatiquement les histoires à partir des manifestes de composants SPFx",
-  "configuration.spfxLocalWorkbench.storybook.storiesPattern.description": "Motif glob pour découvrir les fichiers d'histoires personnalisées dans le projet SPFx",
+  "configuration.spfxLocalWorkbench.storybook.storiesPattern.description": "Motif glob pour découvrir les fichiers d'histoires personnalisées dans le projet SPFx (relatif à la racine de l'espace de travail, par ex. `src/**/*.stories.{ts,tsx}`)",
   "configuration.spfxLocalWorkbench.storybook.generateLocaleStories.description": "Générer automatiquement des variantes d'histoires pour chaque locale prise en charge",
   "configuration.spfxLocalWorkbench.storybook.autoDocs.description": "Activer les pages de documentation générées automatiquement pour les histoires dans Storybook",
   "configuration.spfxLocalWorkbench.storybook.skipInstallPrompt.description": "Installer automatiquement les dépendances Storybook sans demander",
@@ -139,5 +139,7 @@
   "configuration.spfxLocalWorkbench.proxy.fallbackStatus.description": "Code d'état HTTP retourné lorsqu'aucune règle mock ne correspond en mode mock",
   "configuration.spfxLocalWorkbench.proxy.logRequests.description": "Enregistrer toutes les requêtes proxy dans le canal de sortie 'SPFx API Proxy'",
   "configuration.spfxLocalWorkbench.proxy.allowedOrigins.description": "Modèles d'URL autorisés en mode passthrough (vide = tous)",
-  "configuration.spfxLocalWorkbench.proxy.serveMocksWhileRecording.description": "En mode enregistrement, servir également les règles mock existantes pour les requêtes appariées"
+  "configuration.spfxLocalWorkbench.proxy.serveMocksWhileRecording.description": "En mode enregistrement, servir également les règles mock existantes pour les requêtes appariées",
+  "configuration.spfxLocalWorkbench.group.workbench.title": "Workbench",
+  "configuration.spfxLocalWorkbench.propertyPane.shrinkCanvas.description": "Lorsque le volet des propriétés est ouvert, réduire la largeur du canvas (correspond au workbench en ligne) ; désactiver pour superposer le volet des propriétés à la place."
 }
