@@ -136,9 +136,10 @@ export class StorybookPanel {
     this.panel.webview.onDidReceiveMessage(
       async (message: { type?: string; target?: string; text?: string }) => {
         if (message.type === 'spfx:clipboardRequest') {
-          const target = message.target === 'preview' || message.target === 'manager'
-            ? message.target
-            : 'manager';
+          const target =
+            message.target === 'preview' || message.target === 'manager'
+              ? message.target
+              : 'manager';
           const text = await vscode.env.clipboard.readText();
           void this.panel.webview.postMessage({ type: 'spfx:paste', text, target });
         } else if (message.type === 'spfx:clipboardWrite' && typeof message.text === 'string') {
@@ -441,6 +442,7 @@ export class StorybookPanel {
         cmTarget = target;
         setItemDisabled('cm-cut',        !hasSelection || !isEditable);
         setItemDisabled('cm-copy',       !hasSelection);
+        setItemDisabled('cm-paste',      !isEditable);
         setItemDisabled('cm-undo',       !isEditable);
         setItemDisabled('cm-redo',       !isEditable);
         setItemDisabled('cm-select-all', !isEditable);

@@ -199,6 +199,11 @@ if (typeof window !== 'undefined') {
         return;
       }
 
+      // All incoming control messages originate from the parent (manager) frame.
+      if (event.source !== window.parent) {
+        return;
+      }
+
       if (
         data.type === 'spfx:paste' &&
         data.target === 'preview' &&
@@ -221,6 +226,11 @@ if (typeof window !== 'undefined') {
 
       // Context menu command dispatched from the outer webview overlay.
       if (data.type === 'spfx:contextCmd' && data.target === 'preview') {
+        const knownCmds = ['copy', 'cut', 'paste', 'selectAll', 'undo', 'redo'] as const;
+        type KnownCmd = (typeof knownCmds)[number];
+        if (!knownCmds.includes(data.cmd as KnownCmd)) {
+          return;
+        }
         switch (data.cmd) {
           case 'copy': {
             const saved = contextMenuActiveEl as HTMLInputElement | HTMLTextAreaElement | null;
