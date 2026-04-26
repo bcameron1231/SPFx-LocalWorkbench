@@ -4,7 +4,7 @@ import type { IHelloStorybookProps } from './IHelloStorybookProps';
 import { ThemePreview } from './ThemePreview/ThemePreview';
 import { DisplayModeIndicator } from './DisplayModeIndicator/DisplayModeIndicator';
 import * as strings from 'HelloStorybookWebPartStrings';
-import { css } from '@fluentui/react';
+import { css, TextField } from '@fluentui/react';
 
 export default class HelloStorybook extends React.Component<IHelloStorybookProps> {
   public render(): React.ReactElement<IHelloStorybookProps> {
@@ -37,6 +37,11 @@ export default class HelloStorybook extends React.Component<IHelloStorybookProps
         <div className={css(styles.section, styles.horizontal)}>
           <div className={styles.sectionTitle}>Display Mode:</div>
           <DisplayModeIndicator displayMode={displayMode} />
+        </div>
+        <div className={css(styles.section, styles.horizontal)}>
+          <div className={styles.sectionTitle}>Input Test:</div>
+          <input type="text" placeholder="Standard input..." />
+          <TextField placeholder="FluentUI input..."/>
         </div>
         <div className={styles.section}>
           <div className={styles.sectionTitle}>Theme:</div>
