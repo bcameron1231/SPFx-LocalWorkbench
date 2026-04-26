@@ -249,22 +249,32 @@ if (window !== window.top) {
       return;
     }
 
+    // Determine the expected sender for each message type:
+    // preview-frame-originated messages must come from the canvas iframe;
+    // parent-originated messages (spfx:paste, spfx:selectAll, spfx:contextCmd) must come from window.parent.
+    const fromPreview = event.source === getPreviewFrame()?.contentWindow;
+    const fromParent  = event.source === window.parent;
+
     if (data.type === 'spfx:previewFocused') {
+      if (!fromPreview) { return; }
       lastActiveFrame = 'preview';
       return;
     }
 
     // Relay clipboard/context requests from the preview frame up to the outer webview.
     if (data.type === 'spfx:clipboardRequest' && data.target === 'preview') {
+      if (!fromPreview) { return; }
       window.parent.postMessage(data, '*');
       return;
     }
     if (data.type === 'spfx:clipboardWrite') {
+      if (!fromPreview) { return; }
       // Relay copy/cut result from preview up to the outer webview.
       window.parent.postMessage(data, '*');
       return;
     }
     if (data.type === 'spfx:contextMenu' && data.target === 'preview') {
+      if (!fromPreview) { return; }
       // Adjust the preview-relative mouse coordinates to manager document coordinates.
       const pf = getPreviewFrame();
       const rect = pf?.getBoundingClientRect();
@@ -280,6 +290,7 @@ if (window !== window.top) {
     }
 
     if (data.type === 'spfx:paste' && typeof data.text === 'string') {
+      if (!fromParent) { return; }
       const target = data.target ?? lastActiveFrame;
       if (target === 'manager') {
         // Restore focus to the element that initiated the paste (context menu or CMD+V/CTRL+V).
@@ -294,6 +305,7 @@ if (window !== window.top) {
     }
 
     if (data.type === 'spfx:selectAll') {
+      if (!fromParent) { return; }
       const target = data.target ?? lastActiveFrame;
       if (target === 'manager') {
         document.execCommand('selectAll');
@@ -305,6 +317,7 @@ if (window !== window.top) {
 
     // Context menu command dispatched from the outer webview overlay.
     if (data.type === 'spfx:contextCmd') {
+      if (!fromParent) { return; }
       const target =
         data.cmd === 'paste' ? (data.target ?? lastActiveFrame) : (data.target ?? 'manager');
 
