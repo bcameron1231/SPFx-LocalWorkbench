@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 import { escapeHtml, getErrorMessage } from '@spfx-local-workbench/shared';
+import { getNonce } from '@spfx-local-workbench/shared/utils/node';
 
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
 import type { IStorybookThemeColors } from '../types';
@@ -131,7 +132,7 @@ export class StorybookPanel {
     // Handle clipboard requests from Storybook — Storybook intercepts CMD+V/CTRL+V in the
     // cross-origin iframe (where VS Code keybindings never fire) and relays the request
     // here. The extension reads the clipboard via the VS Code API and sends the text back.
-    // Also handles clipboard writes (copy/cut) and contextCmd routing.
+    // Also handles clipboard writes (copy/cut operations forwarded from the iframe).
     this.panel.webview.onDidReceiveMessage(
       async (message: { type?: string; target?: string; text?: string }) => {
         if (message.type === 'spfx:clipboardRequest') {
@@ -350,6 +351,7 @@ export class StorybookPanel {
    */
   private getStorybookHtml(): string {
     const storybookUrl = this.serverManager.getUrl();
+    const nonce = getNonce();
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -359,7 +361,7 @@ export class StorybookPanel {
           content="default-src 'none'; 
                    frame-src ${storybookUrl} http://localhost:* ws://localhost:*; 
                    style-src 'unsafe-inline';
-                   script-src 'unsafe-inline';">
+                   script-src 'nonce-${nonce}';">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPFx Storybook</title>
     <style>
@@ -403,7 +405,7 @@ export class StorybookPanel {
       <div class="cm-item" id="cm-paste">     <span>Paste</span>      <span class="cm-hint" id="hint-paste"></span></div>
       <div class="cm-item" id="cm-select-all"><span>Select All</span> <span class="cm-hint" id="hint-select-all"></span></div>
     </div>
-    <script>
+    <script nonce="${nonce}">
       var vscode = acquireVsCodeApi();
       var frame = document.getElementById('storybook-frame');
       var cm = document.getElementById('spfx-cm');
