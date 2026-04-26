@@ -136,9 +136,12 @@ export class StorybookPanel {
     this.panel.webview.onDidReceiveMessage(
       async (message: { type?: string; target?: string; text?: string }) => {
         if (message.type === 'spfx:clipboardRequest') {
+          const target = message.target === 'preview' || message.target === 'manager'
+            ? message.target
+            : 'manager';
           const text = await vscode.env.clipboard.readText();
-          void this.panel.webview.postMessage({ type: 'spfx:paste', text, target: message.target });
-        } else if (message.type === 'spfx:clipboardWrite' && message.text !== undefined) {
+          void this.panel.webview.postMessage({ type: 'spfx:paste', text, target });
+        } else if (message.type === 'spfx:clipboardWrite' && typeof message.text === 'string') {
           await vscode.env.clipboard.writeText(message.text);
         }
       },
@@ -427,6 +430,7 @@ export class StorybookPanel {
         backdrop.style.display = 'none';
       }
 
+      /** Makes them look disabled and marks them disabled for screen readers n stuff */
       function setItemDisabled(id, disabled) {
         var el = document.getElementById(id);
         el.classList.toggle('disabled', disabled);
