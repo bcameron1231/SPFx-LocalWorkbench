@@ -95,6 +95,10 @@ if (window !== window.top) {
   // Save the active element at right-click time so context menu actions can
   // operate on it even after focus shifts to the context menu overlay.
   let contextMenuActiveEl: HTMLElement | null = null;
+  // Set to true when the context-menu "Paste" command initiates a clipboard request,
+  // so the async spfx:paste response knows to restore focus to contextMenuActiveEl.
+  // Keyboard CMD/CTRL+V pastes must NOT restore focus to a stale context-menu target.
+  let pendingContextMenuPaste = false;
 
   const getPreviewFrame = (): HTMLIFrameElement | null =>
     (document.getElementById('storybook-preview-iframe') ??
@@ -153,7 +157,9 @@ if (window !== window.top) {
       // Let the preview iframe handle its own context menu via its own listener;
       // events don't cross iframe boundaries so this fires only for manager UI elements.
       e.preventDefault();
-      contextMenuActiveEl = document.activeElement as HTMLElement;
+      const target = e.target as HTMLElement;
+      contextMenuActiveEl =
+        (target.closest('input, textarea, [contenteditable]') as HTMLElement | null) ?? target;
       const el = contextMenuActiveEl as HTMLInputElement | HTMLTextAreaElement;
       const hasSelection =
         el.tagName === 'INPUT' || el.tagName === 'TEXTAREA'
@@ -303,10 +309,13 @@ if (window !== window.top) {
       }
       const target = data.target ?? lastActiveFrame;
       if (target === 'manager') {
-        // Restore focus to the element that initiated the paste (context menu or CMD+V/CTRL+V).
-        if (contextMenuActiveEl) {
+        // Only restore focus to contextMenuActiveEl when this paste was triggered by the
+        // context menu. Keyboard paste (CMD/CTRL+V) must not hijack focus to a stale
+        // context-menu target.
+        if (pendingContextMenuPaste && contextMenuActiveEl) {
           contextMenuActiveEl.focus();
         }
+        pendingContextMenuPaste = false;
         document.execCommand('insertText', false, data.text);
       } else {
         getPreviewFrame()?.contentWindow?.postMessage(data, '*');
@@ -367,6 +376,7 @@ if (window !== window.top) {
           if (contextMenuActiveEl) {
             contextMenuActiveEl.focus();
           }
+          pendingContextMenuPaste = true;
           window.parent.postMessage({ type: 'spfx:clipboardRequest', target: 'manager' }, '*');
           break;
         case 'selectAll':

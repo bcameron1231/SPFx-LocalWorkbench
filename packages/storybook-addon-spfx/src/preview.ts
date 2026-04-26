@@ -106,7 +106,9 @@ if (typeof window !== 'undefined') {
       'contextmenu',
       (e: MouseEvent) => {
         e.preventDefault();
-        contextMenuActiveEl = document.activeElement as HTMLElement;
+        const target = e.target as HTMLElement;
+        contextMenuActiveEl =
+          (target.closest('input, textarea, [contenteditable]') as HTMLElement | null) ?? target;
         const el = contextMenuActiveEl as HTMLInputElement | HTMLTextAreaElement;
         const hasSelection =
           el.tagName === 'INPUT' || el.tagName === 'TEXTAREA'
