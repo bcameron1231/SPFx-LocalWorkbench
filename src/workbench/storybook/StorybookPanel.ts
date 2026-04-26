@@ -467,11 +467,17 @@ export class StorybookPanel {
       window.addEventListener('message', function(e) {
         var data = e.data;
         if (!data || typeof data !== 'object') { return; }
+        // Only trust iframe-originated message types when they actually come from the frame.
+        // Extension-originated types (spfx:paste, spfx:selectAll) skip this check.
+        var fromFrame = e.source === frame.contentWindow;
         if (data.type === 'spfx:clipboardRequest') {
+          if (!fromFrame) { return; }
           vscode.postMessage({ type: 'spfx:clipboardRequest', target: data.target });
         } else if (data.type === 'spfx:clipboardWrite') {
+          if (!fromFrame) { return; }
           vscode.postMessage({ type: 'spfx:clipboardWrite', text: data.text });
         } else if (data.type === 'spfx:contextMenu') {
+          if (!fromFrame) { return; }
           showMenu(data.x, data.y, data.target, data.hasSelection, data.isEditable);
         } else if (data.type === 'spfx:paste' || data.type === 'spfx:selectAll') {
           frame.contentWindow.postMessage(data, '*');
