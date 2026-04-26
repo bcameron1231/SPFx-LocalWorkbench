@@ -331,6 +331,10 @@ export class StorybookServerManager {
    * flattens all referenced body files into public/proxy/ with unique names.
    */
   private async copyMockFiles(): Promise<void> {
+    // Storybook's main.ts always declares staticDirs: ['../public'], so the directory must exist!
+    const publicDir = path.join(this.storybookDir, 'public');
+    await vscode.workspace.fs.createDirectory(vscode.Uri.file(publicDir));
+
     // Read proxy settings to get the mock file location
     const proxySettings = ApiProxyService.readSettings();
 

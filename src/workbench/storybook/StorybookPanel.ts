@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 import { escapeHtml, getErrorMessage } from '@spfx-local-workbench/shared';
+import { getNonce } from '@spfx-local-workbench/shared/utils/node';
 
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
 import type { IStorybookThemeColors } from '../types';
@@ -125,6 +126,27 @@ export class StorybookPanel {
         );
       },
       null,
+      this.disposables,
+    );
+
+    // Handle clipboard requests from Storybook — Storybook intercepts CMD+V/CTRL+V in the
+    // cross-origin iframe (where VS Code keybindings never fire) and relays the request
+    // here. The extension reads the clipboard via the VS Code API and sends the text back.
+    // Also handles clipboard writes (copy/cut operations forwarded from the iframe).
+    this.panel.webview.onDidReceiveMessage(
+      async (message: { type?: string; target?: string; text?: string }) => {
+        if (message.type === 'spfx:clipboardRequest') {
+          const target =
+            message.target === 'preview' || message.target === 'manager'
+              ? message.target
+              : 'manager';
+          const text = await vscode.env.clipboard.readText();
+          void this.panel.webview.postMessage({ type: 'spfx:paste', text, target });
+        } else if (message.type === 'spfx:clipboardWrite' && typeof message.text === 'string') {
+          await vscode.env.clipboard.writeText(message.text);
+        }
+      },
+      undefined,
       this.disposables,
     );
   }
@@ -333,6 +355,7 @@ export class StorybookPanel {
    */
   private getStorybookHtml(): string {
     const storybookUrl = this.serverManager.getUrl();
+    const nonce = getNonce();
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -341,25 +364,156 @@ export class StorybookPanel {
     <meta http-equiv="Content-Security-Policy" 
           content="default-src 'none'; 
                    frame-src ${storybookUrl} http://localhost:* ws://localhost:*; 
-                   style-src 'unsafe-inline';">
+                   style-src 'unsafe-inline';
+                   script-src 'nonce-${nonce}';">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPFx Storybook</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: var(--vscode-editor-background);
+        body { margin: 0; padding: 0; overflow: hidden; background-color: var(--vscode-editor-background); }
+        iframe { width: 100%; height: 100vh; border: none; }
+        #spfx-cm {
+            display: none; position: fixed; z-index: 9999;
+            background: var(--vscode-menu-background, #252526);
+            border: 1px solid var(--vscode-menu-border, #3c3c3c);
+            border-radius: 4px; padding: 4px 0; min-width: 200px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4); user-select: none;
         }
-        iframe {
-            width: 100%;
-            height: 100vh;
-            border: none;
+        .cm-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 5px 12px; font-size: 13px;
+            font-family: var(--vscode-font-family, -apple-system, sans-serif);
+            color: var(--vscode-menu-foreground, #cccccc);
+            cursor: pointer; white-space: nowrap; gap: 24px;
+        }
+        .cm-item:hover, .cm-item:focus { background: var(--vscode-list-hoverBackground, #2a2d2e); outline: none; }
+        .cm-item.disabled { opacity: 0.4; pointer-events: none; }
+        .cm-hint { color: var(--vscode-descriptionForeground, #858585); font-size: 12px; }
+        .cm-sep { height: 1px; background: var(--vscode-menu-separatorBackground, #3c3c3c); margin: 4px 0; }
+        /* Transparent full-screen backdrop. Sits above the iframe (pointer-events
+           would otherwise never reach the outer document from a cross-origin iframe)
+           but below the menu so item clicks still work. Shown only while menu is open. */
+        #spfx-cm-backdrop {
+            display: none; position: fixed; inset: 0; z-index: 9998;
         }
     </style>
 </head>
 <body>
-    <iframe src="${storybookUrl}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
+    <iframe id="storybook-frame" src="${storybookUrl}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
+    <div id="spfx-cm-backdrop"></div>
+    <div id="spfx-cm" role="menu">
+      <div class="cm-item" role="menuitem" tabindex="-1" id="cm-undo">      <span>Undo</span>       <span class="cm-hint" id="hint-undo"></span></div>
+      <div class="cm-item" role="menuitem" tabindex="-1" id="cm-redo">      <span>Redo</span>       <span class="cm-hint" id="hint-redo"></span></div>
+      <div class="cm-sep" role="separator"></div>
+      <div class="cm-item" role="menuitem" tabindex="-1" id="cm-cut">       <span>Cut</span>        <span class="cm-hint" id="hint-cut"></span></div>
+      <div class="cm-item" role="menuitem" tabindex="-1" id="cm-copy">      <span>Copy</span>       <span class="cm-hint" id="hint-copy"></span></div>
+      <div class="cm-item" role="menuitem" tabindex="-1" id="cm-paste">     <span>Paste</span>      <span class="cm-hint" id="hint-paste"></span></div>
+      <div class="cm-item" role="menuitem" tabindex="-1" id="cm-select-all"><span>Select All</span> <span class="cm-hint" id="hint-select-all"></span></div>
+    </div>
+    <script nonce="${nonce}">
+      var vscode = acquireVsCodeApi();
+      var frame = document.getElementById('storybook-frame');
+      var cm = document.getElementById('spfx-cm');
+      var backdrop = document.getElementById('spfx-cm-backdrop');
+      var cmTarget = 'manager';
+
+      // Detect platform to show the correct keyboard shortcut hints.
+      var isMac = /Mac|iPhone|iPod|iPad/.test(navigator.platform);
+      var mod = isMac ? '⌘ ' : 'Ctrl+';
+      document.getElementById('hint-undo').textContent       = mod + 'Z';
+      document.getElementById('hint-redo').textContent       = isMac ? '⇧ ⌘ Z' : 'Ctrl+Y';
+      document.getElementById('hint-cut').textContent        = mod + 'X';
+      document.getElementById('hint-copy').textContent       = mod + 'C';
+      document.getElementById('hint-paste').textContent      = mod + 'V';
+      document.getElementById('hint-select-all').textContent = mod + 'A';
+
+      function hideMenu() {
+        cm.style.display = 'none';
+        backdrop.style.display = 'none';
+      }
+
+      /** Makes them look disabled and marks them disabled for screen readers n stuff */
+      function setItemDisabled(id, disabled) {
+        var el = document.getElementById(id);
+        el.classList.toggle('disabled', disabled);
+        el.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+      }
+
+      function showMenu(x, y, target, hasSelection, isEditable) {
+        cmTarget = target;
+        setItemDisabled('cm-cut',        !hasSelection || !isEditable);
+        setItemDisabled('cm-copy',       !hasSelection);
+        setItemDisabled('cm-paste',      !isEditable);
+        setItemDisabled('cm-undo',       !isEditable);
+        setItemDisabled('cm-redo',       !isEditable);
+        setItemDisabled('cm-select-all', !isEditable);
+        // Show backdrop first so any click (including inside the iframe) is captured.
+        backdrop.style.display = 'block';
+        cm.style.left = '0'; cm.style.top = '0'; cm.style.display = 'block';
+        // Clamp to viewport after measuring actual size, then move focus into the menu.
+        requestAnimationFrame(function() {
+          cm.style.left = Math.min(x, window.innerWidth  - cm.offsetWidth  - 4) + 'px';
+          cm.style.top  = Math.min(y, window.innerHeight - cm.offsetHeight - 4) + 'px';
+          var first = cm.querySelector('[role="menuitem"]:not([aria-disabled="true"])');
+          if (first) { first.focus(); }
+        });
+      }
+
+      // The backdrop covers the entire viewport (including the iframe) and dismisses
+      // the menu on any click that doesn't land on a menu item.
+      backdrop.addEventListener('mousedown', hideMenu);
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') { hideMenu(); return; }
+        if (cm.style.display === 'none') { return; }
+        var items = Array.prototype.slice.call(cm.querySelectorAll('[role="menuitem"]:not([aria-disabled="true"])'));
+        if (!items.length) { return; }
+        var idx = items.indexOf(document.activeElement);
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          items[(idx + 1) % items.length].focus();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          items[(idx - 1 + items.length) % items.length].focus();
+        } else if ((e.key === 'Enter' || e.key === ' ') && idx !== -1) {
+          e.preventDefault();
+          document.activeElement.click();
+        }
+      });
+
+      function cmAction(cmd) {
+        // All context menu actions (including paste) go through spfx:contextCmd so the
+        // iframe can restore focus to the saved element before the async clipboard
+        // round-trip begins. Paste is no longer sent directly to the extension here.
+        frame.contentWindow.postMessage({ type: 'spfx:contextCmd', cmd: cmd, target: cmTarget }, '*');
+        hideMenu();
+      }
+
+      document.getElementById('cm-cut').onclick        = function() { cmAction('cut'); };
+      document.getElementById('cm-copy').onclick       = function() { cmAction('copy'); };
+      document.getElementById('cm-paste').onclick      = function() { cmAction('paste'); };
+      document.getElementById('cm-undo').onclick       = function() { cmAction('undo'); };
+      document.getElementById('cm-redo').onclick       = function() { cmAction('redo'); };
+      document.getElementById('cm-select-all').onclick = function() { cmAction('selectAll'); };
+
+      window.addEventListener('message', function(e) {
+        var data = e.data;
+        if (!data || typeof data !== 'object') { return; }
+        // Only trust iframe-originated message types when they actually come from the frame.
+        // Extension-originated types (spfx:paste, spfx:selectAll) skip this check.
+        var fromFrame = e.source === frame.contentWindow;
+        if (data.type === 'spfx:clipboardRequest') {
+          if (!fromFrame) { return; }
+          vscode.postMessage({ type: 'spfx:clipboardRequest', target: data.target });
+        } else if (data.type === 'spfx:clipboardWrite') {
+          if (!fromFrame) { return; }
+          vscode.postMessage({ type: 'spfx:clipboardWrite', text: data.text });
+        } else if (data.type === 'spfx:contextMenu') {
+          if (!fromFrame) { return; }
+          showMenu(data.x, data.y, data.target, data.hasSelection, data.isEditable);
+        } else if (data.type === 'spfx:paste' || data.type === 'spfx:selectAll') {
+          frame.contentWindow.postMessage(data, '*');
+        }
+      });
+    </script>
 </body>
 </html>`;
   }

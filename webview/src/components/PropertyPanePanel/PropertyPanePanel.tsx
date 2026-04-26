@@ -111,6 +111,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
       isBlocking={false}
       isFooterAtBottom={isNonReactive}
       onRenderFooterContent={renderFooter}
+      layerProps={{ eventBubblingEnabled: true }}
     >
       <div id="property-pane-content">
         {config && config.pages && config.pages.length > 0 && webPart ? (
