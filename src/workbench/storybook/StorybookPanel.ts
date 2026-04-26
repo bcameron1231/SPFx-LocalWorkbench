@@ -381,7 +381,7 @@ export class StorybookPanel {
             color: var(--vscode-menu-foreground, #cccccc);
             cursor: pointer; white-space: nowrap; gap: 24px;
         }
-        .cm-item:hover { background: var(--vscode-list-hoverBackground, #2a2d2e); }
+        .cm-item:hover, .cm-item:focus { background: var(--vscode-list-hoverBackground, #2a2d2e); outline: none; }
         .cm-item.disabled { opacity: 0.4; pointer-events: none; }
         .cm-hint { color: var(--vscode-descriptionForeground, #858585); font-size: 12px; }
         .cm-sep { height: 1px; background: var(--vscode-menu-separatorBackground, #3c3c3c); margin: 4px 0; }
@@ -397,13 +397,13 @@ export class StorybookPanel {
     <iframe id="storybook-frame" src="${storybookUrl}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
     <div id="spfx-cm-backdrop"></div>
     <div id="spfx-cm" role="menu">
-      <div class="cm-item" id="cm-undo">      <span>Undo</span>       <span class="cm-hint" id="hint-undo"></span></div>
-      <div class="cm-item" id="cm-redo">      <span>Redo</span>       <span class="cm-hint" id="hint-redo"></span></div>
-      <div class="cm-sep"></div>
-      <div class="cm-item" id="cm-cut">       <span>Cut</span>        <span class="cm-hint" id="hint-cut"></span></div>
-      <div class="cm-item" id="cm-copy">      <span>Copy</span>       <span class="cm-hint" id="hint-copy"></span></div>
-      <div class="cm-item" id="cm-paste">     <span>Paste</span>      <span class="cm-hint" id="hint-paste"></span></div>
-      <div class="cm-item" id="cm-select-all"><span>Select All</span> <span class="cm-hint" id="hint-select-all"></span></div>
+      <div class="cm-item" role="menuitem" tabindex="-1" id="cm-undo">      <span>Undo</span>       <span class="cm-hint" id="hint-undo"></span></div>
+      <div class="cm-item" role="menuitem" tabindex="-1" id="cm-redo">      <span>Redo</span>       <span class="cm-hint" id="hint-redo"></span></div>
+      <div class="cm-sep" role="separator"></div>
+      <div class="cm-item" role="menuitem" tabindex="-1" id="cm-cut">       <span>Cut</span>        <span class="cm-hint" id="hint-cut"></span></div>
+      <div class="cm-item" role="menuitem" tabindex="-1" id="cm-copy">      <span>Copy</span>       <span class="cm-hint" id="hint-copy"></span></div>
+      <div class="cm-item" role="menuitem" tabindex="-1" id="cm-paste">     <span>Paste</span>      <span class="cm-hint" id="hint-paste"></span></div>
+      <div class="cm-item" role="menuitem" tabindex="-1" id="cm-select-all"><span>Select All</span> <span class="cm-hint" id="hint-select-all"></span></div>
     </div>
     <script nonce="${nonce}">
       var vscode = acquireVsCodeApi();
@@ -427,20 +427,28 @@ export class StorybookPanel {
         backdrop.style.display = 'none';
       }
 
+      function setItemDisabled(id, disabled) {
+        var el = document.getElementById(id);
+        el.classList.toggle('disabled', disabled);
+        el.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+      }
+
       function showMenu(x, y, target, hasSelection, isEditable) {
         cmTarget = target;
-        document.getElementById('cm-cut').classList.toggle('disabled', !hasSelection || !isEditable);
-        document.getElementById('cm-copy').classList.toggle('disabled', !hasSelection);
-        document.getElementById('cm-undo').classList.toggle('disabled', !isEditable);
-        document.getElementById('cm-redo').classList.toggle('disabled', !isEditable);
-        document.getElementById('cm-select-all').classList.toggle('disabled', !isEditable);
+        setItemDisabled('cm-cut',        !hasSelection || !isEditable);
+        setItemDisabled('cm-copy',       !hasSelection);
+        setItemDisabled('cm-undo',       !isEditable);
+        setItemDisabled('cm-redo',       !isEditable);
+        setItemDisabled('cm-select-all', !isEditable);
         // Show backdrop first so any click (including inside the iframe) is captured.
         backdrop.style.display = 'block';
         cm.style.left = '0'; cm.style.top = '0'; cm.style.display = 'block';
-        // Clamp to viewport after measuring actual size.
+        // Clamp to viewport after measuring actual size, then move focus into the menu.
         requestAnimationFrame(function() {
           cm.style.left = Math.min(x, window.innerWidth  - cm.offsetWidth  - 4) + 'px';
           cm.style.top  = Math.min(y, window.innerHeight - cm.offsetHeight - 4) + 'px';
+          var first = cm.querySelector('[role="menuitem"]:not([aria-disabled="true"])');
+          if (first) { first.focus(); }
         });
       }
 
@@ -448,7 +456,21 @@ export class StorybookPanel {
       // the menu on any click that doesn't land on a menu item.
       backdrop.addEventListener('mousedown', hideMenu);
       document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') { hideMenu(); }
+        if (e.key === 'Escape') { hideMenu(); return; }
+        if (cm.style.display === 'none') { return; }
+        var items = Array.prototype.slice.call(cm.querySelectorAll('[role="menuitem"]:not([aria-disabled="true"])'));
+        if (!items.length) { return; }
+        var idx = items.indexOf(document.activeElement);
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          items[(idx + 1) % items.length].focus();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          items[(idx - 1 + items.length) % items.length].focus();
+        } else if ((e.key === 'Enter' || e.key === ' ') && idx !== -1) {
+          e.preventDefault();
+          document.activeElement.click();
+        }
       });
 
       function cmAction(cmd) {
