@@ -35,4 +35,11 @@ export const STORYBOOK_GLOBAL_KEYS = {
   PROXY_FALLBACK_STATUS: `${PARAM_KEY}ProxyFallbackStatus`,
   /** Set by the VS Code extension from `spfxLocalWorkbench.proxy.mode`. Defaults to `'mock'`. */
   PROXY_MODE: `${PARAM_KEY}ProxyMode`,
+  /**
+   * HTML Field Security configuration. Controls which external domains web parts may iframe.
+   * Mirrors SharePoint's built-in HTML Field Security setting.
+   * Set by the VS Code extension from `spfxLocalWorkbench.htmlFieldSecurity.*`.
+   * Falls back to `allowList` with SharePoint's default domain list when running outside the extension.
+   */
+  HTML_FIELD_SECURITY: `${PARAM_KEY}HtmlFieldSecurity`,
 } as const;

@@ -1,5 +1,6 @@
 // Browser-compatible utilities
 export * from './buildFluentTheme';
+export * from './buildFrameSrc';
 export * from './buildThemeList';
 export * from './componentUtils';
 export * from './deepMerge';

@@ -5,13 +5,16 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import {
   BrowserProxyTransport,
+  DEFAULT_HTML_FIELD_SECURITY_DOMAINS,
   DEFAULT_THEME_NAME,
+  type IHtmlFieldSecurityConfig,
   type ITheme,
   type IWebPartManifest,
   ProxyAadHttpClient,
   ProxyHttpClient,
   ProxySPHttpClient,
   StatusRenderer,
+  buildFrameSrc,
   buildMockPageContext,
   buildThemeList,
   installFetchInterceptor,
@@ -146,6 +149,10 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
   const globalProxyMode: 'mock' | 'mock-passthrough' =
     rawGlobalProxyMode === 'mock-passthrough' ? 'mock-passthrough' : 'mock';
   const proxyMode = parameters.proxy?.mode ?? globalProxyMode;
+  // HTML field security: VS Code global setting → default allowList with SharePoint domains
+  const htmlFieldSecurity: IHtmlFieldSecurityConfig = globals[
+    STORYBOOK_GLOBAL_KEYS.HTML_FIELD_SECURITY
+  ] ?? { policy: 'allowList', allowedDomains: DEFAULT_HTML_FIELD_SECURITY_DOMAINS };
 
   // Initialize proxy transport when proxy is enabled (or when config changes between stories)
   useEffect(() => {
@@ -420,10 +427,25 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
           }
         }
 
+        // Enforce HTML field security before rendering: inject a Content-Security-Policy
+        // meta tag into the preview iframe's <head> that restricts which external domains
+        // web parts may iframe. This mirrors SharePoint's HTML Field Security setting so
+        // Storybook gives developers the same signal as the real SharePoint environment.
+        // The meta tag is id-keyed so repeated renders replace rather than accumulate entries.
+        const frameSrc = buildFrameSrc('', htmlFieldSecurity);
+        const cspMetaId = 'spfx-iframe-csp';
+        let cspMeta = document.getElementById(cspMetaId) as HTMLMetaElement | null;
+        if (!cspMeta) {
+          cspMeta = document.createElement('meta');
+          cspMeta.id = cspMetaId;
+          cspMeta.httpEquiv = 'Content-Security-Policy';
+          document.head.appendChild(cspMeta);
+        }
+        cspMeta.content = `frame-src ${frameSrc}`;
+
         // Render the component — theme is already applied above.
         instance.render();
 
-        // Emit property changes when they happen
         if (instance.onPropertyPaneFieldChanged) {
           const originalHandler = instance.onPropertyPaneFieldChanged.bind(instance);
           instance.onPropertyPaneFieldChanged = (
@@ -494,8 +516,16 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     if (instance._context) {
       instance._context.displayMode = displayMode;
     }
+
+    // Re-apply the CSP meta tag in case the security config changed between renders
+    const updatedFrameSrc = buildFrameSrc('', htmlFieldSecurity);
+    const existingMeta = document.getElementById('spfx-iframe-csp') as HTMLMetaElement | null;
+    if (existingMeta) {
+      existingMeta.content = `frame-src ${updatedFrameSrc}`;
+    }
+
     instance.render();
-  }, [properties, displayMode, themeName, locale]);
+  }, [properties, displayMode, themeName, locale, htmlFieldSecurity]);
 
   return (
     <SpfxContextProvider

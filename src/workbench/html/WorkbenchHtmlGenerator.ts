@@ -3,7 +3,11 @@
 // This module generates the complete HTML for the workbench webview.
 import * as vscode from 'vscode';
 
-import type { ITheme } from '@spfx-local-workbench/shared';
+import {
+  type IHtmlFieldSecurityConfig,
+  type ITheme,
+  buildFrameSrc,
+} from '@spfx-local-workbench/shared';
 
 import type { IExternalDependency } from '../SpfxProjectDetector';
 import type { IContextConfig } from '../config/WorkbenchConfig';
@@ -33,6 +37,8 @@ export interface IHtmlGeneratorConfig {
   propertyPaneShrinkCanvas?: boolean;
   // External dependencies resolved from the SPFx project's node_modules
   externalDependencies?: IExternalDependency[];
+  // HTML field security configuration controlling which external domains web parts may iframe
+  htmlFieldSecurity?: IHtmlFieldSecurityConfig;
 }
 
 // Generates the Content Security Policy for the webview
@@ -46,7 +52,7 @@ function generateCsp(config: IHtmlGeneratorConfig): string {
     `connect-src ${config.serveUrl} https://*.sharepoint.com https://login.windows.net`,
     `img-src ${config.cspSource} ${config.serveUrl} https: data:`,
     `font-src ${config.cspSource} ${config.serveUrl} https: data:`,
-    `frame-src ${config.serveUrl}`,
+    `frame-src ${buildFrameSrc(config.serveUrl, config.htmlFieldSecurity)}`,
   ].join('; ');
 }
 

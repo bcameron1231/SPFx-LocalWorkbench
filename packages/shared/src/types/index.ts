@@ -2,6 +2,7 @@
 export * from './manifests';
 export * from './components';
 export * from './amd';
+export * from './IHtmlFieldSecurityConfig';
 
 // Legacy flat exports (kept for backwards compatibility)
 export * from './ILocalizedString';

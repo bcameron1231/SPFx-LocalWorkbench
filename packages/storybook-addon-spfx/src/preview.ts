@@ -2,7 +2,10 @@
  * Storybook preview configuration for SPFx addon
  * This file is loaded in the preview iframe and provides decorators
  */
-import { DEFAULT_THEME_NAME } from '@spfx-local-workbench/shared';
+import {
+  DEFAULT_HTML_FIELD_SECURITY_DOMAINS,
+  DEFAULT_THEME_NAME,
+} from '@spfx-local-workbench/shared';
 
 import { DisplayMode, STORYBOOK_GLOBAL_KEYS } from './constants';
 import { withSpfx } from './decorators/withSpfx';
@@ -18,6 +21,9 @@ export const globalTypes = {
   },
   [STORYBOOK_GLOBAL_KEYS.THEME]: {
     defaultValue: DEFAULT_THEME_NAME,
+  },
+  [STORYBOOK_GLOBAL_KEYS.HTML_FIELD_SECURITY]: {
+    defaultValue: { policy: 'allowList', allowedDomains: DEFAULT_HTML_FIELD_SECURITY_DOMAINS },
   },
 };
 

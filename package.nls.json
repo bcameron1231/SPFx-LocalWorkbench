@@ -114,6 +114,11 @@
   "configuration.spfxLocalWorkbench.context.pageContext.properties.cultureInfo.properties.currentCultureName.description": "Current culture code (e.g., en-US, de-DE, fr-FR)",
   "configuration.spfxLocalWorkbench.context.pageContext.properties.isNoScriptEnabled.description": "Whether NoScript is enabled on the site",
   "configuration.spfxLocalWorkbench.context.pageContext.properties.isSPO.description": "Whether this is SharePoint Online (vs. on-premises)",
+  "configuration.spfxLocalWorkbench.htmlFieldSecurity.policy.markdownDescription": "Controls which external domains are allowed to embed iframes in the workbench. Mirrors SharePoint's [HTML Field Security](https://learn.microsoft.com/en-us/sharepoint/dev/general-development/how-to-allow-iframes-in-sharepoint) setting.",
+  "configuration.spfxLocalWorkbench.htmlFieldSecurity.policy.enumDescriptions.none": "No iframes from external domains are allowed",
+  "configuration.spfxLocalWorkbench.htmlFieldSecurity.policy.enumDescriptions.allowAll": "Allow iframes from any domain",
+  "configuration.spfxLocalWorkbench.htmlFieldSecurity.policy.enumDescriptions.allowList": "Allow iframes only from the domains listed in `#spfxLocalWorkbench.htmlFieldSecurity.allowedDomains#`",
+  "configuration.spfxLocalWorkbench.htmlFieldSecurity.allowedDomains.mdDescription": "Domains allowed to embed iframes when `#spfxLocalWorkbench.htmlFieldSecurity.policy#` is set to `allowList`. Matches SharePoint's HTML Field Security allowed domains list.",
 
   "configuration.spfxLocalWorkbench.group.storybook.title": "Storybook",
   "configuration.spfxLocalWorkbench.storybook.port.description": "Port for the Storybook dev server",

@@ -313,7 +313,13 @@ export class StorybookServerManager {
     const proxyMode = vscode.workspace
       .getConfiguration('spfxLocalWorkbench.proxy')
       .get<string>('mode', 'mock');
-    previewConfig += `\n// Injected by VS Code extension at startup\nexport const globals = {\n  spfxTheme: ${JSON.stringify(defaultThemeName)},\n  spfxCustomThemes: ${JSON.stringify(customThemes)},\n  spfxProxyEnabled: ${JSON.stringify(proxyEnabled)},\n  spfxProxyFallbackStatus: ${JSON.stringify(proxyFallbackStatus)},\n  spfxProxyMode: ${JSON.stringify(proxyMode)},\n};\n`;
+    const htmlFieldSecurityPolicy = vscode.workspace
+      .getConfiguration('spfxLocalWorkbench')
+      .get<string>('htmlFieldSecurity.policy', 'allowList');
+    const htmlFieldSecurityDomains = vscode.workspace
+      .getConfiguration('spfxLocalWorkbench')
+      .get<string[]>('htmlFieldSecurity.allowedDomains', []);
+    previewConfig += `\n// Injected by VS Code extension at startup\nexport const globals = {\n  spfxTheme: ${JSON.stringify(defaultThemeName)},\n  spfxCustomThemes: ${JSON.stringify(customThemes)},\n  spfxProxyEnabled: ${JSON.stringify(proxyEnabled)},\n  spfxProxyFallbackStatus: ${JSON.stringify(proxyFallbackStatus)},\n  spfxProxyMode: ${JSON.stringify(proxyMode)},\n  spfxHtmlFieldSecurity: ${JSON.stringify({ policy: htmlFieldSecurityPolicy, allowedDomains: htmlFieldSecurityDomains })},\n};\n`;
 
     await vscode.workspace.fs.writeFile(
       vscode.Uri.file(previewTs),

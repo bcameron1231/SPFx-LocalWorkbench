@@ -113,6 +113,11 @@
   "configuration.spfxLocalWorkbench.context.pageContext.properties.cultureInfo.properties.currentCultureName.description": "Code de culture actuel (par ex. en-US, de-DE, fr-FR)",
   "configuration.spfxLocalWorkbench.context.pageContext.properties.isNoScriptEnabled.description": "Indique si NoScript est activé sur le site",
   "configuration.spfxLocalWorkbench.context.pageContext.properties.isSPO.description": "Indique si ceci est SharePoint Online (vs. sur site)",
+  "configuration.spfxLocalWorkbench.htmlFieldSecurity.policy.markdownDescription": "Contrôle quels domaines externes sont autorisés à intégrer des iframes dans le plan de travail. Reproduit le paramètre [Sécurité des champs HTML](https://learn.microsoft.com/fr-fr/sharepoint/dev/general-development/how-to-allow-iframes-in-sharepoint) de SharePoint.",
+  "configuration.spfxLocalWorkbench.htmlFieldSecurity.policy.enumDescriptions.none": "Aucun iframe de domaines externes n'est autorisé",
+  "configuration.spfxLocalWorkbench.htmlFieldSecurity.policy.enumDescriptions.allowAll": "Autoriser les iframes de n'importe quel domaine",
+  "configuration.spfxLocalWorkbench.htmlFieldSecurity.policy.enumDescriptions.allowList": "Autoriser uniquement les iframes des domaines listés dans `#spfxLocalWorkbench.htmlFieldSecurity.allowedDomains#`",
+  "configuration.spfxLocalWorkbench.htmlFieldSecurity.allowedDomains.mdDescription": "Domaines autorisés à intégrer des iframes lorsque `#spfxLocalWorkbench.htmlFieldSecurity.policy#` est défini sur `allowList`. Correspond à la liste des domaines autorisés dans la Sécurité des champs HTML de SharePoint.",
 
   "configuration.spfxLocalWorkbench.group.storybook.title": "Storybook",
   "configuration.spfxLocalWorkbench.storybook.port.description": "Port du serveur de développement Storybook",

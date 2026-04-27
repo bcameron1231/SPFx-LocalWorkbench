@@ -624,6 +624,71 @@
               }
             },
             "additionalProperties": true
+          },
+          "spfxLocalWorkbench.htmlFieldSecurity.policy": {
+            "order": 20,
+            "type": "string",
+            "default": "allowList",
+            "enum": [
+              "none",
+              "allowAll",
+              "allowList"
+            ],
+            "enumDescriptions": [
+              "%configuration.spfxLocalWorkbench.htmlFieldSecurity.policy.enumDescriptions.none%",
+              "%configuration.spfxLocalWorkbench.htmlFieldSecurity.policy.enumDescriptions.allowAll%",
+              "%configuration.spfxLocalWorkbench.htmlFieldSecurity.policy.enumDescriptions.allowList%"
+            ],
+            "markdownDescription": "%configuration.spfxLocalWorkbench.htmlFieldSecurity.policy.markdownDescription%"
+          },
+          "spfxLocalWorkbench.htmlFieldSecurity.allowedDomains": {
+            "order": 30,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "youtube.com",
+              "youtube-nocookie.com",
+              "player.vimeo.com",
+              "bing.com",
+              "office.microsoft.com",
+              "officeclient.microsoft.com",
+              "store.office.com",
+              "skydrive.live.com",
+              "powerbi.com",
+              "powerbigov.us",
+              "sway.com",
+              "docs.com",
+              "powerapps.com",
+              "flow.microsoft.com",
+              "powerapps.us",
+              "flow.microsoft.us",
+              "app.smartsheet.com",
+              "publish.smartsheet.com",
+              "www.slideshare.net",
+              "youtu.be",
+              "read.amazon.com",
+              "onedrive.live.com",
+              "www.microsoft.com",
+              "forms.office365.us",
+              "support.office.com",
+              "embed.ted.com",
+              "channel9.msdn.com",
+              "forms.office.com",
+              "videoplayercdn.osi.office.net",
+              "forms.microsoft.com",
+              "forms.osi.office365.us",
+              "sway.office.com",
+              "sway.cloud.microsoft",
+              "linkedin.com",
+              "web.yammer.com",
+              "customervoice.microsoft.com",
+              "loop.usercontent.microsoft",
+              "outlook.office365.com",
+              "engage.cloud.microsoft"
+            ],
+            "markdownDescription": "%configuration.spfxLocalWorkbench.htmlFieldSecurity.allowedDomains.mdDescription%"
           }
         }
       },

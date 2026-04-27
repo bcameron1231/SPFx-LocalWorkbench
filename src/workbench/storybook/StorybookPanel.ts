@@ -398,7 +398,7 @@ export class StorybookPanel {
     </style>
 </head>
 <body>
-    <iframe id="storybook-frame" src="${storybookUrl}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
+    <iframe id="storybook-frame" src="${storybookUrl}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"></iframe>
     <div id="spfx-cm-backdrop"></div>
     <div id="spfx-cm" role="menu">
       <div class="cm-item" role="menuitem" tabindex="-1" id="cm-undo">      <span>Undo</span>       <span class="cm-hint" id="hint-undo"></span></div>
