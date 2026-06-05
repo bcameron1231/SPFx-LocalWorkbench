@@ -37,7 +37,5 @@ export type { BodyFileLoader } from './proxy/MockRuleEngine';
 export * from './types';
 export { type IHtmlFieldSecurityConfig } from './types/IHtmlFieldSecurityConfig';
 export * from './utils';
-export { buildFrameSrc } from './utils/buildFrameSrc';
-export { DEFAULT_HTML_FIELD_SECURITY_DOMAINS } from './constants/HTML_FIELD_SECURITY';
 // Note: Node.js-only utils (localize, securityUtils) are in utils/node/
 // Import from '@spfx-local-workbench/shared/utils/node'
