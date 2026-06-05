@@ -432,7 +432,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         // web parts may iframe. This mirrors SharePoint's HTML Field Security setting so
         // Storybook gives developers the same signal as the real SharePoint environment.
         // The meta tag is id-keyed so repeated renders replace rather than accumulate entries.
-        const frameSrc = buildFrameSrc('', htmlFieldSecurity);
+        const frameSrc = buildFrameSrc("'self'", htmlFieldSecurity);
         const cspMetaId = 'spfx-iframe-csp';
         let cspMeta = document.getElementById(cspMetaId) as HTMLMetaElement | null;
         if (!cspMeta) {
@@ -518,7 +518,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     }
 
     // Re-apply the CSP meta tag in case the security config changed between renders
-    const updatedFrameSrc = buildFrameSrc('', htmlFieldSecurity);
+    const updatedFrameSrc = buildFrameSrc("'self'", htmlFieldSecurity);
     const existingMeta = document.getElementById('spfx-iframe-csp') as HTMLMetaElement | null;
     if (existingMeta) {
       existingMeta.content = `frame-src ${updatedFrameSrc}`;
