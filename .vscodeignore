@@ -17,3 +17,6 @@ vsc-extension-quickstart.md
 **/*.ts
 !dist/templates/*.ts
 **/.vscode-test.*
+AGENTS.md
+.nvmrc
+.prettierignore

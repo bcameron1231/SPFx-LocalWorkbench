@@ -1,6 +1,6 @@
 {
   "name": "@spfx-local-workbench/storybook-addon-spfx",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Storybook addon for SharePoint Framework components",
   "author": {
     "name": "Chris Kent",
@@ -62,7 +62,7 @@
     "react-dom": "^17.0.0 || ^18.0.0"
   },
   "dependencies": {
-    "@spfx-local-workbench/shared": "^0.1.0"
+    "@spfx-local-workbench/shared": "^0.1.3"
   },
   "devDependencies": {
     "@storybook/addon-toolbars": "^8.0.0",

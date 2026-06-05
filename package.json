@@ -1,9 +1,10 @@
 {
-  "name": "spfx-local-workbench",
+  "name": "pnp-spfx-local-workbench",
+  "private": true,
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "0.1.2",
-  "publisher": "thechriskent",
+  "version": "0.1.3",
+  "publisher": "m365pnp",
   "homepage": "https://pnp.github.io/",
   "author": {
     "name": "Beau Cameron",
@@ -42,7 +43,9 @@
     "SharePoint Framework",
     "Web Parts",
     "Workbench",
-    "Local Development"
+    "Local Development",
+    "PnP",
+    "M365 Developer Community"
   ],
   "activationEvents": [
     "workspaceContains:**/config/package-solution.json",
@@ -833,6 +836,7 @@
     ]
   },
   "scripts": {
+    "prepublishOnly": "node scripts/block-root-publish.mjs",
     "vscode:prepublish": "npm run package",
     "compile": "npm run packages:build && npm run check-types && npm run lint && npm run generate:css-types && npm-run-all compile:*",
     "compile:extension": "node esbuild.js",
@@ -851,6 +855,11 @@
     "format": "prettier --write \"src/**/*.ts\" \"webview/src/**/*.{ts,tsx}\" \"packages/*/src/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"webview/src/**/*.{ts,tsx}\" \"packages/*/src/**/*.{ts,tsx}\"",
     "generate:icons": "node scripts/generateIcons.js",
+    "version:sync": "node scripts/sync-package-versions.mjs",
+    "version:check": "node scripts/sync-package-versions.mjs --check",
+    "version:bump:patch": "npm version patch --no-git-tag-version && npm run version:sync",
+    "version:bump:minor": "npm version minor --no-git-tag-version && npm run version:sync",
+    "version:bump:major": "npm version major --no-git-tag-version && npm run version:sync",
     "packages:build": "npm run packages:build:shared && npm run packages:build:addon",
     "packages:build:shared": "cd packages/shared && npm run build",
     "packages:build:addon": "cd packages/storybook-addon-spfx && npm run build",
@@ -859,6 +868,7 @@
     "packages:watch:addon": "cd packages/storybook-addon-spfx && npm run watch",
     "packages:clean": "rimraf packages/*/dist packages/*/temp",
     "packages:install": "cd packages/shared && npm install && cd ../storybook-addon-spfx && npm install",
+    "packages:publish": "npm run version:sync && npm run packages:build && node scripts/publish-packages.mjs",
     "clean:cache": "rimraf node_modules/.cache .storybook-cache",
     "clean:dist": "rimraf dist temp && npm run packages:clean",
     "clean": "npm run clean:cache && npm run clean:dist",

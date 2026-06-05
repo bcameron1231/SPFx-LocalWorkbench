@@ -9,6 +9,55 @@ npm install
 npm run compile
 ```
 
+## Publishing NPM Packages
+
+The extension version in the root `package.json` is the source of truth for the publishable packages in `packages/shared` and `packages/storybook-addon-spfx`.
+
+Use these scripts from the repo root:
+
+```bash
+# Bump the root extension version and synchronize both package manifests
+npm run version:bump:patch
+
+# Or minor / major
+npm run version:bump:minor
+npm run version:bump:major
+
+# If you set the root version manually, resync without bumping
+npm run version:sync
+
+# Verify the package versions are aligned before publishing
+npm run version:check
+
+# Build and publish shared first, then the Storybook addon
+npm run packages:publish
+```
+
+Notes:
+
+- `packages:publish` publishes `@spfx-local-workbench/shared` before `@spfx-local-workbench/storybook-addon-spfx` so the addon can resolve the newly published shared version.
+- The repo root package is marked `private`, and root `npm publish` is explicitly blocked, so an accidental publish from the extension root fails with a clear message instead of publishing the VS Code extension package to npm.
+- The Storybook addon dependency on `@spfx-local-workbench/shared` is updated automatically to match the synchronized version while preserving the existing version prefix such as `^`.
+- Run `npm login` first for the npm account that owns these packages. If your npm account uses 2FA for publishes, npm will prompt for the one-time code during `npm run packages:publish`.
+- `npm version ... --no-git-tag-version` updates the root manifest without creating a commit or git tag; tag and release however you prefer afterward.
+- If you want to verify the publish targets without pushing anything, run `node scripts/publish-packages.mjs --dry-run` after a build.
+
+## Publishing The VS Code Extension
+
+The VS Code extension is packaged locally and then uploaded manually to the `m365pnp` publisher in the Marketplace.
+
+From the repo root:
+
+```bash
+vsce package
+```
+
+Notes:
+
+- `vsce package` uses the root extension manifest and runs the existing `vscode:prepublish` step before generating the `.vsix` file.
+- The generated `.vsix` file uses the extension version from the root `package.json`.
+- To publish the updated extension to `m365pnp`, go to https://marketplace.visualstudio.com/manage/publishers/m365pnp?noPrompt=true, open the three-dots menu next to the extension, choose `Update`, and upload the generated `.vsix` file.
+
 ## Sample SPFx Projects
 
 If you keep test SPFx projects under `samples/`, they are excluded from VSIX packaging and VS Code search to keep the extension lean. The folder is still visible in the explorer. For the most reliable detection and debugging, open a sample project folder directly in its own VS Code window (or Extension Host) when testing.
