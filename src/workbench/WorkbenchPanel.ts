@@ -43,6 +43,9 @@ export class WorkbenchPanel {
   private _lastProxyEnabled: boolean = vscode.workspace
     .getConfiguration('spfxLocalWorkbench.proxy')
     .get<boolean>('enabled', true);
+  private _lastHtmlFieldSecurityKey: string = JSON.stringify(
+    getWorkbenchSettings().htmlFieldSecurity,
+  );
   private _displayMode: DisplayMode = DisplayMode.Edit;
   private _preservedComponentConfigs: any[] | undefined;
 
@@ -179,6 +182,14 @@ export class WorkbenchPanel {
       onConfigurationChanged((newSettings) => {
         this._settings = newSettings;
         const currentTheme = getCurrentTheme();
+
+        // The htmlFieldSecurity setting changes the CSP baked into the HTML at load time.
+        const securityKey = JSON.stringify(newSettings.htmlFieldSecurity);
+        if (securityKey !== this._lastHtmlFieldSecurityKey) {
+          this._lastHtmlFieldSecurityKey = securityKey;
+          this._update();
+          return;
+        }
 
         // The proxy.enabled setting changes CSP, HTTP client classes, and bridge initialization — all baked into the HTML at load time.
         const proxyNow = vscode.workspace
@@ -436,6 +447,7 @@ export class WorkbenchPanel {
       proxyEnabled: this._apiProxyService?.enabled ?? true,
       propertyPaneShrinkCanvas: this._settings.propertyPaneShrinkCanvas,
       externalDependencies: this._externalDependencies,
+      htmlFieldSecurity: this._settings.htmlFieldSecurity,
     });
   }
 

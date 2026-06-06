@@ -35,6 +35,7 @@ export type {
 } from './proxy/types';
 export type { BodyFileLoader } from './proxy/MockRuleEngine';
 export * from './types';
+export { type IHtmlFieldSecurityConfig } from './types/IHtmlFieldSecurityConfig';
 export * from './utils';
 // Note: Node.js-only utils (localize, securityUtils) are in utils/node/
 // Import from '@spfx-local-workbench/shared/utils/node'

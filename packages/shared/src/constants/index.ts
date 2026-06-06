@@ -5,3 +5,4 @@ export * from './DisplayMode';
 export * from './timing';
 export * from './ports';
 export * from './LOCALE_CASING_MAP';
+export * from './HTML_FIELD_SECURITY';

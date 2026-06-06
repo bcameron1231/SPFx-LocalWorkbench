@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 import {
   DEFAULT_PAGE_CONTEXT,
   DEFAULT_THEME_NAME,
+  type IHtmlFieldSecurityConfig,
   type IPageContextConfig,
   type ITheme,
   MICROSOFT_THEMES,
@@ -26,6 +27,7 @@ export interface IWorkbenchSettings {
   serveCommand: string;
   context: IContextConfig;
   propertyPaneShrinkCanvas: boolean;
+  htmlFieldSecurity: IHtmlFieldSecurityConfig;
 }
 
 // Default configuration values
@@ -37,6 +39,11 @@ const defaults = {
     pageContext: DEFAULT_PAGE_CONTEXT,
   },
   propertyPaneShrinkCanvas: true,
+  htmlFieldSecurity: {
+    // VS Code always provides the package.json default; this fallback is never reached in practice
+    policy: 'allowList' as const,
+    allowedDomains: [] as string[],
+  },
 };
 
 // Gets the current workbench configuration from VS Code settings
@@ -60,6 +67,16 @@ export function getWorkbenchSettings(): IWorkbenchSettings {
       'propertyPane.shrinkCanvas',
       defaults.propertyPaneShrinkCanvas,
     ),
+    htmlFieldSecurity: {
+      policy: config.get<'none' | 'allowAll' | 'allowList'>(
+        'htmlFieldSecurity.policy',
+        defaults.htmlFieldSecurity.policy,
+      ),
+      allowedDomains: config.get<string[]>(
+        'htmlFieldSecurity.allowedDomains',
+        defaults.htmlFieldSecurity.allowedDomains,
+      ),
+    },
   };
 }
 
