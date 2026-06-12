@@ -21,6 +21,8 @@ export interface IThemePreviewProps {
   isSelected?: boolean;
   /** Click handler */
   onClick?: () => void;
+  /** Visual treatment for the preview. Defaults to the M365 styling. */
+  variant?: 'm365' | 'vscode';
 }
 
 const SMALL_SWATCH_WIDTH = 12.5; // each of 4 small swatches is 12.5% wide (4 × 12.5 = 50% right half)
@@ -33,6 +35,7 @@ export const ThemePreview: React.FC<IThemePreviewProps> = ({
   theme,
   isSelected = false,
   onClick,
+  variant = 'm365',
 }) => {
   const { palette } = theme;
   const smallSwatches = [
@@ -44,11 +47,10 @@ export const ThemePreview: React.FC<IThemePreviewProps> = ({
 
   return (
     <div
-      className={`${styles.container} ${onClick ? styles.clickable : ''}`}
-      style={{
-        borderColor: isSelected ? palette.themePrimary : undefined,
-        backgroundColor: isSelected ? palette.neutralLight : undefined,
-      }}
+      className={`${styles.container} ${onClick ? styles.clickable : ''} ${
+        variant === 'vscode' ? styles.containerVscode : styles.containerM365
+      }`}
+      style={{ borderColor: isSelected ? palette.themePrimary : undefined }}
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
@@ -97,8 +99,15 @@ export const ThemePreview: React.FC<IThemePreviewProps> = ({
 
       {/* Theme name label */}
       <div
-        className={`${styles.label} ${isSelected ? styles.labelSelected : ''}`}
-        style={{ color: isSelected ? (palette.bodyText ?? palette.neutralPrimary) : 'inherit' }}
+        className={`${styles.label} ${
+          variant === 'vscode' ? styles.labelVscode : styles.labelM365
+        } ${isSelected ? styles.labelSelected : ''}`}
+        style={{
+          color:
+            variant === 'vscode' && isSelected
+              ? 'var(--vscode-menu-selectionForeground, inherit)'
+              : 'inherit',
+        }}
       >
         {theme.name}
       </div>

@@ -4,7 +4,6 @@
  * A theme switcher for the status bar that mirrors the storybook ThemeToolbar.
  * Mounted as a separate React root on the static status bar element.
  */
-import { IconButton } from '@fluentui/react';
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -31,6 +30,7 @@ export const StatusBarThemePicker: React.FC<IStatusBarThemePickerProps> = ({
   initialTheme,
   groups: initialGroups,
 }) => {
+  const popupIdRef = useRef(`status-bar-theme-picker-${Math.random().toString(36).slice(2, 10)}`);
   const [currentTheme, setCurrentTheme] = useState<ITheme>(initialTheme);
   const [groups, setGroups] = useState<IThemeGroup[]>(initialGroups);
   const [isOpen, setIsOpen] = useState(false);
@@ -44,8 +44,17 @@ export const StatusBarThemePicker: React.FC<IStatusBarThemePickerProps> = ({
         setIsOpen(false);
       }
     };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
     document.addEventListener('mousedown', handleMouseDown);
-    return () => document.removeEventListener('mousedown', handleMouseDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isOpen]);
 
   // Sync with VS Code settings changes pushed from WorkbenchRuntime
@@ -83,24 +92,34 @@ export const StatusBarThemePicker: React.FC<IStatusBarThemePickerProps> = ({
   return (
     <div ref={containerRef} className={styles.container}>
       {isOpen && (
-        <div className={styles.popup}>
+        <div id={popupIdRef.current} className={styles.popup}>
           <ThemePickerDropdown
             groups={groups}
             currentThemeName={currentTheme.name}
             onSelect={handleSelect}
+            variant="vscode"
           />
         </div>
       )}
-      <IconButton
-        iconProps={{ iconName: 'Color' }}
+      <button
+        type="button"
+        className={styles.trigger}
         title={`Theme: ${currentTheme.name}`}
-        ariaLabel={`Theme: ${currentTheme.name}`}
+        aria-label={`Theme: ${currentTheme.name}`}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? popupIdRef.current : undefined}
         onClick={() => setIsOpen((v) => !v)}
-        styles={{
-          root: { height: 20, width: 'auto', padding: '0 4px', color: 'inherit' },
-          icon: { color: currentTheme.palette.themePrimary, fontSize: 12 },
-        }}
-      />
+      >
+        <span className={styles.swatchContainer}>
+          <span
+            className={styles.swatch}
+            style={{ backgroundColor: currentTheme.palette.themePrimary }}
+            aria-hidden="true"
+          />
+        </span>
+        <span className={styles.label}>{currentTheme.name}</span>
+      </button>
     </div>
   );
 };

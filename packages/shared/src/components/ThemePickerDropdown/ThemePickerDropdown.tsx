@@ -24,6 +24,8 @@ export interface IThemePickerDropdownProps {
   currentThemeName: string;
   /** Called when the user selects a theme */
   onSelect: (themeName: string) => void;
+  /** Visual treatment for the dropdown. Defaults to the M365 styling. */
+  variant?: 'm365' | 'vscode';
 }
 
 /**
@@ -34,19 +36,31 @@ export const ThemePickerDropdown: React.FC<IThemePickerDropdownProps> = ({
   groups,
   currentThemeName,
   onSelect,
+  variant = 'm365',
 }) => (
-  <div className={styles.themeDropdown}>
+  <div
+    className={`${styles.themeDropdown} ${
+      variant === 'vscode' ? styles.themeDropdownVscode : styles.themeDropdownM365
+    }`}
+  >
     {groups.map(
       ({ label, themes }) =>
         themes.length > 0 && (
           <React.Fragment key={label}>
-            <div className={styles.themeGroupHeader}>{label}</div>
+            <div
+              className={`${styles.themeGroupHeader} ${
+                variant === 'vscode' ? styles.themeGroupHeaderVscode : styles.themeGroupHeaderM365
+              }`}
+            >
+              {label}
+            </div>
             {themes.map((theme) => (
               <ThemePreview
                 key={theme.name}
                 theme={theme}
                 isSelected={theme.name === currentThemeName}
                 onClick={() => onSelect(theme.name)}
+                variant={variant}
               />
             ))}
           </React.Fragment>

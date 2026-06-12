@@ -57,14 +57,17 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--primaryBackground, #fff);
-  border-top: 1px solid var(--neutralLight, #edebe9);
-  padding: 6px 20px;
+  background: var(--vscode-sideBarSectionHeader-background, var(--vscode-panel-background, var(--primaryBackground, white)));
+  border-top: 1px solid var(--vscode-sideBarSectionHeader-border, var(--vscode-panel-border, transparent));
+  padding: 0 12px;
   display: flex;
   align-items: center;
   align-content: center;
+  gap: 10px;
+  min-height: 22px;
   font-size: 12px;
-  color: var(--neutralSecondary, #605e5c);
+  font-family: var(--vscode-font-family, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+  color: var(--vscode-sideBarSectionHeader-foreground, var(--neutralSecondary, #605e5c));
   z-index: 100;
   white-space: nowrap;
 }
@@ -72,8 +75,8 @@ body {
 .status-bar .separator {
   width: 1px;
   height: 14px;
-  background: var(--neutralSecondary, #edebe9);
-  margin: 0 8px;
+  background: var(--vscode-sideBarSectionHeader-border, var(--vscode-panel-border, var(--neutralSecondary, #edebe9)));
+  opacity: 0.7;
 }
 
 .status-indicator {
@@ -85,15 +88,16 @@ body {
 }
 
 .status-dot {
-  width: 8px;
-  min-width: 8px;
-  height: 8px;
+  width: 11px;
+  min-width: 11px;
+  height: 11px;
   border-radius: 50%;
-  background: #107c10;
+  background: var(--vscode-testing-iconPassed, #89d185);
+  border: 1px solid var(--vscode-sideBarSectionHeader-border, var(--neutralPrimary, #4d4d4d));
 }
 
 .status-dot.disconnected {
-  background: #d13438;
+  background: var(--vscode-testing-iconFailed, #d13438);
 }
 
 #status-text {
@@ -109,10 +113,18 @@ body {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  color: inherit;
+  opacity: 0.9;
+}
+
+#locale-switcher {
+  color: inherit;
+  opacity: 0.9;
 }
 
 @media (max-width: 500px) {
   .status-bar {
-    padding: 6px;
+    padding: 0 6px;
+    gap: 6px;
   }
 }
