@@ -85,7 +85,16 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
         >
           <Text
             variant="large"
-            styles={{ root: { color: '#a80000', marginBottom: 16, textAlign: 'center' } }}
+            styles={{
+              root: {
+                color: 'var(--errorText)',
+                background: 'var(--errorBackground)',
+                padding: '4px 8px',
+                borderRadius: 4,
+                marginBottom: 16,
+                textAlign: 'center',
+              },
+            }}
           >
             No SPFx components found. Make sure your project is served / running.
           </Text>
@@ -109,10 +118,16 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
             tokens={{ childrenGap: 4 }}
             styles={{ root: { alignItems: 'flex-end' } }}
           >
-            <Text variant="small" styles={{ root: { color: '#605e5c', marginRight: 4 } }}>
+            <Text
+              variant="small"
+              styles={{ root: { color: 'var(--neutralPrimary)', marginRight: 4 } }}
+            >
               Command:
             </Text>
-            <Text variant="small" styles={{ root: { fontFamily: 'monospace', color: '#323130' } }}>
+            <Text
+              variant="small"
+              styles={{ root: { fontFamily: 'monospace', color: 'var(--neutralSecondary)' } }}
+            >
               {serveCommand}
             </Text>
           </Stack>
