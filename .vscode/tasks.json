@@ -32,8 +32,11 @@
         "owner": "esbuild",
         "fileLocation": ["relative", "${workspaceFolder}"],
         "pattern": {
-          "regexp": "^✘ \\[ERROR\\] (.+)$",
-          "message": 1
+          "regexp": "^✘ \\[ERROR\\] (.+):(\\d+):(\\d+): (.+)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
         },
         "background": {
           "activeOnStart": true,
@@ -70,8 +73,11 @@
         "owner": "esbuild-webview",
         "fileLocation": ["relative", "${workspaceFolder}"],
         "pattern": {
-          "regexp": "^✘ \\[ERROR\\] (.+)$",
-          "message": 1
+          "regexp": "^✘ \\[ERROR\\] (.+):(\\d+):(\\d+): (.+)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
         },
         "background": {
           "activeOnStart": true,

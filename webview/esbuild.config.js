@@ -22,12 +22,19 @@ const esbuildProblemMatcherPlugin = {
     });
     build.onEnd((result) => {
       result.errors.forEach(({ text, location }) => {
-        console.error(`✘ [ERROR] ${text}`);
         if (location) {
-          console.error(`    ${location.file}:${location.line}:${location.column}:`);
+          console.error(
+            `✘ [ERROR] ${location.file}:${location.line}:${location.column}: ${text}`,
+          );
+        } else {
+          console.error(`✘ [ERROR] ${text}`);
         }
       });
-      console.log('[watch] build finished');
+      if (result.errors.length === 0) {
+        console.log('[watch] build finished');
+      } else {
+        console.log('[watch] build failed');
+      }
     });
   },
 };
