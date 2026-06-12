@@ -23,6 +23,22 @@ export interface IThemePreviewProps {
   onClick?: () => void;
   /** Visual treatment for the preview. Defaults to the M365 styling. */
   variant?: 'm365' | 'vscode';
+  /** Optional element id */
+  id?: string;
+  /** Accessibility role for the interactive preview */
+  role?: React.AriaRole;
+  /** Keyboard tab order */
+  tabIndex?: number;
+  /** Accessible selected state */
+  ariaChecked?: boolean;
+  /** Accessible label override */
+  ariaLabel?: string;
+  /** Focus handler */
+  onFocus?: React.FocusEventHandler<HTMLDivElement>;
+  /** Keydown handler */
+  onKeyDown?: React.KeyboardEventHandler<HTMLDivElement>;
+  /** Ref for focus management */
+  elementRef?: React.Ref<HTMLDivElement>;
 }
 
 const SMALL_SWATCH_WIDTH = 12.5; // each of 4 small swatches is 12.5% wide (4 × 12.5 = 50% right half)
@@ -36,6 +52,14 @@ export const ThemePreview: React.FC<IThemePreviewProps> = ({
   isSelected = false,
   onClick,
   variant = 'm365',
+  id,
+  role,
+  tabIndex,
+  ariaChecked,
+  ariaLabel,
+  onFocus,
+  onKeyDown,
+  elementRef,
 }) => {
   const { palette } = theme;
   const smallSwatches = [
@@ -47,21 +71,20 @@ export const ThemePreview: React.FC<IThemePreviewProps> = ({
 
   return (
     <div
+      ref={elementRef}
+      id={id}
       className={`${styles.container} ${onClick ? styles.clickable : ''} ${
         variant === 'vscode' ? styles.containerVscode : styles.containerM365
       }`}
       style={{ borderColor: isSelected ? palette.themePrimary : undefined }}
       onClick={onClick}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      aria-label={`${theme.name} theme${isSelected ? ' (selected)' : ''}`}
-      aria-pressed={onClick ? isSelected : undefined}
-      onKeyDown={(e) => {
-        if (onClick && (e.key === 'Enter' || e.key === ' ')) {
-          e.preventDefault();
-          onClick();
-        }
-      }}
+      role={role ?? (onClick ? 'button' : undefined)}
+      tabIndex={tabIndex ?? (onClick ? 0 : undefined)}
+      aria-label={ariaLabel ?? `${theme.name} theme${isSelected ? ' (selected)' : ''}`}
+      aria-checked={ariaChecked}
+      aria-pressed={role ? undefined : onClick ? isSelected : undefined}
+      onFocus={onFocus}
+      onKeyDown={onKeyDown}
     >
       <svg
         role="presentation"

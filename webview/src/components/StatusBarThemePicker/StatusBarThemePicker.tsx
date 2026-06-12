@@ -38,6 +38,7 @@ export const StatusBarThemePicker: React.FC<IStatusBarThemePickerProps> = ({
   const [groups, setGroups] = useState<IThemeGroup[]>(initialGroups);
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   // Close the popup when the user clicks outside the container
   useEffect(() => {
@@ -89,7 +90,13 @@ export const StatusBarThemePicker: React.FC<IStatusBarThemePickerProps> = ({
     if (!theme) return;
     setCurrentTheme(theme);
     setIsOpen(false);
+    triggerRef.current?.focus();
     window.dispatchEvent(new CustomEvent('workbenchThemeChanged', { detail: theme }));
+  };
+
+  const handleDismiss = (): void => {
+    setIsOpen(false);
+    triggerRef.current?.focus();
   };
 
   const previewSwatches = [
@@ -108,15 +115,18 @@ export const StatusBarThemePicker: React.FC<IStatusBarThemePickerProps> = ({
             currentThemeName={currentTheme.name}
             onSelect={handleSelect}
             variant="vscode"
+            ariaLabel="Theme picker"
+            autoFocusSelected
+            onEscape={handleDismiss}
           />
         </div>
       )}
       <button
+        ref={triggerRef}
         type="button"
         className={styles.trigger}
         title={`Theme: ${currentTheme.name}`}
-        aria-label={`Theme: ${currentTheme.name}`}
-        aria-haspopup="menu"
+        aria-label={`Choose theme. Current theme: ${currentTheme.name}`}
         aria-expanded={isOpen}
         aria-controls={isOpen ? popupIdRef.current : undefined}
         onClick={() => setIsOpen((v) => !v)}
