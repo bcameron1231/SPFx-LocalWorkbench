@@ -77,25 +77,9 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
     const serveCommand = window.__workbenchConfig?.serveCommand || 'heft start --clean --nobrowser';
 
     return (
-      <div id="canvas">
-        <Stack
-          horizontalAlign="center"
-          tokens={{ childrenGap: 16 }}
-          styles={{ root: { padding: '24px' } }}
-        >
-          <Text
-            variant="large"
-            styles={{
-              root: {
-                color: 'var(--errorText)',
-                background: 'var(--errorBackground)',
-                padding: '4px 8px',
-                borderRadius: 4,
-                marginBottom: 16,
-                textAlign: 'center',
-              },
-            }}
-          >
+      <div id="canvas" className={styles.canvas}>
+        <Stack horizontalAlign="center" tokens={{ childrenGap: 16 }} className={styles.emptyState}>
+          <Text variant="large" className={styles.emptyStateMessage}>
             No SPFx components found. Make sure your project is served / running.
           </Text>
           <PrimaryButton
@@ -103,35 +87,17 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
             onClick={handleStartServe}
             disabled={serveClicked}
             iconProps={serveClicked ? { iconName: 'Sync' } : undefined}
-            styles={
-              serveClicked
-                ? {
-                    icon: {
-                      animation: 'spin 1.5s linear infinite',
-                    },
-                  }
-                : undefined
-            }
+            styles={serveClicked ? { icon: { animation: 'spin 1.5s linear infinite' } } : undefined}
           />
-          <Stack
-            horizontal
-            tokens={{ childrenGap: 4 }}
-            styles={{ root: { alignItems: 'flex-end' } }}
-          >
-            <Text
-              variant="small"
-              styles={{ root: { color: 'var(--neutralPrimary)', marginRight: 4 } }}
-            >
+          <Stack horizontal tokens={{ childrenGap: 4 }} className={styles.emptyStateCommandRow}>
+            <Text variant="small" className={styles.emptyStateCommandLabel}>
               Command:
             </Text>
-            <Text
-              variant="small"
-              styles={{ root: { fontFamily: 'monospace', color: 'var(--neutralSecondary)' } }}
-            >
+            <Text variant="small" className={styles.emptyStateCommandValue}>
               {serveCommand}
             </Text>
           </Stack>
-          <Link onClick={handleOpenSettings} styles={{ root: { fontSize: 12 } }}>
+          <Link onClick={handleOpenSettings} className={styles.emptyStateSettingsLink}>
             Open Extension Settings
           </Link>
         </Stack>
@@ -141,7 +107,7 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
 
   return (
     <>
-      <div id="canvas">
+      <div id="canvas" className={styles.canvas}>
         {/* First add zone */}
         <AddZone
           insertIndex={0}

@@ -28,12 +28,13 @@
   color: var(--vscode-menu-foreground, inherit);
 }
 
-.containerVscode.clickable:hover:not([aria-pressed='true']) {
+.containerVscode.clickable:hover:not([aria-pressed='true']):not([aria-checked='true']) {
   background-color: var(--vscode-list-hoverBackground, rgb(255 255 255 / 0.08));
   color: var(--vscode-list-hoverForeground, inherit);
 }
 
-.containerVscode[aria-pressed='true'] {
+.containerVscode[aria-pressed='true'],
+.containerVscode[aria-checked='true'] {
   background-color: var(--vscode-menu-selectionBackground, rgb(0 122 204 / 0.35));
   color: var(--vscode-menu-selectionForeground, inherit);
 }

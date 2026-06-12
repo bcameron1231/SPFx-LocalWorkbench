@@ -49,24 +49,29 @@ export const ThemePickerDropdown: React.FC<IThemePickerDropdownProps> = ({
   onEscape,
 }) => {
   const themeOptions = useMemo(() => groups.flatMap((group) => group.themes), [groups]);
-  const [focusedThemeName, setFocusedThemeName] = useState(currentThemeName);
+  const getValidFocusedThemeName = (themeName: string): string =>
+    themeOptions.some((theme) => theme.name === themeName) ? themeName : (themeOptions[0]?.name ?? '');
+
+  const [focusedThemeName, setFocusedThemeName] = useState(() =>
+    getValidFocusedThemeName(currentThemeName),
+  );
   const optionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
-    setFocusedThemeName(currentThemeName);
-  }, [currentThemeName]);
+    setFocusedThemeName(getValidFocusedThemeName(currentThemeName));
+  }, [currentThemeName, themeOptions]);
 
   useEffect(() => {
     if (!autoFocusSelected || themeOptions.length === 0) {
       return;
     }
 
-    const targetThemeName = themeOptions.some((theme) => theme.name === currentThemeName)
-      ? currentThemeName
-      : themeOptions[0].name;
+    const targetThemeName = getValidFocusedThemeName(currentThemeName);
 
-    setFocusedThemeName(targetThemeName);
-    optionRefs.current[targetThemeName]?.focus();
+    if (targetThemeName) {
+      setFocusedThemeName(targetThemeName);
+      optionRefs.current[targetThemeName]?.focus();
+    }
   }, [autoFocusSelected, currentThemeName, themeOptions]);
 
   const focusThemeByIndex = (index: number): void => {

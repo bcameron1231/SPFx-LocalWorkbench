@@ -41,7 +41,7 @@
         "background": {
           "activeOnStart": true,
           "beginsPattern": "^\\[watch\\] build started",
-          "endsPattern": "^\\[watch\\] build finished"
+          "endsPattern": "^\\[watch\\] build (finished|failed)"
         }
       },
       "isBackground": true,
@@ -82,7 +82,7 @@
         "background": {
           "activeOnStart": true,
           "beginsPattern": "^\\[watch\\] build started",
-          "endsPattern": "^\\[watch\\] build finished"
+          "endsPattern": "^\\[watch\\] build (finished|failed)"
         }
       },
       "isBackground": true,

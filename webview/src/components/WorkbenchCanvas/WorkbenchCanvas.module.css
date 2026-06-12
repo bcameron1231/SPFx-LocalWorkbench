@@ -7,6 +7,38 @@
   min-height: calc(100vh - 96px);
 }
 
+.emptyState {
+  padding: 24px;
+}
+
+.emptyStateMessage {
+  color: var(--errorText, #a80000);
+  background: var(--errorBackground, #fde7e9);
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.emptyStateCommandRow {
+  align-items: flex-end;
+}
+
+.emptyStateCommandLabel {
+  color: var(--neutralPrimary, #605e5c);
+  margin-right: 4px;
+}
+
+.emptyStateCommandValue {
+  font-family: ui-monospace, SFMono-Regular, SFMono-Regular, Consolas, 'Liberation Mono', Menlo,
+    monospace;
+  color: var(--neutralSecondary, #605e5c);
+}
+
+.emptyStateSettingsLink {
+  font-size: 12px;
+}
+
 /* Add zone - the + button line */
 .addZone {
   display: flex;
