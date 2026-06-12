@@ -19,6 +19,9 @@ export interface IStatusBarThemePickerProps {
   groups: IThemeGroup[];
 }
 
+const MAIN_SWATCH_WIDTH = 32;
+const SMALL_SWATCH_WIDTH = 17;
+
 /**
  * Renders a small Color icon button in the status bar.
  * Clicking it opens a popup with the full ThemePickerDropdown above the button.
@@ -89,6 +92,13 @@ export const StatusBarThemePicker: React.FC<IStatusBarThemePickerProps> = ({
     window.dispatchEvent(new CustomEvent('workbenchThemeChanged', { detail: theme }));
   };
 
+  const previewSwatches = [
+    currentTheme.palette.themeSecondary,
+    currentTheme.palette.themeTertiary,
+    currentTheme.palette.themeLight,
+    currentTheme.palette.accent ?? currentTheme.palette.themePrimary,
+  ];
+
   return (
     <div ref={containerRef} className={styles.container}>
       {isOpen && (
@@ -111,14 +121,34 @@ export const StatusBarThemePicker: React.FC<IStatusBarThemePickerProps> = ({
         aria-controls={isOpen ? popupIdRef.current : undefined}
         onClick={() => setIsOpen((v) => !v)}
       >
-        <span className={styles.swatchContainer}>
-          <span
-            className={styles.swatch}
-            style={{ backgroundColor: currentTheme.palette.themePrimary }}
-            aria-hidden="true"
-          />
-        </span>
-        <span className={styles.label}>{currentTheme.name}</span>
+        <div className={styles.swatchContainer} aria-hidden="true">
+          <svg
+            className={styles.swatchPreview}
+            viewBox="0 0 84 46"
+            role="presentation"
+            style={{ borderColor: currentTheme.palette.neutralLight }}
+          >
+            <rect
+              y="0%"
+              height="100%"
+              width={`${MAIN_SWATCH_WIDTH}%`}
+              fill={currentTheme.palette.themePrimary}
+              stroke="none"
+            />
+            {previewSwatches.map((color, index) => (
+              <rect
+                key={index}
+                y="0%"
+                height="100%"
+                width={`${SMALL_SWATCH_WIDTH}%`}
+                x={`${MAIN_SWATCH_WIDTH + index * SMALL_SWATCH_WIDTH}%`}
+                fill={color}
+                stroke="none"
+              />
+            ))}
+          </svg>
+        </div>
+        <div className={styles.label}>{currentTheme.name}</div>
       </button>
     </div>
   );

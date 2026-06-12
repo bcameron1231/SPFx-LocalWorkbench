@@ -26,7 +26,7 @@
 .trigger {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
   height: 22px;
   margin: 0;
@@ -49,18 +49,20 @@
 }
 
 .swatchContainer {
+  width: 24px;
+  height: 14px;
   border-radius: 3px;
-  padding: 2px 3px;
-  background: var(--primaryBackground, white);
-  border: 1px solid var(--vscode-sideBarSectionHeader-border, var(--neutralPrimary, #4d4d4d));
+  overflow: hidden;
+  flex: 0 0 auto;
 }
 
-.swatch {
-  width: 10px;
-  height: 10px;
-  flex: 0 0 auto;
-  border-radius: 999px;
-  display: inline-block;
+.swatchPreview {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 3px;
+  border: 1px solid var(--vscode-panel-border, var(--neutralPrimary, #4d4d4d));
+  background: var(--primaryBackground, white);
 }
 
 .label {
