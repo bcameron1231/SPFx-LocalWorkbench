@@ -4,7 +4,6 @@
  * A theme switcher for the status bar that mirrors the storybook ThemeToolbar.
  * Mounted as a separate React root on the static status bar element.
  */
-import { IconButton } from '@fluentui/react';
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -20,6 +19,9 @@ export interface IStatusBarThemePickerProps {
   groups: IThemeGroup[];
 }
 
+const MAIN_SWATCH_WIDTH = 32;
+const SMALL_SWATCH_WIDTH = 17;
+
 /**
  * Renders a small Color icon button in the status bar.
  * Clicking it opens a popup with the full ThemePickerDropdown above the button.
@@ -31,10 +33,12 @@ export const StatusBarThemePicker: React.FC<IStatusBarThemePickerProps> = ({
   initialTheme,
   groups: initialGroups,
 }) => {
+  const popupIdRef = useRef(`status-bar-theme-picker-${Math.random().toString(36).slice(2, 10)}`);
   const [currentTheme, setCurrentTheme] = useState<ITheme>(initialTheme);
   const [groups, setGroups] = useState<IThemeGroup[]>(initialGroups);
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   // Close the popup when the user clicks outside the container
   useEffect(() => {
@@ -44,8 +48,17 @@ export const StatusBarThemePicker: React.FC<IStatusBarThemePickerProps> = ({
         setIsOpen(false);
       }
     };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
     document.addEventListener('mousedown', handleMouseDown);
-    return () => document.removeEventListener('mousedown', handleMouseDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isOpen]);
 
   // Sync with VS Code settings changes pushed from WorkbenchRuntime
@@ -77,30 +90,76 @@ export const StatusBarThemePicker: React.FC<IStatusBarThemePickerProps> = ({
     if (!theme) return;
     setCurrentTheme(theme);
     setIsOpen(false);
+    triggerRef.current?.focus();
     window.dispatchEvent(new CustomEvent('workbenchThemeChanged', { detail: theme }));
   };
+
+  const handleDismiss = (): void => {
+    setIsOpen(false);
+    triggerRef.current?.focus();
+  };
+
+  const previewSwatches = [
+    currentTheme.palette.themeSecondary,
+    currentTheme.palette.themeTertiary,
+    currentTheme.palette.themeLight,
+    currentTheme.palette.accent ?? currentTheme.palette.themePrimary,
+  ];
 
   return (
     <div ref={containerRef} className={styles.container}>
       {isOpen && (
-        <div className={styles.popup}>
+        <div id={popupIdRef.current} className={styles.popup}>
           <ThemePickerDropdown
             groups={groups}
             currentThemeName={currentTheme.name}
             onSelect={handleSelect}
+            variant="vscode"
+            ariaLabel="Theme picker"
+            autoFocusSelected
+            onEscape={handleDismiss}
           />
         </div>
       )}
-      <IconButton
-        iconProps={{ iconName: 'Color' }}
+      <button
+        ref={triggerRef}
+        type="button"
+        className={styles.trigger}
         title={`Theme: ${currentTheme.name}`}
-        ariaLabel={`Theme: ${currentTheme.name}`}
+        aria-label={`Choose theme. Current theme: ${currentTheme.name}`}
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? popupIdRef.current : undefined}
         onClick={() => setIsOpen((v) => !v)}
-        styles={{
-          root: { height: 20, width: 'auto', padding: '0 4px', color: 'inherit' },
-          icon: { color: currentTheme.palette.themePrimary, fontSize: 12 },
-        }}
-      />
+      >
+        <div className={styles.swatchContainer} aria-hidden="true">
+          <svg
+            className={styles.swatchPreview}
+            viewBox="0 0 84 46"
+            role="presentation"
+            style={{ borderColor: currentTheme.palette.neutralLight }}
+          >
+            <rect
+              y="0%"
+              height="100%"
+              width={`${MAIN_SWATCH_WIDTH}%`}
+              fill={currentTheme.palette.themePrimary}
+              stroke="none"
+            />
+            {previewSwatches.map((color, index) => (
+              <rect
+                key={index}
+                y="0%"
+                height="100%"
+                width={`${SMALL_SWATCH_WIDTH}%`}
+                x={`${MAIN_SWATCH_WIDTH + index * SMALL_SWATCH_WIDTH}%`}
+                fill={color}
+                stroke="none"
+              />
+            ))}
+          </svg>
+        </div>
+        <div className={styles.label}>{currentTheme.name}</div>
+      </button>
     </div>
   );
 };

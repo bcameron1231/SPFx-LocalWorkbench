@@ -4,19 +4,70 @@
   position: relative;
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 
-/* The dropdown popup — attached to the bottom of the container, opens upward */
 .popup {
   position: absolute;
   bottom: 100%;
   right: 0;
-  background: var(--primaryBackground, #fff);
-  border: 1px solid var(--neutralLight, #edebe9);
+  background: var(--vscode-menu-background, var(--vscode-dropdown-background, var(--primaryBackground, white)));
+  border: 1px solid var(--vscode-menu-border, var(--vscode-panel-border, var(--neutralLight, #edebe9)));
   border-radius: 4px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14), 0 2px 4px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.28);
   min-width: 320px;
+  max-width: min(420px, calc(100vw - 16px));
   z-index: 200;
   margin-bottom: 4px;
-  color: var(--neutralPrimary, #323130);
+  color: var(--vscode-menu-foreground, var(--vscode-foreground, var(--neutralPrimary, #323130)));
+  overflow: hidden;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  height: 22px;
+  margin: 0;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.trigger:hover {
+  background: var(--vscode-toolbar-hoverBackground, var(--neutralLight, #edebe9));
+}
+
+.trigger:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  outline-offset: -1px;
+}
+
+.swatchContainer {
+  width: 24px;
+  height: 14px;
+  border-radius: 3px;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.swatchPreview {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 3px;
+  border: 1px solid var(--vscode-panel-border, var(--neutralPrimary, #4d4d4d));
+  background: var(--primaryBackground, white);
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

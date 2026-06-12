@@ -1,57 +1,167 @@
 // See https://go.microsoft.com/fwlink/?LinkId=733558
 // for the documentation about the tasks.json format
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-            "label": "watch",
-            "dependsOn": [
-                "npm: watch:tsc",
-                "npm: watch:esbuild"
-            ],
-            "presentation": {
-                "reveal": "never"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "watch",
+      "hide": true,
+      "dependsOn": [
+        "npm: watch:tsc",
+        "npm: watch:esbuild",
+        "npm: watch:webview",
+        "npm: watch:css-types",
+        "npm: packages:watch:shared",
+        "npm: packages:watch:addon"
+      ],
+      "presentation": {
+        "reveal": "never"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "npm: watch:esbuild",
+      "hide": true,
+      "type": "npm",
+      "script": "watch:esbuild",
+      "group": "build",
+      "problemMatcher": {
+        "owner": "esbuild",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^✘ \\[ERROR\\] (.+):(\\d+):(\\d+): (.+)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
         },
-        {
-            "type": "npm",
-            "script": "watch:esbuild",
-            "group": "build",
-            "problemMatcher": {
-                "owner": "esbuild",
-                "fileLocation": ["relative", "${workspaceFolder}"],
-                "pattern": {
-                    "regexp": "^✘ \\[ERROR\\] (.+)$",
-                    "message": 1
-                },
-                "background": {
-                    "activeOnStart": true,
-                    "beginsPattern": "^\\[watch\\] build started",
-                    "endsPattern": "^\\[watch\\] build finished"
-                }
-            },
-            "isBackground": true,
-            "label": "npm: watch:esbuild",
-            "presentation": {
-                "group": "watch",
-                "reveal": "never"
-            }
-        },
-		{
-            "type": "npm",
-            "script": "watch:tsc",
-            "group": "build",
-            "problemMatcher": "$tsc-watch",
-            "isBackground": true,
-            "label": "npm: watch:tsc",
-            "presentation": {
-                "group": "watch",
-                "reveal": "never"
-            }
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^\\[watch\\] build started",
+          "endsPattern": "^\\[watch\\] build (finished|failed)"
         }
-	]
+      },
+      "isBackground": true,
+      "presentation": {
+        "group": "watch",
+        "reveal": "never"
+      }
+    },
+    {
+      "label": "npm: watch:tsc",
+      "hide": true,
+      "type": "npm",
+      "script": "watch:tsc",
+      "group": "build",
+      "problemMatcher": "$tsc-watch",
+      "isBackground": true,
+      "presentation": {
+        "group": "watch",
+        "reveal": "never"
+      }
+    },
+    {
+      "label": "npm: watch:webview",
+      "hide": true,
+      "type": "npm",
+      "script": "watch:webview",
+      "group": "build",
+      "problemMatcher": {
+        "owner": "esbuild-webview",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^✘ \\[ERROR\\] (.+):(\\d+):(\\d+): (.+)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^\\[watch\\] build started",
+          "endsPattern": "^\\[watch\\] build (finished|failed)"
+        }
+      },
+      "isBackground": true,
+      "presentation": {
+        "group": "watch",
+        "reveal": "never"
+      }
+    },
+    {
+      "label": "npm: watch:css-types",
+      "hide": true,
+      "type": "npm",
+      "script": "watch:css-types",
+      "group": "build",
+      "problemMatcher": {
+        "owner": "css-types-webview",
+        "pattern": {
+          "regexp": "^(?!x)x$",
+          "message": 0
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^Watch .+\\.css\\.\\.\\.$",
+          "endsPattern": "^Watch .*\\.css\\.\\.\\.$"
+        }
+      },
+      "isBackground": true,
+      "presentation": {
+        "group": "watch",
+        "reveal": "never"
+      }
+    },
+    {
+      "label": "npm: packages:watch:shared",
+      "hide": true,
+      "type": "npm",
+      "script": "packages:watch:shared",
+      "group": "build",
+      "problemMatcher": {
+        "owner": "packages-shared-watch",
+        "pattern": {
+          "regexp": "^(?!x)x$",
+          "message": 0
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^> @spfx-local-workbench/shared@.+ watch$",
+          "endsPattern": "Watching for file changes\\."
+        }
+      },
+      "isBackground": true,
+      "presentation": {
+        "group": "watch",
+        "reveal": "never"
+      }
+    },
+    {
+      "label": "npm: packages:watch:addon",
+      "hide": true,
+      "type": "npm",
+      "script": "packages:watch:addon",
+      "group": "build",
+      "problemMatcher": {
+        "owner": "packages-addon-watch",
+        "pattern": {
+          "regexp": "^(?!x)x$",
+          "message": 0
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^> @spfx-local-workbench/storybook-addon-spfx@.+ watch$",
+          "endsPattern": "Watching for file changes\\."
+        }
+      },
+      "isBackground": true,
+      "presentation": {
+        "group": "watch",
+        "reveal": "never"
+      }
+    }
+  ]
 }

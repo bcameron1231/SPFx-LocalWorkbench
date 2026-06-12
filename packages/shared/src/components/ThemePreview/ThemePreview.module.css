@@ -8,14 +8,40 @@
   border: 2px solid transparent;
   background-color: transparent;
   transition: all 0.15s ease-in-out;
+}
 
-  &.clickable {
-    cursor: pointer;
+.clickable {
+  cursor: pointer;
+}
 
-    &:hover {
-      background-color: rgba(128, 128, 128, 0.2);
-    }
-  }
+.containerM365 {
+  color: inherit;
+}
+
+.containerM365.clickable:hover {
+  background-color: rgba(128, 128, 128, 0.2);
+}
+
+.containerVscode {
+  border-radius: 3px;
+  border-width: 1px;
+  color: var(--vscode-menu-foreground, inherit);
+}
+
+.containerVscode.clickable:hover:not([aria-pressed='true']):not([aria-checked='true']) {
+  background-color: var(--vscode-list-hoverBackground, rgb(255 255 255 / 0.08));
+  color: var(--vscode-list-hoverForeground, inherit);
+}
+
+.containerVscode[aria-pressed='true'],
+.containerVscode[aria-checked='true'] {
+  background-color: var(--vscode-menu-selectionBackground, rgb(0 122 204 / 0.35));
+  color: var(--vscode-menu-selectionForeground, inherit);
+}
+
+.container:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  outline-offset: -1px;
 }
 
 .svgIcon {
@@ -31,10 +57,25 @@
 .label {
   font-size: 14px;
   font-weight: 400;
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
   color: inherit;
+}
 
-  &.labelSelected {
-    font-weight: 600;
-  }
+.labelM365 {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
+}
+
+.labelVscode {
+  font-family: var(
+    --vscode-font-family,
+    'Segoe UI',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Roboto',
+    'Helvetica Neue',
+    sans-serif
+  );
+}
+
+.labelSelected {
+  font-weight: 600;
 }

@@ -10,6 +10,36 @@ const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
 
 /**
+ * Problem matcher hooks so VS Code can tell when the background webview
+ * watcher is ready and when subsequent rebuilds complete.
+ */
+const esbuildProblemMatcherPlugin = {
+  name: 'esbuild-problem-matcher',
+
+  setup(build) {
+    build.onStart(() => {
+      console.log('[watch] build started');
+    });
+    build.onEnd((result) => {
+      result.errors.forEach(({ text, location }) => {
+        if (location) {
+          console.error(
+            `✘ [ERROR] ${location.file}:${location.line}:${location.column}: ${text}`,
+          );
+        } else {
+          console.error(`✘ [ERROR] ${text}`);
+        }
+      });
+      if (result.errors.length === 0) {
+        console.log('[watch] build finished');
+      } else {
+        console.log('[watch] build failed');
+      }
+    });
+  },
+};
+
+/**
  * Copies vendor UMD bundles (React, ReactDOM, Fluent UI) from node_modules
  * into dist/webview/vendor/ so they can be served as local webview assets
  */
@@ -73,13 +103,19 @@ async function build() {
             path: path.resolve(args.resolveDir, args.path),
             namespace: 'css-module',
           }));
-          build.onLoad({ filter: /.*/, namespace: 'css-module' }, async (args) => ({
-            contents: await fs.promises.readFile(args.path, 'utf8'),
-            loader: 'local-css',
-            resolveDir: path.dirname(args.path),
-          }));
+          build.onLoad({ filter: /.*/, namespace: 'css-module' }, async (args) => {
+            const contents = await fs.promises.readFile(args.path, 'utf8');
+
+            return {
+              contents,
+              loader: 'local-css',
+              resolveDir: path.dirname(args.path),
+              watchFiles: [args.path],
+            };
+          });
         },
       },
+      esbuildProblemMatcherPlugin,
     ],
     format: 'iife',
     target: 'es2020',
@@ -106,7 +142,6 @@ async function build() {
 
   if (watch) {
     await ctx.watch();
-    console.log('Watching webview files for changes...');
   } else {
     await ctx.rebuild();
     await ctx.dispose();
