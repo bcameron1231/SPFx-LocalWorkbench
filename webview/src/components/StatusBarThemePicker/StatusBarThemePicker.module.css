@@ -17,8 +17,8 @@
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.28);
   min-width: 320px;
   max-width: min(420px, calc(100vw - 16px));
-  z-index: 200;
-  margin-bottom: 4px;
+  z-index: var(--workbench-layer-popover);
+  margin-bottom: 1px;
   color: var(--vscode-menu-foreground, var(--vscode-foreground, var(--neutralPrimary, #323130)));
   overflow: hidden;
 }

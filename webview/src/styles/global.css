@@ -1,5 +1,12 @@
 /* Global styles for the SPFx Local Workbench */
 
+:root {
+  --workbench-status-bar-height: 23px;
+  --workbench-layer-property-pane: 1000000;
+  --workbench-layer-status-bar: 1000001;
+  --workbench-layer-popover: 1000002;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -68,7 +75,7 @@ body {
   font-size: 12px;
   font-family: var(--vscode-font-family, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
   color: var(--vscode-panelTitle-activeForeground, var(--neutralSecondary, #605e5c));
-  z-index: 100;
+  z-index: var(--workbench-layer-status-bar);
   white-space: nowrap;
 }
 

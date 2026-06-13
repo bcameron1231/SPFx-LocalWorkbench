@@ -112,6 +112,14 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
       isFooterAtBottom={isNonReactive}
       onRenderFooterContent={renderFooter}
       layerProps={{ eventBubblingEnabled: true }}
+      styles={{
+        main: {
+          top: 0,
+          bottom: 'var(--workbench-status-bar-height)',
+          height: 'calc(100vh - var(--workbench-status-bar-height))',
+          zIndex: 'var(--workbench-layer-property-pane)',
+        },
+      }}
     >
       <div id="property-pane-content">
         {config && config.pages && config.pages.length > 0 && webPart ? (
