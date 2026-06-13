@@ -68,6 +68,25 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
     onInitialized(handlers);
   }, [onInitialized]);
 
+  useEffect(() => {
+    if (!selectedWebPart) {
+      return;
+    }
+
+    const matchingWebPart = activeWebParts.find(
+      (webPart) => webPart.instanceId === selectedWebPart.instanceId,
+    );
+
+    if (!matchingWebPart || !isActiveWebPart(matchingWebPart)) {
+      setSelectedWebPart(undefined);
+      return;
+    }
+
+    if (matchingWebPart !== selectedWebPart) {
+      setSelectedWebPart(matchingWebPart);
+    }
+  }, [activeWebParts, selectedWebPart]);
+
   const shrinkCanvas = config.propertyPaneShrinkCanvas !== false;
 
   return (
