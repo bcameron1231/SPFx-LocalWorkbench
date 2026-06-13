@@ -13,6 +13,7 @@
 
   "serve.waiting": "En attente du démarrage du service…",
   "serve.waitingElapsed": "En attente du démarrage du service… ({0}s)",
+  "serve.cancelled": "Démarrage du service SPFx annulé. Ouvrir le workbench quand même ?",
   "serve.timedout": "Le service SPFx n'a pas démarré à temps. Ouvrir le workbench quand même ?",
 
   "common.open": "Ouvrir",

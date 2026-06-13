@@ -13,6 +13,7 @@
 
   "serve.waiting": "Waiting for serve to start…",
   "serve.waitingElapsed": "Waiting for serve to start… ({0}s)",
+  "serve.cancelled": "SPFx serve cancelled. Open workbench anyway?",
   "serve.timedout": "SPFx serve did not start in time. Open workbench anyway?",
 
   "common.open": "Open",
