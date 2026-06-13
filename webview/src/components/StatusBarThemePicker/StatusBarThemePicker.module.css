@@ -18,7 +18,6 @@
   min-width: 320px;
   max-width: min(420px, calc(100vw - 16px));
   z-index: var(--workbench-layer-popover);
-  margin-bottom: 1px;
   color: var(--vscode-menu-foreground, var(--vscode-foreground, var(--neutralPrimary, #323130)));
   overflow: hidden;
 }
@@ -36,7 +35,6 @@
   color: inherit;
   font: inherit;
   cursor: pointer;
-  border-radius: 3px;
 }
 
 .trigger:hover {
@@ -63,11 +61,4 @@
   border-radius: 3px;
   border: 1px solid var(--vscode-panel-border, var(--neutralPrimary, #4d4d4d));
   background: var(--primaryBackground, white);
-}
-
-.label {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }

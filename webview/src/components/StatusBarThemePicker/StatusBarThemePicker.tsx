@@ -158,7 +158,6 @@ export const StatusBarThemePicker: React.FC<IStatusBarThemePickerProps> = ({
             ))}
           </svg>
         </div>
-        <div className={styles.label}>{currentTheme.name}</div>
       </button>
     </div>
   );
