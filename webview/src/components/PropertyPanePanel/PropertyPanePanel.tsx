@@ -1,9 +1,10 @@
 import { Panel, PanelType, PrimaryButton, Separator, Stack, Text } from '@fluentui/react';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 
-import { PropertyPaneFieldType, logger } from '@spfx-local-workbench/shared';
+import { PropertyPaneFieldType, getLocalizedString, logger } from '@spfx-local-workbench/shared';
 import type { IActiveWebPart } from '@spfx-local-workbench/shared';
 
+import styles from './PropertyPanePanel.module.css';
 import {
   ButtonComponent,
   CheckboxComponent,
@@ -30,6 +31,15 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
   onPropertyChange,
 }) => {
   const [config, setConfig] = useState<any>(null);
+  const pageContextLocale = webPart?.context?.pageContext?.cultureInfo?.currentUICultureName;
+  const locale = pageContextLocale || navigator.language; //TODO: This is temporary, will pull from larger context
+  const preconfiguredEntry =
+    webPart?.manifest.preconfiguredEntries?.[webPart.preconfiguredEntryIndex ?? 0] ??
+    webPart?.manifest.preconfiguredEntries?.[0];
+  const headerText =
+    getLocalizedString(preconfiguredEntry?.title, locale) ||
+    webPart?.manifest.alias ||
+    'Properties';
 
   // Check if the web part has disabled reactive property changes
   const isNonReactive =
@@ -106,7 +116,8 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
       isOpen={!!webPart}
       type={PanelType.custom}
       customWidth="340px"
-      headerText={webPart?.manifest.alias ?? 'Properties'}
+      headerText={headerText}
+      headerClassName={styles.panelHeader}
       onDismiss={onClose}
       isBlocking={false}
       isFooterAtBottom={isNonReactive}
@@ -119,9 +130,26 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
           height: 'calc(100vh - var(--workbench-status-bar-height))',
           zIndex: 'var(--workbench-layer-property-pane)',
         },
+        scrollableContent: {
+          overflowY: 'none',
+        },
+        commands: {
+          paddingTop: 28,
+          paddingBottom: 10,
+        },
+        header: {
+          paddingLeft: 20,
+          paddingRight: 4,
+          maxWidth: 'calc(100% - 44px)',
+        },
+        content: {
+          paddingLeft: 20,
+          paddingRight: 0,
+          paddingBottom: 'calc(var(--workbench-status-bar-height) + 16px)',
+        },
       }}
     >
-      <div id="property-pane-content">
+      <div id="property-pane-content" className={styles.content}>
         {config && config.pages && config.pages.length > 0 && webPart ? (
           <PropertyPaneContent
             config={config}
@@ -130,10 +158,8 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
             getCurrentValue={getCurrentValue}
           />
         ) : (
-          <Stack horizontalAlign="center" styles={{ root: { padding: '16px' } }}>
-            <Text styles={{ root: { color: '#605e5c' } }}>
-              No property pane configuration available for this web part.
-            </Text>
+          <Stack horizontalAlign="center" className={styles.empty}>
+            <Text>No property pane configuration available for this web part.</Text>
           </Stack>
         )}
       </div>
@@ -157,16 +183,16 @@ const PropertyPaneContent: FC<IPropertyPaneContentProps> = ({
   const page = config.pages[0];
 
   return (
-    <Stack tokens={{ childrenGap: 16 }} styles={{ root: { padding: '16px' } }}>
-      {page.header?.description && <Text variant="medium">{page.header.description}</Text>}
+    <Stack tokens={{ childrenGap: 16 }} className={styles.container}>
+      {page.header?.description && (
+        <div className={styles.pageHeader}>{page.header.description}</div>
+      )}
       {(page.groups || []).map((group: any, groupIndex: number) => (
-        <Stack key={groupIndex} tokens={{ childrenGap: 12 }}>
+        <Stack key={groupIndex} tokens={{ childrenGap: 12 }} className={styles.group}>
           {!group.isGroupNameHidden && group.groupName && (
-            <Text variant="mediumPlus" styles={{ root: { fontWeight: 600 } }}>
-              {group.groupName}
-            </Text>
+            <div className={styles.groupHeader}>{group.groupName}</div>
           )}
-          <Stack tokens={{ childrenGap: 8 }}>
+          <Stack tokens={{ childrenGap: 8 }} className={styles.groupFields}>
             {(group.groupFields || []).map((field: any, fieldIndex: number) => (
               <PropertyPaneField
                 key={fieldIndex}
@@ -235,14 +261,8 @@ const PropertyPaneField: FC<IPropertyPaneFieldProps> = ({
     case PropertyPaneFieldType.DynamicField:
       return <TextFieldComponent field={field} value={currentValue} onChange={handleChange} />;
     case PropertyPaneFieldType.DynamicFieldSet:
-      return (
-        <Text styles={{ root: { color: '#605e5c', fontStyle: 'italic' } }}>
-          Dynamic Field Set (Not fully supported)
-        </Text>
-      );
+      return <Text className={styles.empty}>Dynamic Field Set (Not fully supported)</Text>;
     default:
-      return (
-        <Text styles={{ root: { color: '#a80000' } }}>Unsupported field type: {field.type}</Text>
-      );
+      return <Text className={styles.required}>Unsupported field type: {field.type}</Text>;
   }
 };

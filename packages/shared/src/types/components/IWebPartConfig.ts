@@ -11,6 +11,9 @@ export interface IWebPartConfig {
   /** Unique instance identifier */
   instanceId: string;
 
+  /** Selected preconfigured entry index for this web part instance */
+  preconfiguredEntryIndex?: number;
+
   /** Component properties */
   properties: Record<string, any>;
 }

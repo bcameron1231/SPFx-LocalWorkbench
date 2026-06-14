@@ -295,6 +295,7 @@ export class WorkbenchRuntime {
     const config: IWebPartConfig = {
       manifest: manifest,
       instanceId: finalInstanceId,
+      preconfiguredEntryIndex,
       properties: finalProperties,
     };
 
@@ -682,7 +683,7 @@ export class WorkbenchRuntime {
       manifestId: wp.manifest.id,
       instanceId: wp.instanceId,
       properties: JSON.parse(JSON.stringify(wp.properties)), // Deep clone
-      preconfiguredEntryIndex: (wp as any).preconfiguredEntryIndex ?? 0,
+      preconfiguredEntryIndex: wp.preconfiguredEntryIndex ?? 0,
     }));
 
     this.vscode.postMessage({
