@@ -1,18 +1,14 @@
 import { Link } from '@fluentui/react';
 import React, { FC } from 'react';
 
-import { getString } from '../shared';
-
 interface ILinkComponentProps {
-  field: any;
+  href?: string;
+  target?: string;
+  text?: string;
 }
 
-export const LinkComponent: FC<ILinkComponentProps> = ({ field }) => {
-  const text = getString(field.properties?.text || field.properties?.Text);
-  const href = field.properties?.href || field.properties?.Href;
-  return (
-    <Link href={href} target={field.properties?.target || '_blank'} rel="noopener noreferrer">
-      {text}
-    </Link>
-  );
-};
+export const LinkComponent: FC<ILinkComponentProps> = ({ href, target = '_blank', text }) => (
+  <Link href={href} target={target} rel="noopener noreferrer">
+    {text}
+  </Link>
+);

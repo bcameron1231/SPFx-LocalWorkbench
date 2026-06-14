@@ -1,1 +1,19 @@
-export { getString } from './utils';
+export {
+  createButtonFieldViewModel,
+  createCheckboxFieldViewModel,
+  createChoiceGroupFieldViewModel,
+  createDropdownFieldViewModel,
+  createLinkFieldViewModel,
+  createSliderFieldViewModel,
+  createTextFieldViewModel,
+  createTextOnlyFieldViewModel,
+  createToggleFieldViewModel,
+  getPropertyValue,
+  getTextProperty,
+  getTextValue,
+  isConditionalGroup,
+  resolveGroup,
+  resolveFieldValue,
+  resolvePropertyPaneLocale,
+  resolvePropertyPaneTitle,
+} from './utils';

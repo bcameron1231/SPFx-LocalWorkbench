@@ -1,35 +1,34 @@
 import { TextField } from '@fluentui/react';
 import React, { FC } from 'react';
 
-import { getString } from '../shared';
-
 interface ITextFieldComponentProps {
-  field: any;
-  value: any;
+  description?: string;
+  label?: string;
+  multiline?: boolean;
   onChange: (value: string) => void;
+  placeholder?: string;
+  rows?: number;
+  value: string;
 }
 
-export const TextFieldComponent: FC<ITextFieldComponentProps> = ({ field, value, onChange }) => {
-  const label = getString(field.properties?.label || field.properties?.Label);
-  const description = getString(field.properties?.description || field.properties?.Description);
-  const placeholder = getString(field.properties?.placeholder || field.properties?.Placeholder);
-
-  // Fallback: use targetProperty as label if no label provided
-  const displayLabel =
-    label ||
-    (field.targetProperty
-      ? field.targetProperty.charAt(0).toUpperCase() + field.targetProperty.slice(1)
-      : undefined);
-
+export const TextFieldComponent: FC<ITextFieldComponentProps> = ({
+  description,
+  label,
+  multiline,
+  onChange,
+  placeholder,
+  rows,
+  value,
+}) => {
   return (
     <TextField
-      label={displayLabel}
+      label={label}
       description={description}
       placeholder={placeholder}
-      value={value || ''}
+      value={value}
       onChange={(_, newValue) => onChange(newValue || '')}
-      multiline={field.properties?.multiline}
-      rows={field.properties?.rows || 3}
+      multiline={multiline}
+      rows={rows}
     />
   );
 };

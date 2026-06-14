@@ -1,26 +1,26 @@
 import { Toggle } from '@fluentui/react';
 import React, { FC } from 'react';
 
-import { getString } from '../shared';
-
 interface IToggleComponentProps {
-  field: any;
-  value: any;
+  checked: boolean;
+  label?: string;
   onChange: (value: boolean) => void;
+  offText: string;
+  onText: string;
 }
 
-export const ToggleComponent: FC<IToggleComponentProps> = ({ field, value, onChange }) => {
-  const label = getString(field.properties?.label || field.properties?.Label);
-  const onText = getString(field.properties?.onText || field.properties?.OnText) || 'On';
-  const offText = getString(field.properties?.offText || field.properties?.OffText) || 'Off';
-
-  return (
-    <Toggle
-      label={label}
-      checked={!!value}
-      onText={onText}
-      offText={offText}
-      onChange={(_, checked) => onChange(!!checked)}
-    />
-  );
-};
+export const ToggleComponent: FC<IToggleComponentProps> = ({
+  checked,
+  label,
+  offText,
+  onChange,
+  onText,
+}) => (
+  <Toggle
+    label={label}
+    checked={checked}
+    onText={onText}
+    offText={offText}
+    onChange={(_, nextChecked) => onChange(!!nextChecked)}
+  />
+);
