@@ -2,17 +2,27 @@
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
   "version": "2.0",
   "bundles": {
-    "property-pane-web-part": {
+    "standard-controls-web-part": {
       "components": [
         {
-          "entrypoint": "./lib/webparts/propertyPane/PropertyPaneWebPart.js",
-          "manifest": "./src/webparts/propertyPane/PropertyPaneWebPart.manifest.json"
+          "entrypoint": "./lib/webparts/standardControls/StandardControlsWebPart.js",
+          "manifest": "./src/webparts/standardControls/StandardControlsWebPart.manifest.json"
+        }
+      ]
+    },
+    "pnp-controls-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/pnpControls/PnpControlsWebPart.js",
+          "manifest": "./src/webparts/pnpControls/PnpControlsWebPart.manifest.json"
         }
       ]
     }
   },
   "externals": {},
   "localizedResources": {
-    "PropertyPaneWebPartStrings": "lib/webparts/propertyPane/loc/{locale}.js"
+    "StandardControlsWebPartStrings": "lib/webparts/standardControls/loc/{locale}.js",
+    "PnpControlsWebPartStrings": "lib/webparts/pnpControls/loc/{locale}.js",
+    "PropertyControlStrings": "node_modules/@pnp/spfx-property-controls/lib/loc/{locale}.js"
   }
 }

@@ -1,4 +1,4 @@
-declare interface IPropertyPaneWebPartStrings {
+declare interface IPnpControlsWebPartStrings {
   PropertyPaneDescription: string;
   BasicGroupName: string;
   DescriptionFieldLabel: string;
@@ -13,7 +13,7 @@ declare interface IPropertyPaneWebPartStrings {
   UnknownEnvironment: string;
 }
 
-declare module 'PropertyPaneWebPartStrings' {
-  const strings: IPropertyPaneWebPartStrings;
+declare module 'PnpControlsWebPartStrings' {
+  const strings: IPnpControlsWebPartStrings;
   export = strings;
 }

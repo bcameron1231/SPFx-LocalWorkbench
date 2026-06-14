@@ -1,0 +1,34 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.standardControls {
+  overflow: hidden;
+  padding: 1em;
+  color: "[theme:neutralPrimary, default: #333333]";
+}
+
+.propertyTable {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid "[theme:themeLight, default: #e3afb2]";
+  }
+
+  th {
+    background-color: "[theme:themeLighter, default: #f0d3d4]";
+    font-weight: 600;
+    color: "[theme:themeDarkAlt, default: #932227]";
+  }
+}
+
+.groupHeader {
+  background-color: "[theme:themeLight, default: #e3afb2]";
+  font-weight: 600;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: "[theme:themeDarker, default: #5b1519]";
+  padding: 6px 12px;
+}

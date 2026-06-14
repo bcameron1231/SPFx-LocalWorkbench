@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
-  "id": "62f90bb0-8324-4fd9-a970-cced8c5f1af2",
-  "alias": "PropertyPaneWebPart",
+  "id": "b0e8097a-1dfd-4892-a00e-b42d76e3b5e8",
+  "alias": "StandardControlsWebPart",
   "componentType": "WebPart",
 
   // The "*" signifies that the version should be taken from the package.json
@@ -18,11 +18,16 @@
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Advanced
     "group": { "default": "Advanced" },
-    "title": { "default": "Propertt Pane", "fr-FR": "Volet des propriétés" },
-    "description": { "default": "Verifies standard property pane controls", "fr-FR": "Vérifie les contrôles standard du volet des propriétés" },
-    "officeFabricIconFontName": "Robot",
+    "title": { "default": "Standard Controls" },
+    "description": { "default": "StandardControls description" },
+    "officeFabricIconFontName": "Bullseye",
     "properties": {
-      "description": "PropertyPane"
+      "textField": "Hello SPFx",
+      "toggle": true,
+      "checkbox": false,
+      "dropdown": "option2",
+      "slider": 5,
+      "choiceGroup": "B"
     }
   }]
 }
