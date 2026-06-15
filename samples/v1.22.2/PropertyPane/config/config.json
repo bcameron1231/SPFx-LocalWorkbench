@@ -17,6 +17,46 @@
           "manifest": "./src/webparts/pnpControls/PnpControlsWebPart.manifest.json"
         }
       ]
+    },
+    "advanced-behavior-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/advancedBehavior/AdvancedBehaviorWebPart.js",
+          "manifest": "./src/webparts/advancedBehavior/AdvancedBehaviorWebPart.manifest.json"
+        }
+      ]
+    },
+    "page-and-accordion-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/pageAndAccordion/PageAndAccordionWebPart.js",
+          "manifest": "./src/webparts/pageAndAccordion/PageAndAccordionWebPart.manifest.json"
+        }
+      ]
+    },
+    "validation-and-focus-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/validationAndFocus/ValidationAndFocusWebPart.js",
+          "manifest": "./src/webparts/validationAndFocus/ValidationAndFocusWebPart.manifest.json"
+        }
+      ]
+    },
+    "standard-control-variations-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/standardControlVariations/StandardControlVariationsWebPart.js",
+          "manifest": "./src/webparts/standardControlVariations/StandardControlVariationsWebPart.manifest.json"
+        }
+      ]
+    },
+    "dynamic-data-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/dynamicData/DynamicDataWebPart.js",
+          "manifest": "./src/webparts/dynamicData/DynamicDataWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},

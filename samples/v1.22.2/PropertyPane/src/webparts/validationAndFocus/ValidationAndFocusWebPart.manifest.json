@@ -1,0 +1,29 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "76160fb8-8d47-42c8-bd76-c6cb7b7d8945",
+  "alias": "ValidationAndFocusWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
+  "supportsThemeVariants": true,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "Advanced" },
+      "title": { "default": "Validation And Focus" },
+      "description": { "default": "Exercises shouldFocus and validation-related property pane options." },
+      "officeFabricIconFontName": "ReviewSolid",
+      "properties": {
+        "customValidationStatus": "Valid",
+        "customValidationValue": "Cat",
+        "defaultFocusCandidate": "Normally focused first",
+        "focusTarget": "Focus me first",
+        "immediateValidatedText": "NoSpaces",
+        "deferredValidatedText": "Snake",
+        "directErrorValidatedText": "No exclamation points"
+      }
+    }
+  ]
+}

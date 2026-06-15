@@ -1,0 +1,29 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "8e670781-1f18-4f7d-bf84-6147253d118b",
+  "alias": "DynamicDataWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
+  "supportsThemeVariants": true,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "Advanced" },
+      "title": { "default": "Dynamic Data" },
+      "description": { "default": "Exercises PropertyPaneDynamicField and PropertyPaneDynamicFieldSet." },
+      "officeFabricIconFontName": "PlugConnected",
+      "properties": {
+        "connectedDisplayMode": "summary",
+        "connectedSourceNote": "Connected configuration note",
+        "lastConditionalAction": "none yet",
+        "manualConnectionLabel": "Manual configuration",
+        "showConnectedConfiguration": false,
+        "sourceText": "Sample source text",
+        "sourceCount": 3
+      }
+    }
+  ]
+}
