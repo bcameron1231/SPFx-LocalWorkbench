@@ -2,10 +2,16 @@ import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import {
+  PropertyPaneButton,
+  PropertyPaneButtonType,
   PropertyPaneCheckbox,
   PropertyPaneChoiceGroup,
   PropertyPaneDropdown,
   PropertyPaneDropdownOptionType,
+  PropertyPaneLabel,
+  PropertyPaneLink,
+  PopupWindowPosition,
+  PropertyPaneSlider,
   PropertyPaneTextField,
   PropertyPaneToggle,
   type IPropertyPaneConfiguration,
@@ -26,6 +32,7 @@ import StandardControlVariations, {
 
 export interface IStandardControlVariationsWebPartProps {
   ariaPlaceholderText: string;
+  buttonValue: string;
   checkboxAriaLabelValue: boolean;
   checkboxDisabledValue: boolean;
   checkboxValue: boolean;
@@ -35,6 +42,7 @@ export interface IStandardControlVariationsWebPartProps {
   choiceGroupValue: string;
   disabledValue: string;
   dropdownAriaValue: string;
+  dropdownAnimalValue: string;
   dropdownDisabledValue: string;
   dropdownGroupedValue: string | number;
   dropdownValue: string;
@@ -43,6 +51,8 @@ export interface IStandardControlVariationsWebPartProps {
   multilineResizableValue: string;
   multilineStaticValue: string;
   readOnlyValue: string;
+  sliderHiddenValue: number;
+  sliderValue: number;
   toggleAriaLabelOnlyValue: boolean;
   toggleDisabledValue: boolean;
   toggleInlineLabelTextValue: boolean;
@@ -56,6 +66,7 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
   public render(): void {
     const element: React.ReactElement<IStandardControlVariationsProps> = React.createElement(StandardControlVariations, {
       ariaPlaceholderText: this.properties.ariaPlaceholderText,
+      buttonValue: this.properties.buttonValue,
       checkboxAriaLabelValue: this.properties.checkboxAriaLabelValue,
       checkboxDisabledValue: this.properties.checkboxDisabledValue,
       checkboxValue: this.properties.checkboxValue,
@@ -65,6 +76,7 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
       choiceGroupValue: this.properties.choiceGroupValue,
       disabledValue: this.properties.disabledValue,
       dropdownAriaValue: this.properties.dropdownAriaValue,
+      dropdownAnimalValue: this.properties.dropdownAnimalValue,
       dropdownDisabledValue: this.properties.dropdownDisabledValue,
       dropdownGroupedValue: this.properties.dropdownGroupedValue,
       dropdownValue: this.properties.dropdownValue,
@@ -73,6 +85,8 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
       multilineResizableValue: this.properties.multilineResizableValue,
       multilineStaticValue: this.properties.multilineStaticValue,
       readOnlyValue: this.properties.readOnlyValue,
+      sliderHiddenValue: this.properties.sliderHiddenValue,
+      sliderValue: this.properties.sliderValue,
       toggleAriaLabelOnlyValue: this.properties.toggleAriaLabelOnlyValue,
       toggleDisabledValue: this.properties.toggleDisabledValue,
       toggleInlineLabelTextValue: this.properties.toggleInlineLabelTextValue,
@@ -289,6 +303,9 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
                 }),
                 PropertyPaneDropdown('dropdownGroupedValue', {
                   label: 'Dropdown With Option Types',
+                  calloutProps: {
+                    calloutMaxHeight: 100,
+                  },
                   options: [
                     { key: 'header-1', text: 'Status', type: PropertyPaneDropdownOptionType.Header, index: 0 },
                     { key: 'draft', text: 'Draft', index: 1 },
@@ -299,6 +316,24 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
                     { key: 'public', text: 'Public', index: 6 },
                   ],
                 }),
+                PropertyPaneDropdown('dropdownAnimalValue', {
+                  label: 'Dropdown With Callout Max Height',
+                  calloutProps: {
+                    calloutMaxHeight: 100,
+                  },
+                  options: [
+                    { key: 'aardvark', text: 'Aardvark' },
+                    { key: 'beaver', text: 'Beaver' },
+                    { key: 'capybara', text: 'Capybara' },
+                    { key: 'dolphin', text: 'Dolphin' },
+                    { key: 'elephant', text: 'Elephant' },
+                    { key: 'falcon', text: 'Falcon' },
+                    { key: 'giraffe', text: 'Giraffe' },
+                    { key: 'hedgehog', text: 'Hedgehog' },
+                    { key: 'iguana', text: 'Iguana' },
+                    { key: 'jellyfish', text: 'Jellyfish' },
+                  ],
+                }),
                 PropertyPaneDropdown('dropdownDisabledValue', {
                   label: 'Disabled Dropdown',
                   disabled: true,
@@ -306,6 +341,161 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
                     { key: 'locked-a', text: 'Locked A' },
                     { key: 'locked-b', text: 'Locked B' },
                   ],
+                }),
+              ],
+            },
+            {
+              groupName: 'Slider Variations',
+              isCollapsed: true,
+              groupFields: [
+                PropertyPaneSlider('sliderValue', {
+                  label: 'Standard Slider',
+                  min: 0,
+                  max: 10,
+                  ariaLabel: 'Standard Slider, Wowee!',
+                }),
+                PropertyPaneSlider('sliderHiddenValue', {
+                  label: 'Slider Without Value Display (step 10)',
+                  min: 0,
+                  max: 100,
+                  step: 10,
+                  showValue: false,
+                }),
+                PropertyPaneSlider('sliderValue', {
+                  label: 'Disabled Slider',
+                  min: 0,
+                  max: 10,
+                  disabled: true,
+                }),
+              ],
+            },
+            {
+              groupName: 'Button Variations',
+              isCollapsed: true,
+              groupFields: [
+                PropertyPaneButton('buttonValue', {
+                  text: 'Append "!" To Button Value',
+                  buttonType: PropertyPaneButtonType.Normal,
+                  ariaLabel: 'Append an exclamation point to the current button value',
+                  ariaDescription: 'Activates the normal button sample and mutates the bound property.',
+                  onClick: (value: unknown) => `${typeof value === 'string' ? value : ''}!`,
+                }),
+                PropertyPaneButton('buttonValue', {
+                  text: 'Disabled Normal Button',
+                  buttonType: PropertyPaneButtonType.Normal,
+                  disabled: true,
+                  onClick: (value: unknown) => value,
+                }),
+                PropertyPaneButton('buttonValue', {
+                  text: 'Reset Button Value',
+                  buttonType: PropertyPaneButtonType.Primary,
+                  ariaLabel: 'Reset the button value to Ready',
+                  onClick: () => 'Ready',
+                }),
+                PropertyPaneButton('buttonValue', {
+                  text: 'Disabled Primary Button',
+                  buttonType: PropertyPaneButtonType.Primary,
+                  disabled: true,
+                  onClick: (value: unknown) => value,
+                }),
+                PropertyPaneButton('buttonValue', {
+                  text: 'Hero Button',
+                  buttonType: PropertyPaneButtonType.Hero,
+                  icon: 'FavoriteStar',
+                  ariaDescription: 'Sets the button value to Hero when activated.',
+                  onClick: () => 'Hero',
+                }),
+                PropertyPaneButton('buttonValue', {
+                  text: 'Disabled Hero Button',
+                  buttonType: PropertyPaneButtonType.Hero,
+                  icon: 'FavoriteStar',
+                  disabled: true,
+                  onClick: (value: unknown) => value,
+                }),
+                PropertyPaneButton('buttonValue', {
+                  text: 'Compound Button',
+                  buttonType: PropertyPaneButtonType.Compound,
+                  description: 'Compound buttons include supporting description text.',
+                  ariaLabel: 'Set the button value to Compound',
+                  onClick: () => 'Compound',
+                }),
+                PropertyPaneButton('buttonValue', {
+                  text: 'Disabled Compound Button',
+                  buttonType: PropertyPaneButtonType.Compound,
+                  description: 'Disabled compound button sample.',
+                  disabled: true,
+                  onClick: (value: unknown) => value,
+                }),
+                PropertyPaneButton('buttonValue', {
+                  text: 'Command Button',
+                  buttonType: PropertyPaneButtonType.Command,
+                  icon: 'Settings',
+                  ariaDescription: 'Sets the button value to Command.',
+                  onClick: () => 'Command',
+                }),
+                PropertyPaneButton('buttonValue', {
+                  text: 'Disabled Command Button',
+                  buttonType: PropertyPaneButtonType.Command,
+                  icon: 'Settings',
+                  disabled: true,
+                  onClick: (value: unknown) => value,
+                }),
+                PropertyPaneButton('buttonValue', {
+                  text: 'Icon Button',
+                  buttonType: PropertyPaneButtonType.Icon,
+                  icon: 'Emoji2',
+                  ariaLabel: 'Set the button value to Icon',
+                  ariaDescription: 'Icon button sample for compact command-style actions.',
+                  onClick: () => 'Icon',
+                }),
+                PropertyPaneButton('buttonValue', {
+                  text: 'Disabled Icon Button',
+                  buttonType: PropertyPaneButtonType.Icon,
+                  icon: 'Emoji2',
+                  disabled: true,
+                  onClick: (value: unknown) => value,
+                }),
+              ],
+            },
+            {
+              groupName: 'Label Variations',
+              isCollapsed: true,
+              groupFields: [
+                PropertyPaneLabel('labelIntro', {
+                  text: 'PropertyPaneLabel is display-only text that can explain nearby controls.',
+                }),
+                PropertyPaneLabel('labelStatus', {
+                  text: 'Use labels when you need static guidance without a bound input value. This one is marked as required.',
+                  required: true,
+                }),
+              ],
+            },
+            {
+              groupName: 'Link Variations',
+              isCollapsed: true,
+              groupFields: [
+                PropertyPaneLink('linkDocumentation', {
+                  text: 'Open SPFx documentation',
+                  href: 'https://aka.ms/spfx',
+                  target: '_blank',
+                  ariaLabel: 'Open SPFx Documentation in new window',
+                }),
+                PropertyPaneLink('linkPopup', {
+                  text: 'Open SPFx docs in popup window',
+                  href: 'https://aka.ms/spfx',
+                  target: '_blank',
+                  ariaLabel: 'Open SPFx Documentation in popup window',
+                  popupWindowProps: {
+                    title: 'SPFx Docs',
+                    width: 480,
+                    height: 320,
+                    positionWindowPosition: PopupWindowPosition.leftBottom,
+                  },
+                }),
+                PropertyPaneLink('linkDisabled', {
+                  text: 'Disabled link',
+                  href: 'https://aka.ms/spfx',
+                  disabled: true,
                 }),
               ],
             },

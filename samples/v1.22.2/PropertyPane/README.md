@@ -131,7 +131,7 @@ Purpose:
 - built-in control variations for standard property-pane fields
 - text-field behavior and styling variants
 - toggle behavior and accessibility variants
-- checkbox, choice-group, and dropdown variants
+- checkbox, choice-group, dropdown, slider, button, label, and link variants
 - a dedicated home for future built-in control-variation coverage beyond the baseline sample
 
 What it demonstrates:
@@ -184,8 +184,20 @@ What it demonstrates:
   Verifies dropdown accessibility labeling through `ariaLabel` and `ariaDescription`.
 - `dropdownGroupedValue`
   Verifies dropdown headers/dividers and explicit option indexes.
+- `dropdownAnimalValue`
+  Verifies `calloutProps.calloutMaxHeight` with a longer dropdown list that should scroll within a constrained callout.
 - `dropdownDisabledValue`
   Verifies a disabled dropdown remains non-interactive.
+- `sliderValue`
+  Verifies a standard slider with visible numeric value and a disabled slider variant for the same bound property.
+- `sliderHiddenValue`
+  Verifies `showValue: false` on a slider while still updating the bound value.
+- `buttonValue`
+  Verifies `PropertyPaneButton` bound-value mutation and reset behavior across `Normal`, `Primary`, `Hero`, `Compound`, `Command`, and `Icon` button types, including disabled variants.
+- label variations
+  Verify `PropertyPaneLabel` as display-only instructional text in the pane.
+- link variations
+  Verify `PropertyPaneLink` for enabled links, popup-window links, and disabled link rendering.
 
 How to verify:
 
@@ -217,7 +229,27 @@ How to verify:
 26. In `Standard Dropdown`, choose a different option and confirm the rendered summary updates.
 27. In `Dropdown With Aria Labels`, change the selection and use it as the dropdown accessibility surface.
 28. In `Dropdown With Option Types`, confirm headers/dividers render correctly and a selectable option updates the rendered summary.
-29. Confirm `Disabled Dropdown` is not interactive.
+29. In `Dropdown With Callout Max Height`, open the menu, confirm all 10 animal options are available, and confirm the callout stays height-constrained and scrollable.
+30. Confirm `Disabled Dropdown` is not interactive.
+31. In `Standard Slider`, move the slider and confirm the rendered summary updates `sliderValue`.
+32. In `Slider Without Value Display`, move the slider and confirm the rendered summary updates `sliderHiddenValue` even though no inline numeric value is shown.
+33. Confirm `Disabled Slider` is not interactive.
+34. In `Append "!" To Button Value`, click the button and confirm the rendered summary appends exclamation points to `buttonValue`.
+35. Confirm `Disabled Normal Button` is not interactive.
+36. In `Reset Button Value`, click the button and confirm the rendered summary resets `buttonValue` to `Ready`.
+37. Confirm `Disabled Primary Button` is not interactive.
+38. In `Hero Button`, click the button and confirm the rendered summary updates `buttonValue` to `Hero`.
+39. Confirm `Disabled Hero Button` is not interactive.
+40. In `Compound Button`, confirm the description text renders, click it, and confirm the rendered summary updates `buttonValue` to `Compound`.
+41. Confirm `Disabled Compound Button` is not interactive.
+42. In `Command Button`, confirm the command-style button renders with an icon, click it, and confirm the rendered summary updates `buttonValue` to `Command`.
+43. Confirm `Disabled Command Button` is not interactive.
+44. In `Icon Button`, confirm the icon-style button renders, click it, and confirm the rendered summary updates `buttonValue` to `Icon`.
+45. Confirm `Disabled Icon Button` is not interactive.
+46. In `Label Variations`, confirm both labels render as display-only guidance text with no input control.
+47. In `Link Variations`, confirm the documentation link renders as an actionable link.
+48. In `Open SPFx docs in popup window`, confirm the link opens a relatively small popup window near the bottom-left of the screen.
+49. Confirm the disabled link is not interactive.
 
 Expected result:
 
@@ -227,7 +259,7 @@ Expected result:
 - Read-only, underlined, and disabled states are clearly distinct.
 - Static and resizable multiline variants behave differently in the expected way.
 - Toggle text, inline-label, accessibility-label, state-aria-label, and disabled-state variations all render and behave as expected.
-- Checkbox, choice-group, and dropdown variations render correctly and respect disabled/accessibility-related configuration, including image-based choice-group options.
+- Checkbox, choice-group, dropdown, slider, button, label, and link variations render correctly and respect disabled/accessibility-related configuration, including image-based choice-group options and button bound-value mutation across all supported button types.
 
 ### AdvancedBehavior
 
