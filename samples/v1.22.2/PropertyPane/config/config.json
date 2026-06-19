@@ -50,11 +50,19 @@
         }
       ]
     },
-    "dynamic-data-web-part": {
+    "dynamic-data-source-web-part": {
       "components": [
         {
-          "entrypoint": "./lib/webparts/dynamicData/DynamicDataWebPart.js",
-          "manifest": "./src/webparts/dynamicData/DynamicDataWebPart.manifest.json"
+          "entrypoint": "./lib/webparts/dynamicDataSource/DynamicDataSourceWebPart.js",
+          "manifest": "./src/webparts/dynamicDataSource/DynamicDataSourceWebPart.manifest.json"
+        }
+      ]
+    },
+    "dynamic-data-consumer-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/dynamicDataConsumer/DynamicDataConsumerWebPart.js",
+          "manifest": "./src/webparts/dynamicDataConsumer/DynamicDataConsumerWebPart.manifest.json"
         }
       ]
     }

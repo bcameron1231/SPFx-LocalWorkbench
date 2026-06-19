@@ -18,7 +18,8 @@ The harness currently contains:
 - `AdvancedBehavior`
 - `PageAndAccordion`
 - `ValidationAndFocus`
-- `DynamicData`
+- `DynamicDataSource`
+- `DynamicDataConsumer`
 
 `StandardControls` and `PnpControls` are baseline coverage. `StandardControlVariations` isolates built-in field variants, and the remaining web parts are scenario-focused parity surfaces.
 
@@ -65,8 +66,9 @@ Run the samples in this order when validating the online workbench:
 3. `AdvancedBehavior`
 4. `PageAndAccordion`
 5. `ValidationAndFocus`
-6. `DynamicData`
-7. `PnpControls`
+6. `DynamicDataSource`
+7. `DynamicDataConsumer`
+8. `PnpControls`
 
 Why this order:
 
@@ -75,7 +77,8 @@ Why this order:
 - `AdvancedBehavior` confirms non-reactive apply, button semantics, and custom fields before moving into more layered scenarios.
 - `PageAndAccordion` confirms page/group host behavior.
 - `ValidationAndFocus` confirms focus, validation timing, and direct error-message details.
-- `DynamicData` confirms the most host-sensitive scenario last.
+- `DynamicDataSource` establishes the dynamic-data contract before consumer-side connection testing.
+- `DynamicDataConsumer` confirms the most host-sensitive connection and serialization behavior after the source is in place.
 - `PnpControls` is best used as a broad regression surface after native SPFx behaviors look correct.
 
 ## Sample Details
@@ -418,28 +421,69 @@ Expected result:
 - Direct `errorMessage` rendering works without blocking property updates.
 - The shared custom validation field demonstrates immediate reactive `changeCallback` updates.
 
-### DynamicData
+### DynamicDataSource
+
+Purpose:
+
+- dynamic source registration
+- source metadata and property definitions
+- primitive and object-valued dynamic-data properties
+- source update notifications for both direct and derived properties
+
+What it demonstrates:
+
+- `sourceText`
+  Verifies the primary string property exposed through the dynamic-data contract.
+- `sourceCount`
+  Verifies a numeric property exposed through the dynamic-data contract.
+- `sourceCategory`
+  Verifies additional source input used only by the object-valued property.
+- `sourceEmphasis`
+  Verifies another object-only input so structured values are easy to distinguish in the consumer.
+- `summary`
+  Verifies a derived string property updates when `sourceText` or `sourceCount` changes.
+- `details`
+  Verifies an object-valued property can be exposed and safely consumed.
+
+How to verify:
+
+1. Add the web part.
+2. Open the property pane.
+3. Confirm the `Published Values` group renders `Source Text`, `Source Category`, `Source Emphasis`, and `Source Count`.
+4. Confirm the rendered summary shows `text`, `count`, `summary`, and `details`.
+5. Change `Source Text` and confirm both `text` and `summary` update.
+6. Change `Source Count` and confirm both `count`, `summary`, and `details` update.
+7. Change `Source Category` and `Source Emphasis` and confirm only the object-valued `details` payload changes.
+8. Add a `DynamicDataConsumer` web part and confirm `Dynamic Data Source` appears as a selectable source in the built-in connection picker.
+
+Expected result:
+
+- The web part registers as a dynamic-data source.
+- Source metadata and property definitions appear in the connection picker.
+- Primitive and object-valued source properties update correctly.
+- Derived properties are refreshed when their dependent source values change.
+
+### DynamicDataConsumer
 
 Purpose:
 
 - `PropertyPaneDynamicField`
 - `PropertyPaneDynamicFieldSet`
+- field filtering
+- shared source configuration
 - `PropertyPaneConditionalGroup`
-- dynamic property serialization
-- dynamic source registration and updates
+- dynamic property serialization and reload safety
 
 What it demonstrates:
 
-- `sourceText`
-  The text value exposed by this web part as a dynamic data source property.
-- `sourceCount`
-  The numeric value exposed by this web part as a dynamic data source property.
 - `dynamicText`
-  Verifies a single `PropertyPaneDynamicField` connection.
+  Verifies a standalone `PropertyPaneDynamicField` connection.
+- `dynamicDetails`
+  Verifies a filtered standalone field that only allows the object-valued `details` property.
 - `dynamicCount`
-  Verifies one member of a `PropertyPaneDynamicFieldSet`.
+  Verifies a filtered member of a `PropertyPaneDynamicFieldSet`.
 - `dynamicSummary`
-  Verifies another member of a `PropertyPaneDynamicFieldSet`.
+  Verifies another member of the same dynamic field set using shared source selection.
 - shared source configuration
   Verifies the field set can share source selection across grouped entries.
 - `showConnectedConfiguration`
@@ -449,43 +493,49 @@ What it demonstrates:
 - `connectedSourceNote`
   Verifies the secondary conditional group content used after switching to the connected configuration.
 - `connectedDisplayMode`
-  Verifies additional persisted fields inside the secondary conditional group.
+  Verifies additional persisted fields inside the secondary conditional group and changes the rendered preview.
+- `connectedPreviewValue`
+  Verifies the sample can apply the selected display mode to connected dynamic values.
 - `lastConditionalAction`
   Verifies `onShowPrimaryGroup` and `onShowSecondaryGroup` fire when the built-in connector switches the active group.
 
 How to verify:
 
-1. Add the web part.
-2. Open the property pane.
-3. Confirm the `Source` group renders `Source Text` and `Source Count`.
-4. Confirm the `Connections` group renders one standalone dynamic field plus one dynamic field set.
-5. Before connecting anything, confirm the web part renders `"(not connected)"` for dynamic consumer values.
-6. Connect `Dynamic Text` to one available source/property combination.
-7. Confirm the web part continues rendering and the `dynamicText` summary updates.
-8. Change the selected property in the same field and confirm object-valued and primitive-valued selections both render safely.
-9. Configure the `Dynamic Field Set`.
-10. Confirm shared source selection behaves as expected and each member can pick its property.
-11. Update `Source Text` and `Source Count`.
-12. Confirm connected values refresh in the rendered summary.
-13. Switch to Page 2.
-14. Confirm the primary conditional group is visible with the built-in connector (`...`) above it.
-15. Edit `Manual Connection Label`.
-16. Click the connector and choose `Connect to source`.
-17. Confirm the secondary conditional group appears and the rendered summary shows `lastConditionalAction = onShowSecondaryGroup`.
-18. Edit `Connected Source Note` and `Connected Display Mode`.
-19. Click `Remove connection`.
-20. Confirm the primary group returns and the rendered summary shows `lastConditionalAction = onShowPrimaryGroup`.
-21. Close and reopen the property pane.
-22. Confirm the initial conditional-group state now matches the persisted `showConnectedConfiguration` value.
-23. Confirm no serialization errors repeat in the console while editing.
+1. Add `DynamicDataSource`.
+2. Add `DynamicDataConsumer`.
+3. Open the consumer property pane.
+4. Confirm the first page renders one standalone dynamic field, one filtered object field, and one dynamic field set.
+5. Before connecting anything, confirm the web part renders `"(not connected)"` for all dynamic consumer values.
+6. Connect `Dynamic Text` to `Dynamic Data Source > Source Text`.
+7. Confirm the consumer continues rendering and `dynamicText` updates.
+8. Connect `Dynamic Details (Filtered Object)` and confirm only the object-valued `details` property is available.
+9. Confirm the selected object value renders safely instead of crashing the consumer.
+10. Configure the `Dynamic Field Set`.
+11. Confirm shared source selection behaves as expected and each member can pick the intended property.
+12. Confirm `Dynamic Count` is filtered to the numeric count property.
+13. Update `DynamicDataSource` values and confirm connected consumer values refresh.
+14. Switch the consumer to Page 2.
+15. Confirm the primary conditional group is visible with the built-in connector (`...`) above it.
+16. Edit `Manual Connection Label`.
+17. Click the connector and choose `Connect to source`.
+18. Confirm the secondary conditional group appears and the rendered summary shows `lastConditionalAction = onShowSecondaryGroup`.
+19. Edit `Connected Source Note` and change `Connected Display Mode`.
+20. Confirm `connectedPreviewValue` changes to match the selected mode.
+21. Click `Remove connection`.
+22. Confirm the primary group returns and the rendered summary shows `lastConditionalAction = onShowPrimaryGroup`.
+23. Close and reopen the consumer property pane.
+24. Confirm the initial conditional-group state still matches the persisted `showConnectedConfiguration` value.
+25. Refresh or reload the page and confirm configured dynamic properties reconnect without crashing the consumer.
+26. Confirm no serialization errors repeat in the console while editing or reconnecting fields.
 
 Expected result:
 
-- The web part can act as both source and consumer.
 - Unconnected dynamic properties do not crash render.
+- Standalone fields, filtered fields, and field-set members connect correctly.
+- Object-valued dynamic selections render safely and legibly.
 - Connected values update when source values change.
-- Dynamic field set configuration does not fall back to placeholder behavior.
-- Conditional-group behavior is exercised on the sample where its connection-oriented UX actually makes sense.
+- Conditional-group behavior is exercised on the consumer where the connection-oriented UX actually makes sense.
+- Reloaded or partially reconstructed dynamic properties do not crash the sample.
 
 ### PnpControls
 
@@ -520,10 +570,11 @@ Use this checklist once the samples are loaded in the online workbench:
 - `AdvancedBehavior` verifies non-reactive `Apply`, button mutation, and custom field apply gating.
 - `PageAndAccordion` verifies page navigation, accordion state, and multi-page value persistence.
 - `ValidationAndFocus` verifies focus, validation timing, direct errors, and reactive custom-field updates.
-- `DynamicData` verifies dynamic source/consumer behavior and avoids render/serialization failures.
+- `DynamicDataSource` verifies source registration, property definitions, and primitive/object-valued source updates.
+- `DynamicDataConsumer` verifies dynamic connections, field filtering, conditional-group behavior, and render/serialization safety.
 - `PnpControls` still behaves as a broad regression surface.
 
-When all seven behave correctly in the online workbench, the sample harness can be treated as the expected baseline for local workbench parity validation.
+When all eight behave correctly in the online workbench, the sample harness can be treated as the expected baseline for local workbench parity validation.
 
 ## Local Workbench Follow-Up
 

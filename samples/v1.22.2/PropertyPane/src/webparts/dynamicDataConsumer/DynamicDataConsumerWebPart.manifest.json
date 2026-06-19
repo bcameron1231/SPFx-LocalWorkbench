@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
   "id": "8e670781-1f18-4f7d-bf84-6147253d118b",
-  "alias": "DynamicDataWebPart",
+  "alias": "DynamicDataConsumerWebPart",
   "componentType": "WebPart",
   "version": "*",
   "manifestVersion": 2,
@@ -12,17 +12,15 @@
     {
       "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
       "group": { "default": "Advanced" },
-      "title": { "default": "Dynamic Data" },
-      "description": { "default": "Exercises PropertyPaneDynamicField and PropertyPaneDynamicFieldSet." },
+      "title": { "default": "Dynamic Data Consumer" },
+      "description": { "default": "Exercises PropertyPaneDynamicField, PropertyPaneDynamicFieldSet, filters, and connection-oriented conditional groups." },
       "officeFabricIconFontName": "PlugConnected",
       "properties": {
         "connectedDisplayMode": "summary",
         "connectedSourceNote": "Connected configuration note",
         "lastConditionalAction": "none yet",
         "manualConnectionLabel": "Manual configuration",
-        "showConnectedConfiguration": false,
-        "sourceText": "Sample source text",
-        "sourceCount": 3
+        "showConnectedConfiguration": false
       }
     }
   ]

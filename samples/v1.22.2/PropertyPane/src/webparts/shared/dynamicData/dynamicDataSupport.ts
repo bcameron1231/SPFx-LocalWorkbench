@@ -1,20 +1,20 @@
 import {
   DynamicDataSharedDepth,
   PropertyPaneDropdown,
-  PropertyPaneTextField,
   PropertyPaneDynamicField,
   PropertyPaneDynamicFieldSet,
   type IPropertyPaneConditionalGroup,
-  PropertyPaneSlider,
+  PropertyPaneTextField,
   type IPropertyPaneConfiguration,
 } from '@microsoft/sp-property-pane';
 import { DynamicProperty } from '@microsoft/sp-component-base';
-import type { IDynamicDataPropertyDefinition } from '@microsoft/sp-dynamic-data';
-
-export interface IDynamicDataSourceState {
-  sourceCount: number;
-  sourceText: string;
-}
+import { buildDynamicDataDetails, DYNAMIC_DATA_PROPERTY_IDS } from './constants';
+import type {
+  DynamicPropertyLike,
+  IDynamicDataConsumerConnectionState,
+  IDynamicDataSourceState,
+  ISerializedDynamicPropertyState,
+} from './types';
 
 export interface IDynamicDataConditionalGroupOptions {
   onShowPrimaryGroup: () => void;
@@ -22,44 +22,57 @@ export interface IDynamicDataConditionalGroupOptions {
   showSecondaryGroup: boolean;
 }
 
-/**
- * Shape we expect when SPFx deserializes persisted dynamic-property state back into the property bag.
- */
-export type DynamicPropertyLike<TValue> =
-  | DynamicProperty<TValue>
-  | { reference?: string; value?: TValue }
-  | undefined;
-
-interface ISerializedDynamicPropertyState<TValue> {
-  reference?: unknown;
-  value?: TValue;
+/** Source-side property pane: keep it simple and focused on values published to consumers. */
+export function buildDynamicDataSourcePropertyPaneConfiguration(): IPropertyPaneConfiguration {
+  return {
+    pages: [
+      {
+        header: {
+          description: 'Values configured here are published through the SPFx dynamic-data source contract.',
+        },
+        groups: [
+          {
+            groupName: 'Published Values',
+            groupFields: [
+              PropertyPaneTextField('sourceText', {
+                label: 'Source Text',
+                description: 'Published as the sample string property.',
+              }),
+              PropertyPaneTextField('sourceCategory', {
+                label: 'Source Category',
+                description: 'Included in the object-valued property to test structured consumer rendering.',
+              }),
+              PropertyPaneTextField('sourceEmphasis', {
+                label: 'Source Emphasis',
+                description: 'Additional object-only detail so structured values are easier to distinguish.',
+              }),
+              PropertyPaneDropdown('sourceCount', {
+                label: 'Source Count',
+                options: [
+                  { key: 0, text: '0' },
+                  { key: 1, text: '1' },
+                  { key: 2, text: '2' },
+                  { key: 3, text: '3' },
+                  { key: 4, text: '4' },
+                  { key: 5, text: '5' },
+                ],
+              }),
+            ],
+          },
+        ],
+      },
+    ],
+  };
 }
 
 /**
- * Source properties exposed by the sample web part.
- * These definitions are part of the SPFx dynamic-data contract, not just sample display data.
- */
-export const DYNAMIC_DATA_PROPERTY_DEFINITIONS: ReadonlyArray<IDynamicDataPropertyDefinition> = [
-  {
-    id: 'text',
-    title: 'Source Text',
-  },
-  {
-    id: 'count',
-    title: 'Source Count',
-  },
-  {
-    id: 'summary',
-    title: 'Source Summary',
-  },
-];
-
-/**
- * Property-pane surface used to exercise:
+ * Consumer-side property-pane surface used to exercise:
  * - one standalone dynamic field
+ * - one filtered standalone field for object values
  * - one dynamic field set with shared source selection
+ * - one connection-oriented conditional group
  */
-export function buildDynamicDataPropertyPaneConfiguration(
+export function buildDynamicDataConsumerPropertyPaneConfiguration(
   conditionalGroupOptions: IDynamicDataConditionalGroupOptions,
 ): IPropertyPaneConfiguration {
   const conditionalGroup: IPropertyPaneConditionalGroup = {
@@ -85,6 +98,7 @@ export function buildDynamicDataPropertyPaneConfiguration(
             { key: 'summary', text: 'Summary' },
             { key: 'textOnly', text: 'Text Only' },
             { key: 'countOnly', text: 'Count Only' },
+            { key: 'detailsOnly', text: 'Details Object' },
           ],
         }),
       ],
@@ -98,39 +112,33 @@ export function buildDynamicDataPropertyPaneConfiguration(
     pages: [
       {
         header: {
-          description: 'Source values plus dynamic field and dynamic field set consumers.',
+          description: 'Dynamic data consumer scenarios for standalone fields, field sets, filters, and shared source selection.',
         },
         groups: [
           {
-            groupName: 'Source',
+            groupName: 'Standalone Dynamic Fields',
             groupFields: [
-              PropertyPaneTextField('sourceText', {
-                label: 'Source Text',
-                description: 'Published through this web part as dynamic data.',
+              PropertyPaneDynamicField('dynamicText', {
+                label: 'Dynamic Text',
+                sourcesLabel: 'Connect to a dynamic data source',
+                propertyValueDepth: 1,
               }),
-              PropertyPaneSlider('sourceCount', {
-                label: 'Source Count',
-                min: 0,
-                max: 10,
-                step: 1,
-                showValue: true,
+              PropertyPaneDynamicField('dynamicDetails', {
+                label: 'Dynamic Details (Filtered Object)',
+                filters: { propertyId: DYNAMIC_DATA_PROPERTY_IDS.details },
+                propertyValueDepth: 2,
               }),
             ],
           },
           {
-            groupName: 'Connections',
+            groupName: 'Dynamic Field Set',
             groupFields: [
-              PropertyPaneDynamicField('dynamicText', {
-                label: 'Dynamic Text',
-                sourcesLabel: 'Connect to a sample source',
-                propertyValueDepth: 1,
-              }),
               PropertyPaneDynamicFieldSet({
                 label: 'Dynamic Field Set',
                 fields: [
                   PropertyPaneDynamicField('dynamicCount', {
                     label: 'Dynamic Count',
-                    filters: { propertyId: 'count' },
+                    filters: { propertyId: DYNAMIC_DATA_PROPERTY_IDS.count },
                     propertyValueDepth: 0,
                   }),
                   PropertyPaneDynamicField('dynamicSummary', {
@@ -189,14 +197,37 @@ export function getDynamicDataPropertyValue(
   propertyId: string,
 ): unknown {
   switch (propertyId) {
-    case 'text':
+    case DYNAMIC_DATA_PROPERTY_IDS.text:
       return sourceState.sourceText;
-    case 'count':
+    case DYNAMIC_DATA_PROPERTY_IDS.count:
       return sourceState.sourceCount;
-    case 'summary':
+    case DYNAMIC_DATA_PROPERTY_IDS.summary:
       return `${sourceState.sourceText} (${sourceState.sourceCount})`;
+    case DYNAMIC_DATA_PROPERTY_IDS.details:
+      return buildDynamicDataDetails(sourceState);
     default:
       return undefined;
+  }
+}
+
+/** Applies the consumer-side display-mode choice to the already formatted dynamic values. */
+export function resolveConnectedPreview(
+  connectionState: Pick<IDynamicDataConsumerConnectionState, 'connectedDisplayMode'>,
+  dynamicTextValue: string,
+  dynamicCountValue: string,
+  dynamicSummaryValue: string,
+  dynamicDetailsValue: string,
+): string {
+  switch (connectionState.connectedDisplayMode) {
+    case 'textOnly':
+      return dynamicTextValue;
+    case 'countOnly':
+      return dynamicCountValue;
+    case 'detailsOnly':
+      return dynamicDetailsValue;
+    case 'summary':
+    default:
+      return dynamicSummaryValue;
   }
 }
 
@@ -247,7 +278,7 @@ function tryReadDynamicValue<TValue>(
 /**
  * Display helper only. This is not part of the dynamic-data contract itself.
  */
-function formatDynamicValue(value: unknown): string {
+export function formatDynamicValue(value: unknown): string {
   if (value === undefined || value === null) {
     return '(not connected)';
   }

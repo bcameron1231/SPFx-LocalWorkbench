@@ -1,34 +1,30 @@
 import * as React from 'react';
 import ScenarioDetails, { type IScenarioDetailSection } from '../../shared/components/ScenarioDetails';
 
-export interface IDynamicDataProps {
+export interface IDynamicDataConsumerProps {
   connectedDisplayMode: string;
+  connectedPreviewValue: string;
   connectedSourceNote: string;
-  sourceText: string;
-  sourceCount: number;
   dynamicTextValue: string;
   dynamicCountValue: string;
   dynamicSummaryValue: string;
+  dynamicDetailsValue: string;
   lastConditionalAction: string;
   manualConnectionLabel: string;
   showConnectedConfiguration: boolean;
 }
 
-export default function DynamicData(props: IDynamicDataProps): React.ReactElement<IDynamicDataProps> {
+export default function DynamicDataConsumer(
+  props: IDynamicDataConsumerProps,
+): React.ReactElement<IDynamicDataConsumerProps> {
   const sections: IScenarioDetailSection[] = [
-    {
-      title: 'Source Values',
-      entries: [
-        { label: 'sourceText', value: props.sourceText },
-        { label: 'sourceCount', value: String(props.sourceCount) },
-      ],
-    },
     {
       title: 'Dynamic Consumers',
       entries: [
         { label: 'dynamicText', value: props.dynamicTextValue },
         { label: 'dynamicCount', value: props.dynamicCountValue },
         { label: 'dynamicSummary', value: props.dynamicSummaryValue },
+        { label: 'dynamicDetails', value: props.dynamicDetailsValue },
       ],
     },
     {
@@ -38,6 +34,7 @@ export default function DynamicData(props: IDynamicDataProps): React.ReactElemen
         { label: 'manualConnectionLabel', value: props.manualConnectionLabel },
         { label: 'connectedSourceNote', value: props.connectedSourceNote },
         { label: 'connectedDisplayMode', value: props.connectedDisplayMode },
+        { label: 'connectedPreviewValue', value: props.connectedPreviewValue },
         { label: 'lastConditionalAction', value: props.lastConditionalAction },
       ],
     },
@@ -45,8 +42,8 @@ export default function DynamicData(props: IDynamicDataProps): React.ReactElemen
 
   return (
     <ScenarioDetails
-      title="Dynamic Data Property Pane"
-      description="A source and consumer surface for dynamic fields, dynamic field sets, and connection-style conditional groups."
+      title="Dynamic Data Consumer"
+      description="A consumer-only surface for dynamic fields, dynamic field sets, filtered object connections, and connection-style conditional groups."
       sections={sections}
     />
   );
