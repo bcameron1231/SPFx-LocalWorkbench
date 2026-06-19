@@ -43,6 +43,7 @@ import { PropertyPaneWebPartInformation } from '@pnp/spfx-property-controls/lib/
 
 import PnpControls from './components/PnpControls';
 import { IPnpControlsProps } from './components/IPnpControlsProps';
+import { getManifestMetadata } from '../shared/components/ManifestMetadataBadge';
 
 export interface IPnpControlsWebPartProps {
   color: string;
@@ -89,6 +90,7 @@ export default class PnpControlsWebPart extends BaseClientSideWebPart<IPnpContro
     const element: React.ReactElement<IPnpControlsProps> = React.createElement(
       PnpControls,
       {
+        manifestInfo: getManifestMetadata(this.context.manifest),
         color: this.properties.color,
         swatchColor: this.properties.swatchColor,
         brandFont: this.properties.brandFont,

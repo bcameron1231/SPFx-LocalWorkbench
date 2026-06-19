@@ -19,6 +19,7 @@ import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 
 import StandardControls from './components/StandardControls';
 import { IStandardControlsProps } from './components/IStandardControlsProps';
+import { getManifestMetadata } from '../shared/components/ManifestMetadataBadge';
 
 export interface IStandardControlsWebPartProps {
   textField: string;
@@ -35,6 +36,7 @@ export default class StandardControlsWebPart extends BaseClientSideWebPart<IStan
     const element: React.ReactElement<IStandardControlsProps> = React.createElement(
       StandardControls,
       {
+        manifestInfo: getManifestMetadata(this.context.manifest),
         textField: this.properties.textField,
         toggle: this.properties.toggle,
         checkbox: this.properties.checkbox,

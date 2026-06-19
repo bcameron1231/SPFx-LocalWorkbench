@@ -11,6 +11,7 @@ import {
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 
 import AdvancedBehavior, { type IAdvancedBehaviorProps } from './components/AdvancedBehavior';
+import { getManifestMetadata } from '../shared/components/ManifestMetadataBadge';
 import { CustomValidationField } from '../shared/customValidationFieldSupport';
 
 export interface IAdvancedBehaviorWebPartProps {
@@ -31,6 +32,7 @@ export default class AdvancedBehaviorWebPart extends BaseClientSideWebPart<IAdva
       buttonValue: this.properties.buttonValue,
       customValue: this.properties.customValue,
       customFieldStatus: this.properties.customFieldStatus,
+      manifestInfo: getManifestMetadata(this.context.manifest),
     });
 
     ReactDom.render(element, this.domElement);

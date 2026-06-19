@@ -1,9 +1,11 @@
 import * as React from 'react';
+import type { IManifestMetadata } from '../../shared/components/ManifestMetadataBadge';
 import ScenarioDetails, { type IScenarioDetailSection } from '../../shared/components/ScenarioDetails';
 
 export interface IPageAndAccordionProps {
   accordionName: string;
   collapsedNotes: string;
+  manifestInfo: IManifestMetadata;
   pageTwoAudience: string;
   pageTwoHighlight: boolean;
   pageTwoNotes: string;
@@ -41,6 +43,7 @@ export default function PageAndAccordion(props: IPageAndAccordionProps): React.R
 
   return (
     <ScenarioDetails
+      manifestInfo={props.manifestInfo}
       title="Page And Accordion Behavior"
       description="Multiple pages, accordion groups, collapsed defaults, and persisted values across three pages."
       sections={sections}

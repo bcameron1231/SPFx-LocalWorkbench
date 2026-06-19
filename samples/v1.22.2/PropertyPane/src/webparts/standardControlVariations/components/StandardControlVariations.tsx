@@ -1,4 +1,5 @@
 import * as React from 'react';
+import type { IManifestMetadata } from '../../shared/components/ManifestMetadataBadge';
 import ScenarioDetails, { type IScenarioDetailSection } from '../../shared/components/ScenarioDetails';
 
 export interface IStandardControlVariationsProps {
@@ -19,6 +20,7 @@ export interface IStandardControlVariationsProps {
   dropdownValue: string;
   fallbackValueText?: string;
   limitedLengthValue: string;
+  manifestInfo: IManifestMetadata;
   multilineResizableValue: string;
   multilineStaticValue: string;
   readOnlyValue: string;
@@ -120,6 +122,7 @@ export default function StandardControlVariations(
 
   return (
     <ScenarioDetails
+      manifestInfo={props.manifestInfo}
       title="Standard Control Variations"
       description="Built-in PropertyPane field variations grouped by standard control type."
       sections={sections}

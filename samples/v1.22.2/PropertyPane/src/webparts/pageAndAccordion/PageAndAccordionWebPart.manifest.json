@@ -3,7 +3,7 @@
   "id": "a72170df-6e8c-44ae-b1ca-e298f49791ad",
   "alias": "PageAndAccordionWebPart",
   "componentType": "WebPart",
-  "version": "*",
+  "version": "1.22.2",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],

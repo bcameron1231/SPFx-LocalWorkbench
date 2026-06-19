@@ -1,7 +1,9 @@
 import * as React from 'react';
+import type { IManifestMetadata } from '../../shared/components/ManifestMetadataBadge';
 import ScenarioDetails, { type IScenarioDetailSection } from '../../shared/components/ScenarioDetails';
 
 export interface IDynamicDataSourceProps {
+  manifestInfo: IManifestMetadata;
   sourceCategory: string;
   sourceCount: number;
   sourceDetailsValue: string;
@@ -34,6 +36,7 @@ export default function DynamicDataSource(
 
   return (
     <ScenarioDetails
+      manifestInfo={props.manifestInfo}
       title="Dynamic Data Source"
       description="A source-only surface that publishes primitive and object-valued properties through the SPFx dynamic-data contract."
       sections={sections}

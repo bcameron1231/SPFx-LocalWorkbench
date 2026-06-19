@@ -29,6 +29,7 @@ import {
 import StandardControlVariations, {
   type IStandardControlVariationsProps,
 } from './components/StandardControlVariations';
+import { getManifestMetadata } from '../shared/components/ManifestMetadataBadge';
 
 export interface IStandardControlVariationsWebPartProps {
   ariaPlaceholderText: string;
@@ -82,6 +83,7 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
       dropdownValue: this.properties.dropdownValue,
       fallbackValueText: this.properties.fallbackValueText,
       limitedLengthValue: this.properties.limitedLengthValue,
+      manifestInfo: getManifestMetadata(this.context.manifest),
       multilineResizableValue: this.properties.multilineResizableValue,
       multilineStaticValue: this.properties.multilineStaticValue,
       readOnlyValue: this.properties.readOnlyValue,

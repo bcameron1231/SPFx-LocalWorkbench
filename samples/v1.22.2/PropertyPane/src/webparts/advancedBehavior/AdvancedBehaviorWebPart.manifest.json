@@ -3,7 +3,7 @@
   "id": "7c77c9e5-2520-43ef-bf38-30f1d62084f2",
   "alias": "AdvancedBehaviorWebPart",
   "componentType": "WebPart",
-  "version": "*",
+  "version": "1.22.2",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],

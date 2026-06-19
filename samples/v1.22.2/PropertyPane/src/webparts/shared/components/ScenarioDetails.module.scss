@@ -1,6 +1,7 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
 .scenarioDetails {
+  position: relative;
   overflow: hidden;
   padding: 1em;
   color: "[theme:neutralPrimary, default: #333333]";

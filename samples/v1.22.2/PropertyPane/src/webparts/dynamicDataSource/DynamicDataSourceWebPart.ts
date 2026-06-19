@@ -5,6 +5,7 @@ import type { IDynamicDataCallables, IDynamicDataPropertyDefinition } from '@mic
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 
 import DynamicDataSource, { type IDynamicDataSourceProps } from './components/DynamicDataSource';
+import { getManifestMetadata } from '../shared/components/ManifestMetadataBadge';
 import {
   buildDynamicDataDetails,
   buildDynamicDataSourcePropertyPaneConfiguration,
@@ -38,6 +39,7 @@ export default class DynamicDataSourceWebPart
     const sourceDetails = buildDynamicDataDetails(sourceState);
 
     const element: React.ReactElement<IDynamicDataSourceProps> = React.createElement(DynamicDataSource, {
+      manifestInfo: getManifestMetadata(this.context.manifest),
       sourceCategory: sourceState.sourceCategory,
       sourceCount: sourceState.sourceCount,
       sourceDetailsValue: formatDynamicValue(sourceDetails),

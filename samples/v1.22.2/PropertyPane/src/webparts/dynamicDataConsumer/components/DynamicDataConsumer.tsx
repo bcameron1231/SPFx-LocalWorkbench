@@ -1,4 +1,5 @@
 import * as React from 'react';
+import type { IManifestMetadata } from '../../shared/components/ManifestMetadataBadge';
 import ScenarioDetails, { type IScenarioDetailSection } from '../../shared/components/ScenarioDetails';
 
 export interface IDynamicDataConsumerProps {
@@ -10,6 +11,7 @@ export interface IDynamicDataConsumerProps {
   dynamicSummaryValue: string;
   dynamicDetailsValue: string;
   lastConditionalAction: string;
+  manifestInfo: IManifestMetadata;
   manualConnectionLabel: string;
   showConnectedConfiguration: boolean;
 }
@@ -42,6 +44,7 @@ export default function DynamicDataConsumer(
 
   return (
     <ScenarioDetails
+      manifestInfo={props.manifestInfo}
       title="Dynamic Data Consumer"
       description="A consumer-only surface for dynamic fields, dynamic field sets, filtered object connections, and connection-style conditional groups."
       sections={sections}

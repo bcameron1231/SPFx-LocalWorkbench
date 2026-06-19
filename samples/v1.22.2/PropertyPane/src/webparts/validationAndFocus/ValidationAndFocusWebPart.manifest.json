@@ -3,7 +3,7 @@
   "id": "76160fb8-8d47-42c8-bd76-c6cb7b7d8945",
   "alias": "ValidationAndFocusWebPart",
   "componentType": "WebPart",
-  "version": "*",
+  "version": "1.22.2",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],

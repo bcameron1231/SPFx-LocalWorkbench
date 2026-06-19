@@ -1,6 +1,8 @@
 import { IDateTimeFieldValue } from '@pnp/spfx-property-controls/lib/PropertyFieldDateTimePicker';
+import type { IManifestMetadata } from '../../shared/components/ManifestMetadataBadge';
 
 export interface IPnpControlsProps {
+  manifestInfo: IManifestMetadata;
   // Text & colour
   color: string;
   swatchColor: string;

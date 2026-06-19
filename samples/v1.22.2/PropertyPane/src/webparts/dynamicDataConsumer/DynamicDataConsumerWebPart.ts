@@ -6,6 +6,7 @@ import type IWebPartPropertiesMetadata from '@microsoft/sp-webpart-base/lib/core
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 
 import DynamicDataConsumer, { type IDynamicDataConsumerProps } from './components/DynamicDataConsumer';
+import { getManifestMetadata } from '../shared/components/ManifestMetadataBadge';
 import {
   buildDynamicDataConsumerPropertyPaneConfiguration,
   DYNAMIC_DATA_CONDITIONAL_ACTIONS,
@@ -77,6 +78,7 @@ export default class DynamicDataConsumerWebPart extends BaseClientSideWebPart<ID
       dynamicSummaryValue,
       dynamicTextValue,
       lastConditionalAction: this.properties.lastConditionalAction ?? DYNAMIC_DATA_CONDITIONAL_ACTIONS.none,
+      manifestInfo: getManifestMetadata(this.context.manifest),
       manualConnectionLabel: this.properties.manualConnectionLabel,
       showConnectedConfiguration: this.properties.showConnectedConfiguration,
     });

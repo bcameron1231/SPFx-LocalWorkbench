@@ -1,4 +1,5 @@
 import * as React from 'react';
+import type { IManifestMetadata } from '../../shared/components/ManifestMetadataBadge';
 import ScenarioDetails, { type IScenarioDetailSection } from '../../shared/components/ScenarioDetails';
 
 export interface IAdvancedBehaviorProps {
@@ -6,6 +7,7 @@ export interface IAdvancedBehaviorProps {
   buttonValue: string;
   customValue: string;
   customFieldStatus: string;
+  manifestInfo: IManifestMetadata;
 }
 
 export default function AdvancedBehavior(props: IAdvancedBehaviorProps): React.ReactElement<IAdvancedBehaviorProps> {
@@ -28,6 +30,7 @@ export default function AdvancedBehavior(props: IAdvancedBehaviorProps): React.R
 
   return (
     <ScenarioDetails
+      manifestInfo={props.manifestInfo}
       title="Advanced Property Pane Behavior"
       description="Non-reactive updates, bound-value button mutation, and custom field callbacks."
       sections={sections}

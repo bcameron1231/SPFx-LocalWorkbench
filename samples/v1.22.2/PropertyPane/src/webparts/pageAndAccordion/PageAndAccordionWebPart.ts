@@ -11,6 +11,7 @@ import {
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 
 import PageAndAccordion, { type IPageAndAccordionProps } from './components/PageAndAccordion';
+import { getManifestMetadata } from '../shared/components/ManifestMetadataBadge';
 
 export interface IPageAndAccordionWebPartProps {
   accordionName: string;
@@ -28,6 +29,7 @@ export default class PageAndAccordionWebPart extends BaseClientSideWebPart<IPage
     const element: React.ReactElement<IPageAndAccordionProps> = React.createElement(PageAndAccordion, {
       accordionName: this.properties.accordionName,
       collapsedNotes: this.properties.collapsedNotes,
+      manifestInfo: getManifestMetadata(this.context.manifest),
       pageTwoAudience: this.properties.pageTwoAudience,
       pageTwoHighlight: this.properties.pageTwoHighlight,
       pageTwoNotes: this.properties.pageTwoNotes,

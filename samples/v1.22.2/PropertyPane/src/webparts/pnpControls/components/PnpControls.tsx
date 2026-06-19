@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Icon } from '@fluentui/react/lib/Icon';
+import ScenarioDetails, { type IScenarioDetailSection } from '../../shared/components/ScenarioDetails';
 import styles from './PnpControls.module.scss';
 import type { IPnpControlsProps } from './IPnpControlsProps';
 
@@ -28,114 +29,94 @@ export default class PnpControls extends React.Component<IPnpControlsProps> {
       return JSON.stringify(val);
     };
 
-    const groups: { groupName: string; properties: { name: string; value: React.ReactNode }[] }[] = [
+    const sections: IScenarioDetailSection[] = [
       {
-        groupName: 'Text Inputs',
-        properties: [
-          { name: 'password',         value: password ? '•'.repeat(password.length) : '' },
-          { name: 'searchValue',      value: searchValue || '(empty)' },
-          { name: 'htmlCode',         value: htmlCode || '(empty)' },
-          { name: 'monacoCode',       value: monacoCode || '(empty)' },
-          { name: 'guid',             value: guid || '(empty)' },
+        title: 'Text Inputs',
+        entries: [
+          { label: 'password', value: password ? '•'.repeat(password.length) : '' },
+          { label: 'searchValue', value: searchValue || '(empty)' },
+          { label: 'htmlCode', value: htmlCode || '(empty)' },
+          { label: 'monacoCode', value: monacoCode || '(empty)' },
+          { label: 'guid', value: guid || '(empty)' },
         ]
       },
       {
-        groupName: 'Numbers & Ordering',
-        properties: [
-          { name: 'numberValue',      value: String(numberValue ?? '') },
-          { name: 'spinValue',        value: `${spinValue ?? ''} units` },
-          { name: 'multiSelect',      value: (multiSelect ?? []).join(', ') || 'None' },
-          { name: 'orderedItems',     value: fmtArr(orderedItems, i => i.title ?? JSON.stringify(i)) },
-          { name: 'collectionData',   value: fmtJson(collectionData) },
+        title: 'Numbers & Ordering',
+        entries: [
+          { label: 'numberValue', value: String(numberValue ?? '') },
+          { label: 'spinValue', value: `${spinValue ?? ''} units` },
+          { label: 'multiSelect', value: (multiSelect ?? []).join(', ') || 'None' },
+          { label: 'orderedItems', value: fmtArr(orderedItems, i => i.title ?? JSON.stringify(i)) },
+          { label: 'collectionData', value: fmtJson(collectionData) },
         ]
       },
       {
-        groupName: 'Colors, Fonts & Icons',
-        properties: [
-          { name: 'color',       value: color ? <span className={styles.colorValue}><span className={styles.colorSwatch} style={{ backgroundColor: color }} />{color}</span> : '(empty)' },
-          { name: 'swatchColor', value: swatchColor ? <span className={styles.colorValue}><span className={styles.colorSwatch} style={{ backgroundColor: swatchColor }} />{swatchColor}</span> : '(empty)' },
-          { name: 'iconName',    value: iconName ? <span className={styles.iconValue}><Icon iconName={iconName} className={styles.iconDisplay} />{iconName}</span> : '(empty)' },
-          { name: 'brandFont',   value: brandFont || '(empty)' },
+        title: 'Colors, Fonts & Icons',
+        entries: [
+          { label: 'color', value: color ? <span className={styles.colorValue}><span className={styles.colorSwatch} style={{ backgroundColor: color }} />{color}</span> : '(empty)' },
+          { label: 'swatchColor', value: swatchColor ? <span className={styles.colorValue}><span className={styles.colorSwatch} style={{ backgroundColor: swatchColor }} />{swatchColor}</span> : '(empty)' },
+          { label: 'iconName', value: iconName ? <span className={styles.iconValue}><Icon iconName={iconName} className={styles.iconDisplay} />{iconName}</span> : '(empty)' },
+          { label: 'brandFont', value: brandFont || '(empty)' },
         ]
       },
       {
-        groupName: 'Date, Actions & Grid',
-        properties: [
-          { name: 'dateTime',         value: dateTime?.displayValue ?? 'Not set' },
-          { name: 'gridItems',        value: fmtArr(gridItems, i => i.title ?? i.key) },
+        title: 'Date, Actions & Grid',
+        entries: [
+          { label: 'dateTime', value: dateTime?.displayValue ?? 'Not set' },
+          { label: 'gridItems', value: fmtArr(gridItems, i => i.title ?? i.key) },
         ]
       },
       {
-        groupName: 'List Pickers',
-        properties: [
-          { name: 'lists',            value: lists || '(empty)' },
-          { name: 'column',           value: column || '(empty)' },
-          { name: 'view',             value: view || '(empty)' },
+        title: 'List Pickers',
+        entries: [
+          { label: 'lists', value: lists || '(empty)' },
+          { label: 'column', value: column || '(empty)' },
+          { label: 'view', value: view || '(empty)' },
         ]
       },
       {
-        groupName: 'People & Teams',
-        properties: [
+        title: 'People & Teams',
+        entries: [
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          { name: 'people',           value: fmtArr(people, (p: any) => p.text ?? p.fullName ?? p.id) },
+          { label: 'people', value: fmtArr(people, (p: any) => p.text ?? p.fullName ?? p.id) },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          { name: 'teams',            value: fmtArr(teams, (t: any) => t.title ?? t.id) },
+          { label: 'teams', value: fmtArr(teams, (t: any) => t.title ?? t.id) },
         ]
       },
       {
-        groupName: 'Files & Folders',
-        properties: [
-          { name: 'filePickerResult', value: filePickerResult?.fileAbsoluteUrl ?? 'Not set' },
-          { name: 'folderPicker',     value: folderPicker?.ServerRelativeUrl ?? 'Not set' },
+        title: 'Files & Folders',
+        entries: [
+          { label: 'filePickerResult', value: filePickerResult?.fileAbsoluteUrl ?? 'Not set' },
+          { label: 'folderPicker', value: folderPicker?.ServerRelativeUrl ?? 'Not set' },
         ]
       },
       {
-        groupName: 'Term Store',
-        properties: [
+        title: 'Term Store',
+        entries: [
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          { name: 'terms',            value: fmtArr(Array.isArray(terms) ? terms : [], (t: any) => t.name ?? t.key) },
+          { label: 'terms', value: fmtArr(Array.isArray(terms) ? terms : [], (t: any) => t.name ?? t.key) },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          { name: 'enterpriseTerms',  value: fmtArr(Array.isArray(enterpriseTerms) ? enterpriseTerms : [], (t: any) => t.name ?? t.key) },
+          { label: 'enterpriseTerms', value: fmtArr(Array.isArray(enterpriseTerms) ? enterpriseTerms : [], (t: any) => t.name ?? t.key) },
         ]
       },
       {
-        groupName: 'Sites & Roles',
-        properties: [
+        title: 'Sites & Roles',
+        entries: [
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          { name: 'sites',            value: fmtArr(sites, (s: any) => s.title ?? s.url) },
+          { label: 'sites', value: fmtArr(sites, (s: any) => s.title ?? s.url) },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          { name: 'roleDefinitions',  value: fmtArr(roleDefinitions, (r: any) => r.Name ?? r.Id) },
+          { label: 'roleDefinitions', value: fmtArr(roleDefinitions, (r: any) => r.Name ?? r.Id) },
         ]
       },
     ];
 
     return (
-      <section className={styles.pnpControls}>
-        <h2>PnP SPFx Property Controls</h2>
-        <table className={styles.propertyTable}>
-          <thead>
-            <tr>
-              <th>Property</th>
-              <th>Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            {groups.map(group => (
-              <React.Fragment key={group.groupName}>
-                <tr>
-                  <td colSpan={2} className={styles.groupHeader}>{group.groupName}</td>
-                </tr>
-                {group.properties.map(p => (
-                  <tr key={p.name}>
-                    <td><strong>{p.name}</strong></td>
-                    <td>{p.value}</td>
-                  </tr>
-                ))}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
-      </section>
+      <ScenarioDetails
+        manifestInfo={this.props.manifestInfo}
+        title="PnP SPFx Property Controls"
+        description="Broad regression surface for PnP property controls across text, pickers, collections, files, terms, and roles."
+        sections={sections}
+      />
     );
   }
 }

@@ -3,7 +3,7 @@
   "id": "8e670781-1f18-4f7d-bf84-6147253d118b",
   "alias": "DynamicDataConsumerWebPart",
   "componentType": "WebPart",
-  "version": "*",
+  "version": "1.22.2",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],

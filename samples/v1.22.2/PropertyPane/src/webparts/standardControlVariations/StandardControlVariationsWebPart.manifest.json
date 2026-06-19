@@ -3,7 +3,7 @@
   "id": "cb4c47ea-0eb7-4987-a359-667f7bdb8e1d",
   "alias": "StandardControlVariationsWebPart",
   "componentType": "WebPart",
-  "version": "*",
+  "version": "1.22.2",
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],

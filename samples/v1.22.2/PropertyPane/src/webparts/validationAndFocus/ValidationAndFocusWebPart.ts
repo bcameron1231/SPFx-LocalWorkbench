@@ -7,6 +7,7 @@ import type { IPropertyPaneTextFieldProps } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 
 import ValidationAndFocus, { type IValidationAndFocusProps } from './components/ValidationAndFocus';
+import { getManifestMetadata } from '../shared/components/ManifestMetadataBadge';
 import { CustomValidationField } from '../shared/customValidationFieldSupport';
 
 export interface IValidationAndFocusWebPartProps {
@@ -29,6 +30,7 @@ export default class ValidationAndFocusWebPart extends BaseClientSideWebPart<IVa
       immediateValidatedText: this.properties.immediateValidatedText,
       deferredValidatedText: this.properties.deferredValidatedText,
       directErrorValidatedText: this.properties.directErrorValidatedText,
+      manifestInfo: getManifestMetadata(this.context.manifest),
     });
 
     ReactDom.render(element, this.domElement);

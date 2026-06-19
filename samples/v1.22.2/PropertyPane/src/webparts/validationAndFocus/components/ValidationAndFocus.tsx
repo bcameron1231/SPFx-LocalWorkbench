@@ -1,4 +1,5 @@
 import * as React from 'react';
+import type { IManifestMetadata } from '../../shared/components/ManifestMetadataBadge';
 import ScenarioDetails, { type IScenarioDetailSection } from '../../shared/components/ScenarioDetails';
 
 export interface IValidationAndFocusProps {
@@ -9,6 +10,7 @@ export interface IValidationAndFocusProps {
   immediateValidatedText: string;
   deferredValidatedText: string;
   directErrorValidatedText: string;
+  manifestInfo: IManifestMetadata;
 }
 
 export default function ValidationAndFocus(props: IValidationAndFocusProps): React.ReactElement<IValidationAndFocusProps> {
@@ -34,6 +36,7 @@ export default function ValidationAndFocus(props: IValidationAndFocusProps): Rea
 
   return (
     <ScenarioDetails
+      manifestInfo={props.manifestInfo}
       title="Validation And Focus Behavior"
       description="Focus behavior, validation timing, direct error messages, and reactive custom-field updates."
       sections={sections}
