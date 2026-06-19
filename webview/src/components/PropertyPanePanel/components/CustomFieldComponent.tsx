@@ -7,14 +7,14 @@ import type { IPropertyPaneCustomFieldPropsModel, IPropertyPaneFieldChangeCallba
 
 interface ICustomFieldComponentProps {
   field: IPropertyPaneFieldModel<IPropertyPaneCustomFieldPropsModel>;
-  onChange: (value: unknown) => void;
+  onPropertyChange: (targetProperty: string, value: unknown) => void;
   value: unknown;
 }
 
 export const CustomFieldComponent: FC<ICustomFieldComponentProps> = ({
   field,
   value,
-  onChange,
+  onPropertyChange,
 }) => {
   const { context, key, onDispose, onRender } = field.properties;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,13 +25,9 @@ export const CustomFieldComponent: FC<ICustomFieldComponentProps> = ({
         return;
       }
 
-      if (targetProperty && targetProperty !== field.targetProperty) {
-        return;
-      }
-
-      onChange(newValue);
+      onPropertyChange(targetProperty || field.targetProperty, newValue);
     },
-    [field.targetProperty, onChange],
+    [field.targetProperty, onPropertyChange],
   );
 
   useEffect(() => {

@@ -6,6 +6,10 @@ import type {
   ICheckboxFieldViewModel,
   IChoiceGroupFieldViewModel,
   IChoiceGroupOptionViewModel,
+  IDynamicDataSourceViewModel,
+  IDynamicFieldFiltersViewModel,
+  IDynamicFieldSetViewModel,
+  IDynamicFieldViewModel,
   IPropertyPaneConditionalGroupModel,
   IDropdownFieldViewModel,
   IDropdownOptionViewModel,
@@ -74,6 +78,15 @@ export function getNumericProperty(
   return typeof value === 'number' ? value : fallback;
 }
 
+export function getBooleanProperty(
+  properties: PropertyPanePropertyBag | undefined,
+  fallback: boolean,
+  ...keys: string[]
+): boolean {
+  const value = getPropertyValue<boolean>(properties, ...keys);
+  return typeof value === 'boolean' ? value : fallback;
+}
+
 export function resolvePropertyPaneLocale(webPart?: IActiveWebPart): string {
   return webPart?.context?.pageContext?.cultureInfo?.currentUICultureName || navigator.language;
 }
@@ -136,9 +149,27 @@ export function createTextFieldViewModel(
         ? field.targetProperty.charAt(0).toUpperCase() + field.targetProperty.slice(1)
         : undefined),
     description: getTextProperty(field.properties, locale, 'description', 'Description'),
+    ariaLabel: getTextProperty(field.properties, locale, 'ariaLabel', 'AriaLabel'),
+    disabled: getBooleanProperty(field.properties, false, 'disabled', 'Disabled'),
+    errorMessage: getTextProperty(field.properties, locale, 'errorMessage', 'ErrorMessage'),
+    maxLength: getPropertyValue<number>(field.properties, 'maxLength', 'MaxLength'),
     placeholder: getTextProperty(field.properties, locale, 'placeholder', 'Placeholder'),
     multiline: getPropertyValue<boolean>(field.properties, 'multiline', 'Multiline'),
+    readOnly: getBooleanProperty(field.properties, false, 'readOnly', 'ReadOnly'),
+    resizable: getBooleanProperty(field.properties, true, 'resizable', 'Resizable'),
     rows: getNumericProperty(field.properties, 3, 'rows', 'Rows'),
+    underlined: getBooleanProperty(field.properties, false, 'underlined', 'Underlined'),
+    validateOnFocusIn: getBooleanProperty(field.properties, false, 'validateOnFocusIn', 'ValidateOnFocusIn'),
+    validateOnFocusOut: getBooleanProperty(field.properties, false, 'validateOnFocusOut', 'ValidateOnFocusOut'),
+    deferredValidationTime: getPropertyValue<number>(
+      field.properties,
+      'deferredValidationTime',
+      'DeferredValidationTime',
+    ),
+    onGetErrorMessage: getPropertyValue<(value: string) => string | Promise<string>>(
+      field.properties,
+      'onGetErrorMessage',
+    ),
   };
 }
 
@@ -147,6 +178,8 @@ export function createCheckboxFieldViewModel(
   locale: string,
 ): ICheckboxFieldViewModel {
   return {
+    ariaLabel: getTextProperty(field.properties, locale, 'ariaLabel', 'AriaLabel'),
+    disabled: getBooleanProperty(field.properties, false, 'disabled', 'Disabled'),
     label: getTextProperty(field.properties, locale, 'text', 'Text'),
   };
 }
@@ -156,9 +189,14 @@ export function createToggleFieldViewModel(
   locale: string,
 ): IToggleFieldViewModel {
   return {
+    ariaLabel: getTextProperty(field.properties, locale, 'ariaLabel', 'AriaLabel'),
+    disabled: getBooleanProperty(field.properties, false, 'disabled', 'Disabled'),
+    inlineLabel: getBooleanProperty(field.properties, false, 'inlineLabel', 'InlineLabel'),
     label: getTextProperty(field.properties, locale, 'label', 'Label'),
     onText: getTextProperty(field.properties, locale, 'onText', 'OnText') || 'On',
+    offAriaLabel: getTextProperty(field.properties, locale, 'offAriaLabel', 'OffAriaLabel'),
     offText: getTextProperty(field.properties, locale, 'offText', 'OffText') || 'Off',
+    onAriaLabel: getTextProperty(field.properties, locale, 'onAriaLabel', 'OnAriaLabel'),
   };
 }
 
@@ -176,10 +214,20 @@ export function createDropdownFieldViewModel(
     label: getTextProperty(field.properties, locale, 'label', 'Label'),
     options: options.map(
       (option): IDropdownOptionViewModel => ({
+        disabled: !!option.disabled,
+        index: getPropertyValue<number>(option as PropertyPanePropertyBag, 'index', 'Index'),
         key: option.key,
         text: getTextValue(option.text, locale) || String(option.key),
+        type: getPropertyValue<number>(option as PropertyPanePropertyBag, 'type', 'Type'),
       }),
     ),
+    ariaLabel: getTextProperty(field.properties, locale, 'ariaLabel', 'AriaLabel'),
+    calloutMaxHeight: getPropertyValue<number>(
+      getPropertyValue<PropertyPanePropertyBag>(field.properties, 'calloutProps', 'CalloutProps'),
+      'calloutMaxHeight',
+      'CalloutMaxHeight',
+    ),
+    disabled: getBooleanProperty(field.properties, false, 'disabled', 'Disabled'),
   };
 }
 
@@ -197,10 +245,29 @@ export function createChoiceGroupFieldViewModel(
     label: getTextProperty(field.properties, locale, 'label', 'Label'),
     options: options.map(
       (option): IChoiceGroupOptionViewModel => ({
+        checked: !!getPropertyValue<boolean>(option as PropertyPanePropertyBag, 'checked', 'Checked'),
+        disabled: !!getPropertyValue<boolean>(option as PropertyPanePropertyBag, 'disabled', 'Disabled'),
+        iconProps: getPropertyValue<{ iconName?: string }>(
+          option as PropertyPanePropertyBag,
+          'iconProps',
+          'IconProps',
+        ),
+        imageAlt: getTextValue(
+          getPropertyValue(option as PropertyPanePropertyBag, 'imageAlt', 'ImageAlt'),
+          locale,
+        ),
+        imageSize: getPropertyValue<{ height: number; width: number }>(
+          option as PropertyPanePropertyBag,
+          'imageSize',
+          'ImageSize',
+        ),
+        imageSrc: getPropertyValue<string>(option as PropertyPanePropertyBag, 'imageSrc', 'ImageSrc'),
         key: option.key,
         text: getTextValue(option.text, locale) || option.key,
       }),
     ),
+    ariaLabel: getTextProperty(field.properties, locale, 'ariaLabel', 'AriaLabel'),
+    disabled: getBooleanProperty(field.properties, false, 'disabled', 'Disabled'),
   };
 }
 
@@ -209,9 +276,12 @@ export function createSliderFieldViewModel(
   locale: string,
 ): ISliderFieldViewModel {
   return {
+    ariaLabel: getTextProperty(field.properties, locale, 'ariaLabel', 'AriaLabel'),
+    disabled: getBooleanProperty(field.properties, false, 'disabled', 'Disabled'),
     label: getTextProperty(field.properties, locale, 'label', 'Label'),
     min: getNumericProperty(field.properties, 0, 'min', 'Min'),
     max: getNumericProperty(field.properties, 100, 'max', 'Max'),
+    showValue: getBooleanProperty(field.properties, true, 'showValue', 'ShowValue'),
     step: getNumericProperty(field.properties, 1, 'step', 'Step'),
   };
 }
@@ -221,6 +291,10 @@ export function createButtonFieldViewModel(
   locale: string,
 ): IButtonFieldViewModel {
   return {
+    ariaDescription: getTextProperty(field.properties, locale, 'ariaDescription', 'AriaDescription'),
+    ariaLabel: getTextProperty(field.properties, locale, 'ariaLabel', 'AriaLabel'),
+    buttonType: getPropertyValue<number>(field.properties, 'buttonType', 'ButtonType'),
+    disabled: getBooleanProperty(field.properties, false, 'disabled', 'Disabled'),
     text: getTextProperty(field.properties, locale, 'text', 'Text'),
     onClick: getPropertyValue<(value: unknown) => unknown>(field.properties, 'onClick'),
   };
@@ -240,8 +314,143 @@ export function createLinkFieldViewModel(
   locale: string,
 ): ILinkFieldViewModel {
   return {
+    ariaLabel: getTextProperty(field.properties, locale, 'ariaLabel', 'AriaLabel'),
+    disabled: getBooleanProperty(field.properties, false, 'disabled', 'Disabled'),
     text: getTextProperty(field.properties, locale, 'text', 'Text'),
     href: getPropertyValue<string>(field.properties, 'href', 'Href'),
     target: getPropertyValue<string>(field.properties, 'target', 'Target') || '_blank',
   };
+}
+
+export function createDynamicFieldViewModel(
+  field: IPropertyPaneFieldModel,
+  locale: string,
+): IDynamicFieldViewModel {
+  return {
+    filters: getPropertyValue<IDynamicFieldFiltersViewModel>(field.properties, 'filters', 'Filters'),
+    label: getTextProperty(field.properties, locale, 'label', 'Label'),
+    propertyValueDepth: getPropertyValue<number>(
+      field.properties,
+      'propertyValueDepth',
+      'PropertyValueDepth',
+    ),
+    sourcesLabel: getTextProperty(field.properties, locale, 'sourcesLabel', 'SourcesLabel'),
+  };
+}
+
+export function createDynamicFieldSetViewModel(
+  field: IPropertyPaneFieldModel,
+  locale: string,
+): IDynamicFieldSetViewModel {
+  const properties = field.properties as PropertyPanePropertyBag;
+  const sharedConfiguration = getPropertyValue<PropertyPanePropertyBag>(
+    properties,
+    'sharedConfiguration',
+    'SharedConfiguration',
+  );
+  return {
+    fields: (getPropertyValue<IPropertyPaneFieldModel[]>(properties, 'fields', 'Fields') || []),
+    label: getTextProperty(properties, locale, 'label', 'Label'),
+    sharedConfiguration: sharedConfiguration
+      ? {
+          depth: getPropertyValue<number>(sharedConfiguration, 'depth', 'Depth'),
+          property: getPropertyValue<PropertyPanePropertyBag>(sharedConfiguration, 'property', 'Property')
+            ? {
+                filters: getPropertyValue<IDynamicFieldFiltersViewModel>(
+                  getPropertyValue<PropertyPanePropertyBag>(sharedConfiguration, 'property', 'Property'),
+                  'filters',
+                  'Filters',
+                ),
+              }
+            : undefined,
+          source: getPropertyValue<PropertyPanePropertyBag>(sharedConfiguration, 'source', 'Source')
+            ? {
+                filters: getPropertyValue<IDynamicFieldFiltersViewModel>(
+                  getPropertyValue<PropertyPanePropertyBag>(sharedConfiguration, 'source', 'Source'),
+                  'filters',
+                  'Filters',
+                ),
+                sourcesLabel: getTextProperty(
+                  getPropertyValue<PropertyPanePropertyBag>(sharedConfiguration, 'source', 'Source'),
+                  locale,
+                  'sourcesLabel',
+                  'SourcesLabel',
+                ),
+              }
+            : undefined,
+        }
+      : undefined,
+  };
+}
+
+export function getDynamicDataSources(provider: unknown): IDynamicDataSourceViewModel[] {
+  if (!provider || typeof provider !== 'object') {
+    return [];
+  }
+
+  const getAvailableSources = (provider as { getAvailableSources?: () => Array<{
+    id: string;
+    metadata?: {
+      alias?: string;
+      componentId?: string;
+      description?: string;
+      instanceId?: string;
+      title?: string;
+    };
+    getPropertyDefinitions?: () => Array<{ id: string; title: string }>;
+  }> }).getAvailableSources;
+
+  if (typeof getAvailableSources !== 'function') {
+    return [];
+  }
+
+  return (getAvailableSources() || []).map((source) => ({
+    id: source.id,
+    metadata: source.metadata,
+    properties: source.getPropertyDefinitions?.().map((property) => ({
+      id: property.id,
+      title: property.title,
+    })) || [],
+  }));
+}
+
+export function getDynamicPropertyReference(value: unknown): string | undefined {
+  if (value && typeof value === 'object' && 'reference' in value) {
+    const reference = (value as { reference?: unknown }).reference;
+    return typeof reference === 'string' ? reference : undefined;
+  }
+
+  return undefined;
+}
+
+export function getDynamicPropertyValue(value: unknown): string | undefined {
+  if (value && typeof value === 'object' && 'tryGetValue' in value) {
+    const tryGetValue = (value as { tryGetValue?: () => unknown }).tryGetValue;
+    if (typeof tryGetValue === 'function') {
+      const resolvedValue = tryGetValue();
+      return formatDynamicValue(resolvedValue);
+    }
+  }
+
+  return formatDynamicValue(value);
+}
+
+function formatDynamicValue(value: unknown): string | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
 }

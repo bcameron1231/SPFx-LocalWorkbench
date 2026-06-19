@@ -1,5 +1,15 @@
-import { Panel, PanelType, PrimaryButton, Stack, Text } from '@fluentui/react';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import {
+  DefaultButton,
+  Icon,
+  IconButton,
+  Panel,
+  PanelType,
+  PrimaryButton,
+  Stack,
+  Text,
+  css,
+} from '@fluentui/react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { logger } from '@spfx-local-workbench/shared';
 import type { IActiveWebPart } from '@spfx-local-workbench/shared';
@@ -12,10 +22,7 @@ import {
   resolvePropertyPaneLocale,
   resolvePropertyPaneTitle,
 } from './shared';
-import type {
-  IPropertyPaneConfigurationModel,
-  IPropertyPanePageModel,
-} from './types';
+import type { IPropertyPaneConfigurationModel, IPropertyPanePageModel } from './types';
 
 interface IPropertyPanePanelProps {
   webPart?: IActiveWebPart;
@@ -29,21 +36,30 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
   onPropertyChange,
 }) => {
   const [config, setConfig] = useState<IPropertyPaneConfigurationModel | null>(null);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [pendingChanges, setPendingChanges] = useState<Record<string, unknown>>({});
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  const [focusFieldKey, setFocusFieldKey] = useState<string>();
+
   const locale = resolvePropertyPaneLocale(webPart);
   const headerText = resolvePropertyPaneTitle(webPart, locale);
 
   const isNonReactive =
     webPart?.instance &&
     'disableReactivePropertyChanges' in webPart.instance &&
-    (webPart.instance as any).disableReactivePropertyChanges === true;
-
-  const [pendingChanges, setPendingChanges] = useState<Record<string, unknown>>({});
+    (webPart.instance as { disableReactivePropertyChanges?: boolean })
+      .disableReactivePropertyChanges === true;
 
   useEffect(() => {
     if (webPart?.instance && typeof webPart.instance.getPropertyPaneConfiguration === 'function') {
       try {
-        const paneConfig = webPart.instance.getPropertyPaneConfiguration();
+        const paneConfig =
+          webPart.instance.getPropertyPaneConfiguration() as IPropertyPaneConfigurationModel;
         setConfig(paneConfig);
+        setCurrentPageIndex(
+          Math.max(0, Math.min(paneConfig.currentPage ?? 0, paneConfig.pages.length - 1)),
+        );
+        setCollapsedGroups(buildCollapsedGroupState(paneConfig));
       } catch (error: unknown) {
         logger.warn('Error getting property pane configuration:', error);
         setConfig(null);
@@ -51,16 +67,19 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
     } else {
       setConfig(null);
     }
+
     setPendingChanges({});
+    setFocusFieldKey(undefined);
   }, [webPart]);
 
   const handlePropertyChange = useCallback(
     (targetProperty: string, newValue: unknown) => {
       if (isNonReactive) {
         setPendingChanges((prev) => ({ ...prev, [targetProperty]: newValue }));
-      } else {
-        onPropertyChange(targetProperty, newValue);
+        return;
       }
+
+      onPropertyChange(targetProperty, newValue);
     },
     [isNonReactive, onPropertyChange],
   );
@@ -74,9 +93,40 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
 
   const getCurrentValue = useCallback(
     (targetProperty: string | undefined) =>
-      resolveFieldValue(targetProperty, webPart?.properties, pendingChanges, isNonReactive),
+      resolveFieldValue(targetProperty, webPart?.properties, pendingChanges, !!isNonReactive),
     [isNonReactive, pendingChanges, webPart?.properties],
   );
+
+  const page = config?.pages[currentPageIndex];
+
+  useEffect(() => {
+    if (!page) {
+      setFocusFieldKey(undefined);
+      return;
+    }
+
+    const nextFocusField = findFirstFocusedField(page, currentPageIndex, collapsedGroups);
+    setFocusFieldKey(nextFocusField);
+  }, [collapsedGroups, currentPageIndex, page]);
+
+  const pageButtons = useMemo(() => {
+    if (!config || config.pages.length <= 1) {
+      return null;
+    }
+
+    return (
+      <Stack horizontal tokens={{ childrenGap: 8 }} className={styles.pageNavigation}>
+        {config.pages.map((_, pageIndex) => (
+          <DefaultButton
+            key={pageIndex}
+            text={`Page ${pageIndex + 1}`}
+            primary={pageIndex === currentPageIndex}
+            onClick={() => setCurrentPageIndex(pageIndex)}
+          />
+        ))}
+      </Stack>
+    );
+  }, [config, currentPageIndex]);
 
   const hasPendingChanges = Object.keys(pendingChanges).length > 0;
 
@@ -124,20 +174,83 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
           maxWidth: 'calc(100% - 44px)',
         },
         content: {
-          paddingLeft: 20,
+          display: 'flex',
+          flexDirection: 'column',
+          height: 'calc(100% - 70px)', // Account for header
+          minHeight: 0,
+          paddingLeft: 0,
           paddingRight: 0,
-          paddingBottom: 'calc(var(--workbench-status-bar-height) + 16px)',
         },
       }}
     >
       <div id="property-pane-content" className={styles.content}>
-        {config && config.pages && config.pages.length > 0 && webPart ? (
-          <PropertyPaneContent
-            config={config}
-            locale={locale}
-            onPropertyChange={handlePropertyChange}
-            getCurrentValue={getCurrentValue}
-          />
+        {config && page && webPart ? (
+          <Stack className={styles.container}>
+            {pageButtons}
+            {page.header?.description && (
+              <div className={styles.pageHeader}>{page.header.description}</div>
+            )}
+            {page.groups.map((groupOrConditionalGroup, groupIndex: number) => {
+              const group = resolveGroup(groupOrConditionalGroup);
+              const groupKey = getGroupKey(currentPageIndex, groupIndex);
+              const isCollapsed = collapsedGroups[groupKey] ?? !!group.isCollapsed;
+              const isAccordion = !!page.displayGroupsAsAccordion;
+
+              return (
+                <Stack
+                  key={groupKey}
+                  className={css(
+                    styles.group,
+                    isAccordion && styles.accordionGroup,
+                    isCollapsed && styles.collapsed,
+                  )}
+                >
+                  {!group.isGroupNameHidden &&
+                    group.groupName &&
+                    (isAccordion ? (
+                      <button
+                        type="button"
+                        className={css(styles.accordionHeader, styles.groupHeader)}
+                        onClick={() =>
+                          setCollapsedGroups((prev) => ({
+                            ...prev,
+                            [groupKey]: !isCollapsed,
+                          }))
+                        }
+                      >
+                        <span>{group.groupName}</span>
+                        <Icon
+                          className={styles.accordionToggle}
+                          ariaLabel={isCollapsed ? 'Expand group' : 'Collapse group'}
+                          iconName={isCollapsed ? 'ChevronDown' : 'ChevronUp'}
+                        />
+                      </button>
+                    ) : (
+                      <div className={styles.groupHeader}>{group.groupName}</div>
+                    ))}
+                  {!isCollapsed && (
+                    <Stack className={styles.groupFields}>
+                      {group.groupFields.map((field, fieldIndex: number) => {
+                        const fieldKey = `${groupKey}-${fieldIndex}-${field.targetProperty}`;
+                        return (
+                          <PropertyPaneFieldRenderer
+                            key={fieldKey}
+                            autoFocus={focusFieldKey === fieldKey}
+                            currentValue={getCurrentValue(field.targetProperty)}
+                            field={field}
+                            getCurrentValue={getCurrentValue}
+                            locale={locale}
+                            onPropertyChange={handlePropertyChange}
+                            provider={webPart.context.dynamicDataProvider}
+                          />
+                        );
+                      })}
+                    </Stack>
+                  )}
+                </Stack>
+              );
+            })}
+          </Stack>
         ) : (
           <Stack horizontalAlign="center" className={styles.empty}>
             <Text>No property pane configuration available for this web part.</Text>
@@ -148,54 +261,43 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
   );
 };
 
-interface IPropertyPaneContentProps {
-  config: IPropertyPaneConfigurationModel;
-  getCurrentValue: (targetProperty: string | undefined) => unknown;
-  locale: string;
-  onPropertyChange: (targetProperty: string, newValue: unknown) => void;
+function buildCollapsedGroupState(
+  config: IPropertyPaneConfigurationModel,
+): Record<string, boolean> {
+  const state: Record<string, boolean> = {};
+
+  config.pages.forEach((page, pageIndex) => {
+    page.groups.forEach((groupOrConditionalGroup, groupIndex) => {
+      const group = resolveGroup(groupOrConditionalGroup);
+      state[getGroupKey(pageIndex, groupIndex)] = !!group.isCollapsed;
+    });
+  });
+
+  return state;
 }
 
-const PropertyPaneContent: FC<IPropertyPaneContentProps> = ({
-  config,
-  getCurrentValue,
-  locale,
-  onPropertyChange,
-}) => {
-  const page: IPropertyPanePageModel | undefined = config.pages[0];
+function getGroupKey(pageIndex: number, groupIndex: number): string {
+  return `${pageIndex}-${groupIndex}`;
+}
 
-  if (!page) {
-    return null;
+function findFirstFocusedField(
+  page: IPropertyPanePageModel,
+  pageIndex: number,
+  collapsedGroups: Record<string, boolean>,
+): string | undefined {
+  for (let groupIndex = 0; groupIndex < page.groups.length; groupIndex += 1) {
+    const group = resolveGroup(page.groups[groupIndex]);
+    if (collapsedGroups[getGroupKey(pageIndex, groupIndex)]) {
+      continue;
+    }
+
+    for (let fieldIndex = 0; fieldIndex < group.groupFields.length; fieldIndex += 1) {
+      const field = group.groupFields[fieldIndex];
+      if (field.shouldFocus) {
+        return `${getGroupKey(pageIndex, groupIndex)}-${fieldIndex}-${field.targetProperty}`;
+      }
+    }
   }
 
-  return (
-    <Stack tokens={{ childrenGap: 16 }} className={styles.container}>
-      {page.header?.description && (
-        <div className={styles.pageHeader}>{page.header.description}</div>
-      )}
-      {page.groups.map((groupOrConditionalGroup, groupIndex: number) => {
-        const group = resolveGroup(groupOrConditionalGroup);
-
-        return (
-          <Stack key={groupIndex} tokens={{ childrenGap: 12 }} className={styles.group}>
-            {!group.isGroupNameHidden && group.groupName && (
-              <div className={styles.groupHeader}>{group.groupName}</div>
-            )}
-            {!group.isCollapsed && (
-              <Stack tokens={{ childrenGap: 8 }} className={styles.groupFields}>
-                {group.groupFields.map((field, fieldIndex: number) => (
-                  <PropertyPaneFieldRenderer
-                    key={fieldIndex}
-                    currentValue={getCurrentValue(field.targetProperty)}
-                    field={field}
-                    locale={locale}
-                    onPropertyChange={onPropertyChange}
-                  />
-                ))}
-              </Stack>
-            )}
-          </Stack>
-        );
-      })}
-    </Stack>
-  );
-};
+  return undefined;
+}
