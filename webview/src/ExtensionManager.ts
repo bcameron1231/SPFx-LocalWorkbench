@@ -82,7 +82,7 @@ export class ExtensionManager {
       await new Promise((r) => setTimeout(r, DOM_RENDER_DELAY_MS));
 
       const context = this.createExtensionContext(
-        config.manifest.id,
+        config.manifest,
         config.instanceId,
         headerElement,
         footerElement,
@@ -111,12 +111,12 @@ export class ExtensionManager {
   }
 
   private createExtensionContext(
-    extensionId: string,
+    manifest: IExtensionManifest,
     instanceId: string,
     headerElement: HTMLDivElement,
     footerElement: HTMLDivElement,
   ): any {
-    const baseContext = this.contextProvider.createMockContext(extensionId, instanceId);
+    const baseContext = this.contextProvider.createMockContext(manifest, instanceId);
 
     // Create mock placeholders for header and footer
     const topPlaceholder = new MockPlaceholderContent(PlaceholderName.Top, headerElement);

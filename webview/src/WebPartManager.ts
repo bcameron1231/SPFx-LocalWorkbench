@@ -64,7 +64,7 @@ export class WebPartManager {
       const newModules = await this.loadWebPartBundle(config.manifest);
       await new Promise((r) => setTimeout(r, AMD_REGISTRATION_DELAY_MS));
 
-      const context = this.contextProvider.createMockContext(config.manifest.id, config.instanceId);
+      const context = this.contextProvider.createMockContext(config.manifest, config.instanceId);
       context.domElement = domElement;
 
       const WebPartClass = this.findWebPartClass(config.manifest, newModules);

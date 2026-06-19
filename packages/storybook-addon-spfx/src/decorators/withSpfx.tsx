@@ -343,8 +343,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         instance._context = {
           pageContext: mockPageContext,
           manifest: {
-            id: manifest.id,
-            alias: manifest.alias,
+            ...manifest,
           },
           domElement: containerRef.current,
           displayMode: displayMode,
