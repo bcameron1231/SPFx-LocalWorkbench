@@ -14,7 +14,7 @@
       "group": { "default": "Advanced" },
       "title": { "default": "Page And Accordion" },
       "description": { "default": "Exercises multi-page property pane behavior and accordion groups." },
-      "officeFabricIconFontName": "BulletedList2",
+      "officeFabricIconFontName": "GroupedList",
       "properties": {
         "accordionName": "Accordion demo",
         "collapsedNotes": "Initially hidden details",

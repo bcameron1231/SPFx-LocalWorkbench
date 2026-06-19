@@ -14,7 +14,7 @@
       "group": { "default": "Advanced" },
       "title": { "default": "Advanced Behavior" },
       "description": { "default": "Exercises non-reactive, button, and custom-field property pane behavior." },
-      "officeFabricIconFontName": "Processing",
+      "officeFabricIconFontName": "Lightbulb",
       "properties": {
         "bufferedText": "Apply me",
         "buttonValue": "Button seed",

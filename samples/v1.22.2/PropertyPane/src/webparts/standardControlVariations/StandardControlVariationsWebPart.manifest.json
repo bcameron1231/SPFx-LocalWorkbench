@@ -14,7 +14,7 @@
       "group": { "default": "Advanced" },
       "title": { "default": "Standard Control Variations" },
       "description": { "default": "Exercises stylistic and behavioral variations of built-in property pane fields." },
-      "officeFabricIconFontName": "TextField",
+      "officeFabricIconFontName": "TextBox",
       "properties": {
         "ariaPlaceholderText": "",
         "buttonValue": "Ready",

@@ -14,7 +14,7 @@
       "group": { "default": "Advanced" },
       "title": { "default": "Validation And Focus" },
       "description": { "default": "Exercises shouldFocus and validation-related property pane options." },
-      "officeFabricIconFontName": "ReviewSolid",
+      "officeFabricIconFontName": "VerifiedBrandSolid",
       "properties": {
         "customValidationStatus": "Valid",
         "customValidationValue": "Cat",

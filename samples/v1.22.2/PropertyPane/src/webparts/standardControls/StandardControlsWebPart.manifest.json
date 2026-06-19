@@ -20,7 +20,7 @@
     "group": { "default": "Advanced" },
     "title": { "default": "Standard Controls" },
     "description": { "default": "StandardControls description" },
-    "officeFabricIconFontName": "Bullseye",
+    "officeFabricIconFontName": "TextField",
     "properties": {
       "textField": "Hello SPFx",
       "toggle": true,
