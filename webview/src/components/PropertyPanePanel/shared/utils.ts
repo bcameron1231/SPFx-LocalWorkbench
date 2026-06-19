@@ -229,9 +229,9 @@ export function createDropdownFieldViewModel(
       (option): IDropdownOptionViewModel => ({
         disabled: !!option.disabled,
         index: getPropertyValue<number>(option as PropertyPanePropertyBag, 'index', 'Index'),
+        itemType: getPropertyValue<number>(option as PropertyPanePropertyBag, 'type', 'Type'),
         key: option.key,
         text: getTextValue(option.text, locale) || String(option.key),
-        type: getPropertyValue<number>(option as PropertyPanePropertyBag, 'type', 'Type'),
       }),
     ),
     ariaLabel: getTextProperty(field.properties, locale, 'ariaLabel', 'AriaLabel'),

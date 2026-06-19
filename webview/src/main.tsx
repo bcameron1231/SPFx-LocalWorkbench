@@ -3,6 +3,7 @@
 // This is the entry point that gets bundled and loaded in the webview
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { initializeIcons } from '@fluentui/react';
 
 import { buildThemeList, getErrorMessage, logger } from '@spfx-local-workbench/shared';
 import type { ITheme, IThemeGroup } from '@spfx-local-workbench/shared';
@@ -24,6 +25,8 @@ if (document.readyState === 'loading') {
 
 function initialize() {
   try {
+    initializeIcons();
+
     // Get configuration injected by the extension
     const config = window.__workbenchConfig;
 

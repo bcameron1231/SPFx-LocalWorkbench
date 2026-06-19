@@ -86,9 +86,9 @@ export interface IToggleFieldViewModel {
 export interface IDropdownOptionViewModel {
   disabled?: boolean;
   index?: number;
+  itemType?: number;
   key: string | number;
   text: string;
-  type?: number;
 }
 
 export interface IDropdownFieldViewModel {
