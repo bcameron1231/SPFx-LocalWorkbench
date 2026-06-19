@@ -9,7 +9,7 @@ import {
   Text,
   css,
 } from '@fluentui/react';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { logger } from '@spfx-local-workbench/shared';
 import type { IActiveWebPart } from '@spfx-local-workbench/shared';
@@ -40,6 +40,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
   const [pendingChanges, setPendingChanges] = useState<Record<string, unknown>>({});
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [focusFieldKey, setFocusFieldKey] = useState<string>();
+  const previousInstanceIdRef = useRef<string | undefined>();
 
   const locale = resolvePropertyPaneLocale(webPart);
   const headerText = resolvePropertyPaneTitle(webPart, locale);
@@ -51,15 +52,27 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
       .disableReactivePropertyChanges === true;
 
   useEffect(() => {
+    const previousInstanceId = previousInstanceIdRef.current;
+    const currentInstanceId = webPart?.instanceId;
+    const isSameWebPart = !!currentInstanceId && currentInstanceId === previousInstanceId;
+
     if (webPart?.instance && typeof webPart.instance.getPropertyPaneConfiguration === 'function') {
       try {
         const paneConfig =
           webPart.instance.getPropertyPaneConfiguration() as IPropertyPaneConfigurationModel;
         setConfig(paneConfig);
-        setCurrentPageIndex(
-          Math.max(0, Math.min(paneConfig.currentPage ?? 0, paneConfig.pages.length - 1)),
-        );
-        setCollapsedGroups(buildCollapsedGroupState(paneConfig));
+
+        if (isSameWebPart) {
+          setCurrentPageIndex((prev) =>
+            Math.max(0, Math.min(prev, Math.max(0, paneConfig.pages.length - 1))),
+          );
+          setCollapsedGroups((prev) => mergeCollapsedGroupState(prev, paneConfig));
+        } else {
+          setCurrentPageIndex(
+            Math.max(0, Math.min(paneConfig.currentPage ?? 0, paneConfig.pages.length - 1)),
+          );
+          setCollapsedGroups(buildCollapsedGroupState(paneConfig));
+        }
       } catch (error: unknown) {
         logger.warn('Error getting property pane configuration:', error);
         setConfig(null);
@@ -68,8 +81,12 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
       setConfig(null);
     }
 
-    setPendingChanges({});
-    setFocusFieldKey(undefined);
+    if (!isSameWebPart) {
+      setPendingChanges({});
+      setFocusFieldKey(undefined);
+    }
+
+    previousInstanceIdRef.current = currentInstanceId;
   }, [webPart]);
 
   const handlePropertyChange = useCallback(
@@ -274,6 +291,21 @@ function buildCollapsedGroupState(
   });
 
   return state;
+}
+
+function mergeCollapsedGroupState(
+  existingState: Record<string, boolean>,
+  config: IPropertyPaneConfigurationModel,
+): Record<string, boolean> {
+  const nextState = buildCollapsedGroupState(config);
+
+  Object.keys(nextState).forEach((groupKey) => {
+    if (groupKey in existingState) {
+      nextState[groupKey] = existingState[groupKey];
+    }
+  });
+
+  return nextState;
 }
 
 function getGroupKey(pageIndex: number, groupIndex: number): string {

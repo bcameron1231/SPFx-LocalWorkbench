@@ -33,14 +33,18 @@ export const ToggleComponent: FC<IToggleComponentProps> = ({
     inlineLabel={inlineLabel}
     label={label}
     offAriaLabel={offAriaLabel}
-    offText={offText}
+    offText={inlineLabel ? undefined : offText} // Align with buggy behavior in M365
     onAriaLabel={onAriaLabel}
-    onText={onText}
+    onText={inlineLabel ? undefined : onText} // Align with buggy behavior in M365
     onChange={(_, nextChecked) => onChange(!!nextChecked)}
     styles={{
+      root: {
+        marginBottom: 0, // Override to align with buggy behavior in M365
+      },
       label: {
         fontWeight: 400,
         padding: 0,
+        margin: 0, // Override to align with buggy behavior in M365
       },
       container: {
         margin: 8,

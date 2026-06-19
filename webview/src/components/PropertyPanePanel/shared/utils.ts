@@ -6,16 +6,16 @@ import type {
   ICheckboxFieldViewModel,
   IChoiceGroupFieldViewModel,
   IChoiceGroupOptionViewModel,
+  IDropdownFieldViewModel,
+  IDropdownOptionViewModel,
   IDynamicDataSourceViewModel,
   IDynamicFieldFiltersViewModel,
   IDynamicFieldSetViewModel,
   IDynamicFieldViewModel,
-  IPropertyPaneConditionalGroupModel,
-  IDropdownFieldViewModel,
-  IDropdownOptionViewModel,
   ILinkFieldViewModel,
-  IPropertyPaneGroupModel,
+  IPropertyPaneConditionalGroupModel,
   IPropertyPaneFieldModel,
+  IPropertyPaneGroupModel,
   ISliderFieldViewModel,
   ITextFieldViewModel,
   ITextOnlyFieldViewModel,
@@ -45,7 +45,10 @@ export function getPropertyValue<T>(
   return undefined;
 }
 
-export function getTextValue(value: PropertyPaneTextValue | unknown, locale?: string): string | undefined {
+export function getTextValue(
+  value: PropertyPaneTextValue | unknown,
+  locale?: string,
+): string | undefined {
   if (typeof value === 'string') {
     return value;
   }
@@ -159,8 +162,18 @@ export function createTextFieldViewModel(
     resizable: getBooleanProperty(field.properties, true, 'resizable', 'Resizable'),
     rows: getNumericProperty(field.properties, 3, 'rows', 'Rows'),
     underlined: getBooleanProperty(field.properties, false, 'underlined', 'Underlined'),
-    validateOnFocusIn: getBooleanProperty(field.properties, false, 'validateOnFocusIn', 'ValidateOnFocusIn'),
-    validateOnFocusOut: getBooleanProperty(field.properties, false, 'validateOnFocusOut', 'ValidateOnFocusOut'),
+    validateOnFocusIn: getBooleanProperty(
+      field.properties,
+      false,
+      'validateOnFocusIn',
+      'ValidateOnFocusIn',
+    ),
+    validateOnFocusOut: getBooleanProperty(
+      field.properties,
+      false,
+      'validateOnFocusOut',
+      'ValidateOnFocusOut',
+    ),
     deferredValidationTime: getPropertyValue<number>(
       field.properties,
       'deferredValidationTime',
@@ -245,12 +258,26 @@ export function createChoiceGroupFieldViewModel(
     label: getTextProperty(field.properties, locale, 'label', 'Label'),
     options: options.map(
       (option): IChoiceGroupOptionViewModel => ({
-        checked: !!getPropertyValue<boolean>(option as PropertyPanePropertyBag, 'checked', 'Checked'),
-        disabled: !!getPropertyValue<boolean>(option as PropertyPanePropertyBag, 'disabled', 'Disabled'),
-        iconProps: getPropertyValue<{ iconName?: string }>(
+        ariaLabel: getTextValue(
+          getPropertyValue(option as PropertyPanePropertyBag, 'ariaLabel', 'AriaLabel'),
+          locale,
+        ),
+        checked: !!getPropertyValue<boolean>(
           option as PropertyPanePropertyBag,
-          'iconProps',
-          'IconProps',
+          'checked',
+          'Checked',
+        ),
+        disabled: !!getPropertyValue<boolean>(
+          option as PropertyPanePropertyBag,
+          'disabled',
+          'Disabled',
+        ),
+        iconProps: normalizeChoiceGroupIconProps(
+          getPropertyValue<{ iconName?: string; officeFabricIconFontName?: string } | undefined>(
+            option as PropertyPanePropertyBag,
+            'iconProps',
+            'IconProps',
+          ),
         ),
         imageAlt: getTextValue(
           getPropertyValue(option as PropertyPanePropertyBag, 'imageAlt', 'ImageAlt'),
@@ -261,13 +288,39 @@ export function createChoiceGroupFieldViewModel(
           'imageSize',
           'ImageSize',
         ),
-        imageSrc: getPropertyValue<string>(option as PropertyPanePropertyBag, 'imageSrc', 'ImageSrc'),
+        imageSrc: getPropertyValue<string>(
+          option as PropertyPanePropertyBag,
+          'imageSrc',
+          'ImageSrc',
+        ),
+        // selectedImageSrc: getPropertyValue<string>(
+        //   option as PropertyPanePropertyBag,
+        //   'selectedImageSrc',
+        //   'SelectedImageSrc',
+        // ),
+        selectedImageSrc: getPropertyValue<string>(
+          option as PropertyPanePropertyBag,
+          'imageSrc', // Align with online bug where selected src is ignored
+          'ImageSrc',
+        ),
         key: option.key,
         text: getTextValue(option.text, locale) || option.key,
       }),
     ),
-    ariaLabel: getTextProperty(field.properties, locale, 'ariaLabel', 'AriaLabel'),
     disabled: getBooleanProperty(field.properties, false, 'disabled', 'Disabled'),
+  };
+}
+
+function normalizeChoiceGroupIconProps(iconProps?: {
+  iconName?: string;
+  officeFabricIconFontName?: string;
+}): { iconName?: string } | undefined {
+  if (!iconProps) {
+    return undefined;
+  }
+
+  return {
+    iconName: iconProps.iconName || iconProps.officeFabricIconFontName,
   };
 }
 
@@ -291,7 +344,12 @@ export function createButtonFieldViewModel(
   locale: string,
 ): IButtonFieldViewModel {
   return {
-    ariaDescription: getTextProperty(field.properties, locale, 'ariaDescription', 'AriaDescription'),
+    ariaDescription: getTextProperty(
+      field.properties,
+      locale,
+      'ariaDescription',
+      'AriaDescription',
+    ),
     ariaLabel: getTextProperty(field.properties, locale, 'ariaLabel', 'AriaLabel'),
     buttonType: getPropertyValue<number>(field.properties, 'buttonType', 'ButtonType'),
     disabled: getBooleanProperty(field.properties, false, 'disabled', 'Disabled'),
@@ -327,7 +385,11 @@ export function createDynamicFieldViewModel(
   locale: string,
 ): IDynamicFieldViewModel {
   return {
-    filters: getPropertyValue<IDynamicFieldFiltersViewModel>(field.properties, 'filters', 'Filters'),
+    filters: getPropertyValue<IDynamicFieldFiltersViewModel>(
+      field.properties,
+      'filters',
+      'Filters',
+    ),
     label: getTextProperty(field.properties, locale, 'label', 'Label'),
     propertyValueDepth: getPropertyValue<number>(
       field.properties,
@@ -349,15 +411,23 @@ export function createDynamicFieldSetViewModel(
     'SharedConfiguration',
   );
   return {
-    fields: (getPropertyValue<IPropertyPaneFieldModel[]>(properties, 'fields', 'Fields') || []),
+    fields: getPropertyValue<IPropertyPaneFieldModel[]>(properties, 'fields', 'Fields') || [],
     label: getTextProperty(properties, locale, 'label', 'Label'),
     sharedConfiguration: sharedConfiguration
       ? {
           depth: getPropertyValue<number>(sharedConfiguration, 'depth', 'Depth'),
-          property: getPropertyValue<PropertyPanePropertyBag>(sharedConfiguration, 'property', 'Property')
+          property: getPropertyValue<PropertyPanePropertyBag>(
+            sharedConfiguration,
+            'property',
+            'Property',
+          )
             ? {
                 filters: getPropertyValue<IDynamicFieldFiltersViewModel>(
-                  getPropertyValue<PropertyPanePropertyBag>(sharedConfiguration, 'property', 'Property'),
+                  getPropertyValue<PropertyPanePropertyBag>(
+                    sharedConfiguration,
+                    'property',
+                    'Property',
+                  ),
                   'filters',
                   'Filters',
                 ),
@@ -366,12 +436,20 @@ export function createDynamicFieldSetViewModel(
           source: getPropertyValue<PropertyPanePropertyBag>(sharedConfiguration, 'source', 'Source')
             ? {
                 filters: getPropertyValue<IDynamicFieldFiltersViewModel>(
-                  getPropertyValue<PropertyPanePropertyBag>(sharedConfiguration, 'source', 'Source'),
+                  getPropertyValue<PropertyPanePropertyBag>(
+                    sharedConfiguration,
+                    'source',
+                    'Source',
+                  ),
                   'filters',
                   'Filters',
                 ),
                 sourcesLabel: getTextProperty(
-                  getPropertyValue<PropertyPanePropertyBag>(sharedConfiguration, 'source', 'Source'),
+                  getPropertyValue<PropertyPanePropertyBag>(
+                    sharedConfiguration,
+                    'source',
+                    'Source',
+                  ),
                   locale,
                   'sourcesLabel',
                   'SourcesLabel',
@@ -388,17 +466,21 @@ export function getDynamicDataSources(provider: unknown): IDynamicDataSourceView
     return [];
   }
 
-  const getAvailableSources = (provider as { getAvailableSources?: () => Array<{
-    id: string;
-    metadata?: {
-      alias?: string;
-      componentId?: string;
-      description?: string;
-      instanceId?: string;
-      title?: string;
-    };
-    getPropertyDefinitions?: () => Array<{ id: string; title: string }>;
-  }> }).getAvailableSources;
+  const getAvailableSources = (
+    provider as {
+      getAvailableSources?: () => Array<{
+        id: string;
+        metadata?: {
+          alias?: string;
+          componentId?: string;
+          description?: string;
+          instanceId?: string;
+          title?: string;
+        };
+        getPropertyDefinitions?: () => Array<{ id: string; title: string }>;
+      }>;
+    }
+  ).getAvailableSources;
 
   if (typeof getAvailableSources !== 'function') {
     return [];
@@ -407,10 +489,11 @@ export function getDynamicDataSources(provider: unknown): IDynamicDataSourceView
   return (getAvailableSources() || []).map((source) => ({
     id: source.id,
     metadata: source.metadata,
-    properties: source.getPropertyDefinitions?.().map((property) => ({
-      id: property.id,
-      title: property.title,
-    })) || [],
+    properties:
+      source.getPropertyDefinitions?.().map((property) => ({
+        id: property.id,
+        title: property.title,
+      })) || [],
   }));
 }
 

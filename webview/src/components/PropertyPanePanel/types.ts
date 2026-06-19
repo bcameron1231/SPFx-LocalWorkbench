@@ -38,7 +38,9 @@ export interface IPropertyPaneConditionalGroupModel {
   showSecondaryGroup: boolean;
 }
 
-export interface IPropertyPaneFieldModel<TProps extends PropertyPanePropertyBag = PropertyPanePropertyBag> {
+export interface IPropertyPaneFieldModel<
+  TProps extends PropertyPanePropertyBag = PropertyPanePropertyBag,
+> {
   type: number;
   targetProperty: string;
   shouldFocus?: boolean;
@@ -98,18 +100,19 @@ export interface IDropdownFieldViewModel {
 }
 
 export interface IChoiceGroupOptionViewModel {
+  ariaLabel?: string;
   checked?: boolean;
   disabled?: boolean;
   iconProps?: { iconName?: string };
   imageAlt?: string;
   imageSize?: { height: number; width: number };
   imageSrc?: string;
+  selectedImageSrc?: string;
   key: string;
   text: string;
 }
 
 export interface IChoiceGroupFieldViewModel {
-  ariaLabel?: string;
   disabled?: boolean;
   label?: string;
   options: IChoiceGroupOptionViewModel[];

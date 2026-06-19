@@ -118,7 +118,6 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
       const choiceGroup = createChoiceGroupFieldViewModel(field, locale);
       return wrapField(
         <ChoiceGroupComponent
-          ariaLabel={choiceGroup.ariaLabel}
           disabled={choiceGroup.disabled}
           label={choiceGroup.label}
           options={choiceGroup.options}
