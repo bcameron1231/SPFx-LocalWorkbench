@@ -24,6 +24,7 @@ import { isActiveExtension, isActiveWebPart } from '@spfx-local-workbench/shared
 import { ExtensionManager } from './ExtensionManager';
 import { WebPartManager } from './WebPartManager';
 import type { IAppHandlers } from './components/App';
+import { DynamicDataHost } from './dynamicData/DynamicDataHost';
 import { SpfxContext, ThemeProvider } from './mocks';
 import { registerProxyHttpClients } from './proxy';
 import type { IVsCodeApi, IWorkbenchConfig } from './types';
@@ -33,6 +34,7 @@ export class WorkbenchRuntime {
   private vscode: IVsCodeApi;
   private config: IWorkbenchConfig;
   private manifestLoader: ManifestLoader;
+  private dynamicDataHost: DynamicDataHost;
   private contextProvider: SpfxContext;
   private themeProvider: ThemeProvider;
   private webPartManager: WebPartManager;
@@ -50,7 +52,12 @@ export class WorkbenchRuntime {
 
     // Initialize core components
     this.manifestLoader = new ManifestLoader(config.serveUrl);
-    this.contextProvider = new SpfxContext(config.context, config.proxyEnabled !== false);
+    this.dynamicDataHost = new DynamicDataHost();
+    this.contextProvider = new SpfxContext(
+      config.context,
+      this.dynamicDataHost,
+      config.proxyEnabled !== false,
+    );
     this.themeProvider = new ThemeProvider(config.theme);
     this.themeProvider.applyThemeToDocument();
     this.webPartManager = new WebPartManager(
@@ -112,7 +119,11 @@ export class WorkbenchRuntime {
       );
     }
     if (settings.context) {
-      this.contextProvider = new SpfxContext(settings.context, settings.proxyEnabled !== false);
+      this.contextProvider = new SpfxContext(
+        settings.context,
+        this.dynamicDataHost,
+        settings.proxyEnabled !== false,
+      );
     }
     if (settings.customThemes !== undefined) {
       window.dispatchEvent(
@@ -323,6 +334,15 @@ export class WorkbenchRuntime {
 
     // Dispose the web part instance if active
     if (isActiveWebPart(webPart)) {
+      const dynamicDataSourceManager = (webPart.context as { dynamicDataSourceManager?: { dispose?: () => void } }).dynamicDataSourceManager;
+      if (typeof dynamicDataSourceManager?.dispose === 'function') {
+        try {
+          dynamicDataSourceManager.dispose();
+        } catch (error: unknown) {
+          this.log.warn('Error disposing dynamic data source manager:', error);
+        }
+      }
+
       if (typeof webPart.instance.onDispose === 'function') {
         try {
           webPart.instance.onDispose();
@@ -350,6 +370,15 @@ export class WorkbenchRuntime {
     // Dispose all web part instances
     for (const webPart of this.activeWebParts) {
       if (isActiveWebPart(webPart)) {
+        const dynamicDataSourceManager = (webPart.context as { dynamicDataSourceManager?: { dispose?: () => void } }).dynamicDataSourceManager;
+        if (typeof dynamicDataSourceManager?.dispose === 'function') {
+          try {
+            dynamicDataSourceManager.dispose();
+          } catch (error: unknown) {
+            this.log.warn('Error disposing dynamic data source manager:', error);
+          }
+        }
+
         if (typeof webPart.instance.onDispose === 'function') {
           try {
             webPart.instance.onDispose();
@@ -411,14 +440,32 @@ export class WorkbenchRuntime {
       return;
     }
 
-    // Update property
-    webPart.properties[targetProperty] = newValue;
+    const oldValue = webPart.properties[targetProperty];
+    const dynamicProperty = oldValue as {
+      setReference?: (reference: string) => void;
+      setValue?: (value: unknown) => void;
+    };
+
+    if (dynamicProperty && typeof dynamicProperty === 'object' && typeof dynamicProperty.setReference === 'function') {
+      if (typeof newValue === 'string' && newValue.includes(':')) {
+        dynamicProperty.setReference(newValue);
+      } else if (typeof dynamicProperty.setValue === 'function') {
+        dynamicProperty.setValue(newValue);
+      }
+      webPart.properties[targetProperty] = oldValue;
+    } else {
+      webPart.properties[targetProperty] = newValue;
+    }
 
     // Call lifecycle methods and re-render if instantiated
     if (isActiveWebPart(webPart)) {
       if (typeof webPart.instance.onPropertyPaneFieldChanged === 'function') {
         try {
-          webPart.instance.onPropertyPaneFieldChanged(targetProperty, null, newValue);
+          webPart.instance.onPropertyPaneFieldChanged(
+            targetProperty,
+            oldValue,
+            webPart.properties[targetProperty],
+          );
         } catch (error: unknown) {
           this.log.warn('Error calling onPropertyPaneFieldChanged:', error);
         }

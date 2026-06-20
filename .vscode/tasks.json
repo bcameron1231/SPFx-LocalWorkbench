@@ -5,7 +5,6 @@
   "tasks": [
     {
       "label": "watch",
-      "hide": true,
       "dependsOn": [
         "npm: watch:tsc",
         "npm: watch:esbuild",
@@ -20,6 +19,10 @@
       "group": {
         "kind": "build",
         "isDefault": true
+      },
+      "icon": {
+        "id": "eye-watch",
+        "color": "terminal.ansiGreen"
       }
     },
     {
