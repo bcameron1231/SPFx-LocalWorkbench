@@ -524,28 +524,68 @@
             "order": 10,
             "type": "object",
             "default": {
+              "cultureInfo": {
+                "currentCultureName": "en-US",
+                "currentUICultureName": "en-US",
+                "isRightToLeft": false
+              },
+              "isInitialized": true,
+              "legacyPageContext": {
+                "isNoScriptEnabled": false,
+                "isSPO": true
+              },
+              "list": {
+                "id": "00000000-0000-4000-b000-555555555555",
+                "permissions": {
+                  "value": {
+                    "High": 2147483647,
+                    "Low": 4294705151
+                  }
+                },
+                "serverRelativeUrl": "/sites/devsite/SitePages",
+                "title": "Site Pages"
+              },
+              "listItem": {
+                "id": 1
+              },
               "site": {
                 "absoluteUrl": "https://contoso.sharepoint.com/sites/devsite",
-                "id": "00000000-0000-4000-b000-666666666666"
-              },
-              "web": {
-                "absoluteUrl": "https://contoso.sharepoint.com/sites/devsite",
-                "title": "Local Workbench",
-                "description": "Local development workbench for SPFx",
-                "templateName": "STS#3",
-                "id": "00000000-0000-4000-b000-777777777777"
+                "cdnPrefix": "res-1.public.onecdn.static.microsoft/bld",
+                "classification": "",
+                "correlationId": "00000000-0000-4000-b000-888888888888",
+                "id": "00000000-0000-4000-b000-666666666666",
+                "isNoScriptEnabled": false,
+                "recycleBinItemCount": -1,
+                "serverRelativeUrl": "/sites/devsite",
+                "serverRequestPath": "/sites/devsite/SitePages/Home.aspx",
+                "sitePagesEnabled": true
               },
               "user": {
                 "displayName": "Local Workbench User",
                 "email": "user@contoso.onmicrosoft.com",
-                "loginName": "i:0#.f|membership|user@contoso.onmicrosoft.com",
-                "isAnonymousGuestUser": false
+                "isAnonymousGuestUser": false,
+                "isExternalGuestUser": false,
+                "loginName": "user@contoso.onmicrosoft.com",
+                "preferUserTimeZone": false
               },
-              "cultureInfo": {
-                "currentCultureName": "en-US"
-              },
-              "isNoScriptEnabled": false,
-              "isSPO": true
+              "web": {
+                "absoluteUrl": "https://contoso.sharepoint.com/sites/devsite",
+                "description": "Local development workbench for SPFx",
+                "id": "00000000-0000-4000-b000-777777777777",
+                "isAppWeb": false,
+                "language": 1033,
+                "languageName": "en-US",
+                "logoUrl": "_layouts/15/images/siteicon.png",
+                "permissions": {
+                  "value": {
+                    "High": 2147483647,
+                    "Low": 4294705151
+                  }
+                },
+                "serverRelativeUrl": "/sites/devsite",
+                "templateName": "68",
+                "title": "SPFx Local Workbench"
+              }
             },
             "markdownDescription": "%configuration.spfxLocalWorkbench.context.pageContext.mdDescription%",
             "properties": {
@@ -556,6 +596,30 @@
                   "absoluteUrl": {
                     "type": "string",
                     "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.site.properties.absoluteUrl.description%"
+                  },
+                  "serverRelativeUrl": {
+                    "type": "string"
+                  },
+                  "serverRequestPath": {
+                    "type": "string"
+                  },
+                  "cdnPrefix": {
+                    "type": "string"
+                  },
+                  "classification": {
+                    "type": "string"
+                  },
+                  "correlationId": {
+                    "type": "string"
+                  },
+                  "isNoScriptEnabled": {
+                    "type": "boolean"
+                  },
+                  "recycleBinItemCount": {
+                    "type": "number"
+                  },
+                  "sitePagesEnabled": {
+                    "type": "boolean"
                   }
                 },
                 "additionalProperties": true
@@ -576,9 +640,36 @@
                     "type": "string",
                     "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.web.properties.description.description%"
                   },
+                  "serverRelativeUrl": {
+                    "type": "string"
+                  },
                   "templateName": {
                     "type": "string",
                     "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.web.properties.templateName.description%"
+                  },
+                  "language": {
+                    "type": "number"
+                  },
+                  "languageName": {
+                    "type": "string"
+                  },
+                  "logoUrl": {
+                    "type": "string"
+                  },
+                  "isAppWeb": {
+                    "type": "boolean"
+                  },
+                  "permissions": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "additionalProperties": true
                   }
                 },
                 "additionalProperties": true
@@ -602,6 +693,12 @@
                   "isAnonymousGuestUser": {
                     "type": "boolean",
                     "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.user.properties.isAnonymousGuestUser.description%"
+                  },
+                  "isExternalGuestUser": {
+                    "type": "boolean"
+                  },
+                  "preferUserTimeZone": {
+                    "type": "boolean"
                   }
                 },
                 "additionalProperties": true
@@ -613,17 +710,66 @@
                   "currentCultureName": {
                     "type": "string",
                     "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.cultureInfo.properties.currentCultureName.description%"
+                  },
+                  "currentUICultureName": {
+                    "type": "string"
+                  },
+                  "isRightToLeft": {
+                    "type": "boolean"
                   }
                 },
                 "additionalProperties": true
               },
-              "isNoScriptEnabled": {
-                "type": "boolean",
-                "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.isNoScriptEnabled.description%"
+              "list": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "serverRelativeUrl": {
+                    "type": "string"
+                  },
+                  "permissions": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "additionalProperties": true
               },
-              "isSPO": {
-                "type": "boolean",
-                "description": "%configuration.spfxLocalWorkbench.context.pageContext.properties.isSPO.description%"
+              "listItem": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "number"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "legacyPageContext": {
+                "type": "object",
+                "properties": {
+                  "isNoScriptEnabled": {
+                    "type": "boolean"
+                  },
+                  "isSPO": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "isInitialized": {
+                "type": "boolean"
               }
             },
             "additionalProperties": true

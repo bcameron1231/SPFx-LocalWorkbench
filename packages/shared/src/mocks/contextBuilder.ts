@@ -42,6 +42,17 @@ export function getLanguageCodeFromCulture(culture: string): number {
   return cultureMap[culture] || 1033; // Default to en-US
 }
 
+function createMockPermissions(permissions?: { [key: string]: any }): any {
+  if (!permissions) {
+    return undefined;
+  }
+
+  return {
+    ...permissions,
+    hasPermission: () => true,
+  };
+}
+
 /**
  * Builds a mock SPFx pageContext with all computed properties
  * This ensures consistent behavior between webview and Storybook
@@ -55,36 +66,54 @@ export function buildMockPageContext(config: IPageContextConfig): any {
     config.web.language ?? getLanguageCodeFromCulture(config.cultureInfo.currentCultureName);
   const siteId = config.site.id ?? DEFAULT_PAGE_CONTEXT.site.id;
   const webId = config.web.id ?? DEFAULT_PAGE_CONTEXT.web.id;
+  const listId = config.list?.id ?? DEFAULT_PAGE_CONTEXT.list?.id;
+  const currentUICultureName =
+    config.cultureInfo.currentUICultureName ?? config.cultureInfo.currentCultureName;
+  const isRightToLeft =
+    config.cultureInfo.isRightToLeft ?? isRtlCulture(config.cultureInfo.currentCultureName);
+  const isNoScriptEnabled =
+    config.legacyPageContext?.isNoScriptEnabled ??
+    config.site.isNoScriptEnabled ??
+    false;
+  const isSPO = config.legacyPageContext?.isSPO ?? true;
 
   return {
     ...config,
+    isInitialized: config.isInitialized ?? true,
     web: {
       ...config.web,
-      serverRelativeUrl: webServerRelativeUrl,
       id: MockGuid.parse(webId),
       language,
       languageName: config.web.languageName ?? config.cultureInfo.currentCultureName,
-      permissions: { hasPermission: () => true },
+      permissions: createMockPermissions(config.web.permissions),
+      serverRelativeUrl: webServerRelativeUrl,
     },
     site: {
       ...config.site,
-      serverRelativeUrl: siteServerRelativeUrl,
       id: MockGuid.parse(siteId),
+      isNoScriptEnabled,
+      serverRelativeUrl: siteServerRelativeUrl,
     },
     user: {
       ...config.user,
       isExternalGuestUser: config.user.isExternalGuestUser ?? false,
+      preferUserTimeZone: config.user.preferUserTimeZone ?? false,
     },
     cultureInfo: {
       ...config.cultureInfo,
-      currentUICultureName:
-        config.cultureInfo.currentUICultureName ?? config.cultureInfo.currentCultureName,
-      isRightToLeft:
-        config.cultureInfo.isRightToLeft ?? isRtlCulture(config.cultureInfo.currentCultureName),
+      currentUICultureName,
+      isRightToLeft,
     },
-    list: config.list ?? null,
+    list: config.list
+      ? {
+          ...config.list,
+          id: listId ? MockGuid.parse(listId) : undefined,
+          permissions: createMockPermissions(config.list.permissions),
+        }
+      : null,
     listItem: config.listItem ?? null,
     legacyPageContext: {
+      ...config.legacyPageContext,
       webAbsoluteUrl: config.web.absoluteUrl,
       webServerRelativeUrl: webServerRelativeUrl,
       siteAbsoluteUrl: config.site.absoluteUrl,
@@ -98,11 +127,10 @@ export function buildMockPageContext(config: IPageContextConfig): any {
       webId: `{${webId}}`,
       siteId: `{${siteId}}`,
       currentCultureName: config.cultureInfo.currentCultureName,
-      currentUICultureName:
-        config.cultureInfo.currentUICultureName ?? config.cultureInfo.currentCultureName,
+      currentUICultureName,
       webLanguage: language,
-      isNoScriptEnabled: config.isNoScriptEnabled ?? false,
-      isSPO: config.isSPO ?? true,
+      isNoScriptEnabled,
+      isSPO,
       aadTenantId: '00000000-0000-4000-b000-000000000000',
     },
   };
