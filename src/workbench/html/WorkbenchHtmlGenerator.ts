@@ -41,10 +41,12 @@ export interface IHtmlGeneratorConfig {
   htmlFieldSecurity?: IHtmlFieldSecurityConfig;
   propertyPaneStrings?: {
     applyButtonText: string;
+    backButtonText: string;
     collapseGroupAriaLabel: string;
     emptyConfigurationText: string;
     expandGroupAriaLabel: string;
-    pageButtonText: string;
+    nextButtonText: string;
+    pageCountText: string;
     visibilityGroupName: string;
     visibilityToggleLabel: string;
     visibilityToggleOnText: string;

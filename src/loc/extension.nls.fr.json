@@ -52,10 +52,12 @@
   "panel.title": "Workbench SPFx local"
   ,
   "propertyPane.applyButtonText": "Appliquer",
+  "propertyPane.backButtonText": "Retour",
   "propertyPane.collapseGroupAriaLabel": "Réduire le groupe",
   "propertyPane.emptyConfigurationText": "Aucune configuration de volet de propriétés n'est disponible pour ce composant WebPart.",
   "propertyPane.expandGroupAriaLabel": "Développer le groupe",
-  "propertyPane.pageButtonText": "Page {0}",
+  "propertyPane.nextButtonText": "Suivant",
+  "propertyPane.pageCountText": "{0} sur {1}",
   "propertyPane.visibility.groupName": "Visibilité",
   "propertyPane.visibility.toggleLabel": "Afficher dans la vue mobile et courriel",
   "propertyPane.visibility.onText": "Activé",

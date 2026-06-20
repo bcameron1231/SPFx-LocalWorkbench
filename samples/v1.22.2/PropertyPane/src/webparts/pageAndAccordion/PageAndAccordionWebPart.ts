@@ -49,6 +49,10 @@ export default class PageAndAccordionWebPart extends BaseClientSideWebPart<IPage
     return Version.parse('1.0');
   }
 
+  // protected get disableReactivePropertyChanges(): boolean {
+  //   return true;
+  // }
+
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
       pages: [

@@ -29,10 +29,12 @@ export interface IWorkbenchConfig {
   propertyPaneShrinkCanvas?: boolean;
   propertyPaneStrings?: {
     applyButtonText: string;
+    backButtonText: string;
     collapseGroupAriaLabel: string;
     emptyConfigurationText: string;
     expandGroupAriaLabel: string;
-    pageButtonText: string;
+    nextButtonText: string;
+    pageCountText: string;
     visibilityGroupName: string;
     visibilityToggleLabel: string;
     visibilityToggleOnText: string;

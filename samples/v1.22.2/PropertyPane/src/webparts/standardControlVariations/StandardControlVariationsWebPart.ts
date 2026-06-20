@@ -1,7 +1,6 @@
-import * as React from 'react';
-import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import {
+  type IPropertyPaneConfiguration,
   PropertyPaneButton,
   PropertyPaneButtonType,
   PropertyPaneCheckbox,
@@ -10,13 +9,16 @@ import {
   PropertyPaneDropdownOptionType,
   PropertyPaneLabel,
   PropertyPaneLink,
-  PopupWindowPosition,
+  //PopupWindowPosition,
   PropertyPaneSlider,
   PropertyPaneTextField,
   PropertyPaneToggle,
-  type IPropertyPaneConfiguration,
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
+import * as React from 'react';
+import * as ReactDom from 'react-dom';
+
+import { getManifestMetadata } from '../shared/components/ManifestMetadataBadge';
 import {
   BANANAS_SELECTED_IMAGE_DATA_URL,
   BANANAS_UNSELECTED_IMAGE_DATA_URL,
@@ -25,11 +27,9 @@ import {
   WATERMELON_SELECTED_IMAGE_DATA_URL,
   WATERMELON_UNSELECTED_IMAGE_DATA_URL,
 } from './choiceGroupImageData';
-
 import StandardControlVariations, {
   type IStandardControlVariationsProps,
 } from './components/StandardControlVariations';
-import { getManifestMetadata } from '../shared/components/ManifestMetadataBadge';
 
 export interface IStandardControlVariationsWebPartProps {
   ariaPlaceholderText: string;
@@ -65,38 +65,41 @@ export interface IStandardControlVariationsWebPartProps {
 
 export default class StandardControlVariationsWebPart extends BaseClientSideWebPart<IStandardControlVariationsWebPartProps> {
   public render(): void {
-    const element: React.ReactElement<IStandardControlVariationsProps> = React.createElement(StandardControlVariations, {
-      ariaPlaceholderText: this.properties.ariaPlaceholderText,
-      buttonValue: this.properties.buttonValue,
-      checkboxAriaLabelValue: this.properties.checkboxAriaLabelValue,
-      checkboxDisabledValue: this.properties.checkboxDisabledValue,
-      checkboxValue: this.properties.checkboxValue,
-      choiceGroupDisabledOptionValue: this.properties.choiceGroupDisabledOptionValue,
-      choiceGroupImageValue: this.properties.choiceGroupImageValue,
-      choiceGroupIconValue: this.properties.choiceGroupIconValue,
-      choiceGroupValue: this.properties.choiceGroupValue,
-      disabledValue: this.properties.disabledValue,
-      dropdownAriaValue: this.properties.dropdownAriaValue,
-      dropdownAnimalValue: this.properties.dropdownAnimalValue,
-      dropdownDisabledValue: this.properties.dropdownDisabledValue,
-      dropdownGroupedValue: this.properties.dropdownGroupedValue,
-      dropdownValue: this.properties.dropdownValue,
-      fallbackValueText: this.properties.fallbackValueText,
-      limitedLengthValue: this.properties.limitedLengthValue,
-      manifestInfo: getManifestMetadata(this.context.manifest),
-      multilineResizableValue: this.properties.multilineResizableValue,
-      multilineStaticValue: this.properties.multilineStaticValue,
-      readOnlyValue: this.properties.readOnlyValue,
-      sliderHiddenValue: this.properties.sliderHiddenValue,
-      sliderValue: this.properties.sliderValue,
-      toggleAriaLabelOnlyValue: this.properties.toggleAriaLabelOnlyValue,
-      toggleDisabledValue: this.properties.toggleDisabledValue,
-      toggleInlineLabelTextValue: this.properties.toggleInlineLabelTextValue,
-      toggleInlineLabelValue: this.properties.toggleInlineLabelValue,
-      toggleStateAriaLabelValue: this.properties.toggleStateAriaLabelValue,
-      toggleTextValue: this.properties.toggleTextValue,
-      underlinedValue: this.properties.underlinedValue,
-    });
+    const element: React.ReactElement<IStandardControlVariationsProps> = React.createElement(
+      StandardControlVariations,
+      {
+        ariaPlaceholderText: this.properties.ariaPlaceholderText,
+        buttonValue: this.properties.buttonValue,
+        checkboxAriaLabelValue: this.properties.checkboxAriaLabelValue,
+        checkboxDisabledValue: this.properties.checkboxDisabledValue,
+        checkboxValue: this.properties.checkboxValue,
+        choiceGroupDisabledOptionValue: this.properties.choiceGroupDisabledOptionValue,
+        choiceGroupImageValue: this.properties.choiceGroupImageValue,
+        choiceGroupIconValue: this.properties.choiceGroupIconValue,
+        choiceGroupValue: this.properties.choiceGroupValue,
+        disabledValue: this.properties.disabledValue,
+        dropdownAriaValue: this.properties.dropdownAriaValue,
+        dropdownAnimalValue: this.properties.dropdownAnimalValue,
+        dropdownDisabledValue: this.properties.dropdownDisabledValue,
+        dropdownGroupedValue: this.properties.dropdownGroupedValue,
+        dropdownValue: this.properties.dropdownValue,
+        fallbackValueText: this.properties.fallbackValueText,
+        limitedLengthValue: this.properties.limitedLengthValue,
+        manifestInfo: getManifestMetadata(this.context.manifest),
+        multilineResizableValue: this.properties.multilineResizableValue,
+        multilineStaticValue: this.properties.multilineStaticValue,
+        readOnlyValue: this.properties.readOnlyValue,
+        sliderHiddenValue: this.properties.sliderHiddenValue,
+        sliderValue: this.properties.sliderValue,
+        toggleAriaLabelOnlyValue: this.properties.toggleAriaLabelOnlyValue,
+        toggleDisabledValue: this.properties.toggleDisabledValue,
+        toggleInlineLabelTextValue: this.properties.toggleInlineLabelTextValue,
+        toggleInlineLabelValue: this.properties.toggleInlineLabelValue,
+        toggleStateAriaLabelValue: this.properties.toggleStateAriaLabelValue,
+        toggleTextValue: this.properties.toggleTextValue,
+        underlinedValue: this.properties.underlinedValue,
+      },
+    );
 
     ReactDom.render(element, this.domElement);
   }
@@ -115,7 +118,8 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
         {
           displayGroupsAsAccordion: true,
           header: {
-            description: 'Built-in property-pane control variations grouped by standard field type.',
+            description:
+              'Built-in property-pane control variations grouped by standard field type.',
           },
           groups: [
             {
@@ -126,7 +130,8 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
                   label: 'Placeholder And Aria Label',
                   placeholder: 'Type to replace this placeholder',
                   ariaLabel: 'Placeholder and aria label sample text field',
-                  description: 'Uses a placeholder plus explicit ariaLabel for accessibility testing.',
+                  description:
+                    'Uses a placeholder plus explicit ariaLabel for accessibility testing.',
                 }),
                 PropertyPaneTextField('fallbackValueText', {
                   label: 'Value Fallback',
@@ -227,7 +232,7 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
               isCollapsed: true,
               groupFields: [
                 PropertyPaneChoiceGroup('choiceGroupValue', {
-                  label: 'Standard Choice Group (with ariaLabels)',
+                  label: 'Standard Choice Group',
                   options: [
                     { key: 'alpha', text: 'Alpha', ariaLabel: 'Alpha option' },
                     { key: 'beta', text: 'Beta', ariaLabel: 'Beta option' },
@@ -235,11 +240,26 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
                   ],
                 }),
                 PropertyPaneChoiceGroup('choiceGroupIconValue', {
-                  label: 'Choice Group With Icons (with ariaLabels)',
+                  label: 'Choice Group With Icons',
                   options: [
-                    { key: 'sun', text: 'Sun', iconProps: { officeFabricIconFontName: 'Sunny' }, ariaLabel: 'Sunny option' },
-                    { key: 'rain', text: 'Rain', iconProps: { officeFabricIconFontName: 'Rain' }, ariaLabel: 'Rain option' },
-                    { key: 'cloud', text: 'Cloud', iconProps: { officeFabricIconFontName: 'Cloud' }, ariaLabel: 'Cloud option' },
+                    {
+                      key: 'lamp',
+                      text: 'Lamp',
+                      iconProps: { officeFabricIconFontName: 'Lamp' },
+                      ariaLabel: 'Lamp option',
+                    },
+                    {
+                      key: 'guitar',
+                      text: 'Guitar',
+                      iconProps: { officeFabricIconFontName: 'Guitar' },
+                      ariaLabel: 'Guitar option',
+                    },
+                    {
+                      key: 'shirt',
+                      text: 'Shirt',
+                      iconProps: { officeFabricIconFontName: 'Shirt' },
+                      ariaLabel: 'Shirt option',
+                    },
                   ],
                 }),
                 PropertyPaneChoiceGroup('choiceGroupImageValue', {
@@ -309,11 +329,26 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
                     calloutMaxHeight: 100,
                   },
                   options: [
-                    { key: 'header-1', text: 'Status', type: PropertyPaneDropdownOptionType.Header, index: 0 },
+                    {
+                      key: 'header-1',
+                      text: 'Status',
+                      type: PropertyPaneDropdownOptionType.Header,
+                      index: 0,
+                    },
                     { key: 'draft', text: 'Draft', index: 1 },
                     { key: 'review', text: 'In Review', index: 2 },
-                    { key: 'divider-1', text: '-', type: PropertyPaneDropdownOptionType.Divider, index: 3 },
-                    { key: 'header-2', text: 'Visibility', type: PropertyPaneDropdownOptionType.Header, index: 4 },
+                    {
+                      key: 'divider-1',
+                      text: '-',
+                      type: PropertyPaneDropdownOptionType.Divider,
+                      index: 3,
+                    },
+                    {
+                      key: 'header-2',
+                      text: 'Visibility',
+                      type: PropertyPaneDropdownOptionType.Header,
+                      index: 4,
+                    },
                     { key: 'private', text: 'Private', index: 5 },
                     { key: 'public', text: 'Public', index: 6 },
                   ],
@@ -367,6 +402,7 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
                   label: 'Disabled Slider',
                   min: 0,
                   max: 10,
+                  step: 3,
                   disabled: true,
                 }),
               ],
@@ -375,11 +411,15 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
               groupName: 'Button Variations',
               isCollapsed: true,
               groupFields: [
+                PropertyPaneLabel('buttonNormalLabel', {
+                  text: 'Normal',
+                }),
                 PropertyPaneButton('buttonValue', {
                   text: 'Append "!" To Button Value',
                   buttonType: PropertyPaneButtonType.Normal,
                   ariaLabel: 'Append an exclamation point to the current button value',
-                  ariaDescription: 'Activates the normal button sample and mutates the bound property.',
+                  ariaDescription:
+                    'Activates the normal button sample and mutates the bound property.',
                   onClick: (value: unknown) => `${typeof value === 'string' ? value : ''}!`,
                 }),
                 PropertyPaneButton('buttonValue', {
@@ -387,6 +427,9 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
                   buttonType: PropertyPaneButtonType.Normal,
                   disabled: true,
                   onClick: (value: unknown) => value,
+                }),
+                PropertyPaneLabel('buttonPrimaryLabel', {
+                  text: 'Primary',
                 }),
                 PropertyPaneButton('buttonValue', {
                   text: 'Reset Button Value',
@@ -399,6 +442,9 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
                   buttonType: PropertyPaneButtonType.Primary,
                   disabled: true,
                   onClick: (value: unknown) => value,
+                }),
+                PropertyPaneLabel('buttonHeroLabel', {
+                  text: 'Hero',
                 }),
                 PropertyPaneButton('buttonValue', {
                   text: 'Hero Button',
@@ -414,6 +460,9 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
                   disabled: true,
                   onClick: (value: unknown) => value,
                 }),
+                PropertyPaneLabel('buttonCompoundLabel', {
+                  text: 'Compound',
+                }),
                 PropertyPaneButton('buttonValue', {
                   text: 'Compound Button',
                   buttonType: PropertyPaneButtonType.Compound,
@@ -428,6 +477,9 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
                   disabled: true,
                   onClick: (value: unknown) => value,
                 }),
+                PropertyPaneLabel('buttonCommandLabel', {
+                  text: 'Command',
+                }),
                 PropertyPaneButton('buttonValue', {
                   text: 'Command Button',
                   buttonType: PropertyPaneButtonType.Command,
@@ -441,6 +493,9 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
                   icon: 'Settings',
                   disabled: true,
                   onClick: (value: unknown) => value,
+                }),
+                PropertyPaneLabel('buttonIconLabel', {
+                  text: 'Icon',
                 }),
                 PropertyPaneButton('buttonValue', {
                   text: 'Icon Button',
@@ -482,18 +537,18 @@ export default class StandardControlVariationsWebPart extends BaseClientSideWebP
                   target: '_blank',
                   ariaLabel: 'Open SPFx Documentation in new window',
                 }),
-                PropertyPaneLink('linkPopup', {
-                  text: 'Open SPFx docs in popup window',
-                  href: 'https://aka.ms/spfx',
-                  target: '_blank',
-                  ariaLabel: 'Open SPFx Documentation in popup window',
-                  popupWindowProps: {
-                    title: 'SPFx Docs',
-                    width: 480,
-                    height: 320,
-                    positionWindowPosition: PopupWindowPosition.leftBottom,
-                  },
-                }),
+                // PropertyPaneLink('linkPopup', {
+                //   text: 'Open SPFx docs in popup window',
+                //   href: 'https://aka.ms/spfx',
+                //   target: '_blank',
+                //   ariaLabel: 'Open SPFx Documentation in popup window',
+                //   popupWindowProps: {
+                //     title: 'SPFx Docs',
+                //     width: 480,
+                //     height: 320,
+                //     positionWindowPosition: PopupWindowPosition.leftBottom,
+                //   },
+                // }),
                 PropertyPaneLink('linkDisabled', {
                   text: 'Disabled link',
                   href: 'https://aka.ms/spfx',

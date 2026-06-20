@@ -52,10 +52,12 @@
   "panel.title": "SPFx Local Workbench"
   ,
   "propertyPane.applyButtonText": "Apply",
+  "propertyPane.backButtonText": "Back",
   "propertyPane.collapseGroupAriaLabel": "Collapse group",
   "propertyPane.emptyConfigurationText": "No property pane configuration available for this web part.",
   "propertyPane.expandGroupAriaLabel": "Expand group",
-  "propertyPane.pageButtonText": "Page {0}",
+  "propertyPane.nextButtonText": "Next",
+  "propertyPane.pageCountText": "{0} of {1}",
   "propertyPane.visibility.groupName": "Visibility",
   "propertyPane.visibility.toggleLabel": "Show in mobile and email view",
   "propertyPane.visibility.onText": "On",
