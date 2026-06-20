@@ -132,12 +132,15 @@ export interface IButtonFieldViewModel {
   ariaDescription?: string;
   ariaLabel?: string;
   buttonType?: number;
+  description?: string;
   disabled?: boolean;
+  iconProps?: { iconName?: string };
   text?: string;
   onClick?: (value: unknown) => unknown;
 }
 
 export interface ITextOnlyFieldViewModel {
+  required?: boolean;
   text?: string;
 }
 

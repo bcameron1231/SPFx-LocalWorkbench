@@ -16,7 +16,14 @@ export const LinkComponent: FC<ILinkComponentProps> = ({
   target = '_blank',
   text,
 }) => (
-  <Link ariaLabel={ariaLabel} disabled={disabled} href={href} target={target} rel="noopener noreferrer">
+  <Link
+    ariaLabel={ariaLabel}
+    disabled={disabled}
+    href={href}
+    target={target}
+    rel="noopener noreferrer"
+    styles={{ root: { cursor: disabled ? 'not-allowed' : 'pointer' } }}
+  >
     {text}
   </Link>
 );

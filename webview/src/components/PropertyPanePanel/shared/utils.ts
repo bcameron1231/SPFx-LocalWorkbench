@@ -352,9 +352,39 @@ export function createButtonFieldViewModel(
     ),
     ariaLabel: getTextProperty(field.properties, locale, 'ariaLabel', 'AriaLabel'),
     buttonType: getPropertyValue<number>(field.properties, 'buttonType', 'ButtonType'),
+    description: getTextProperty(field.properties, locale, 'description', 'Description'),
     disabled: getBooleanProperty(field.properties, false, 'disabled', 'Disabled'),
+    iconProps: normalizeButtonIconProps(
+      getPropertyValue<{ iconName?: string; officeFabricIconFontName?: string } | string | undefined>(
+        field.properties,
+        'icon',
+        'Icon',
+      ),
+    ),
     text: getTextProperty(field.properties, locale, 'text', 'Text'),
     onClick: getPropertyValue<(value: unknown) => unknown>(field.properties, 'onClick'),
+  };
+}
+
+function normalizeButtonIconProps(
+  icon:
+    | {
+        iconName?: string;
+        officeFabricIconFontName?: string;
+      }
+    | string
+    | undefined,
+): { iconName?: string } | undefined {
+  if (!icon) {
+    return undefined;
+  }
+
+  if (typeof icon === 'string') {
+    return { iconName: icon };
+  }
+
+  return {
+    iconName: icon.iconName || icon.officeFabricIconFontName,
   };
 }
 
@@ -363,6 +393,7 @@ export function createTextOnlyFieldViewModel(
   locale: string,
 ): ITextOnlyFieldViewModel {
   return {
+    required: getBooleanProperty(field.properties, false, 'required', 'Required'),
     text: getTextProperty(field.properties, locale, 'text', 'Text'),
   };
 }
