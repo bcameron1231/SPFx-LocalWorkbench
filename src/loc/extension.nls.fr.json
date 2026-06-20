@@ -50,4 +50,14 @@
   "recording.inProgress": "Enregistrement des requêtes API. Les composants WebPart sont rafraîchis. Cliquez sur la barre d'état ou exécutez de nouveau la commande pour arrêter et générer des règles.",
 
   "panel.title": "Workbench SPFx local"
+  ,
+  "propertyPane.applyButtonText": "Appliquer",
+  "propertyPane.collapseGroupAriaLabel": "Réduire le groupe",
+  "propertyPane.emptyConfigurationText": "Aucune configuration de volet de propriétés n'est disponible pour ce composant WebPart.",
+  "propertyPane.expandGroupAriaLabel": "Développer le groupe",
+  "propertyPane.pageButtonText": "Page {0}",
+  "propertyPane.visibility.groupName": "Visibilité",
+  "propertyPane.visibility.toggleLabel": "Afficher dans la vue mobile et courriel",
+  "propertyPane.visibility.onText": "Activé",
+  "propertyPane.visibility.offText": "Désactivé"
 }

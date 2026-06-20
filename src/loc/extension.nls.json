@@ -50,4 +50,14 @@
   "recording.inProgress": "Recording API requests. Web parts are being refreshed. Click the status bar or run this command again to stop and generate rules.",
 
   "panel.title": "SPFx Local Workbench"
+  ,
+  "propertyPane.applyButtonText": "Apply",
+  "propertyPane.collapseGroupAriaLabel": "Collapse group",
+  "propertyPane.emptyConfigurationText": "No property pane configuration available for this web part.",
+  "propertyPane.expandGroupAriaLabel": "Expand group",
+  "propertyPane.pageButtonText": "Page {0}",
+  "propertyPane.visibility.groupName": "Visibility",
+  "propertyPane.visibility.toggleLabel": "Show in mobile and email view",
+  "propertyPane.visibility.onText": "On",
+  "propertyPane.visibility.offText": "Off"
 }

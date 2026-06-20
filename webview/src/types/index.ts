@@ -27,6 +27,17 @@ export interface IWorkbenchConfig {
   proxyEnabled?: boolean;
   /** When true, the canvas shrinks to make room when the property pane is open (default true). */
   propertyPaneShrinkCanvas?: boolean;
+  propertyPaneStrings?: {
+    applyButtonText: string;
+    collapseGroupAriaLabel: string;
+    emptyConfigurationText: string;
+    expandGroupAriaLabel: string;
+    pageButtonText: string;
+    visibilityGroupName: string;
+    visibilityToggleLabel: string;
+    visibilityToggleOnText: string;
+    visibilityToggleOffText: string;
+  };
   externalDependencies?: Array<{ moduleName: string; globalName: string }>;
 }
 

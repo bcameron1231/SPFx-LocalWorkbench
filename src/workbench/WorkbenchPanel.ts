@@ -446,6 +446,23 @@ export class WorkbenchPanel {
       contextSettings: this._settings.context,
       proxyEnabled: this._apiProxyService?.enabled ?? true,
       propertyPaneShrinkCanvas: this._settings.propertyPaneShrinkCanvas,
+      propertyPaneStrings: {
+        applyButtonText: localize('propertyPane.applyButtonText', 'Apply'),
+        collapseGroupAriaLabel: localize('propertyPane.collapseGroupAriaLabel', 'Collapse group'),
+        emptyConfigurationText: localize(
+          'propertyPane.emptyConfigurationText',
+          'No property pane configuration available for this web part.',
+        ),
+        expandGroupAriaLabel: localize('propertyPane.expandGroupAriaLabel', 'Expand group'),
+        pageButtonText: localize('propertyPane.pageButtonText', 'Page {0}'),
+        visibilityGroupName: localize('propertyPane.visibility.groupName', 'Visibility'),
+        visibilityToggleLabel: localize(
+          'propertyPane.visibility.toggleLabel',
+          'Show in mobile and email view',
+        ),
+        visibilityToggleOnText: localize('propertyPane.visibility.onText', 'On'),
+        visibilityToggleOffText: localize('propertyPane.visibility.offText', 'Off'),
+      },
       externalDependencies: this._externalDependencies,
       htmlFieldSecurity: this._settings.htmlFieldSecurity,
     });

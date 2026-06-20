@@ -11,7 +11,7 @@ import {
 } from '@fluentui/react';
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { logger } from '@spfx-local-workbench/shared';
+import { logger, PropertyPaneFieldType } from '@spfx-local-workbench/shared';
 import type { IActiveWebPart } from '@spfx-local-workbench/shared';
 
 import { PropertyPaneFieldRenderer } from './PropertyPaneFieldRenderer';
@@ -22,7 +22,24 @@ import {
   resolvePropertyPaneLocale,
   resolvePropertyPaneTitle,
 } from './shared';
-import type { IPropertyPaneConfigurationModel, IPropertyPanePageModel } from './types';
+import type {
+  IPropertyPaneConfigurationModel,
+  IPropertyPaneGroupModel,
+  IPropertyPanePageModel,
+} from './types';
+
+const WORKBENCH_VISIBILITY_TARGET_PROPERTY = '__workbenchVisibility.showInMobileAndEmailView';
+const DEFAULT_PROPERTY_PANE_STRINGS = {
+  applyButtonText: 'Apply',
+  collapseGroupAriaLabel: 'Collapse group',
+  emptyConfigurationText: 'No property pane configuration available for this web part.',
+  expandGroupAriaLabel: 'Expand group',
+  pageButtonText: 'Page {0}',
+  visibilityGroupName: 'Visibility',
+  visibilityToggleLabel: 'Show in mobile and email view',
+  visibilityToggleOnText: 'On',
+  visibilityToggleOffText: 'Off',
+};
 
 interface IPropertyPanePanelProps {
   webPart?: IActiveWebPart;
@@ -40,10 +57,13 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
   const [pendingChanges, setPendingChanges] = useState<Record<string, unknown>>({});
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [focusFieldKey, setFocusFieldKey] = useState<string>();
+  const [showInMobileAndEmailView, setShowInMobileAndEmailView] = useState(true);
   const previousInstanceIdRef = useRef<string | undefined>();
 
   const locale = resolvePropertyPaneLocale(webPart);
   const headerText = resolvePropertyPaneTitle(webPart, locale);
+  const propertyPaneStrings =
+    window.__workbenchConfig?.propertyPaneStrings ?? DEFAULT_PROPERTY_PANE_STRINGS;
 
   const isNonReactive =
     webPart?.instance &&
@@ -84,6 +104,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
     if (!isSameWebPart) {
       setPendingChanges({});
       setFocusFieldKey(undefined);
+      setShowInMobileAndEmailView(true);
     }
 
     previousInstanceIdRef.current = currentInstanceId;
@@ -91,6 +112,12 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
 
   const handlePropertyChange = useCallback(
     (targetProperty: string, newValue: unknown) => {
+      if (targetProperty === WORKBENCH_VISIBILITY_TARGET_PROPERTY) {
+        // TODO: Use this workbench-only visibility state to drive simulated mobile/email rendering.
+        setShowInMobileAndEmailView(newValue !== false);
+        return;
+      }
+
       if (isNonReactive) {
         setPendingChanges((prev) => ({ ...prev, [targetProperty]: newValue }));
         return;
@@ -109,12 +136,28 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
   }, [pendingChanges, onPropertyChange]);
 
   const getCurrentValue = useCallback(
-    (targetProperty: string | undefined) =>
-      resolveFieldValue(targetProperty, webPart?.properties, pendingChanges, !!isNonReactive),
-    [isNonReactive, pendingChanges, webPart?.properties],
+    (targetProperty: string | undefined) => {
+      if (targetProperty === WORKBENCH_VISIBILITY_TARGET_PROPERTY) {
+        return showInMobileAndEmailView;
+      }
+
+      return resolveFieldValue(targetProperty, webPart?.properties, pendingChanges, !!isNonReactive);
+    },
+    [isNonReactive, pendingChanges, showInMobileAndEmailView, webPart?.properties],
   );
 
   const page = config?.pages[currentPageIndex];
+  const pageGroups = useMemo(() => {
+    if (!page || !config) {
+      return [];
+    }
+
+    if (config.pages.length > 1 && currentPageIndex !== 0) {
+      return page.groups;
+    }
+
+    return [...page.groups, createWorkbenchVisibilityGroup()];
+  }, [config, currentPageIndex, page]);
 
   useEffect(() => {
     if (!page) {
@@ -122,9 +165,9 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
       return;
     }
 
-    const nextFocusField = findFirstFocusedField(page, currentPageIndex, collapsedGroups);
+    const nextFocusField = findFirstFocusedField(pageGroups, currentPageIndex, collapsedGroups);
     setFocusFieldKey(nextFocusField);
-  }, [collapsedGroups, currentPageIndex, page]);
+  }, [collapsedGroups, currentPageIndex, page, pageGroups]);
 
   const pageButtons = useMemo(() => {
     if (!config || config.pages.length <= 1) {
@@ -132,15 +175,15 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
     }
 
     return (
-      <Stack horizontal tokens={{ childrenGap: 8 }} className={styles.pageNavigation}>
-        {config.pages.map((_, pageIndex) => (
-          <DefaultButton
-            key={pageIndex}
-            text={`Page ${pageIndex + 1}`}
-            primary={pageIndex === currentPageIndex}
-            onClick={() => setCurrentPageIndex(pageIndex)}
-          />
-        ))}
+        <Stack horizontal tokens={{ childrenGap: 8 }} className={styles.pageNavigation}>
+          {config.pages.map((_, pageIndex) => (
+            <DefaultButton
+              key={pageIndex}
+              text={propertyPaneStrings.pageButtonText.replace('{0}', String(pageIndex + 1))}
+              primary={pageIndex === currentPageIndex}
+              onClick={() => setCurrentPageIndex(pageIndex)}
+            />
+          ))}
       </Stack>
     );
   }, [config, currentPageIndex]);
@@ -150,7 +193,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
   const renderFooter = isNonReactive
     ? () => (
         <PrimaryButton
-          text="Apply"
+          text={propertyPaneStrings.applyButtonText}
           onClick={handleApply}
           disabled={!hasPendingChanges}
           styles={{ root: { width: 'fit-content' } }}
@@ -207,7 +250,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
             {page.header?.description && (
               <div className={styles.pageHeader}>{page.header.description}</div>
             )}
-            {page.groups.map((groupOrConditionalGroup, groupIndex: number) => {
+            {pageGroups.map((groupOrConditionalGroup, groupIndex: number) => {
               const group = resolveGroup(groupOrConditionalGroup);
               const groupKey = getGroupKey(currentPageIndex, groupIndex);
               const isCollapsed = collapsedGroups[groupKey] ?? !!group.isCollapsed;
@@ -238,7 +281,11 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
                         <span>{group.groupName}</span>
                         <Icon
                           className={styles.accordionToggle}
-                          ariaLabel={isCollapsed ? 'Expand group' : 'Collapse group'}
+                          ariaLabel={
+                            isCollapsed
+                              ? propertyPaneStrings.expandGroupAriaLabel
+                              : propertyPaneStrings.collapseGroupAriaLabel
+                          }
                           iconName={isCollapsed ? 'ChevronDown' : 'ChevronUp'}
                         />
                       </button>
@@ -270,7 +317,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
           </Stack>
         ) : (
           <Stack horizontalAlign="center" className={styles.empty}>
-            <Text>No property pane configuration available for this web part.</Text>
+            <Text>{propertyPaneStrings.emptyConfigurationText}</Text>
           </Stack>
         )}
       </div>
@@ -284,7 +331,7 @@ function buildCollapsedGroupState(
   const state: Record<string, boolean> = {};
 
   config.pages.forEach((page, pageIndex) => {
-    page.groups.forEach((groupOrConditionalGroup, groupIndex) => {
+    [...page.groups, createWorkbenchVisibilityGroup()].forEach((groupOrConditionalGroup, groupIndex) => {
       const group = resolveGroup(groupOrConditionalGroup);
       state[getGroupKey(pageIndex, groupIndex)] = !!group.isCollapsed;
     });
@@ -313,12 +360,12 @@ function getGroupKey(pageIndex: number, groupIndex: number): string {
 }
 
 function findFirstFocusedField(
-  page: IPropertyPanePageModel,
+  pageGroups: IPropertyPanePageModel['groups'],
   pageIndex: number,
   collapsedGroups: Record<string, boolean>,
 ): string | undefined {
-  for (let groupIndex = 0; groupIndex < page.groups.length; groupIndex += 1) {
-    const group = resolveGroup(page.groups[groupIndex]);
+  for (let groupIndex = 0; groupIndex < pageGroups.length; groupIndex += 1) {
+    const group = resolveGroup(pageGroups[groupIndex]);
     if (collapsedGroups[getGroupKey(pageIndex, groupIndex)]) {
       continue;
     }
@@ -332,4 +379,25 @@ function findFirstFocusedField(
   }
 
   return undefined;
+}
+
+function createWorkbenchVisibilityGroup(): IPropertyPaneGroupModel {
+  const propertyPaneStrings =
+    window.__workbenchConfig?.propertyPaneStrings ?? DEFAULT_PROPERTY_PANE_STRINGS;
+
+  return {
+    groupName: propertyPaneStrings.visibilityGroupName,
+    isCollapsed: false,
+    groupFields: [
+      {
+        type: PropertyPaneFieldType.Toggle,
+        targetProperty: WORKBENCH_VISIBILITY_TARGET_PROPERTY,
+        properties: {
+          label: propertyPaneStrings.visibilityToggleLabel,
+          offText: propertyPaneStrings.visibilityToggleOffText,
+          onText: propertyPaneStrings.visibilityToggleOnText,
+        },
+      },
+    ],
+  };
 }

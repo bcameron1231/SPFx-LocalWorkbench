@@ -39,6 +39,17 @@ export interface IHtmlGeneratorConfig {
   externalDependencies?: IExternalDependency[];
   // HTML field security configuration controlling which external domains web parts may iframe
   htmlFieldSecurity?: IHtmlFieldSecurityConfig;
+  propertyPaneStrings?: {
+    applyButtonText: string;
+    collapseGroupAriaLabel: string;
+    emptyConfigurationText: string;
+    expandGroupAriaLabel: string;
+    pageButtonText: string;
+    visibilityGroupName: string;
+    visibilityToggleLabel: string;
+    visibilityToggleOnText: string;
+    visibilityToggleOffText: string;
+  };
 }
 
 // Generates the Content Security Policy for the webview
@@ -160,6 +171,7 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
     context: config.contextSettings,
     proxyEnabled: config.proxyEnabled !== false,
     propertyPaneShrinkCanvas: config.propertyPaneShrinkCanvas !== false,
+    propertyPaneStrings: config.propertyPaneStrings,
     externalDependencies: (config.externalDependencies || []).map((dep) => ({
       moduleName: dep.moduleName,
       globalName: dep.globalName,
