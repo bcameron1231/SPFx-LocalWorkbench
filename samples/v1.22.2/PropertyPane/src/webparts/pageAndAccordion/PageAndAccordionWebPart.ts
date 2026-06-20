@@ -16,6 +16,7 @@ import { getManifestMetadata } from '../shared/components/ManifestMetadataBadge'
 export interface IPageAndAccordionWebPartProps {
   accordionName: string;
   collapsedNotes: string;
+  pageThreeUnnamedGroupValue: string;
   pageTwoAudience: string;
   pageTwoHighlight: boolean;
   pageTwoNotes: string;
@@ -30,6 +31,7 @@ export default class PageAndAccordionWebPart extends BaseClientSideWebPart<IPage
       accordionName: this.properties.accordionName,
       collapsedNotes: this.properties.collapsedNotes,
       manifestInfo: getManifestMetadata(this.context.manifest),
+      pageThreeUnnamedGroupValue: this.properties.pageThreeUnnamedGroupValue,
       pageTwoAudience: this.properties.pageTwoAudience,
       pageTwoHighlight: this.properties.pageTwoHighlight,
       pageTwoNotes: this.properties.pageTwoNotes,
@@ -148,6 +150,14 @@ export default class PageAndAccordionWebPart extends BaseClientSideWebPart<IPage
                 PropertyPaneTextField('pageThreeHiddenNameValue', {
                   label: 'Hidden Group Name Value',
                   description: 'This field lives in a group with isGroupNameHidden set to true.',
+                }),
+              ],
+            },
+            {
+              groupFields: [
+                PropertyPaneTextField('pageThreeUnnamedGroupValue', {
+                  label: 'Unnamed Group Value',
+                  description: 'This field lives in a group where groupName is not specified at all.',
                 }),
               ],
             },

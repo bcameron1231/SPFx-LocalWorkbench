@@ -6,6 +6,7 @@ export interface IPageAndAccordionProps {
   accordionName: string;
   collapsedNotes: string;
   manifestInfo: IManifestMetadata;
+  pageThreeUnnamedGroupValue: string;
   pageTwoAudience: string;
   pageTwoHighlight: boolean;
   pageTwoNotes: string;
@@ -37,6 +38,7 @@ export default function PageAndAccordion(props: IPageAndAccordionProps): React.R
         { label: 'pageThreeSummary', value: props.pageThreeSummary },
         { label: 'pageThreeStatus', value: props.pageThreeStatus },
         { label: 'pageThreeHiddenNameValue', value: props.pageThreeHiddenNameValue },
+        { label: 'pageThreeUnnamedGroupValue', value: props.pageThreeUnnamedGroupValue },
       ],
     },
   ];

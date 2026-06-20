@@ -12,6 +12,7 @@ Its purpose is not just to demonstrate controls. It is meant to give us a small 
 
 The harness currently contains:
 
+- `EmptyPane`
 - `StandardControls`
 - `StandardControlVariations`
 - `PnpControls`
@@ -21,7 +22,7 @@ The harness currently contains:
 - `DynamicDataSource`
 - `DynamicDataConsumer`
 
-`StandardControls` and `PnpControls` are baseline coverage. `StandardControlVariations` isolates built-in field variants, and the remaining web parts are scenario-focused parity surfaces.
+`EmptyPane` covers the no-real-properties edge case. `StandardControls` and `PnpControls` are baseline coverage. `StandardControlVariations` isolates built-in field variants, and the remaining web parts are scenario-focused parity surfaces.
 
 ## Used SharePoint Framework Version
 
@@ -62,17 +63,19 @@ That means each sample should answer:
 Run the samples in this order when validating the online workbench:
 
 1. `StandardControls`
-2. `StandardControlVariations`
-3. `AdvancedBehavior`
-4. `PageAndAccordion`
-5. `ValidationAndFocus`
-6. `DynamicDataSource`
-7. `DynamicDataConsumer`
-8. `PnpControls`
+2. `EmptyPane`
+3. `StandardControlVariations`
+4. `AdvancedBehavior`
+5. `PageAndAccordion`
+6. `ValidationAndFocus`
+7. `DynamicDataSource`
+8. `DynamicDataConsumer`
+9. `PnpControls`
 
 Why this order:
 
 - `StandardControls` confirms the basic built-in field path is healthy.
+- `EmptyPane` confirms the host stays stable when a web part intentionally exposes no sample-defined property pane fields.
 - `StandardControlVariations` confirms built-in field variants such as placeholders, fallback values, disabled/read-only states, and multiline behavior.
 - `AdvancedBehavior` confirms non-reactive apply, button semantics, and custom fields before moving into more layered scenarios.
 - `PageAndAccordion` confirms page/group host behavior.
@@ -126,6 +129,34 @@ Expected result:
 
 - Changes apply reactively.
 - No pane crash, render error, or serialization warning occurs.
+
+### EmptyPane
+
+Purpose:
+
+- no-real-properties property-pane baseline
+- empty-page shell behavior
+- host stability when the pane has nothing meaningful to render
+
+What it demonstrates:
+
+- no sample-defined property fields
+  Verifies the property pane can still open intentionally without crashing or fabricating sample data requirements.
+- empty-page layout
+  Verifies the host handles a page with no groups or fields cleanly.
+
+How to verify:
+
+1. Add the web part.
+2. Open the property pane.
+3. Confirm the pane opens without errors.
+4. Confirm there are no sample-defined editable fields shown for this web part.
+5. Confirm closing and reopening the pane remains stable.
+
+Expected result:
+
+- The web part renders normally.
+- The property pane opens intentionally and remains stable despite having no sample-defined fields.
 
 ### StandardControlVariations
 
@@ -566,6 +597,7 @@ Expected result:
 Use this checklist once the samples are loaded in the online workbench:
 
 - `StandardControls` opens and reactively updates.
+- `EmptyPane` opens without crashing and remains stable with no sample-defined fields.
 - `StandardControlVariations` verifies built-in field variants such as placeholder, value fallback, disabled/read-only, and multiline behavior.
 - `AdvancedBehavior` verifies non-reactive `Apply`, button mutation, and custom field apply gating.
 - `PageAndAccordion` verifies page navigation, accordion state, and multi-page value persistence.

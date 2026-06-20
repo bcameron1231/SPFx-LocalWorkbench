@@ -1,0 +1,21 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "7f6db80d-e702-4c43-b3f2-a7e72b2ac4a2",
+  "alias": "EmptyPaneWebPart",
+  "componentType": "WebPart",
+  "version": "1.22.2",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
+  "supportsThemeVariants": true,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "Advanced" },
+      "title": { "default": "Empty Pane" },
+      "description": { "default": "A web part whose property pane intentionally contains no sample-defined fields." },
+      "officeFabricIconFontName": "FolderOpen",
+      "properties": {}
+    }
+  ]
+}

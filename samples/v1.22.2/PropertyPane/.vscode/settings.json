@@ -11,5 +11,29 @@
     "src/**/*.scss.ts": true
   },
   "typescript.tsdk": ".\\node_modules\\typescript\\lib",
-  "spfxLocalWorkbench.theme.current": "Green"
+  "spfxLocalWorkbench.theme.current": "Green",
+  "spfxLocalWorkbench.context.pageContext": {
+    "site": {
+      "absoluteUrl": "https://contoso.sharepoint.com/sites/devsite",
+      "id": "00000000-0000-4000-b000-666666666666"
+    },
+    "web": {
+      "absoluteUrl": "https://contoso.sharepoint.com/sites/devsite",
+      "title": "Local Workbench",
+      "description": "Local development workbench for SPFx",
+      "templateName": "STS#3",
+      "id": "00000000-0000-4000-b000-777777777777"
+    },
+    "user": {
+      "displayName": "Local Workbench User",
+      "email": "user@contoso.onmicrosoft.com",
+      "loginName": "i:0#.f|membership|user@contoso.onmicrosoft.com",
+      "isAnonymousGuestUser": false
+    },
+    "cultureInfo": {
+      "currentCultureName": "en-US"
+    },
+    "isNoScriptEnabled": false,
+    "isSPO": true
+  }
 }

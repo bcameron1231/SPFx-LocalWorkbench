@@ -65,6 +65,14 @@
           "manifest": "./src/webparts/dynamicDataConsumer/DynamicDataConsumerWebPart.manifest.json"
         }
       ]
+    },
+    "empty-pane-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/emptyPane/EmptyPaneWebPart.js",
+          "manifest": "./src/webparts/emptyPane/EmptyPaneWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
