@@ -43,7 +43,6 @@ export interface IHtmlGeneratorConfig {
     applyButtonText: string;
     backButtonText: string;
     collapseGroupAriaLabel: string;
-    emptyConfigurationText: string;
     expandGroupAriaLabel: string;
     nextButtonText: string;
     pageCountText: string;

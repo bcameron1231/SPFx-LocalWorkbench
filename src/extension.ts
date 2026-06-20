@@ -228,7 +228,7 @@ export function activate(context: vscode.ExtensionContext) {
     () => {
       vscode.commands.executeCommand(
         'workbench.action.openWorkspaceSettings',
-        '@ext:thechriskent.spfx-local-workbench',
+        '@ext:m365pnp.pnp-spfx-local-workbench',
       );
     },
   );

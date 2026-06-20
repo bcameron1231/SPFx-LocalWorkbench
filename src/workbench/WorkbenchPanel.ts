@@ -450,10 +450,6 @@ export class WorkbenchPanel {
         applyButtonText: localize('propertyPane.applyButtonText', 'Apply'),
         backButtonText: localize('propertyPane.backButtonText', 'Back'),
         collapseGroupAriaLabel: localize('propertyPane.collapseGroupAriaLabel', 'Collapse group'),
-        emptyConfigurationText: localize(
-          'propertyPane.emptyConfigurationText',
-          'No property pane configuration available for this web part.',
-        ),
         expandGroupAriaLabel: localize('propertyPane.expandGroupAriaLabel', 'Expand group'),
         nextButtonText: localize('propertyPane.nextButtonText', 'Next'),
         pageCountText: localize('propertyPane.pageCountText', '{0} of {1}'),

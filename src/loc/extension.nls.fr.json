@@ -54,7 +54,6 @@
   "propertyPane.applyButtonText": "Appliquer",
   "propertyPane.backButtonText": "Retour",
   "propertyPane.collapseGroupAriaLabel": "Réduire le groupe",
-  "propertyPane.emptyConfigurationText": "Aucune configuration de volet de propriétés n'est disponible pour ce composant WebPart.",
   "propertyPane.expandGroupAriaLabel": "Développer le groupe",
   "propertyPane.nextButtonText": "Suivant",
   "propertyPane.pageCountText": "{0} sur {1}",

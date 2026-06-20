@@ -54,7 +54,6 @@
   "propertyPane.applyButtonText": "Apply",
   "propertyPane.backButtonText": "Back",
   "propertyPane.collapseGroupAriaLabel": "Collapse group",
-  "propertyPane.emptyConfigurationText": "No property pane configuration available for this web part.",
   "propertyPane.expandGroupAriaLabel": "Expand group",
   "propertyPane.nextButtonText": "Next",
   "propertyPane.pageCountText": "{0} of {1}",

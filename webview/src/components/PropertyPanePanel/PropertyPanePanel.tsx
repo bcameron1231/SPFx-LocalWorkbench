@@ -1,4 +1,4 @@
-import { Icon, Panel, PanelType, PrimaryButton, Stack, Text, css } from '@fluentui/react';
+import { Icon, Panel, PanelType, PrimaryButton, Stack, css } from '@fluentui/react';
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { PropertyPaneFieldType, logger } from '@spfx-local-workbench/shared';
@@ -23,7 +23,6 @@ const DEFAULT_PROPERTY_PANE_STRINGS = {
   applyButtonText: 'Apply',
   backButtonText: 'Back',
   collapseGroupAriaLabel: 'Collapse group',
-  emptyConfigurationText: 'No property pane configuration available for this web part.',
   expandGroupAriaLabel: 'Expand group',
   nextButtonText: 'Next',
   pageCountText: '{0} of {1}',
@@ -168,9 +167,16 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
     [isNonReactive, pendingChanges, showInMobileAndEmailView, webPart?.properties],
   );
 
-  const page = config?.pages[currentPageIndex];
+  const page = useMemo<IPropertyPanePageModel>(
+    () =>
+      config?.pages[currentPageIndex] ?? {
+        groups: [],
+      },
+    [config, currentPageIndex],
+  );
+
   const pageGroups = useMemo(() => {
-    if (!page || !config) {
+    if (!config) {
       return [];
     }
 
@@ -182,15 +188,16 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
   }, [config, currentPageIndex, page]);
 
   useEffect(() => {
-    if (!page) {
+    if (!config) {
       setFocusFieldKey(undefined);
       return;
     }
 
     const nextFocusField = findFirstFocusedField(pageGroups, currentPageIndex, collapsedGroups);
     setFocusFieldKey(nextFocusField);
-  }, [collapsedGroups, currentPageIndex, page, pageGroups]);
+  }, [collapsedGroups, config, currentPageIndex, pageGroups]);
 
+  const hasPages = config && config.pages.length > 1;
   const pageNavigation = useMemo(() => {
     if (!config || config.pages.length <= 1) {
       return null;
@@ -234,8 +241,9 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
   const hasPendingChanges = Object.keys(pendingChanges).length > 0;
   const hasInvalidProperties = Object.keys(invalidProperties).length > 0;
 
-  const renderFooter = isNonReactive
-    ? () => (
+  const renderFooter = useMemo(() => {
+    if (isNonReactive) {
+      return () => (
         <Stack horizontal={false} tokens={{ childrenGap: 20 }}>
           <PrimaryButton
             text={propertyPaneStrings.applyButtonText}
@@ -245,8 +253,23 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
           />
           {pageNavigation}
         </Stack>
-      )
-    : () => pageNavigation;
+      );
+    }
+
+    if (hasPages) {
+      return () => pageNavigation;
+    }
+
+    return undefined;
+  }, [
+    handleApply,
+    hasInvalidProperties,
+    hasPages,
+    hasPendingChanges,
+    isNonReactive,
+    pageNavigation,
+    propertyPaneStrings.applyButtonText,
+  ]);
 
   return (
     <Panel
@@ -258,7 +281,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
       headerClassName={styles.panelHeader}
       onDismiss={onClose}
       isBlocking={false}
-      isFooterAtBottom={true}
+      isFooterAtBottom={!!renderFooter}
       onRenderFooterContent={renderFooter}
       layerProps={{ eventBubblingEnabled: true }}
       styles={{
@@ -291,7 +314,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
       }}
     >
       <div id="property-pane-content" className={styles.content}>
-        {config && page && webPart ? (
+        {config && webPart && (
           <Stack className={styles.container}>
             <div className={styles.pageContent}>
               {page.header?.description && (
@@ -363,10 +386,6 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
                 );
               })}
             </div>
-          </Stack>
-        ) : (
-          <Stack horizontalAlign="center" className={styles.empty}>
-            <Text>{propertyPaneStrings.emptyConfigurationText}</Text>
           </Stack>
         )}
       </div>
