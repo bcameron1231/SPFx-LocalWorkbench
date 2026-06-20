@@ -54,6 +54,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
 }) => {
   const [config, setConfig] = useState<IPropertyPaneConfigurationModel | null>(null);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [invalidProperties, setInvalidProperties] = useState<Record<string, boolean>>({});
   const [pendingChanges, setPendingChanges] = useState<Record<string, unknown>>({});
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [focusFieldKey, setFocusFieldKey] = useState<string>();
@@ -102,6 +103,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
     }
 
     if (!isSameWebPart) {
+      setInvalidProperties({});
       setPendingChanges({});
       setFocusFieldKey(undefined);
       setShowInMobileAndEmailView(true);
@@ -134,6 +136,29 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
     });
     setPendingChanges({});
   }, [pendingChanges, onPropertyChange]);
+
+  const handleFieldValidityChange = useCallback((targetProperty: string, isValid: boolean) => {
+    setInvalidProperties((prev) => {
+      if (isValid) {
+        if (!(targetProperty in prev)) {
+          return prev;
+        }
+
+        const next = { ...prev };
+        delete next[targetProperty];
+        return next;
+      }
+
+      if (prev[targetProperty]) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [targetProperty]: true,
+      };
+    });
+  }, []);
 
   const getCurrentValue = useCallback(
     (targetProperty: string | undefined) => {
@@ -189,13 +214,14 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
   }, [config, currentPageIndex]);
 
   const hasPendingChanges = Object.keys(pendingChanges).length > 0;
+  const hasInvalidProperties = Object.keys(invalidProperties).length > 0;
 
   const renderFooter = isNonReactive
     ? () => (
         <PrimaryButton
           text={propertyPaneStrings.applyButtonText}
           onClick={handleApply}
-          disabled={!hasPendingChanges}
+          disabled={!hasPendingChanges || hasInvalidProperties}
           styles={{ root: { width: 'fit-content' } }}
         />
       )
@@ -300,13 +326,14 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
                           <PropertyPaneFieldRenderer
                             key={fieldKey}
                             autoFocus={focusFieldKey === fieldKey}
-                            currentValue={getCurrentValue(field.targetProperty)}
-                            field={field}
-                            getCurrentValue={getCurrentValue}
-                            locale={locale}
-                            onPropertyChange={handlePropertyChange}
-                            provider={webPart.context.dynamicDataProvider}
-                          />
+                          currentValue={getCurrentValue(field.targetProperty)}
+                          field={field}
+                          getCurrentValue={getCurrentValue}
+                          locale={locale}
+                          onFieldValidityChange={handleFieldValidityChange}
+                          onPropertyChange={handlePropertyChange}
+                          provider={webPart.context.dynamicDataProvider}
+                        />
                         );
                       })}
                     </Stack>

@@ -41,6 +41,7 @@ interface IPropertyPaneFieldRendererProps {
   autoFocus?: boolean;
   currentValue: unknown;
   field: IPropertyPaneFieldModel;
+  onFieldValidityChange?: (targetProperty: string, isValid: boolean) => void;
   getCurrentValue?: (targetProperty: string | undefined) => unknown;
   locale: string;
   onPropertyChange: (targetProperty: string, newValue: unknown) => void;
@@ -53,6 +54,7 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
   field,
   getCurrentValue,
   locale,
+  onFieldValidityChange,
   onPropertyChange,
   provider,
 }) => {
@@ -72,6 +74,11 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
         <TextFieldComponent
           {...createTextFieldViewModel(field, locale)}
           autoFocus={autoFocus}
+          onFieldValidityChange={
+            onFieldValidityChange
+              ? (isValid) => onFieldValidityChange(field.targetProperty, isValid)
+              : undefined
+          }
           value={typeof currentValue === 'string' ? currentValue : ''}
           onChange={handleChange}
         />
@@ -146,6 +153,7 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
       return wrapField(
         <CustomFieldComponent
           field={field}
+          onFieldValidityChange={onFieldValidityChange || (() => {})}
           value={currentValue}
           onPropertyChange={onPropertyChange}
         />

@@ -1,5 +1,5 @@
-import { TextField } from '@fluentui/react';
-import React, { FC, useEffect, useRef } from 'react';
+import { Icon, TextField } from '@fluentui/react';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 
 interface ITextFieldComponentProps {
   ariaLabel?: string;
@@ -11,6 +11,7 @@ interface ITextFieldComponentProps {
   label?: string;
   maxLength?: number;
   multiline?: boolean;
+  onFieldValidityChange?: (isValid: boolean) => void;
   onGetErrorMessage?: (value: string) => string | Promise<string>;
   onChange: (value: string) => void;
   placeholder?: string;
@@ -33,6 +34,7 @@ export const TextFieldComponent: FC<ITextFieldComponentProps> = ({
   label,
   maxLength,
   multiline,
+  onFieldValidityChange,
   onGetErrorMessage,
   onChange,
   placeholder,
@@ -45,6 +47,40 @@ export const TextFieldComponent: FC<ITextFieldComponentProps> = ({
   value,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const validationTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>();
+  const validationRequestIdRef = useRef(0);
+  const [draftValue, setDraftValue] = useState(value);
+  const [validationErrorMessage, setValidationErrorMessage] = useState<string | undefined>();
+  const effectiveErrorMessage = validationErrorMessage ?? errorMessage;
+
+  const runValidation = useCallback(
+    async (nextValue: string) => {
+      if (!onGetErrorMessage) {
+        setValidationErrorMessage(undefined);
+        onFieldValidityChange?.(true);
+        onChange(nextValue);
+        return;
+      }
+
+      const requestId = ++validationRequestIdRef.current;
+      const result = await onGetErrorMessage(nextValue);
+
+      if (requestId !== validationRequestIdRef.current) {
+        return;
+      }
+
+      const nextErrorMessage = typeof result === 'string' ? result : '';
+      const isValid = nextErrorMessage.length === 0;
+
+      setValidationErrorMessage(nextErrorMessage || undefined);
+      onFieldValidityChange?.(isValid);
+
+      if (isValid) {
+        onChange(nextValue);
+      }
+    },
+    [onChange, onFieldValidityChange, onGetErrorMessage],
+  );
 
   useEffect(() => {
     if (!autoFocus) {
@@ -59,18 +95,67 @@ export const TextFieldComponent: FC<ITextFieldComponentProps> = ({
     inputElement?.select?.();
   }, [autoFocus]);
 
+  useEffect(() => {
+    setDraftValue(value);
+  }, [value]);
+
+  useEffect(() => {
+    return () => {
+      if (validationTimeoutRef.current) {
+        clearTimeout(validationTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleValueChange = useCallback(
+    (nextValue: string) => {
+      setDraftValue(nextValue);
+
+      if (!onGetErrorMessage) {
+        onChange(nextValue);
+        return;
+      }
+
+      if (validationTimeoutRef.current) {
+        clearTimeout(validationTimeoutRef.current);
+      }
+
+      if (deferredValidationTime && deferredValidationTime > 0) {
+        validationTimeoutRef.current = setTimeout(() => {
+          void runValidation(nextValue);
+        }, deferredValidationTime);
+        return;
+      }
+
+      void runValidation(nextValue);
+    },
+    [deferredValidationTime, onChange, onGetErrorMessage, runValidation],
+  );
+
   return (
     <div ref={containerRef} style={{ paddingTop: 4 }}>
       <TextField
         ariaLabel={ariaLabel}
         deferredValidationTime={deferredValidationTime}
-        description={description}
         disabled={disabled}
-        errorMessage={errorMessage}
         label={label}
         maxLength={maxLength}
         multiline={multiline}
-        onChange={(_, newValue) => onChange(newValue || '')}
+        onBlur={
+          validateOnFocusOut
+            ? () => {
+                void runValidation(draftValue);
+              }
+            : undefined
+        }
+        onChange={(_, newValue) => handleValueChange(newValue || '')}
+        onFocus={
+          validateOnFocusIn
+            ? () => {
+                void runValidation(draftValue);
+              }
+            : undefined
+        }
         onGetErrorMessage={onGetErrorMessage}
         placeholder={placeholder}
         readOnly={readOnly}
@@ -79,7 +164,7 @@ export const TextFieldComponent: FC<ITextFieldComponentProps> = ({
         underlined={underlined}
         validateOnFocusIn={validateOnFocusIn}
         validateOnFocusOut={validateOnFocusOut}
-        value={value}
+        value={draftValue}
         styles={{
           subComponentStyles: {
             label: {
@@ -129,14 +214,39 @@ export const TextFieldComponent: FC<ITextFieldComponentProps> = ({
               },
             },
           },
-          description: {
-            fontSize: 12,
-            lineHeight: 16,
-            display: 'block',
-            marginTop: 2,
+          errorMessage: {
+            display: 'none',
           },
         }}
       />
+      {effectiveErrorMessage && (
+        <div
+          style={{
+            alignItems: 'flex-start',
+            color: 'var(--errorText, #d13438)',
+            display: 'flex',
+            fontSize: 12,
+            lineHeight: '16px',
+            gap: 4,
+            marginTop: 2,
+          }}
+        >
+          <Icon iconName="AlertSolid" style={{ fontSize: 12, lineHeight: '16px', marginTop: 1 }} />
+          <span>{effectiveErrorMessage}</span>
+        </div>
+      )}
+      {description && (
+        <div
+          style={{
+            color: 'var(--neutralSecondary, #605e5c)',
+            fontSize: 12,
+            lineHeight: '16px',
+            marginTop: 2,
+          }}
+        >
+          {description}
+        </div>
+      )}
     </div>
   );
 };

@@ -7,27 +7,43 @@ import type { IPropertyPaneCustomFieldPropsModel, IPropertyPaneFieldChangeCallba
 
 interface ICustomFieldComponentProps {
   field: IPropertyPaneFieldModel<IPropertyPaneCustomFieldPropsModel>;
+  onFieldValidityChange: (targetProperty: string, isValid: boolean) => void;
   onPropertyChange: (targetProperty: string, value: unknown) => void;
   value: unknown;
 }
 
 export const CustomFieldComponent: FC<ICustomFieldComponentProps> = ({
   field,
-  value,
+  onFieldValidityChange,
   onPropertyChange,
 }) => {
   const { context, key, onDispose, onRender } = field.properties;
   const containerRef = useRef<HTMLDivElement>(null);
+  const targetPropertyRef = useRef(field.targetProperty);
+  const onFieldValidityChangeRef = useRef(onFieldValidityChange);
+  const onPropertyChangeRef = useRef(onPropertyChange);
+
+  useEffect(() => {
+    targetPropertyRef.current = field.targetProperty;
+    onFieldValidityChangeRef.current = onFieldValidityChange;
+    onPropertyChangeRef.current = onPropertyChange;
+  }, [field.targetProperty, onFieldValidityChange, onPropertyChange]);
 
   const changeCallback = useCallback<IPropertyPaneFieldChangeCallback>(
     (targetProperty, newValue, isValidEntry) => {
+      const resolvedTargetProperty = targetProperty || targetPropertyRef.current;
+
+      if (typeof isValidEntry === 'boolean') {
+        onFieldValidityChangeRef.current(resolvedTargetProperty, isValidEntry);
+      }
+
       if (isValidEntry === false) {
         return;
       }
 
-      onPropertyChange(targetProperty || field.targetProperty, newValue);
+      onPropertyChangeRef.current(resolvedTargetProperty, newValue);
     },
-    [field.targetProperty, onPropertyChange],
+    [],
   );
 
   useEffect(() => {
@@ -50,7 +66,7 @@ export const CustomFieldComponent: FC<ICustomFieldComponentProps> = ({
         }
       }
     };
-  }, [changeCallback, context, onDispose, onRender, value]);
+  }, [changeCallback, key]);
 
   if (typeof onRender !== 'function') {
     return (
