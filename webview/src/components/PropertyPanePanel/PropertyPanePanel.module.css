@@ -108,6 +108,15 @@
   color: var(--neutralPrimary, #323130);
   padding-top: 4px;
   padding-left: 20px;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.groupHeaderText {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .accordionHeader {
@@ -122,6 +131,7 @@
   padding-top: 0;
   cursor: pointer;
   outline: none;
+  min-width: 0;
 
   &:hover {
     background-color: var(--neutralLighter, #f3f2f1);
@@ -139,7 +149,16 @@
   }
 }
 
+.accordionHeaderText {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .accordionToggle {
+  flex: 0 0 auto;
   font-size: 14px;
   padding-right: 20px;
 }

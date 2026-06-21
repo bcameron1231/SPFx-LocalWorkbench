@@ -1,17 +1,17 @@
-import { Stack, Text, type IDropdownOption } from '@fluentui/react';
-import React, { FC, useMemo } from 'react';
+import { Stack, type IDropdownOption } from '@fluentui/react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 
 import { DropdownComponent } from './DropdownComponent';
+import { DynamicFieldComponent } from './DynamicFieldComponent';
 import type {
   IDynamicDataSourceViewModel,
-  IDynamicFieldFiltersViewModel,
   IDynamicFieldSetViewModel,
 } from '../types';
 
 interface IDynamicFieldSetEntry {
-  filters?: IDynamicFieldFiltersViewModel;
   key: string;
   label?: string;
+  propertyValueDepth?: number;
   reference?: string;
   value?: string;
 }
@@ -41,9 +41,15 @@ function parseReference(reference?: string): { propertyId?: string; sourceId?: s
   return { propertyId, sourceId };
 }
 
+function formatPropertiesLabel(name: string): string {
+  const template =
+    window.__workbenchConfig?.dynamicDataStrings?.propertiesLabelFormat ?? "{0}'s properties";
+  return template.replace('{0}', name);
+}
+
 export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
   entries,
-  label,
+  label: _label,
   onChange,
   sharedConfiguration,
   sources,
@@ -53,7 +59,7 @@ export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
   const sharedPropertyEnabled = sharedDepth >= 2;
   const sharedSourceFilters = sharedConfiguration?.source?.filters;
   const sharedPropertyFilters = sharedConfiguration?.property?.filters;
-  const sharedSourceLabel = sharedConfiguration?.source?.sourcesLabel || 'Shared source';
+  const sharedSourceLabel = sharedConfiguration?.source?.sourcesLabel || 'Connect to source';
 
   const availableSources = useMemo(
     () =>
@@ -68,46 +74,73 @@ export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
     [sharedSourceFilters?.componentId, sources],
   );
 
-  const sharedSourceId = sharedSourceEnabled
+  const derivedSharedSourceId = sharedSourceEnabled
     ? sharedSourceFilters?.sourceId ||
       entries.map((entry) => parseReference(entry.reference).sourceId).find(Boolean)
     : undefined;
+  const [sharedSourceId, setSharedSourceId] = useState<string | undefined>(derivedSharedSourceId);
+  const derivedSharedPropertyId =
+    sharedPropertyEnabled && derivedSharedSourceId
+      ? sharedPropertyFilters?.propertyId ||
+        entries.map((entry) => parseReference(entry.reference).propertyId).find(Boolean)
+      : undefined;
+  const [sharedPropertyId, setSharedPropertyId] = useState<string | undefined>(
+    derivedSharedPropertyId,
+  );
+
+  useEffect(() => {
+    setSharedSourceId(derivedSharedSourceId);
+  }, [derivedSharedSourceId]);
+
+  useEffect(() => {
+    setSharedPropertyId(derivedSharedPropertyId);
+  }, [derivedSharedPropertyId]);
+
   const sharedSource = availableSources.find((source) => source.id === sharedSourceId);
   const sharedSourceOptions = useMemo<IDropdownOption[]>(
     () =>
-      (sharedSourceFilters?.sourceId && sharedSource ? [sharedSource] : availableSources).map((source) => ({
-        key: source.id,
-        text: source.metadata?.title || source.id,
-      })),
+      (sharedSourceFilters?.sourceId && sharedSource ? [sharedSource] : availableSources)
+        .sort((left, right) =>
+          (left.metadata?.title || left.id).localeCompare(right.metadata?.title || right.id),
+        )
+        .map((source) => ({
+          key: source.id,
+          text: source.metadata?.title || source.id,
+        })),
     [availableSources, sharedSource, sharedSourceFilters?.sourceId],
   );
-
-  const sharedPropertyId = sharedPropertyEnabled
-    ? sharedPropertyFilters?.propertyId ||
-      entries.map((entry) => parseReference(entry.reference).propertyId).find(Boolean)
-    : undefined;
-  const sharedPropertySource = sharedSource;
+  const forcedSharedPropertyId = sharedPropertyFilters?.propertyId;
   const sharedPropertyOptions = useMemo<IDropdownOption[]>(
     () =>
-      (sharedPropertyFilters?.propertyId && sharedPropertySource?.properties.some((property) => property.id === sharedPropertyFilters.propertyId)
-        ? sharedPropertySource.properties.filter((property) => property.id === sharedPropertyFilters.propertyId)
-        : sharedPropertySource?.properties || []
+      (forcedSharedPropertyId
+        ? sharedSource?.properties.filter((property) => property.id === forcedSharedPropertyId) ||
+          []
+        : sharedSource?.properties || []
       ).map((property) => ({
         key: property.id,
         text: property.title,
       })),
-    [sharedPropertyFilters?.propertyId, sharedPropertySource],
+    [forcedSharedPropertyId, sharedSource?.properties],
   );
 
-  const updateAllEntries = (sourceId: string | undefined, propertyId: string | undefined) => {
-    for (const entry of entries) {
-      onChange(entry.key, sourceId && propertyId ? `${sourceId}:${propertyId}` : undefined);
-    }
-  };
+  const displayEntries = useMemo(
+    () =>
+      entries.map((entry) => {
+        const parsedEntryReference = parseReference(entry.reference);
+        const sourceMatches = !sharedSourceEnabled || parsedEntryReference.sourceId === sharedSourceId;
+        const propertyMatches =
+          !sharedPropertyEnabled || parsedEntryReference.propertyId === sharedPropertyId;
+
+        return {
+          ...entry,
+          displayReference: sourceMatches && propertyMatches ? entry.reference : undefined,
+        };
+      }),
+    [entries, sharedPropertyEnabled, sharedPropertyId, sharedSourceEnabled, sharedSourceId],
+  );
 
   return (
     <Stack tokens={{ childrenGap: 12 }} className="pp-field">
-      {label && <Text variant="mediumPlus">{label}</Text>}
       {sharedSourceEnabled && (
         <DropdownComponent
           label={sharedSourceLabel}
@@ -116,96 +149,68 @@ export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
           options={sharedSourceOptions}
           onChange={(value) => {
             const nextSourceId = typeof value === 'string' ? value : undefined;
-            const nextSource = availableSources.find((source) => source.id === nextSourceId);
-            const nextPropertyId =
-              sharedPropertyFilters?.propertyId && nextSource?.properties.some((property) => property.id === sharedPropertyFilters.propertyId)
-                ? sharedPropertyFilters.propertyId
-                : nextSource?.properties[0]?.id;
-            updateAllEntries(nextSourceId, nextPropertyId);
+            const nextSharedSource = availableSources.find((source) => source.id === nextSourceId);
+            const nextSharedPropertyId = sharedPropertyEnabled
+              ? nextSharedSource?.properties.find(
+                  (property) => property.id === forcedSharedPropertyId,
+                )?.id
+              : undefined;
+
+            setSharedSourceId(nextSourceId);
+            setSharedPropertyId(nextSharedPropertyId);
+
+            if (sharedPropertyEnabled && nextSourceId && nextSharedPropertyId) {
+              for (const entry of entries) {
+                onChange(entry.key, `${nextSourceId}:${nextSharedPropertyId}`);
+              }
+            }
           }}
         />
       )}
-      {sharedPropertyEnabled && (
+      {sharedPropertyEnabled && sharedSourceId && !forcedSharedPropertyId && (
         <DropdownComponent
-          label="Shared property"
-          disabled={!sharedSourceId || !!sharedPropertyFilters?.propertyId}
-          selectedKey={sharedPropertyId}
+          label={formatPropertiesLabel(sharedSource?.metadata?.title || sharedSourceId)}
+          selectedKey={sharedPropertyId ?? null}
           options={sharedPropertyOptions}
           onChange={(value) => {
             const nextPropertyId = typeof value === 'string' ? value : undefined;
-            updateAllEntries(sharedSourceId, nextPropertyId);
+            setSharedPropertyId(nextPropertyId);
+
+            if (sharedSourceId && nextPropertyId) {
+              for (const entry of entries) {
+                onChange(entry.key, `${sharedSourceId}:${nextPropertyId}`);
+              }
+            }
           }}
         />
       )}
-      {entries.map((entry) => {
-        const { propertyId, sourceId } = parseReference(entry.reference);
-        const sourceFilters = entry.filters;
-        const entrySources = availableSources.filter((source) => {
-          const filteredComponentId = normalizeComponentId(sourceFilters?.componentId);
-
-          if (filteredComponentId && source.metadata?.componentId !== filteredComponentId) {
-            return false;
-          }
-          return true;
-        });
-        const forcedEntrySource = sourceFilters?.sourceId
-          ? entrySources.find((source) => source.id === sourceFilters.sourceId)
-          : undefined;
-        const effectiveSourceId = sharedSourceId || forcedEntrySource?.id || sourceId;
-        const selectedSource = entrySources.find((source) => source.id === effectiveSourceId);
-        const forcedEntryProperty = sourceFilters?.propertyId
-          ? selectedSource?.properties.find((property) => property.id === sourceFilters.propertyId)
-          : undefined;
-        const effectivePropertyId = sharedPropertyId || forcedEntryProperty?.id || propertyId;
-        const propertyOptions: IDropdownOption[] = (
-          forcedEntryProperty ? [forcedEntryProperty] : selectedSource?.properties || []
-        ).map((property) => ({
-          key: property.id,
-          text: property.title,
-        }));
-
-        return (
-          <Stack key={entry.key} tokens={{ childrenGap: 6 }}>
-            <Text>{entry.label || entry.key}</Text>
-            {!sharedSourceEnabled && (
-              <DropdownComponent
-                label="Source"
-                disabled={!!forcedEntrySource}
-                selectedKey={effectiveSourceId}
-                options={entrySources.map((source) => ({
-                  key: source.id,
-                  text: source.metadata?.title || source.id,
-                }))}
-                onChange={(value) => {
-                  const nextSourceId = typeof value === 'string' ? value : undefined;
-                  const nextPropertyId =
-                    sourceFilters?.propertyId &&
-                    entrySources.find((source) => source.id === nextSourceId)?.properties.some((property) => property.id === sourceFilters.propertyId)
-                      ? sourceFilters.propertyId
-                      : entrySources.find((source) => source.id === nextSourceId)?.properties[0]?.id;
-                  onChange(entry.key, nextSourceId && nextPropertyId ? `${nextSourceId}:${nextPropertyId}` : undefined);
-                }}
-              />
-            )}
-            {!sharedPropertyEnabled && (
-              <DropdownComponent
-                disabled={!effectiveSourceId || !!forcedEntryProperty}
-                label="Property"
-                selectedKey={effectivePropertyId}
-                options={propertyOptions}
-                onChange={(value) => {
-                  const nextPropertyId = typeof value === 'string' ? value : undefined;
-                  onChange(
-                    entry.key,
-                    effectiveSourceId && nextPropertyId ? `${effectiveSourceId}:${nextPropertyId}` : undefined,
-                  );
-                }}
-              />
-            )}
-            {entry.value !== undefined && <Text variant="small">Current value: {entry.value}</Text>}
-          </Stack>
-        );
-      })}
+      {(!sharedSourceEnabled || sharedSourceId) &&
+        (!sharedPropertyEnabled || sharedPropertyId) &&
+        displayEntries.map((entry) => (
+          <DynamicFieldComponent
+            key={`${entry.key}:${sharedSourceId ?? ''}:${sharedPropertyId ?? ''}`}
+            currentReference={entry.displayReference}
+            currentValue={entry.value}
+            filters={
+              sharedPropertyEnabled
+                ? {
+                    propertyId: sharedPropertyId,
+                    sourceId: sharedSourceId,
+                  }
+                : sharedSourceEnabled
+                  ? {
+                      sourceId: sharedSourceId,
+                    }
+                  : undefined
+            }
+            hideSourceDropdown={sharedSourceEnabled}
+            label={entry.label}
+            propertyValueDepth={entry.propertyValueDepth}
+            sourceLabel="Connect to source"
+            sources={sources}
+            onChange={(reference) => onChange(entry.key, reference)}
+          />
+        ))}
     </Stack>
   );
 };

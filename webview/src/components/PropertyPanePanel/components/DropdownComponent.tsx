@@ -16,7 +16,8 @@ interface IDropdownComponentProps {
   label?: string;
   onChange: (value: string | number | undefined) => void;
   options: IDropdownOption[];
-  selectedKey?: string | number;
+  placeholder?: string;
+  selectedKey?: string | number | null;
   styles?: Partial<IDropdownStyles>;
 }
 
@@ -27,6 +28,7 @@ export const DropdownComponent: FC<IDropdownComponentProps> = ({
   label,
   onChange,
   options,
+  placeholder,
   selectedKey,
   styles,
 }) => {
@@ -137,6 +139,7 @@ export const DropdownComponent: FC<IDropdownComponentProps> = ({
       calloutProps={calloutMaxHeight ? { calloutMaxHeight } : undefined}
       disabled={disabled}
       label={label}
+      placeholder={placeholder}
       selectedKey={selectedKey}
       options={options}
       onChange={(_, option) => onChange(option?.key)}

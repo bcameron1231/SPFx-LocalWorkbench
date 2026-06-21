@@ -8,8 +8,10 @@ interface IDynamicFieldComponentProps {
   currentReference?: string;
   currentValue?: string;
   filters?: IDynamicFieldFiltersViewModel;
+  hideSourceDropdown?: boolean;
   label?: string;
   onChange: (reference: string | undefined) => void;
+  propertyValueDepth?: number;
   sourceLabel?: string;
   sources: IDynamicDataSourceViewModel[];
 }
@@ -140,11 +142,14 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
   currentReference,
   currentValue,
   filters,
+  hideSourceDropdown = false,
   label,
   onChange,
+  propertyValueDepth,
   sourceLabel = 'Connect to source',
   sources,
 }) => {
+  const maxPropertyValueDepth = propertyValueDepth ?? 2;
   const [optimisticReference, setOptimisticReference] = useState<string | undefined>();
   const effectiveReference = optimisticReference ?? currentReference;
   const parsedReference = useMemo(
@@ -159,6 +164,9 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
   );
   const [pendingPathSegments, setPendingPathSegments] = useState<string[]>(
     parsedReference.pathSegments,
+  );
+  const [lastSyncedSourceId, setLastSyncedSourceId] = useState<string | undefined>(
+    parsedReference.sourceId,
   );
 
   useEffect(() => {
@@ -189,16 +197,27 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
       !!parsedReference.sourceId ||
       !!parsedReference.propertyId ||
       parsedReference.pathSegments.length > 0;
+    const hasUncommittedSourceSelection =
+      !!pendingSourceId &&
+      pendingSourceId !== parsedReference.sourceId &&
+      pendingPropertyId === undefined &&
+      pendingPathSegments.length === 0;
 
-    if (!hasIncomingReference && hasLocalSelection) {
+    if ((!hasIncomingReference && hasLocalSelection) || hasUncommittedSourceSelection) {
       return;
+    }
+
+    if (parsedReference.sourceId !== lastSyncedSourceId) {
+      setPendingPathSegments([]);
     }
 
     setPendingSourceId(parsedReference.sourceId);
     setPendingPropertyId(parsedReference.propertyId);
     setPendingPathSegments(parsedReference.pathSegments);
+    setLastSyncedSourceId(parsedReference.sourceId);
   }, [
     currentReference,
+    lastSyncedSourceId,
     optimisticReference,
     parsedReference.pathSegments,
     parsedReference.propertyId,
@@ -285,7 +304,7 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
   const nestedPathSegments = pendingPathSegments;
 
   const nestedDropdowns = useMemo(() => {
-    if (!selectedProperty || !isObjectLike(selectedPropertyValue)) {
+    if (!selectedProperty || !isObjectLike(selectedPropertyValue) || maxPropertyValueDepth <= 0) {
       return [];
     }
 
@@ -302,7 +321,7 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
     let currentLabel = selectedProperty.title;
     const basePath: string[] = [];
 
-    while (isObjectLike(currentValue)) {
+    while (isObjectLike(currentValue) && basePath.length < maxPropertyValueDepth) {
       const selectedSegment = nestedPathSegments[basePath.length] ?? '';
       const childKeys = getObjectChildKeys(currentValue);
       const pathBaseForDropdown = [...basePath];
@@ -351,6 +370,7 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
 
     return dropdowns;
   }, [
+    maxPropertyValueDepth,
     effectivePropertyId,
     effectiveSourceId,
     nestedPathSegments,
@@ -366,15 +386,16 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
           {label}
         </Text>
       )}
-      <DropdownComponent
-        label={sourceLabel}
-        disabled={!!forcedSource}
-        selectedKey={effectiveSourceId}
-        options={sourceOptions}
-        onChange={(value) => {
-          const nextSourceId = typeof value === 'string' ? value : undefined;
-          const nextSelectedSource = sourceOptionsBase.find((source) => source.id === nextSourceId);
-          const nextForcedPropertyId = getForcedPropertyId(nextSelectedSource, filters);
+      {!hideSourceDropdown && (
+        <DropdownComponent
+          label={sourceLabel}
+          disabled={!!forcedSource}
+          selectedKey={effectiveSourceId}
+          options={sourceOptions}
+          onChange={(value) => {
+            const nextSourceId = typeof value === 'string' ? value : undefined;
+            const nextSelectedSource = sourceOptionsBase.find((source) => source.id === nextSourceId);
+            const nextForcedPropertyId = getForcedPropertyId(nextSelectedSource, filters);
           console.debug('[DynamicDataTrace] DynamicFieldComponent source change', {
             nextForcedPropertyId,
             nextSourceId,
@@ -383,17 +404,17 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
           setPendingSourceId(nextSourceId);
           setPendingPropertyId(nextForcedPropertyId);
           setPendingPathSegments([]);
-          emitReferenceChange(
-            nextSourceId && nextForcedPropertyId
-              ? `${nextSourceId}:${nextForcedPropertyId}`
-              : undefined,
-          );
+
+          if (nextSourceId && nextForcedPropertyId) {
+            emitReferenceChange(`${nextSourceId}:${nextForcedPropertyId}`);
+          }
         }}
       />
+      )}
       {selectedSource && !forcedProperty && (
         <DropdownComponent
           label={formatPropertiesLabel(selectedSource.metadata?.title || selectedSource.id)}
-          selectedKey={effectivePropertyId}
+          selectedKey={effectivePropertyId ?? null}
           options={propertyOptions}
           onChange={(value) => {
             const nextPropertyId = typeof value === 'string' ? value : undefined;

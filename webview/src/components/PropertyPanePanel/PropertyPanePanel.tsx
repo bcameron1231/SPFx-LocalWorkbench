@@ -308,6 +308,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
           flexDirection: 'column',
           height: 'calc(100% - 70px)', // Account for header
           minHeight: 0,
+          paddingBottom: 0,
           paddingLeft: 0,
           paddingRight: 0,
         },
@@ -348,7 +349,9 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
                             }))
                           }
                         >
-                          <span>{group.groupName}</span>
+                          <span className={css(styles.groupHeaderText, styles.accordionHeaderText)}>
+                            {group.groupName}
+                          </span>
                           <Icon
                             className={styles.accordionToggle}
                             ariaLabel={
@@ -360,7 +363,9 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
                           />
                         </button>
                       ) : (
-                        <div className={styles.groupHeader}>{group.groupName}</div>
+                        <div className={styles.groupHeader}>
+                          <span className={styles.groupHeaderText}>{group.groupName}</span>
+                        </div>
                       ))}
                     {!isCollapsed && (
                       <Stack className={styles.groupFields}>

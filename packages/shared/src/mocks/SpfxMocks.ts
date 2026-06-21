@@ -7,6 +7,7 @@ export function initializeSpfxMocks(): void {
   const amdModules = window.__amdModules!;
 
   function MockDynamicProperty(this: any, provider: any, callback?: () => void) {
+    this._defaultValue = undefined;
     this._provider = provider;
     this._callback = callback;
     this._hasValue = false;
@@ -81,6 +82,13 @@ export function initializeSpfxMocks(): void {
         };
       }
 
+      if (this._reference === undefined && this._defaultValue !== undefined) {
+        return {
+          __type: (MockDynamicProperty as any)._TYPE_NAME,
+          value: this._defaultValue,
+        };
+      }
+
       return {
         __type: (MockDynamicProperty as any)._TYPE_NAME,
         reference: this._reference,
@@ -97,7 +105,7 @@ export function initializeSpfxMocks(): void {
       }
 
       if (!this._reference) {
-        return undefined;
+        return this._defaultValue;
       }
 
       const value = this._provider?._getData?.(this._reference);

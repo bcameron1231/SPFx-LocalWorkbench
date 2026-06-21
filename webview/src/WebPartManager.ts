@@ -137,6 +137,8 @@ export class WebPartManager {
         }
       }
 
+      this.applyDynamicPropertyDefaults(instance);
+
       // Call onThemeChanged if available
       if (typeof instance.onThemeChanged === 'function') {
         try {
@@ -175,6 +177,53 @@ export class WebPartManager {
       this.log.error('Setup error:', error);
       domElement.innerHTML = `<div class="error-message">Setup error: ${getErrorMessage(error)}</div>`;
       throw error;
+    }
+  }
+
+  private applyDynamicPropertyDefaults(instance: any): void {
+    const propertiesMetadata = instance?.propertiesMetadata as
+      | Record<string, { dynamicPropertyType?: string }>
+      | undefined;
+    const properties = instance?.properties as Record<string, unknown> | undefined;
+
+    if (!propertiesMetadata || !properties) {
+      return;
+    }
+
+    Object.entries(propertiesMetadata).forEach(([propertyKey, metadata]) => {
+      const propertyValue = properties[propertyKey] as
+        | {
+            _defaultValue?: unknown;
+            setReference?: (reference: string) => void;
+            setValue?: (value: unknown) => void;
+          }
+        | undefined;
+
+      if (
+        !propertyValue ||
+        typeof propertyValue !== 'object' ||
+        (typeof propertyValue.setReference !== 'function' &&
+          typeof propertyValue.setValue !== 'function')
+      ) {
+        return;
+      }
+
+      propertyValue._defaultValue = this.getDynamicPropertyDefaultValue(
+        metadata?.dynamicPropertyType,
+      );
+    });
+  }
+
+  private getDynamicPropertyDefaultValue(dynamicPropertyType?: string): unknown {
+    switch (dynamicPropertyType) {
+      case 'number':
+        return 0;
+      case 'object':
+        return {};
+      case 'string':
+        return '';
+      default:
+        return undefined;
     }
   }
 

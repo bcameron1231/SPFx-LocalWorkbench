@@ -173,6 +173,7 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
           currentValue={resolvedValue}
           filters={dynamicField.filters}
           label={dynamicField.label}
+          propertyValueDepth={dynamicField.propertyValueDepth}
           sourceLabel={dynamicField.sourcesLabel}
           sources={getDynamicDataSources(provider)}
           onChange={handleChange}
@@ -192,6 +193,8 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
               filters: createDynamicFieldViewModel(dynamicField, locale).filters,
               key: dynamicField.targetProperty,
               label: createDynamicFieldViewModel(dynamicField, locale).label,
+              propertyValueDepth: createDynamicFieldViewModel(dynamicField, locale)
+                .propertyValueDepth,
               reference: getDynamicPropertyReference(value),
               value: getDynamicPropertyValue(value),
             };
