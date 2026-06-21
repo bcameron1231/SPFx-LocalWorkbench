@@ -28,6 +28,7 @@ export const ComponentPicker: FC<IComponentPickerProps> = (props) => {
   const [filter, setFilter] = useState('');
   const [openUpward, setOpenUpward] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   // Reset filter when picker closes
   useEffect(() => {
@@ -41,6 +42,23 @@ export const ComponentPicker: FC<IComponentPickerProps> = (props) => {
         setOpenUpward(true);
       }
     }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const focusSearchInput = () => {
+      const input = searchContainerRef.current?.querySelector('input');
+      if (input instanceof HTMLInputElement) {
+        input.focus();
+        input.select();
+      }
+    };
+
+    const frameId = window.requestAnimationFrame(focusSearchInput);
+    return () => window.cancelAnimationFrame(frameId);
   }, [isOpen]);
 
   const filteredComponents = components.filter((component) => {
@@ -57,13 +75,14 @@ export const ComponentPicker: FC<IComponentPickerProps> = (props) => {
       className={css(styles.popup, isOpen && styles.open, openUpward && styles.upward)}
     >
       <Stack>
-        <SearchBox
-          placeholder="Search"
-          className={styles.search}
-          value={filter}
-          onChange={(_, newValue) => setFilter(newValue || '')}
-          autoFocus={isOpen}
-        />
+        <div ref={searchContainerRef}>
+          <SearchBox
+            placeholder="Search"
+            className={styles.search}
+            value={filter}
+            onChange={(_, newValue) => setFilter(newValue || '')}
+          />
+        </div>
         <Text variant="medium" className={styles.resultsLabel}>
           {resultsLabel || 'Available components'}
         </Text>
