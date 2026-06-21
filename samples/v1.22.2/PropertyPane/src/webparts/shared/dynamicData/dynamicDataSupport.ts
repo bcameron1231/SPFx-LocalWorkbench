@@ -118,17 +118,27 @@ export function buildDynamicDataConsumerPropertyPaneConfiguration(
         header: {
           description: 'Dynamic data consumer scenarios for standalone fields, field sets, filters, and shared source selection.',
         },
+        displayGroupsAsAccordion: true,
         groups: [
           {
             groupName: 'Standalone Dynamic Fields',
+            isCollapsed: true,
             groupFields: [
-              PropertyPaneDynamicField('dynamicText', {
-                label: 'Dynamic Text',
+              PropertyPaneDynamicField('depthDefault', {
+                label: 'Depth Default',
                 sourcesLabel: 'Connect to a dynamic data source',
+                propertyValueDepth: 2,
+              }),
+              PropertyPaneDynamicField('depthZero', {
+                label: 'Depth Zero',
+                propertyValueDepth: 0,
+              }),
+              PropertyPaneDynamicField('depthOne', {
+                label: 'Depth One',
                 propertyValueDepth: 1,
               }),
-              PropertyPaneDynamicField('dynamicDetails', {
-                label: 'Dynamic Details (Filtered Object)',
+              PropertyPaneDynamicField('filteredToDetails', {
+                label: 'Filtered To Details',
                 filters: {
                   componentId: DYNAMIC_DATA_SOURCE_COMPONENT_ID,
                   propertyId: DYNAMIC_DATA_PROPERTY_IDS.details,
@@ -138,23 +148,121 @@ export function buildDynamicDataConsumerPropertyPaneConfiguration(
             ],
           },
           {
-            groupName: 'Dynamic Field Set',
+            groupName: 'DynamicFieldSet: Default',
+            isCollapsed: true,
             groupFields: [
               PropertyPaneDynamicFieldSet({
-                label: 'Dynamic Field Set',
+                label: '',
                 fields: [
-                  PropertyPaneDynamicField('dynamicCount', {
-                    label: 'Dynamic Count',
-                    filters: { propertyId: DYNAMIC_DATA_PROPERTY_IDS.count },
-                    propertyValueDepth: 0,
+                  PropertyPaneDynamicField('fieldSetDefaultPrimary', {
+                    label: 'Default Primary',
                   }),
-                  PropertyPaneDynamicField('dynamicSummary', {
-                    label: 'Dynamic Summary',
-                    propertyValueDepth: 1,
+                  PropertyPaneDynamicField('fieldSetDefaultSecondary', {
+                    label: 'Default Secondary',
+                  }),
+                ],
+              }),
+            ],
+          },
+          {
+            groupName: 'DynamicFieldSet: Shared Source',
+            isCollapsed: true,
+            groupFields: [
+              PropertyPaneDynamicFieldSet({
+                label: '',
+                fields: [
+                  PropertyPaneDynamicField('fieldSetSharedSourcePrimary', {
+                    label: 'Shared Source Primary',
+                  }),
+                  PropertyPaneDynamicField('fieldSetSharedSourceSecondary', {
+                    label: 'Shared Source Secondary',
                   }),
                 ],
                 sharedConfiguration: {
                   depth: DynamicDataSharedDepth.Source,
+                  source: {
+                    sourcesLabel: 'Source is shared for all the fields',
+                  },
+                },
+              }),
+            ],
+          },
+          {
+            groupName: 'DynamicFieldSet: Shared Source Filtered',
+            isCollapsed: true,
+            groupFields: [
+              PropertyPaneDynamicFieldSet({
+                label: '',
+                fields: [
+                  PropertyPaneDynamicField('fieldSetSharedSourceFilteredPrimary', {
+                    label: 'Shared Source Filtered Primary',
+                  }),
+                  PropertyPaneDynamicField('fieldSetSharedSourceFilteredSecondary', {
+                    label: 'Shared Source Filtered Secondary',
+                  }),
+                ],
+                sharedConfiguration: {
+                  depth: DynamicDataSharedDepth.Source,
+                  source: {
+                    filters: {
+                      componentId: DYNAMIC_DATA_SOURCE_COMPONENT_ID,
+                    },
+                    sourcesLabel: 'Source is shared but must be DDS',
+                  },
+                },
+              }),
+            ],
+          },
+          {
+            groupName: 'DynamicFieldSet: Shared Prop',
+            isCollapsed: true,
+            groupFields: [
+              PropertyPaneDynamicFieldSet({
+                label: '',
+                fields: [
+                  PropertyPaneDynamicField('fieldSetSharedPropertyPrimary', {
+                    label: 'Shared Property Primary',
+                  }),
+                  PropertyPaneDynamicField('fieldSetSharedPropertySecondary', {
+                    label: 'Shared Property Secondary',
+                  }),
+                ],
+                sharedConfiguration: {
+                  depth: DynamicDataSharedDepth.Property,
+                  source: {
+                    sourcesLabel: 'Source & Property is shared for all the fields',
+                  },
+                },
+              }),
+            ],
+          },
+          {
+            groupName: 'DynamicFieldSet: Shared Prop Filtered',
+            isCollapsed: true,
+            groupFields: [
+              PropertyPaneDynamicFieldSet({
+                label: '',
+                fields: [
+                  PropertyPaneDynamicField('fieldSetFilteredPropertyPrimary', {
+                    label: 'Filtered Property Primary',
+                  }),
+                  PropertyPaneDynamicField('fieldSetFilteredPropertySecondary', {
+                    label: 'Filtered Property Secondary',
+                  }),
+                ],
+                sharedConfiguration: {
+                  depth: DynamicDataSharedDepth.Property,
+                  source: {
+                    filters: {
+                      componentId: DYNAMIC_DATA_SOURCE_COMPONENT_ID,
+                    },
+                    sourcesLabel: 'Source & Property is shared but must be DDS.details',
+                  },
+                  property: {
+                    filters: {
+                      propertyId: DYNAMIC_DATA_PROPERTY_IDS.details,
+                    },
+                  },
                 },
               }),
             ],
@@ -165,6 +273,7 @@ export function buildDynamicDataConsumerPropertyPaneConfiguration(
         header: {
           description: 'Conditional groups in SPFx are used for connection-style alternate configuration.',
         },
+        displayGroupsAsAccordion: true,
         groups: [conditionalGroup],
       },
     ],
@@ -210,6 +319,8 @@ export function getDynamicDataPropertyValue(
       return sourceState.sourceCount;
     case DYNAMIC_DATA_PROPERTY_IDS.summary:
       return `${sourceState.sourceText} (${sourceState.sourceCount})`;
+    case DYNAMIC_DATA_PROPERTY_IDS.pvDepth:
+      return 0;
     case DYNAMIC_DATA_PROPERTY_IDS.details:
       return buildDynamicDataDetails(sourceState);
     default:
@@ -220,14 +331,14 @@ export function getDynamicDataPropertyValue(
 /** Applies the consumer-side display-mode choice to the already formatted dynamic values. */
 export function resolveConnectedPreview(
   connectionState: Pick<IDynamicDataConsumerConnectionState, 'connectedDisplayMode'>,
-  dynamicTextValue: string,
+  depthDefaultValue: string,
   dynamicCountValue: string,
   dynamicSummaryValue: string,
   dynamicDetailsValue: string,
 ): string {
   switch (connectionState.connectedDisplayMode) {
     case 'textOnly':
-      return dynamicTextValue;
+      return depthDefaultValue;
     case 'countOnly':
       return dynamicCountValue;
     case 'detailsOnly':

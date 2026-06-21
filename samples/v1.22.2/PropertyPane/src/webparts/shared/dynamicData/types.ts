@@ -5,6 +5,17 @@ export interface IDynamicDataDetails {
   category: string;
   count: number;
   emphasis: string;
+  pvDepth: number;
+  metadata: {
+    categoryLength: number;
+    emphasisUppercase: string;
+    pvDepth: number;
+    metrics: {
+      countSquared: number;
+      textLength: number;
+      pvDepth: number;
+    };
+  };
   summary: string;
 }
 

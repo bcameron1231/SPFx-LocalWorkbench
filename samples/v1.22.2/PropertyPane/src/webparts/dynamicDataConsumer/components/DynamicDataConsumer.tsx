@@ -6,10 +6,20 @@ export interface IDynamicDataConsumerProps {
   connectedDisplayMode: string;
   connectedPreviewValue: string;
   connectedSourceNote: string;
-  dynamicTextValue: string;
-  dynamicCountValue: string;
-  dynamicSummaryValue: string;
-  dynamicDetailsValue: string;
+  depthDefaultValue: string;
+  depthOneValue: string;
+  depthZeroValue: string;
+  fieldSetDefaultPrimaryValue: string;
+  fieldSetDefaultSecondaryValue: string;
+  fieldSetFilteredPropertyPrimaryValue: string;
+  fieldSetFilteredPropertySecondaryValue: string;
+  fieldSetSharedPropertyPrimaryValue: string;
+  fieldSetSharedPropertySecondaryValue: string;
+  fieldSetSharedSourcePrimaryValue: string;
+  fieldSetSharedSourceSecondaryValue: string;
+  fieldSetSharedSourceFilteredPrimaryValue: string;
+  fieldSetSharedSourceFilteredSecondaryValue: string;
+  filteredToDetailsValue: string;
   lastConditionalAction: string;
   manifestInfo: IManifestMetadata;
   manualConnectionLabel: string;
@@ -23,15 +33,69 @@ export default function DynamicDataConsumer(
     {
       title: 'Dynamic Consumers',
       entries: [
-        { label: 'dynamicText', value: props.dynamicTextValue },
-        { label: 'dynamicDetails', value: props.dynamicDetailsValue },
+        { label: 'depthDefault', value: props.depthDefaultValue },
+        { label: 'depthZero', value: props.depthZeroValue },
+        { label: 'depthOne', value: props.depthOneValue },
+        { label: 'filteredToDetails', value: props.filteredToDetailsValue },
       ],
     },
     {
-      title: 'DYNAMIC FIELDSET',
+      title: 'Dynamic Field Set: Default',
       entries: [
-        { label: 'dynamicCount', value: props.dynamicCountValue },
-        { label: 'dynamicSummary', value: props.dynamicSummaryValue },
+        { label: 'fieldSetDefaultPrimary', value: props.fieldSetDefaultPrimaryValue },
+        { label: 'fieldSetDefaultSecondary', value: props.fieldSetDefaultSecondaryValue },
+      ],
+    },
+    {
+      title: 'Dynamic Field Set: Shared Source',
+      entries: [
+        {
+          label: 'fieldSetSharedSourcePrimary',
+          value: props.fieldSetSharedSourcePrimaryValue,
+        },
+        {
+          label: 'fieldSetSharedSourceSecondary',
+          value: props.fieldSetSharedSourceSecondaryValue,
+        },
+      ],
+    },
+    {
+      title: 'Dynamic Field Set: Shared Source Filtered',
+      entries: [
+        {
+          label: 'fieldSetSharedSourceFilteredPrimary',
+          value: props.fieldSetSharedSourceFilteredPrimaryValue,
+        },
+        {
+          label: 'fieldSetSharedSourceFilteredSecondary',
+          value: props.fieldSetSharedSourceFilteredSecondaryValue,
+        },
+      ],
+    },
+    {
+      title: 'Dynamic Field Set: Shared Property',
+      entries: [
+        {
+          label: 'fieldSetSharedPropertyPrimary',
+          value: props.fieldSetSharedPropertyPrimaryValue,
+        },
+        {
+          label: 'fieldSetSharedPropertySecondary',
+          value: props.fieldSetSharedPropertySecondaryValue,
+        },
+      ],
+    },
+    {
+      title: 'Dynamic Field Set: Shared Property Filtered',
+      entries: [
+        {
+          label: 'fieldSetFilteredPropertyPrimary',
+          value: props.fieldSetFilteredPropertyPrimaryValue,
+        },
+        {
+          label: 'fieldSetFilteredPropertySecondary',
+          value: props.fieldSetFilteredPropertySecondaryValue,
+        },
       ],
     },
     {

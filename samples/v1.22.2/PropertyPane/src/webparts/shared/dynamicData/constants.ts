@@ -6,6 +6,7 @@ export const DYNAMIC_DATA_PROPERTY_IDS = {
   text: 'text',
   count: 'count',
   summary: 'summary',
+  pvDepth: 'pvDepth',
   details: 'details',
 } as const;
 
@@ -34,6 +35,10 @@ export const DYNAMIC_DATA_PROPERTY_DEFINITIONS: ReadonlyArray<IDynamicDataProper
     title: 'Source Summary',
   },
   {
+    id: DYNAMIC_DATA_PROPERTY_IDS.pvDepth,
+    title: 'Property Value Depth',
+  },
+  {
     id: DYNAMIC_DATA_PROPERTY_IDS.details,
     title: 'Source Details (Object)',
   },
@@ -45,6 +50,17 @@ export function buildDynamicDataDetails(sourceState: IDynamicDataSourceState): I
     category: sourceState.sourceCategory,
     count: sourceState.sourceCount,
     emphasis: sourceState.sourceEmphasis,
+    pvDepth: 1,
+    metadata: {
+      categoryLength: sourceState.sourceCategory.length,
+      emphasisUppercase: sourceState.sourceEmphasis.toUpperCase(),
+      pvDepth: 2,
+      metrics: {
+        countSquared: sourceState.sourceCount * sourceState.sourceCount,
+        textLength: sourceState.sourceText.length,
+        pvDepth: 3,
+      },
+    },
     summary: `${sourceState.sourceText} (${sourceState.sourceCount})`,
   };
 }
