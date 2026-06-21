@@ -14,7 +14,6 @@ export default class EmptyPaneWebPart extends BaseClientSideWebPart<IEmptyPaneWe
     const element: React.ReactElement<IEmptyPaneProps> = React.createElement(EmptyPane, {
       manifestInfo: getManifestMetadata(this.context.manifest),
     });
-    console.log('this.context', this.context);
 
     ReactDom.render(element, this.domElement);
   }

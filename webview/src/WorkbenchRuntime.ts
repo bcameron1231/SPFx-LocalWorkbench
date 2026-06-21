@@ -474,25 +474,6 @@ export class WorkbenchRuntime {
       }
     ).__amdModules?.['@microsoft/sp-component-base']?.DynamicProperty;
 
-    console.debug('[DynamicDataTrace] WorkbenchRuntime.updateWebPartProperty start', {
-      instanceId,
-      targetProperty,
-      newValue,
-      oldValue,
-      oldReference:
-        oldValue &&
-        typeof oldValue === 'object' &&
-        typeof (oldValue as { reference?: unknown }).reference === 'string'
-          ? (oldValue as { reference: string }).reference
-          : undefined,
-      oldResolvedValue:
-        oldValue &&
-        typeof oldValue === 'object' &&
-        typeof (oldValue as { tryGetValue?: () => unknown }).tryGetValue === 'function'
-          ? (oldValue as { tryGetValue: () => unknown }).tryGetValue()
-          : oldValue,
-    });
-
     const isDynamicPropertyLike =
       dynamicProperty &&
       typeof dynamicProperty === 'object' &&
@@ -500,12 +481,6 @@ export class WorkbenchRuntime {
         typeof dynamicProperty.setValue === 'function');
 
     if (typeof newValue === 'string' && newValue.includes(':')) {
-      console.debug('[DynamicDataDebug] updateWebPartProperty received reference', {
-        instanceId,
-        targetProperty,
-        newValue,
-      });
-
       if (
         typeof internalPropertyPaneChanged !== 'function' &&
         isDynamicPropertyLike &&
@@ -566,47 +541,11 @@ export class WorkbenchRuntime {
       }
     }
 
-    console.debug('[DynamicDataTrace] WorkbenchRuntime.updateWebPartProperty committed', {
-      committedReference:
-        webPart.properties[targetProperty] &&
-        typeof webPart.properties[targetProperty] === 'object' &&
-        typeof (webPart.properties[targetProperty] as { reference?: unknown }).reference === 'string'
-          ? (webPart.properties[targetProperty] as { reference: string }).reference
-          : undefined,
-      committedValue:
-        webPart.properties[targetProperty] &&
-        typeof webPart.properties[targetProperty] === 'object' &&
-        typeof (webPart.properties[targetProperty] as { tryGetValue?: () => unknown }).tryGetValue === 'function'
-          ? (webPart.properties[targetProperty] as { tryGetValue: () => unknown }).tryGetValue()
-          : webPart.properties[targetProperty],
-      targetProperty,
-    });
-
     // Call lifecycle methods and re-render if instantiated
     if (isActiveWebPart(webPart)) {
       if (typeof internalPropertyPaneChanged === 'function') {
         try {
           internalPropertyPaneChanged.call(webPart.instance, targetProperty, nextValue);
-          const updatedValue = (
-            webPart.instance as { properties?: Record<string, unknown> }
-          ).properties?.[targetProperty] as
-            | {
-                reference?: string;
-                tryGetValue?: () => unknown;
-              }
-            | undefined;
-
-          console.debug('[DynamicDataDebug] post _onPropertyPaneFieldChanged', {
-            targetProperty,
-            reference:
-              updatedValue && typeof updatedValue.reference === 'string'
-                ? updatedValue.reference
-                : undefined,
-            resolvedValue:
-              updatedValue && typeof updatedValue.tryGetValue === 'function'
-                ? updatedValue.tryGetValue()
-                : updatedValue,
-          });
         } catch (error: unknown) {
           this.log.warn('Error calling _onPropertyPaneFieldChanged:', error);
         }

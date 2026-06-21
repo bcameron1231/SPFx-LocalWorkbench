@@ -256,7 +256,6 @@ export default class DynamicDataConsumerWebPart extends BaseClientSideWebPart<ID
   private _handleShowPrimaryGroup = (): void => {
     this.properties.showConnectedConfiguration = false;
     this.properties.lastConditionalAction = DYNAMIC_DATA_CONDITIONAL_ACTIONS.primary;
-    console.log('[DynamicDataConsumer] onShowPrimaryGroup invoked.');
     this.render();
     this.context.propertyPane.refresh();
   };
@@ -264,7 +263,6 @@ export default class DynamicDataConsumerWebPart extends BaseClientSideWebPart<ID
   private _handleShowSecondaryGroup = (): void => {
     this.properties.showConnectedConfiguration = true;
     this.properties.lastConditionalAction = DYNAMIC_DATA_CONDITIONAL_ACTIONS.secondary;
-    console.log('[DynamicDataConsumer] onShowSecondaryGroup invoked.');
     this.render();
     this.context.propertyPane.refresh();
   };

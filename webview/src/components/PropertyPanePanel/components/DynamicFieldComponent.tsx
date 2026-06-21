@@ -174,17 +174,6 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
   );
 
   useEffect(() => {
-    console.debug('[DynamicDataTrace] DynamicFieldComponent prop sync', {
-      currentReference,
-      currentValue,
-      effectiveReference,
-      optimisticReference,
-      parsedReference,
-      pendingSourceId,
-      pendingPropertyId,
-      pendingPathSegments,
-    });
-
     if (optimisticReference !== undefined) {
       if (currentReference === optimisticReference) {
         setOptimisticReference(undefined);
@@ -232,14 +221,6 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
   ]);
 
   const emitReferenceChange = (reference: string | undefined) => {
-    console.debug('[DynamicDataTrace] DynamicFieldComponent emitReferenceChange', {
-      currentReference,
-      nextReference: reference,
-      optimisticReference,
-      pendingSourceId,
-      pendingPropertyId,
-      pendingPathSegments,
-    });
     setOptimisticReference(reference);
     onChange(reference);
   };
@@ -400,20 +381,15 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
             const nextSourceId = typeof value === 'string' ? value : undefined;
             const nextSelectedSource = sourceOptionsBase.find((source) => source.id === nextSourceId);
             const nextForcedPropertyId = getForcedPropertyId(nextSelectedSource, filters);
-          console.debug('[DynamicDataTrace] DynamicFieldComponent source change', {
-            nextForcedPropertyId,
-            nextSourceId,
-            previousSourceId: effectiveSourceId,
-          });
-          setPendingSourceId(nextSourceId);
-          setPendingPropertyId(nextForcedPropertyId);
-          setPendingPathSegments([]);
+            setPendingSourceId(nextSourceId);
+            setPendingPropertyId(nextForcedPropertyId);
+            setPendingPathSegments([]);
 
-          if (nextSourceId && nextForcedPropertyId) {
-            emitReferenceChange(`${nextSourceId}:${nextForcedPropertyId}`);
-          }
-        }}
-      />
+            if (nextSourceId && nextForcedPropertyId) {
+              emitReferenceChange(`${nextSourceId}:${nextForcedPropertyId}`);
+            }
+          }}
+        />
       )}
       {selectedSource && !forcedProperty && (
         <DropdownComponent
@@ -422,11 +398,6 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
           options={propertyOptions}
           onChange={(value) => {
             const nextPropertyId = typeof value === 'string' ? value : undefined;
-            console.debug('[DynamicDataTrace] DynamicFieldComponent property change', {
-              sourceId: effectiveSourceId,
-              nextPropertyId,
-              previousPropertyId: effectivePropertyId,
-            });
             setPendingPropertyId(nextPropertyId);
             setPendingPathSegments([]);
             emitReferenceChange(
@@ -449,14 +420,6 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
             const resolvedPathSegments = nextSegment
               ? [...dropdown.basePath, nextSegment]
               : dropdown.basePath;
-            console.debug('[DynamicDataTrace] DynamicFieldComponent nested change', {
-              sourceId: effectiveSourceId,
-              propertyId: effectivePropertyId,
-              basePath: dropdown.basePath,
-              optionValue: value,
-              nextSegment,
-              resolvedPathSegments,
-            });
             setPendingPathSegments(resolvedPathSegments);
             dropdown.onChange(
               value === WHOLE_OBJECT_OPTION_KEY ? undefined : value,
