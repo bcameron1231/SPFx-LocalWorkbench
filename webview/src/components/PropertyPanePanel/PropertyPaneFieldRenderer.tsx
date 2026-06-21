@@ -58,6 +58,11 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
   onPropertyChange,
   provider,
 }) => {
+  const propertyPaneStrings =
+    window.__workbenchConfig?.propertyPaneStrings ?? {
+      connectToSourceText: 'Connect to source',
+      unsupportedFieldTypeText: 'Unsupported field type: {0}',
+    };
   const handleChange = (newValue: unknown) => {
     if (field.targetProperty) {
       onPropertyChange(field.targetProperty, newValue);
@@ -174,7 +179,7 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
           filters={dynamicField.filters}
           label={dynamicField.label}
           propertyValueDepth={dynamicField.propertyValueDepth}
-          sourceLabel={dynamicField.sourcesLabel}
+          sourceLabel={dynamicField.sourcesLabel || propertyPaneStrings.connectToSourceText}
           sources={getDynamicDataSources(provider)}
           onChange={handleChange}
         />
@@ -205,7 +210,9 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
     }
     default:
       return wrapField(
-        <Text className={styles.required}>Unsupported field type: {field.type}</Text>
+        <Text className={styles.required}>
+          {propertyPaneStrings.unsupportedFieldTypeText.replace('{0}', String(field.type))}
+        </Text>
       );
   }
 };

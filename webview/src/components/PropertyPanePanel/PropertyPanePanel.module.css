@@ -49,6 +49,12 @@
   font-size: 14px;
   gap: 4px;
   padding: 0;
+  height: 32px;
+
+  &:hover:not(:disabled) {
+    background-color: var(--themeLight);
+    color: var(--themePrimary);
+  }
 }
 
 .pageNavigationButton:disabled {
@@ -88,8 +94,31 @@
   padding-left: 20px;
 }
 
+.groupContainer {
+  display: flex;
+  flex-direction: column;
+}
+
 .group {
   padding-bottom: 24px;
+}
+
+.conditionalGroupActions {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 20px;
+}
+
+.conditionalGroupMenuButton {
+  color: var(--neutralPrimary, #323130);
+  height: 32px;
+  width: 32px;
+}
+
+.conditionalGroupFooter {
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 4px;
 }
 
 .accordionGroup {

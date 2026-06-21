@@ -29,7 +29,6 @@ export interface IDynamicDataSourceState {
 
 /** Persisted state that drives the consumer-side connection-oriented conditional group. */
 export interface IDynamicDataConsumerConnectionState {
-  connectedDisplayMode: string;
   connectedSourceNote: string;
   lastConditionalAction?: string;
   manualConnectionLabel: string;

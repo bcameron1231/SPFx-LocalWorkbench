@@ -59,7 +59,10 @@ export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
   const sharedPropertyEnabled = sharedDepth >= 2;
   const sharedSourceFilters = sharedConfiguration?.source?.filters;
   const sharedPropertyFilters = sharedConfiguration?.property?.filters;
-  const sharedSourceLabel = sharedConfiguration?.source?.sourcesLabel || 'Connect to source';
+  const sharedSourceLabel =
+    sharedConfiguration?.source?.sourcesLabel ||
+    window.__workbenchConfig?.propertyPaneStrings?.connectToSourceText ||
+    'Connect to source';
 
   const availableSources = useMemo(
     () =>
@@ -206,7 +209,7 @@ export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
             hideSourceDropdown={sharedSourceEnabled}
             label={entry.label}
             propertyValueDepth={entry.propertyValueDepth}
-            sourceLabel="Connect to source"
+            sourceLabel={window.__workbenchConfig?.propertyPaneStrings?.connectToSourceText}
             sources={sources}
             onChange={(reference) => onChange(entry.key, reference)}
           />

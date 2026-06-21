@@ -11,13 +11,11 @@ import {
   buildDynamicDataConsumerPropertyPaneConfiguration,
   DYNAMIC_DATA_CONDITIONAL_ACTIONS,
   ensureDynamicProperty,
-  resolveConnectedPreview,
   resolveDynamicDisplayValue,
 } from '../shared/dynamicData';
 import type { IDynamicDataDetails } from '../shared/dynamicData';
 
 export interface IDynamicDataConsumerWebPartProps {
-  connectedDisplayMode: string;
   connectedSourceNote: string;
   depthDefault?: DynamicProperty<unknown>;
   depthOne?: DynamicProperty<unknown>;
@@ -153,14 +151,6 @@ export default class DynamicDataConsumerWebPart extends BaseClientSideWebPart<ID
     );
 
     const element: React.ReactElement<IDynamicDataConsumerProps> = React.createElement(DynamicDataConsumer, {
-      connectedDisplayMode: this.properties.connectedDisplayMode,
-      connectedPreviewValue: resolveConnectedPreview(
-        { connectedDisplayMode: this.properties.connectedDisplayMode },
-        depthDefaultValue,
-        fieldSetSharedSourcePrimaryValue,
-        fieldSetSharedSourceSecondaryValue,
-        filteredToDetailsValue,
-      ),
       connectedSourceNote: this.properties.connectedSourceNote,
       depthDefaultValue,
       depthOneValue,
@@ -176,6 +166,7 @@ export default class DynamicDataConsumerWebPart extends BaseClientSideWebPart<ID
       fieldSetSharedSourceFilteredPrimaryValue,
       fieldSetSharedSourceFilteredSecondaryValue,
       filteredToDetailsValue,
+      isConnectedConfigurationActive: this.properties.showConnectedConfiguration,
       lastConditionalAction: this.properties.lastConditionalAction ?? DYNAMIC_DATA_CONDITIONAL_ACTIONS.none,
       manifestInfo: getManifestMetadata(this.context.manifest),
       manualConnectionLabel: this.properties.manualConnectionLabel,

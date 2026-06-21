@@ -16,7 +16,6 @@
       "description": { "default": "Exercises PropertyPaneDynamicField, PropertyPaneDynamicFieldSet, filters, and connection-oriented conditional groups." },
       "officeFabricIconFontName": "PlugConnected",
       "properties": {
-        "connectedDisplayMode": "summary",
         "connectedSourceNote": "Connected configuration note",
         "lastConditionalAction": "none yet",
         "manualConnectionLabel": "Manual configuration",

@@ -94,7 +94,11 @@ export function resolvePropertyPaneLocale(webPart?: IActiveWebPart): string {
   return webPart?.context?.pageContext?.cultureInfo?.currentUICultureName || navigator.language;
 }
 
-export function resolvePropertyPaneTitle(webPart?: IActiveWebPart, locale?: string): string {
+export function resolvePropertyPaneTitle(
+  webPart?: IActiveWebPart,
+  locale?: string,
+  defaultTitle = 'Properties',
+): string {
   const effectiveLocale = locale || resolvePropertyPaneLocale(webPart);
   const preconfiguredEntry =
     webPart?.manifest.preconfiguredEntries?.[webPart.preconfiguredEntryIndex ?? 0] ??
@@ -103,7 +107,7 @@ export function resolvePropertyPaneTitle(webPart?: IActiveWebPart, locale?: stri
   return (
     getLocalizedString(preconfiguredEntry?.title, effectiveLocale) ||
     webPart?.manifest.alias ||
-    'Properties'
+    defaultTitle
   );
 }
 

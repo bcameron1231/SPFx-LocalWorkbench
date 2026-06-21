@@ -43,9 +43,15 @@ export interface IHtmlGeneratorConfig {
     applyButtonText: string;
     backButtonText: string;
     collapseGroupAriaLabel: string;
+    connectToSourceText: string;
+    conditionalConnectToSourceText: string;
+    conditionalMenuAriaLabel: string;
+    conditionalRemoveConnectionText: string;
+    defaultHeaderText: string;
     expandGroupAriaLabel: string;
     nextButtonText: string;
     pageCountText: string;
+    unsupportedFieldTypeText: string;
     visibilityGroupName: string;
     visibilityToggleLabel: string;
     visibilityToggleOnText: string;

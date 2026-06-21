@@ -450,9 +450,30 @@ export class WorkbenchPanel {
         applyButtonText: localize('propertyPane.applyButtonText', 'Apply'),
         backButtonText: localize('propertyPane.backButtonText', 'Back'),
         collapseGroupAriaLabel: localize('propertyPane.collapseGroupAriaLabel', 'Collapse group'),
+        connectToSourceText: localize(
+          'propertyPane.connectToSourceText',
+          'Connect to source',
+        ),
+        conditionalConnectToSourceText: localize(
+          'propertyPane.conditional.connectToSourceText',
+          'Connect to source',
+        ),
+        conditionalMenuAriaLabel: localize(
+          'propertyPane.conditional.menuAriaLabel',
+          'Conditional group actions',
+        ),
+        conditionalRemoveConnectionText: localize(
+          'propertyPane.conditional.removeConnectionText',
+          'Remove connection',
+        ),
+        defaultHeaderText: localize('propertyPane.defaultHeaderText', 'Properties'),
         expandGroupAriaLabel: localize('propertyPane.expandGroupAriaLabel', 'Expand group'),
         nextButtonText: localize('propertyPane.nextButtonText', 'Next'),
         pageCountText: localize('propertyPane.pageCountText', '{0} of {1}'),
+        unsupportedFieldTypeText: localize(
+          'propertyPane.unsupportedFieldTypeText',
+          'Unsupported field type: {0}',
+        ),
         visibilityGroupName: localize('propertyPane.visibility.groupName', 'Visibility'),
         visibilityToggleLabel: localize(
           'propertyPane.visibility.toggleLabel',

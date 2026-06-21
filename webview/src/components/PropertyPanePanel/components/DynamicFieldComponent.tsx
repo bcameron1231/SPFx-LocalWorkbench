@@ -146,9 +146,13 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
   label,
   onChange,
   propertyValueDepth,
-  sourceLabel = 'Connect to source',
+  sourceLabel,
   sources,
 }) => {
+  const resolvedSourceLabel =
+    sourceLabel ||
+    window.__workbenchConfig?.propertyPaneStrings?.connectToSourceText ||
+    'Connect to source';
   const maxPropertyValueDepth = propertyValueDepth ?? 2;
   const [optimisticReference, setOptimisticReference] = useState<string | undefined>();
   const effectiveReference = optimisticReference ?? currentReference;
@@ -388,7 +392,7 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
       )}
       {!hideSourceDropdown && (
         <DropdownComponent
-          label={sourceLabel}
+          label={resolvedSourceLabel}
           disabled={!!forcedSource}
           selectedKey={effectiveSourceId}
           options={sourceOptions}

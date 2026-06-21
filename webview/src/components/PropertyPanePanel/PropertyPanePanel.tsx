@@ -1,4 +1,15 @@
-import { Icon, Panel, PanelType, PrimaryButton, Stack, css } from '@fluentui/react';
+import {
+  ContextualMenu,
+  DirectionalHint,
+  Icon,
+  IconButton,
+  Link,
+  Panel,
+  PanelType,
+  PrimaryButton,
+  Stack,
+  css,
+} from '@fluentui/react';
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { PropertyPaneFieldType, logger } from '@spfx-local-workbench/shared';
@@ -7,6 +18,7 @@ import type { IActiveWebPart } from '@spfx-local-workbench/shared';
 import { PropertyPaneFieldRenderer } from './PropertyPaneFieldRenderer';
 import styles from './PropertyPanePanel.module.css';
 import {
+  isConditionalGroup,
   resolveFieldValue,
   resolveGroup,
   resolvePropertyPaneLocale,
@@ -23,9 +35,15 @@ const DEFAULT_PROPERTY_PANE_STRINGS = {
   applyButtonText: 'Apply',
   backButtonText: 'Back',
   collapseGroupAriaLabel: 'Collapse group',
+  connectToSourceText: 'Connect to source',
+  conditionalConnectToSourceText: 'Connect to source',
+  conditionalMenuAriaLabel: 'Conditional group actions',
+  conditionalRemoveConnectionText: 'Remove connection',
+  defaultHeaderText: 'Properties',
   expandGroupAriaLabel: 'Expand group',
   nextButtonText: 'Next',
   pageCountText: '{0} of {1}',
+  unsupportedFieldTypeText: 'Unsupported field type: {0}',
   visibilityGroupName: 'Visibility',
   visibilityToggleLabel: 'Show in mobile and email view',
   visibilityToggleOnText: 'On',
@@ -48,14 +66,19 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
   const [invalidProperties, setInvalidProperties] = useState<Record<string, boolean>>({});
   const [pendingChanges, setPendingChanges] = useState<Record<string, unknown>>({});
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  const [openConditionalMenuGroupKey, setOpenConditionalMenuGroupKey] = useState<string>();
   const [focusFieldKey, setFocusFieldKey] = useState<string>();
   const [showInMobileAndEmailView, setShowInMobileAndEmailView] = useState(true);
   const previousInstanceIdRef = useRef<string | undefined>();
 
   const locale = resolvePropertyPaneLocale(webPart);
-  const headerText = resolvePropertyPaneTitle(webPart, locale);
   const propertyPaneStrings =
     window.__workbenchConfig?.propertyPaneStrings ?? DEFAULT_PROPERTY_PANE_STRINGS;
+  const headerText = resolvePropertyPaneTitle(
+    webPart,
+    locale,
+    propertyPaneStrings.defaultHeaderText,
+  );
 
   const isNonReactive =
     webPart?.instance &&
@@ -63,45 +86,64 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
     (webPart.instance as { disableReactivePropertyChanges?: boolean })
       .disableReactivePropertyChanges === true;
 
-  useEffect(() => {
-    const previousInstanceId = previousInstanceIdRef.current;
-    const currentInstanceId = webPart?.instanceId;
-    const isSameWebPart = !!currentInstanceId && currentInstanceId === previousInstanceId;
+  const refreshPropertyPaneConfiguration = useCallback(
+    (options?: { preserveCurrentPage?: boolean; preserveGroupState?: boolean }) => {
+      if (
+        !webPart?.instance ||
+        typeof webPart.instance.getPropertyPaneConfiguration !== 'function'
+      ) {
+        setConfig(null);
+        return;
+      }
 
-    if (webPart?.instance && typeof webPart.instance.getPropertyPaneConfiguration === 'function') {
       try {
         const paneConfig =
           webPart.instance.getPropertyPaneConfiguration() as IPropertyPaneConfigurationModel;
         setConfig(paneConfig);
 
-        if (isSameWebPart) {
+        if (options?.preserveCurrentPage) {
           setCurrentPageIndex((prev) =>
             Math.max(0, Math.min(prev, Math.max(0, paneConfig.pages.length - 1))),
           );
-          setCollapsedGroups((prev) => mergeCollapsedGroupState(prev, paneConfig));
         } else {
           setCurrentPageIndex(
             Math.max(0, Math.min(paneConfig.currentPage ?? 0, paneConfig.pages.length - 1)),
           );
+        }
+
+        if (options?.preserveGroupState) {
+          setCollapsedGroups((prev) => mergeCollapsedGroupState(prev, paneConfig));
+        } else {
           setCollapsedGroups(buildCollapsedGroupState(paneConfig));
         }
       } catch (error: unknown) {
         logger.warn('Error getting property pane configuration:', error);
         setConfig(null);
       }
-    } else {
-      setConfig(null);
-    }
+    },
+    [webPart],
+  );
+
+  useEffect(() => {
+    const previousInstanceId = previousInstanceIdRef.current;
+    const currentInstanceId = webPart?.instanceId;
+    const isSameWebPart = !!currentInstanceId && currentInstanceId === previousInstanceId;
+
+    refreshPropertyPaneConfiguration({
+      preserveCurrentPage: isSameWebPart,
+      preserveGroupState: isSameWebPart,
+    });
 
     if (!isSameWebPart) {
       setInvalidProperties({});
       setPendingChanges({});
       setFocusFieldKey(undefined);
+      setOpenConditionalMenuGroupKey(undefined);
       setShowInMobileAndEmailView(true);
     }
 
     previousInstanceIdRef.current = currentInstanceId;
-  }, [webPart]);
+  }, [refreshPropertyPaneConfiguration, webPart]);
 
   const handlePropertyChange = useCallback(
     (targetProperty: string, newValue: unknown) => {
@@ -322,72 +364,182 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
                 <div className={styles.pageHeader}>{page.header.description}</div>
               )}
               {pageGroups.map((groupOrConditionalGroup, groupIndex: number) => {
+                const conditionalGroup = isConditionalGroup(groupOrConditionalGroup)
+                  ? groupOrConditionalGroup
+                  : undefined;
                 const group = resolveGroup(groupOrConditionalGroup);
                 const groupKey = getGroupKey(currentPageIndex, groupIndex);
                 const isCollapsed = collapsedGroups[groupKey] ?? !!group.isCollapsed;
                 const isAccordion = !!page.displayGroupsAsAccordion;
+                const conditionalMenuTargetId = `conditional-group-menu-${groupKey}`;
+                const isConditionalMenuOpen = openConditionalMenuGroupKey === groupKey;
+                const showConditionalMenu =
+                  !!conditionalGroup && !conditionalGroup.showSecondaryGroup;
 
                 return (
-                  <Stack
-                    key={groupKey}
-                    className={css(
-                      styles.group,
-                      isAccordion && styles.accordionGroup,
-                      isCollapsed && styles.collapsed,
-                    )}
-                  >
-                    {!group.isGroupNameHidden &&
-                      group.groupName &&
-                      (isAccordion ? (
-                        <button
-                          type="button"
-                          className={css(styles.accordionHeader, styles.groupHeader)}
+                  <div key={groupKey} className={styles.groupContainer}>
+                    {showConditionalMenu && (
+                      <div className={styles.conditionalGroupActions}>
+                        <IconButton
+                          id={conditionalMenuTargetId}
+                          ariaLabel={propertyPaneStrings.conditionalMenuAriaLabel}
+                          className={styles.conditionalGroupMenuButton}
+                          iconProps={{ iconName: 'More' }}
                           onClick={() =>
-                            setCollapsedGroups((prev) => ({
-                              ...prev,
-                              [groupKey]: !isCollapsed,
-                            }))
+                            setOpenConditionalMenuGroupKey((prev) =>
+                              prev === groupKey ? undefined : groupKey,
+                            )
                           }
-                        >
-                          <span className={css(styles.groupHeaderText, styles.accordionHeaderText)}>
-                            {group.groupName}
-                          </span>
-                          <Icon
-                            className={styles.accordionToggle}
-                            ariaLabel={
-                              isCollapsed
-                                ? propertyPaneStrings.expandGroupAriaLabel
-                                : propertyPaneStrings.collapseGroupAriaLabel
-                            }
-                            iconName={isCollapsed ? 'ChevronDown' : 'ChevronUp'}
+                          styles={{
+                            root: {
+                              borderRadius: 4,
+                            },
+                          }}
+                        />
+                        {isConditionalMenuOpen && (
+                          <ContextualMenu
+                            items={[
+                              {
+                                key: 'toggle-conditional-group',
+                                text: propertyPaneStrings.conditionalConnectToSourceText,
+                                iconProps: { iconName: 'Plug' },
+                                onClick: () => {
+                                  conditionalGroup?.onShowSecondaryGroup?.();
+                                  refreshPropertyPaneConfiguration({
+                                    preserveCurrentPage: true,
+                                    preserveGroupState: true,
+                                  });
+                                  setOpenConditionalMenuGroupKey(undefined);
+                                },
+                              },
+                            ]}
+                            isBeakVisible={false}
+                            target={`#${conditionalMenuTargetId}`}
+                            onDismiss={() => setOpenConditionalMenuGroupKey(undefined)}
+                            styles={{
+                              root: {
+                                borderRadius: 4,
+                                paddingRight: 1,
+                              },
+                              subComponentStyles: {
+                                callout: {
+                                  root: {
+                                    borderRadius: 4,
+                                    paddingRight: 1,
+                                  },
+                                  calloutMain: {
+                                    borderRadius: 4,
+                                    overflow: 'hidden',
+                                  },
+                                },
+                                menuItem: {
+                                  root: {
+                                    fontWeight: 600,
+                                    border: '1px solid var(--neutralSecondary)',
+                                    borderRadius: 4,
+                                    margin: 1,
+                                    height: 30,
+                                    lineHeight: 30,
+                                    padding: '0 12px',
+                                    selectors: {
+                                      ':hover': {
+                                        borderColor: 'var(--neutralTertiary)',
+                                        backgroundColor: 'var(--neutralLighter)',
+                                      },
+                                    },
+                                  },
+                                  icon: {
+                                    color: 'var(--neutralPrimary) !important',
+                                    fontSize: '16px !important',
+                                    width: 16,
+                                  },
+                                  label: {
+                                    marginBottom: 2,
+                                  },
+                                },
+                              },
+                            }}
                           />
-                        </button>
-                      ) : (
-                        <div className={styles.groupHeader}>
-                          <span className={styles.groupHeaderText}>{group.groupName}</span>
-                        </div>
-                      ))}
-                    {!isCollapsed && (
-                      <Stack className={styles.groupFields}>
-                        {group.groupFields.map((field, fieldIndex: number) => {
-                          const fieldKey = `${groupKey}-${fieldIndex}-${field.targetProperty}`;
-                          return (
-                            <PropertyPaneFieldRenderer
-                              key={fieldKey}
-                              autoFocus={focusFieldKey === fieldKey}
-                              currentValue={getCurrentValue(field.targetProperty)}
-                              field={field}
-                              getCurrentValue={getCurrentValue}
-                              locale={locale}
-                              onFieldValidityChange={handleFieldValidityChange}
-                              onPropertyChange={handlePropertyChange}
-                              provider={webPart.context.dynamicDataProvider}
-                            />
-                          );
-                        })}
-                      </Stack>
+                        )}
+                      </div>
                     )}
-                  </Stack>
+                    <Stack
+                      className={css(
+                        styles.group,
+                        isAccordion && styles.accordionGroup,
+                        isCollapsed && styles.collapsed,
+                      )}
+                    >
+                      {!group.isGroupNameHidden &&
+                        group.groupName &&
+                        (isAccordion ? (
+                          <button
+                            type="button"
+                            className={css(styles.accordionHeader, styles.groupHeader)}
+                            onClick={() =>
+                              setCollapsedGroups((prev) => ({
+                                ...prev,
+                                [groupKey]: !isCollapsed,
+                              }))
+                            }
+                          >
+                            <span
+                              className={css(styles.groupHeaderText, styles.accordionHeaderText)}
+                            >
+                              {group.groupName}
+                            </span>
+                            <Icon
+                              className={styles.accordionToggle}
+                              ariaLabel={
+                                isCollapsed
+                                  ? propertyPaneStrings.expandGroupAriaLabel
+                                  : propertyPaneStrings.collapseGroupAriaLabel
+                              }
+                              iconName={isCollapsed ? 'ChevronDown' : 'ChevronUp'}
+                            />
+                          </button>
+                        ) : (
+                          <div className={styles.groupHeader}>
+                            <span className={styles.groupHeaderText}>{group.groupName}</span>
+                          </div>
+                        ))}
+                      {!isCollapsed && (
+                        <Stack className={styles.groupFields}>
+                          {group.groupFields.map((field, fieldIndex: number) => {
+                            const fieldKey = `${groupKey}-${fieldIndex}-${field.targetProperty}`;
+                            return (
+                              <PropertyPaneFieldRenderer
+                                key={fieldKey}
+                                autoFocus={focusFieldKey === fieldKey}
+                                currentValue={getCurrentValue(field.targetProperty)}
+                                field={field}
+                                getCurrentValue={getCurrentValue}
+                                locale={locale}
+                                onFieldValidityChange={handleFieldValidityChange}
+                                onPropertyChange={handlePropertyChange}
+                                provider={webPart.context.dynamicDataProvider}
+                              />
+                            );
+                          })}
+                        </Stack>
+                      )}
+                    </Stack>
+                    {conditionalGroup?.showSecondaryGroup && (
+                      <div className={styles.conditionalGroupFooter}>
+                        <Link
+                          onClick={() => {
+                            conditionalGroup.onShowPrimaryGroup?.();
+                            refreshPropertyPaneConfiguration({
+                              preserveCurrentPage: true,
+                              preserveGroupState: true,
+                            });
+                          }}
+                        >
+                          {propertyPaneStrings.conditionalRemoveConnectionText}
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>

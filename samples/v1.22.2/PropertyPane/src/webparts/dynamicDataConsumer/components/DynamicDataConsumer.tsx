@@ -3,8 +3,6 @@ import type { IManifestMetadata } from '../../shared/components/ManifestMetadata
 import ScenarioDetails, { type IScenarioDetailSection } from '../../shared/components/ScenarioDetails';
 
 export interface IDynamicDataConsumerProps {
-  connectedDisplayMode: string;
-  connectedPreviewValue: string;
   connectedSourceNote: string;
   depthDefaultValue: string;
   depthOneValue: string;
@@ -20,6 +18,7 @@ export interface IDynamicDataConsumerProps {
   fieldSetSharedSourceFilteredPrimaryValue: string;
   fieldSetSharedSourceFilteredSecondaryValue: string;
   filteredToDetailsValue: string;
+  isConnectedConfigurationActive: boolean;
   lastConditionalAction: string;
   manifestInfo: IManifestMetadata;
   manualConnectionLabel: string;
@@ -101,11 +100,13 @@ export default function DynamicDataConsumer(
     {
       title: 'Conditional Connection',
       entries: [
+        {
+          label: 'activeConfiguration',
+          value: props.isConnectedConfigurationActive ? 'connected' : 'manual',
+        },
         { label: 'showConnectedConfiguration', value: String(props.showConnectedConfiguration) },
         { label: 'manualConnectionLabel', value: props.manualConnectionLabel },
         { label: 'connectedSourceNote', value: props.connectedSourceNote },
-        { label: 'connectedDisplayMode', value: props.connectedDisplayMode },
-        { label: 'connectedPreviewValue', value: props.connectedPreviewValue },
         { label: 'lastConditionalAction', value: props.lastConditionalAction },
       ],
     },

@@ -1,6 +1,5 @@
 import {
   DynamicDataSharedDepth,
-  PropertyPaneDropdown,
   PropertyPaneDynamicField,
   PropertyPaneDynamicFieldSet,
   type IPropertyPaneConditionalGroup,
@@ -95,15 +94,6 @@ export function buildDynamicDataConsumerPropertyPaneConfiguration(
         PropertyPaneTextField('connectedSourceNote', {
           label: 'Connected Source Note',
           description: 'A persisted note for the connected configuration path.',
-        }),
-        PropertyPaneDropdown('connectedDisplayMode', {
-          label: 'Connected Display Mode',
-          options: [
-            { key: 'summary', text: 'Summary' },
-            { key: 'textOnly', text: 'Text Only' },
-            { key: 'countOnly', text: 'Count Only' },
-            { key: 'detailsOnly', text: 'Details Object' },
-          ],
         }),
       ],
     },
@@ -325,27 +315,6 @@ export function getDynamicDataPropertyValue(
       return buildDynamicDataDetails(sourceState);
     default:
       return undefined;
-  }
-}
-
-/** Applies the consumer-side display-mode choice to the already formatted dynamic values. */
-export function resolveConnectedPreview(
-  connectionState: Pick<IDynamicDataConsumerConnectionState, 'connectedDisplayMode'>,
-  depthDefaultValue: string,
-  dynamicCountValue: string,
-  dynamicSummaryValue: string,
-  dynamicDetailsValue: string,
-): string {
-  switch (connectionState.connectedDisplayMode) {
-    case 'textOnly':
-      return depthDefaultValue;
-    case 'countOnly':
-      return dynamicCountValue;
-    case 'detailsOnly':
-      return dynamicDetailsValue;
-    case 'summary':
-    default:
-      return dynamicSummaryValue;
   }
 }
 
