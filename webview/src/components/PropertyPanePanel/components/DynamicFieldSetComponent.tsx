@@ -1,6 +1,7 @@
-import { Dropdown, Stack, Text, type IDropdownOption } from '@fluentui/react';
+import { Stack, Text, type IDropdownOption } from '@fluentui/react';
 import React, { FC, useMemo } from 'react';
 
+import { DropdownComponent } from './DropdownComponent';
 import type {
   IDynamicDataSourceViewModel,
   IDynamicFieldFiltersViewModel,
@@ -21,6 +22,14 @@ interface IDynamicFieldSetComponentProps {
   onChange: (targetProperty: string, reference: string | undefined) => void;
   sharedConfiguration?: IDynamicFieldSetViewModel['sharedConfiguration'];
   sources: IDynamicDataSourceViewModel[];
+}
+
+function normalizeComponentId(componentId?: string | { toString(): string }): string | undefined {
+  if (!componentId) {
+    return undefined;
+  }
+
+  return typeof componentId === 'string' ? componentId : componentId.toString();
 }
 
 function parseReference(reference?: string): { propertyId?: string; sourceId?: string } {
@@ -49,7 +58,9 @@ export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
   const availableSources = useMemo(
     () =>
       sources.filter((source) => {
-        if (sharedSourceFilters?.componentId && source.metadata?.componentId !== sharedSourceFilters.componentId) {
+        const filteredComponentId = normalizeComponentId(sharedSourceFilters?.componentId);
+
+        if (filteredComponentId && source.metadata?.componentId !== filteredComponentId) {
           return false;
         }
         return true;
@@ -98,13 +109,13 @@ export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
     <Stack tokens={{ childrenGap: 12 }} className="pp-field">
       {label && <Text variant="mediumPlus">{label}</Text>}
       {sharedSourceEnabled && (
-        <Dropdown
+        <DropdownComponent
           label={sharedSourceLabel}
           selectedKey={sharedSourceId}
           disabled={!!sharedSourceFilters?.sourceId}
           options={sharedSourceOptions}
-          onChange={(_, option) => {
-            const nextSourceId = typeof option?.key === 'string' ? option.key : undefined;
+          onChange={(value) => {
+            const nextSourceId = typeof value === 'string' ? value : undefined;
             const nextSource = availableSources.find((source) => source.id === nextSourceId);
             const nextPropertyId =
               sharedPropertyFilters?.propertyId && nextSource?.properties.some((property) => property.id === sharedPropertyFilters.propertyId)
@@ -115,13 +126,13 @@ export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
         />
       )}
       {sharedPropertyEnabled && (
-        <Dropdown
+        <DropdownComponent
           label="Shared property"
           disabled={!sharedSourceId || !!sharedPropertyFilters?.propertyId}
           selectedKey={sharedPropertyId}
           options={sharedPropertyOptions}
-          onChange={(_, option) => {
-            const nextPropertyId = typeof option?.key === 'string' ? option.key : undefined;
+          onChange={(value) => {
+            const nextPropertyId = typeof value === 'string' ? value : undefined;
             updateAllEntries(sharedSourceId, nextPropertyId);
           }}
         />
@@ -130,7 +141,9 @@ export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
         const { propertyId, sourceId } = parseReference(entry.reference);
         const sourceFilters = entry.filters;
         const entrySources = availableSources.filter((source) => {
-          if (sourceFilters?.componentId && source.metadata?.componentId !== sourceFilters.componentId) {
+          const filteredComponentId = normalizeComponentId(sourceFilters?.componentId);
+
+          if (filteredComponentId && source.metadata?.componentId !== filteredComponentId) {
             return false;
           }
           return true;
@@ -155,7 +168,7 @@ export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
           <Stack key={entry.key} tokens={{ childrenGap: 6 }}>
             <Text>{entry.label || entry.key}</Text>
             {!sharedSourceEnabled && (
-              <Dropdown
+              <DropdownComponent
                 label="Source"
                 disabled={!!forcedEntrySource}
                 selectedKey={effectiveSourceId}
@@ -163,8 +176,8 @@ export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
                   key: source.id,
                   text: source.metadata?.title || source.id,
                 }))}
-                onChange={(_, option) => {
-                  const nextSourceId = typeof option?.key === 'string' ? option.key : undefined;
+                onChange={(value) => {
+                  const nextSourceId = typeof value === 'string' ? value : undefined;
                   const nextPropertyId =
                     sourceFilters?.propertyId &&
                     entrySources.find((source) => source.id === nextSourceId)?.properties.some((property) => property.id === sourceFilters.propertyId)
@@ -175,13 +188,13 @@ export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
               />
             )}
             {!sharedPropertyEnabled && (
-              <Dropdown
+              <DropdownComponent
                 disabled={!effectiveSourceId || !!forcedEntryProperty}
                 label="Property"
                 selectedKey={effectivePropertyId}
                 options={propertyOptions}
-                onChange={(_, option) => {
-                  const nextPropertyId = typeof option?.key === 'string' ? option.key : undefined;
+                onChange={(value) => {
+                  const nextPropertyId = typeof value === 'string' ? value : undefined;
                   onChange(
                     entry.key,
                     effectiveSourceId && nextPropertyId ? `${effectiveSourceId}:${nextPropertyId}` : undefined,

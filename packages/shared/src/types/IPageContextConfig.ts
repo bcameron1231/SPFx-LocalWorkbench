@@ -33,6 +33,8 @@ export interface IPageContextCultureInfoConfig {
 }
 
 export interface IPageContextLegacyConfig {
+  aadTenantId?: string;
+  userId?: number;
   isNoScriptEnabled?: boolean;
   isSPO?: boolean;
   [key: string]: any;

@@ -51,6 +51,29 @@ export interface IHtmlGeneratorConfig {
     visibilityToggleOnText: string;
     visibilityToggleOffText: string;
   };
+  dynamicDataStrings?: {
+    itemIdLabel: string;
+    fragmentLabel: string;
+    listUrlLabel: string;
+    pageEnvironmentDescription: string;
+    propertiesLabelFormat: string;
+    pageEnvironmentSourceAlias: string;
+    pageEnvironmentSourceTitle: string;
+    currentUserInformationTitle: string;
+    queryParametersLabel: string;
+    queryStringTitle: string;
+    searchTitle: string;
+    siteClassificationLabel: string;
+    siteCollectionUrlLabel: string;
+    siteDescriptionLabel: string;
+    siteLogoUrlLabel: string;
+    sitePropertiesTitle: string;
+    siteTitleLabel: string;
+    siteUrlLabel: string;
+    userEmailLabel: string;
+    userLoginLabel: string;
+    userNameLabel: string;
+  };
 }
 
 // Generates the Content Security Policy for the webview
@@ -173,6 +196,7 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
     proxyEnabled: config.proxyEnabled !== false,
     propertyPaneShrinkCanvas: config.propertyPaneShrinkCanvas !== false,
     propertyPaneStrings: config.propertyPaneStrings,
+    dynamicDataStrings: config.dynamicDataStrings,
     externalDependencies: (config.externalDependencies || []).map((dep) => ({
       moduleName: dep.moduleName,
       globalName: dep.globalName,

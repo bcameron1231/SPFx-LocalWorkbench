@@ -1,4 +1,12 @@
-import { Dropdown, DropdownMenuItemType, IDropdownOption, Icon, Stack } from '@fluentui/react';
+import {
+  concatStyleSets,
+  Dropdown,
+  DropdownMenuItemType,
+  type IDropdownOption,
+  type IDropdownStyles,
+  Icon,
+  Stack,
+} from '@fluentui/react';
 import React, { FC } from 'react';
 
 interface IDropdownComponentProps {
@@ -9,6 +17,7 @@ interface IDropdownComponentProps {
   onChange: (value: string | number | undefined) => void;
   options: IDropdownOption[];
   selectedKey?: string | number;
+  styles?: Partial<IDropdownStyles>;
 }
 
 export const DropdownComponent: FC<IDropdownComponentProps> = ({
@@ -19,41 +28,10 @@ export const DropdownComponent: FC<IDropdownComponentProps> = ({
   onChange,
   options,
   selectedKey,
-}) => (
-  <Dropdown
-    ariaLabel={ariaLabel}
-    calloutProps={calloutMaxHeight ? { calloutMaxHeight } : undefined}
-    disabled={disabled}
-    label={label}
-    selectedKey={selectedKey}
-    options={options}
-    onChange={(_, option) => onChange(option?.key)}
-    onRenderOption={(option) => {
-      if (!option) {
-        return null;
-      }
-
-      if (option.itemType === DropdownMenuItemType.Header) {
-        return <div>{option.text}</div>;
-      }
-
-      if (option.itemType === DropdownMenuItemType.Divider) {
-        return null;
-      }
-
-      const isSelected = option.key === selectedKey;
-
-      return (
-        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 4 }}>
-          <Icon
-            iconName="CheckMark"
-            styles={{ root: { opacity: isSelected ? 1 : 0, width: 16 } }}
-          />
-          <div>{option.text}</div>
-        </Stack>
-      );
-    }}
-    styles={{
+  styles,
+}) => {
+  const mergedStyles = concatStyleSets(
+    {
       label: {
         fontWeight: 600,
         paddingLeft: 0,
@@ -149,6 +127,45 @@ export const DropdownComponent: FC<IDropdownComponentProps> = ({
           },
         },
       },
-    }}
-  />
-);
+    },
+    styles,
+  );
+
+  return (
+    <Dropdown
+      ariaLabel={ariaLabel}
+      calloutProps={calloutMaxHeight ? { calloutMaxHeight } : undefined}
+      disabled={disabled}
+      label={label}
+      selectedKey={selectedKey}
+      options={options}
+      onChange={(_, option) => onChange(option?.key)}
+      onRenderOption={(option) => {
+        if (!option) {
+          return null;
+        }
+
+        if (option.itemType === DropdownMenuItemType.Header) {
+          return <div>{option.text}</div>;
+        }
+
+        if (option.itemType === DropdownMenuItemType.Divider) {
+          return null;
+        }
+
+        const isSelected = option.key === selectedKey;
+
+        return (
+          <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 4 }}>
+            <Icon
+              iconName="CheckMark"
+              styles={{ root: { opacity: isSelected ? 1 : 0, width: 16 } }}
+            />
+            <div>{option.text}</div>
+          </Stack>
+        );
+      }}
+      styles={mergedStyles}
+    />
+  );
+};

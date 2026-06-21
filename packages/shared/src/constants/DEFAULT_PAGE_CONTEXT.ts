@@ -15,8 +15,10 @@ export const DEFAULT_PAGE_CONTEXT: IPageContextConfig = {
   },
   isInitialized: true,
   legacyPageContext: {
+    aadTenantId: '00000000-0000-4000-b000-000000000000',
     isNoScriptEnabled: false,
     isSPO: true,
+    userId: 1,
   },
   list: {
     id: '00000000-0000-4000-b000-555555555555',

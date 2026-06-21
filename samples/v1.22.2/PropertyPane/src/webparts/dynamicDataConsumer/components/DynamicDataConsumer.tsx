@@ -24,9 +24,14 @@ export default function DynamicDataConsumer(
       title: 'Dynamic Consumers',
       entries: [
         { label: 'dynamicText', value: props.dynamicTextValue },
+        { label: 'dynamicDetails', value: props.dynamicDetailsValue },
+      ],
+    },
+    {
+      title: 'DYNAMIC FIELDSET',
+      entries: [
         { label: 'dynamicCount', value: props.dynamicCountValue },
         { label: 'dynamicSummary', value: props.dynamicSummaryValue },
-        { label: 'dynamicDetails', value: props.dynamicDetailsValue },
       ],
     },
     {

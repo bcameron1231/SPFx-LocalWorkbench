@@ -1,3 +1,4 @@
+import { Guid } from '@microsoft/sp-core-library';
 import type { IDynamicDataPropertyDefinition } from '@microsoft/sp-dynamic-data';
 import type { IDynamicDataDetails, IDynamicDataSourceState } from './types';
 
@@ -7,6 +8,10 @@ export const DYNAMIC_DATA_PROPERTY_IDS = {
   summary: 'summary',
   details: 'details',
 } as const;
+
+export const DYNAMIC_DATA_SOURCE_COMPONENT_ID = Guid.parse(
+  '1d9314e3-672f-4f6f-8db1-c7fd5f58d1e8',
+);
 
 export const DYNAMIC_DATA_CONDITIONAL_ACTIONS = {
   none: 'none yet',

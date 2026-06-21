@@ -8,7 +8,11 @@ import {
   type IPropertyPaneConfiguration,
 } from '@microsoft/sp-property-pane';
 import { DynamicProperty } from '@microsoft/sp-component-base';
-import { buildDynamicDataDetails, DYNAMIC_DATA_PROPERTY_IDS } from './constants';
+import {
+  buildDynamicDataDetails,
+  DYNAMIC_DATA_PROPERTY_IDS,
+  DYNAMIC_DATA_SOURCE_COMPONENT_ID,
+} from './constants';
 import type {
   DynamicPropertyLike,
   IDynamicDataConsumerConnectionState,
@@ -125,7 +129,10 @@ export function buildDynamicDataConsumerPropertyPaneConfiguration(
               }),
               PropertyPaneDynamicField('dynamicDetails', {
                 label: 'Dynamic Details (Filtered Object)',
-                filters: { propertyId: DYNAMIC_DATA_PROPERTY_IDS.details },
+                filters: {
+                  componentId: DYNAMIC_DATA_SOURCE_COMPONENT_ID,
+                  propertyId: DYNAMIC_DATA_PROPERTY_IDS.details,
+                },
                 propertyValueDepth: 2,
               }),
             ],

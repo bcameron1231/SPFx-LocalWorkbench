@@ -52,7 +52,7 @@ export class WorkbenchRuntime {
 
     // Initialize core components
     this.manifestLoader = new ManifestLoader(config.serveUrl);
-    this.dynamicDataHost = new DynamicDataHost();
+    this.dynamicDataHost = new DynamicDataHost(config.context.pageContext);
     this.contextProvider = new SpfxContext(
       config.context,
       this.dynamicDataHost,
@@ -119,6 +119,7 @@ export class WorkbenchRuntime {
       );
     }
     if (settings.context) {
+      this.dynamicDataHost.updatePageContext(settings.context.pageContext);
       this.contextProvider = new SpfxContext(
         settings.context,
         this.dynamicDataHost,
@@ -440,26 +441,176 @@ export class WorkbenchRuntime {
       return;
     }
 
-    const oldValue = webPart.properties[targetProperty];
+    const liveInstanceProperty = isActiveWebPart(webPart)
+      ? (webPart.instance as { properties?: Record<string, unknown> }).properties?.[targetProperty]
+      : undefined;
+    const oldValue = liveInstanceProperty ?? webPart.properties[targetProperty];
     const dynamicProperty = oldValue as {
+      constructor?: new (provider: unknown, callback?: () => void) => {
+        setReference?: (reference: string) => void;
+        setValue?: (value: unknown) => void;
+      };
       setReference?: (reference: string) => void;
       setValue?: (value: unknown) => void;
     };
+    let nextValue = newValue;
+    const internalPropertyPaneChanged = isActiveWebPart(webPart)
+      ? (
+          webPart.instance as {
+            _onPropertyPaneFieldChanged?: (
+              propertyPath: string,
+              updatedValue: unknown,
+              fieldType?: unknown,
+            ) => boolean;
+          }
+        )._onPropertyPaneFieldChanged
+      : undefined;
+    const dynamicPropertyConstructor = (
+      window as {
+        __amdModules?: Record<string, { DynamicProperty?: new (provider: unknown, callback?: () => void) => {
+          setReference?: (reference: string) => void;
+          setValue?: (value: unknown) => void;
+        } }>;
+      }
+    ).__amdModules?.['@microsoft/sp-component-base']?.DynamicProperty;
 
-    if (dynamicProperty && typeof dynamicProperty === 'object' && typeof dynamicProperty.setReference === 'function') {
-      if (typeof newValue === 'string' && newValue.includes(':')) {
+    console.debug('[DynamicDataTrace] WorkbenchRuntime.updateWebPartProperty start', {
+      instanceId,
+      targetProperty,
+      newValue,
+      oldValue,
+      oldReference:
+        oldValue &&
+        typeof oldValue === 'object' &&
+        typeof (oldValue as { reference?: unknown }).reference === 'string'
+          ? (oldValue as { reference: string }).reference
+          : undefined,
+      oldResolvedValue:
+        oldValue &&
+        typeof oldValue === 'object' &&
+        typeof (oldValue as { tryGetValue?: () => unknown }).tryGetValue === 'function'
+          ? (oldValue as { tryGetValue: () => unknown }).tryGetValue()
+          : oldValue,
+    });
+
+    const isDynamicPropertyLike =
+      dynamicProperty &&
+      typeof dynamicProperty === 'object' &&
+      (typeof dynamicProperty.setReference === 'function' ||
+        typeof dynamicProperty.setValue === 'function');
+
+    if (typeof newValue === 'string' && newValue.includes(':')) {
+      console.debug('[DynamicDataDebug] updateWebPartProperty received reference', {
+        instanceId,
+        targetProperty,
+        newValue,
+      });
+
+      if (
+        typeof internalPropertyPaneChanged !== 'function' &&
+        isDynamicPropertyLike &&
+        typeof dynamicProperty.setReference === 'function'
+      ) {
         dynamicProperty.setReference(newValue);
-      } else if (typeof dynamicProperty.setValue === 'function') {
+        nextValue = dynamicProperty;
+      } else if (
+        isDynamicPropertyLike &&
+        typeof dynamicProperty.constructor === 'function'
+      ) {
+        const nextDynamicProperty = new dynamicProperty.constructor(
+          webPart.context.dynamicDataProvider,
+          () => {
+            if (typeof webPart.instance?.render === 'function') {
+              webPart.instance.render();
+            }
+          },
+        );
+        nextDynamicProperty.setReference?.(newValue);
+        nextValue = nextDynamicProperty;
+      } else if (typeof dynamicPropertyConstructor === 'function') {
+        const nextDynamicProperty = new dynamicPropertyConstructor(
+          webPart.context.dynamicDataProvider,
+          () => {
+            if (typeof webPart.instance?.render === 'function') {
+              webPart.instance.render();
+            }
+          },
+        );
+        nextDynamicProperty.setReference?.(newValue);
+        nextValue = nextDynamicProperty;
+      } else if (
+        isDynamicPropertyLike &&
+        typeof dynamicProperty.setReference === 'function'
+      ) {
+        dynamicProperty.setReference(newValue);
+        nextValue = dynamicProperty;
+      }
+    } else if (
+      isDynamicPropertyLike &&
+      typeof dynamicProperty.setReference === 'function'
+    ) {
+      if (typeof dynamicProperty.setValue === 'function') {
         dynamicProperty.setValue(newValue);
       }
-      webPart.properties[targetProperty] = oldValue;
-    } else {
-      webPart.properties[targetProperty] = newValue;
+      nextValue = dynamicProperty;
     }
+
+    // When SPFx's internal property-pane handler is available, let it own the
+    // property write so old/new diffing and DynamicProperty behavior match the
+    // framework's expectations.
+    if (typeof internalPropertyPaneChanged !== 'function') {
+      if (isDynamicPropertyLike) {
+        webPart.properties[targetProperty] = nextValue;
+      } else {
+        webPart.properties[targetProperty] = newValue;
+      }
+    }
+
+    console.debug('[DynamicDataTrace] WorkbenchRuntime.updateWebPartProperty committed', {
+      committedReference:
+        webPart.properties[targetProperty] &&
+        typeof webPart.properties[targetProperty] === 'object' &&
+        typeof (webPart.properties[targetProperty] as { reference?: unknown }).reference === 'string'
+          ? (webPart.properties[targetProperty] as { reference: string }).reference
+          : undefined,
+      committedValue:
+        webPart.properties[targetProperty] &&
+        typeof webPart.properties[targetProperty] === 'object' &&
+        typeof (webPart.properties[targetProperty] as { tryGetValue?: () => unknown }).tryGetValue === 'function'
+          ? (webPart.properties[targetProperty] as { tryGetValue: () => unknown }).tryGetValue()
+          : webPart.properties[targetProperty],
+      targetProperty,
+    });
 
     // Call lifecycle methods and re-render if instantiated
     if (isActiveWebPart(webPart)) {
-      if (typeof webPart.instance.onPropertyPaneFieldChanged === 'function') {
+      if (typeof internalPropertyPaneChanged === 'function') {
+        try {
+          internalPropertyPaneChanged.call(webPart.instance, targetProperty, nextValue);
+          const updatedValue = (
+            webPart.instance as { properties?: Record<string, unknown> }
+          ).properties?.[targetProperty] as
+            | {
+                reference?: string;
+                tryGetValue?: () => unknown;
+              }
+            | undefined;
+
+          console.debug('[DynamicDataDebug] post _onPropertyPaneFieldChanged', {
+            targetProperty,
+            reference:
+              updatedValue && typeof updatedValue.reference === 'string'
+                ? updatedValue.reference
+                : undefined,
+            resolvedValue:
+              updatedValue && typeof updatedValue.tryGetValue === 'function'
+                ? updatedValue.tryGetValue()
+                : updatedValue,
+          });
+        } catch (error: unknown) {
+          this.log.warn('Error calling _onPropertyPaneFieldChanged:', error);
+        }
+      } else if (typeof webPart.instance.onPropertyPaneFieldChanged === 'function') {
         try {
           webPart.instance.onPropertyPaneFieldChanged(
             targetProperty,
@@ -469,15 +620,17 @@ export class WorkbenchRuntime {
         } catch (error: unknown) {
           this.log.warn('Error calling onPropertyPaneFieldChanged:', error);
         }
-      }
 
-      if (typeof webPart.instance.render === 'function') {
-        try {
-          webPart.instance.render();
-        } catch (error: unknown) {
-          this.log.warn('Error rendering web part:', error);
+        if (typeof webPart.instance.render === 'function') {
+          try {
+            webPart.instance.render();
+          } catch (error: unknown) {
+            this.log.warn('Error rendering web part:', error);
+          }
         }
       }
+    } else {
+      webPart.properties[targetProperty] = newValue;
     }
 
     // Update React app

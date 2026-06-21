@@ -67,15 +67,77 @@ export function buildMockPageContext(config: IPageContextConfig): any {
   const siteId = config.site.id ?? DEFAULT_PAGE_CONTEXT.site.id;
   const webId = config.web.id ?? DEFAULT_PAGE_CONTEXT.web.id;
   const listId = config.list?.id ?? DEFAULT_PAGE_CONTEXT.list?.id;
+  const siteCorrelationId =
+    config.site.correlationId ?? DEFAULT_PAGE_CONTEXT.site.correlationId;
   const currentUICultureName =
     config.cultureInfo.currentUICultureName ?? config.cultureInfo.currentCultureName;
   const isRightToLeft =
     config.cultureInfo.isRightToLeft ?? isRtlCulture(config.cultureInfo.currentCultureName);
   const isNoScriptEnabled =
-    config.legacyPageContext?.isNoScriptEnabled ??
-    config.site.isNoScriptEnabled ??
-    false;
+    config.site.isNoScriptEnabled ?? config.legacyPageContext?.isNoScriptEnabled ?? false;
   const isSPO = config.legacyPageContext?.isSPO ?? true;
+  const legacyPageContextDefaults = {
+    CorrelationId: siteCorrelationId,
+    RecycleBinItemCount:
+      config.site.recycleBinItemCount ?? DEFAULT_PAGE_CONTEXT.site.recycleBinItemCount,
+    aadTenantId:
+      DEFAULT_PAGE_CONTEXT.legacyPageContext?.aadTenantId ??
+      '00000000-0000-4000-b000-000000000000',
+    cdnPrefix: config.site.cdnPrefix ?? DEFAULT_PAGE_CONTEXT.site.cdnPrefix,
+    currentCultureName: config.cultureInfo.currentCultureName,
+    currentUICultureName,
+    isAnonymousGuestUser:
+      config.user.isAnonymousGuestUser ?? DEFAULT_PAGE_CONTEXT.user.isAnonymousGuestUser,
+    isAppWeb: config.web.isAppWeb ?? DEFAULT_PAGE_CONTEXT.web.isAppWeb,
+    isExternalGuestUser:
+      config.user.isExternalGuestUser ?? DEFAULT_PAGE_CONTEXT.user.isExternalGuestUser,
+    isNoScriptEnabled,
+    isSPO,
+    listId: listId ? `{${listId}}` : undefined,
+    listPermsMask: {
+      High:
+        config.list?.permissions?.value?.High ??
+        DEFAULT_PAGE_CONTEXT.list?.permissions?.value?.High ??
+        0,
+      Low:
+        config.list?.permissions?.value?.Low ??
+        DEFAULT_PAGE_CONTEXT.list?.permissions?.value?.Low ??
+        0,
+    },
+    listTitle: config.list?.title ?? DEFAULT_PAGE_CONTEXT.list?.title ?? '',
+    listUrl: config.list?.serverRelativeUrl ?? DEFAULT_PAGE_CONTEXT.list?.serverRelativeUrl ?? '',
+    preferUserTimeZone:
+      config.user.preferUserTimeZone ?? DEFAULT_PAGE_CONTEXT.user.preferUserTimeZone,
+    siteAbsoluteUrl: config.site.absoluteUrl,
+    siteClassification: config.site.classification ?? DEFAULT_PAGE_CONTEXT.site.classification,
+    siteId: siteId ? `{${siteId}}` : undefined,
+    sitePagesEnabled:
+      config.site.sitePagesEnabled ?? DEFAULT_PAGE_CONTEXT.site.sitePagesEnabled,
+    siteServerRelativeUrl: siteServerRelativeUrl,
+    userDisplayName: config.user.displayName,
+    userEmail: config.user.email,
+    userId: config.legacyPageContext?.userId ?? DEFAULT_PAGE_CONTEXT.legacyPageContext?.userId,
+    userLoginName: config.user.loginName,
+    webAbsoluteUrl: config.web.absoluteUrl,
+    webDescription: config.web.description,
+    webId: webId ? `{${webId}}` : undefined,
+    webLanguage: language,
+    webLanguageName: config.web.languageName ?? DEFAULT_PAGE_CONTEXT.web.languageName,
+    webLogoUrl: config.web.logoUrl ?? DEFAULT_PAGE_CONTEXT.web.logoUrl,
+    webPermMasks: {
+      High:
+        config.web.permissions?.value?.High ??
+        DEFAULT_PAGE_CONTEXT.web.permissions?.value?.High ??
+        0,
+      Low:
+        config.web.permissions?.value?.Low ??
+        DEFAULT_PAGE_CONTEXT.web.permissions?.value?.Low ??
+        0,
+    },
+    webServerRelativeUrl: webServerRelativeUrl,
+    webTemplate: config.web.templateName ?? DEFAULT_PAGE_CONTEXT.web.templateName,
+    webTitle: config.web.title,
+  };
 
   return {
     ...config,
@@ -90,6 +152,7 @@ export function buildMockPageContext(config: IPageContextConfig): any {
     },
     site: {
       ...config.site,
+      correlationId: siteCorrelationId ? MockGuid.parse(siteCorrelationId) : undefined,
       id: MockGuid.parse(siteId),
       isNoScriptEnabled,
       serverRelativeUrl: siteServerRelativeUrl,
@@ -113,25 +176,8 @@ export function buildMockPageContext(config: IPageContextConfig): any {
       : null,
     listItem: config.listItem ?? null,
     legacyPageContext: {
+      ...legacyPageContextDefaults,
       ...config.legacyPageContext,
-      webAbsoluteUrl: config.web.absoluteUrl,
-      webServerRelativeUrl: webServerRelativeUrl,
-      siteAbsoluteUrl: config.site.absoluteUrl,
-      siteServerRelativeUrl: siteServerRelativeUrl,
-      userDisplayName: config.user.displayName,
-      userEmail: config.user.email,
-      userLoginName: config.user.loginName,
-      userId: 1,
-      webTitle: config.web.title,
-      webDescription: config.web.description,
-      webId: `{${webId}}`,
-      siteId: `{${siteId}}`,
-      currentCultureName: config.cultureInfo.currentCultureName,
-      currentUICultureName,
-      webLanguage: language,
-      isNoScriptEnabled,
-      isSPO,
-      aadTenantId: '00000000-0000-4000-b000-000000000000',
     },
   };
 }

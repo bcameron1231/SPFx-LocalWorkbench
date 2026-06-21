@@ -518,6 +518,7 @@ export function getDynamicDataSources(provider: unknown): IDynamicDataSourceView
   }
 
   return (getAvailableSources() || []).map((source) => ({
+    getPropertyValue: source.getPropertyValue,
     id: source.id,
     metadata: source.metadata,
     properties:
@@ -541,8 +542,12 @@ export function getDynamicPropertyValue(value: unknown): string | undefined {
   if (value && typeof value === 'object' && 'tryGetValue' in value) {
     const tryGetValue = (value as { tryGetValue?: () => unknown }).tryGetValue;
     if (typeof tryGetValue === 'function') {
-      const resolvedValue = tryGetValue();
-      return formatDynamicValue(resolvedValue);
+      try {
+        const resolvedValue = tryGetValue.call(value);
+        return formatDynamicValue(resolvedValue);
+      } catch {
+        return undefined;
+      }
     }
   }
 

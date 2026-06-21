@@ -160,10 +160,17 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
       );
     case PropertyPaneFieldType.DynamicField: {
       const dynamicField = createDynamicFieldViewModel(field, locale);
+      const currentReference = getDynamicPropertyReference(currentValue);
+      const resolvedValue = getDynamicPropertyValue(currentValue);
+      console.debug('[DynamicDataTrace] PropertyPaneFieldRenderer DynamicField', {
+        currentReference,
+        field: field.targetProperty,
+        resolvedValue,
+      });
       return wrapField(
         <DynamicFieldComponent
-          currentReference={getDynamicPropertyReference(currentValue)}
-          currentValue={getDynamicPropertyValue(currentValue)}
+          currentReference={currentReference}
+          currentValue={resolvedValue}
           filters={dynamicField.filters}
           label={dynamicField.label}
           sourceLabel={dynamicField.sourcesLabel}

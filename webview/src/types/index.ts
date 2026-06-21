@@ -39,6 +39,29 @@ export interface IWorkbenchConfig {
     visibilityToggleOnText: string;
     visibilityToggleOffText: string;
   };
+  dynamicDataStrings?: {
+    itemIdLabel: string;
+    fragmentLabel: string;
+    listUrlLabel: string;
+    pageEnvironmentDescription: string;
+    propertiesLabelFormat: string;
+    pageEnvironmentSourceAlias: string;
+    pageEnvironmentSourceTitle: string;
+    currentUserInformationTitle: string;
+    queryParametersLabel: string;
+    queryStringTitle: string;
+    searchTitle: string;
+    siteClassificationLabel: string;
+    siteCollectionUrlLabel: string;
+    siteDescriptionLabel: string;
+    siteLogoUrlLabel: string;
+    sitePropertiesTitle: string;
+    siteTitleLabel: string;
+    siteUrlLabel: string;
+    userEmailLabel: string;
+    userLoginLabel: string;
+    userNameLabel: string;
+  };
   externalDependencies?: Array<{ moduleName: string; globalName: string }>;
 }
 

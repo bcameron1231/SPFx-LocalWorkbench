@@ -158,6 +158,7 @@ export interface IDynamicDataPropertyDefinitionViewModel {
 }
 
 export interface IDynamicDataSourceViewModel {
+  getPropertyValue?: (propertyId: string) => unknown;
   id: string;
   metadata?: {
     alias?: string;
@@ -170,7 +171,7 @@ export interface IDynamicDataSourceViewModel {
 }
 
 export interface IDynamicFieldFiltersViewModel {
-  componentId?: string;
+  componentId?: string | { toString(): string };
   propertyId?: string;
   sourceId?: string;
 }
