@@ -1,41 +1,80 @@
-import React, { FC, useEffect, useRef } from 'react';
+import React, { FC, useCallback, useEffect, useRef } from 'react';
 
 import { logger } from '@spfx-local-workbench/shared';
 
 import styles from './CustomFieldComponent.module.css';
+import type { IPropertyPaneCustomFieldPropsModel, IPropertyPaneFieldChangeCallback, IPropertyPaneFieldModel } from '../types';
 
 interface ICustomFieldComponentProps {
-  field: any;
-  value: any;
-  onChange: (value: any) => void;
+  field: IPropertyPaneFieldModel<IPropertyPaneCustomFieldPropsModel>;
+  onFieldValidityChange: (targetProperty: string, isValid: boolean) => void;
+  onPropertyChange: (targetProperty: string, value: unknown) => void;
+  value: unknown;
 }
 
 export const CustomFieldComponent: FC<ICustomFieldComponentProps> = ({
   field,
-  value,
-  onChange,
+  onFieldValidityChange,
+  onPropertyChange,
 }) => {
-  // Custom fields can render their own content
-  if (field.properties.onRender && typeof field.properties.onRender === 'function') {
-    const containerRef = useRef<HTMLDivElement>(null);
+  const { context, key, onDispose, onRender } = field.properties;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const targetPropertyRef = useRef(field.targetProperty);
+  const onFieldValidityChangeRef = useRef(onFieldValidityChange);
+  const onPropertyChangeRef = useRef(onPropertyChange);
 
-    useEffect(() => {
-      if (containerRef.current) {
+  useEffect(() => {
+    targetPropertyRef.current = field.targetProperty;
+    onFieldValidityChangeRef.current = onFieldValidityChange;
+    onPropertyChangeRef.current = onPropertyChange;
+  }, [field.targetProperty, onFieldValidityChange, onPropertyChange]);
+
+  const changeCallback = useCallback<IPropertyPaneFieldChangeCallback>(
+    (targetProperty, newValue, isValidEntry) => {
+      const resolvedTargetProperty = targetProperty || targetPropertyRef.current;
+
+      if (typeof isValidEntry === 'boolean') {
+        onFieldValidityChangeRef.current(resolvedTargetProperty, isValidEntry);
+      }
+
+      if (isValidEntry === false) {
+        return;
+      }
+
+      onPropertyChangeRef.current(resolvedTargetProperty, newValue);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const containerElement = containerRef.current;
+
+    if (typeof onRender === 'function' && containerElement) {
+      try {
+        onRender(containerElement, context, changeCallback);
+      } catch (error: unknown) {
+        logger.warn('Custom field render error:', error);
+      }
+    }
+
+    return () => {
+      if (containerElement && onDispose) {
         try {
-          field.properties.onRender(containerRef.current, value, onChange);
+          onDispose(containerElement, context);
         } catch (error: unknown) {
-          logger.warn('Custom field render error:', error);
+          logger.warn('Custom field dispose error:', error);
         }
       }
-    }, [field, value, onChange]);
+    };
+  }, [changeCallback, key]);
 
-    return <div className="pp-field" ref={containerRef}></div>;
+  if (typeof onRender !== 'function') {
+    return (
+      <div className="pp-field">
+        <div className={styles.customFieldFallback}>Custom Field {key}</div>
+      </div>
+    );
   }
 
-  // Fallback for custom fields without onRender
-  return (
-    <div className="pp-field">
-      <div className={styles.customFieldFallback}>Custom Field {field.properties.key || ''}</div>
-    </div>
-  );
+  return <div className="pp-field" ref={containerRef}></div>;
 };

@@ -139,8 +139,6 @@ export interface ISpfxPageContextConfig {
   webTitle?: string;
   webDescription?: string;
   webTemplate?: string;
-  isNoScriptEnabled?: boolean;
-  isSPO?: boolean;
 }
 
 // Re-export theme types from shared package for convenience

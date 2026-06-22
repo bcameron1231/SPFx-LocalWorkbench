@@ -1,9 +1,123 @@
 import { deepMerge } from '../utils/deepMerge';
 import { loadThemedStylesModule } from '../utils/loadThemedStyles';
+import { MockGuid } from './MockGuid';
 import { spPropertyPaneModule } from './PropertyPaneMocks';
 
 export function initializeSpfxMocks(): void {
   const amdModules = window.__amdModules!;
+
+  function MockDynamicProperty(this: any, provider: any, callback?: () => void) {
+    this._defaultValue = undefined;
+    this._provider = provider;
+    this._callback = callback;
+    this._hasValue = false;
+    this._value = undefined;
+    this._reference = undefined;
+  }
+
+  (MockDynamicProperty as any)._TYPE_NAME = 'DynamicProperty';
+
+  MockDynamicProperty.prototype = {
+    constructor: MockDynamicProperty,
+    dispose: function () {},
+    register: function () {},
+    unregister: function () {},
+    setReference: function (
+      reference:
+        | string
+        | {
+            property?: string;
+            propertyPath?: string;
+            reference?: string;
+            sourceId?: string;
+          },
+    ) {
+      const normalizedReference =
+        typeof reference === 'string'
+          ? (() => {
+              const [sourceId, property, ...propertyPathParts] = reference.split(':');
+              return {
+                property,
+                propertyPath: propertyPathParts.length > 0 ? propertyPathParts.join(':') : undefined,
+                reference,
+                sourceId,
+              };
+            })()
+          : {
+              property: reference?.property,
+              propertyPath: reference?.propertyPath,
+              reference:
+                reference?.reference ??
+                (reference?.sourceId && reference?.property
+                  ? `${reference.sourceId}:${reference.property}${reference.propertyPath ? `:${reference.propertyPath}` : ''}`
+                  : undefined),
+              sourceId: reference?.sourceId,
+            };
+
+      this._reference = {
+        property: normalizedReference.property,
+        propertyPath: normalizedReference.propertyPath,
+        reference: normalizedReference.reference,
+        sourceId: normalizedReference.sourceId,
+      };
+      this._value = undefined;
+      this._hasValue = false;
+      if (typeof this._callback === 'function') {
+        this._callback();
+      }
+    },
+    setValue: function (value: unknown) {
+      this._value = value;
+      this._hasValue = true;
+      this._reference = undefined;
+      if (typeof this._callback === 'function') {
+        this._callback();
+      }
+    },
+    toJSON: function () {
+      if (this._hasValue) {
+        return {
+          __type: (MockDynamicProperty as any)._TYPE_NAME,
+          value: this._value,
+        };
+      }
+
+      if (this._reference === undefined && this._defaultValue !== undefined) {
+        return {
+          __type: (MockDynamicProperty as any)._TYPE_NAME,
+          value: this._defaultValue,
+        };
+      }
+
+      return {
+        __type: (MockDynamicProperty as any)._TYPE_NAME,
+        reference: this._reference,
+      };
+    },
+    tryGetSource: function () {
+      return this._hasValue || !this._reference
+        ? undefined
+        : this._provider?.tryGetSource?.(this._reference.sourceId);
+    },
+    tryGetValue: function () {
+      if (this._hasValue) {
+        return this._value;
+      }
+
+      if (!this._reference) {
+        return this._defaultValue;
+      }
+
+      const value = this._provider?._getData?.(this._reference);
+      return Array.isArray(value) ? value[0] : value;
+    },
+    get reference() {
+      return this._hasValue ? undefined : this._reference?.reference;
+    },
+    get value() {
+      return this._value;
+    },
+  };
 
   // Mock BaseClientSideWebPart - ES5-compatible constructor function
   // This is necessary because SPFx bundles compile to ES5 and use old-style
@@ -149,11 +263,7 @@ export function initializeSpfxMocks(): void {
       warn: console.warn,
       error: console.error,
     },
-    Guid: {
-      newGuid: () => ({
-        toString: () => `guid-${Math.random().toString(36).substr(2, 9)}`,
-      }),
-    },
+    Guid: MockGuid,
     DisplayMode: { Read: 1, Edit: 2 },
   };
 
@@ -162,6 +272,10 @@ export function initializeSpfxMocks(): void {
 
   // Also make it globally available for direct imports
   (window as any)['@microsoft/sp-property-pane'] = spPropertyPaneModule;
+
+  amdModules['@microsoft/sp-component-base'] = {
+    DynamicProperty: MockDynamicProperty,
+  };
 
   // Mock HTTP clients
   class MockHttpClient {

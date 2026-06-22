@@ -1,0 +1,26 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "1d9314e3-672f-4f6f-8db1-c7fd5f58d1e8",
+  "alias": "DynamicDataSourceWebPart",
+  "componentType": "WebPart",
+  "version": "1.22.2",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
+  "supportsThemeVariants": true,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "Advanced" },
+      "title": { "default": "Dynamic Data Source" },
+      "description": { "default": "Publishes primitive and object-valued dynamic-data properties for sample validation." },
+      "officeFabricIconFontName": "Plug",
+      "properties": {
+        "sourceCategory": "News",
+        "sourceCount": 3,
+        "sourceEmphasis": "High",
+        "sourceText": "Sample source text"
+      }
+    }
+  ]
+}

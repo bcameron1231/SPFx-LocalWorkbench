@@ -7,7 +7,12 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-import { DEFAULT_PAGE_CONTEXT, getLocalizedString } from '@spfx-local-workbench/shared';
+import {
+  DEFAULT_PAGE_CONTEXT,
+  getLocalizedString,
+  isRtlCulture,
+  type IPageContextConfig,
+} from '@spfx-local-workbench/shared';
 import type { IWebPartManifest } from '@spfx-local-workbench/shared';
 import { logger } from '@spfx-local-workbench/shared';
 
@@ -21,7 +26,7 @@ export interface IStoryGeneratorConfig {
   /** Whether to generate locale variants (default: true) */
   generateLocaleStories?: boolean;
   /** Page context configuration to inject */
-  pageContext?: typeof DEFAULT_PAGE_CONTEXT;
+  pageContext?: IPageContextConfig;
   /** Whether to enable auto-generated docs pages (default: false) */
   autoDocs?: boolean;
 }
@@ -43,7 +48,7 @@ export class StoryGenerator {
   private readonly workspacePath: string;
   private readonly outputDir: string;
   private readonly generateLocaleStories: boolean;
-  private readonly pageContext: typeof DEFAULT_PAGE_CONTEXT;
+  private readonly pageContext: IPageContextConfig;
   private readonly autoDocs: boolean;
   private readonly detector: SpfxProjectDetector;
 
@@ -198,11 +203,13 @@ export class StoryGenerator {
     } = options;
 
     // Create the shared parameters object
-    const pageContextForDefault = {
+    const pageContextForDefault: IPageContextConfig = {
       ...this.pageContext,
       cultureInfo: {
         ...this.pageContext.cultureInfo,
         currentCultureName: defaultLocale,
+        currentUICultureName: defaultLocale,
+        isRightToLeft: isRtlCulture(defaultLocale),
       },
     };
 
@@ -261,6 +268,18 @@ export const Locale${index + 1}: Story = {
     spfx: {
       ...sharedParameters.spfx,
       locale: '${locale}',
+      context: {
+        ...sharedParameters.spfx.context,
+        pageContext: {
+          ...sharedParameters.spfx.context.pageContext,
+          cultureInfo: {
+            ...sharedParameters.spfx.context.pageContext.cultureInfo,
+            currentCultureName: '${locale}',
+            currentUICultureName: '${locale}',
+            isRightToLeft: ${isRtlCulture(locale)}
+          }
+        }
+      }
     }
   }
 };

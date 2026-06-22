@@ -1,26 +1,57 @@
 import { Toggle } from '@fluentui/react';
 import React, { FC } from 'react';
 
-import { getString } from '../shared';
-
 interface IToggleComponentProps {
-  field: any;
-  value: any;
+  ariaLabel?: string;
+  checked: boolean;
+  disabled?: boolean;
+  inlineLabel?: boolean;
+  label?: string;
+  offAriaLabel?: string;
+  offText: string;
+  onAriaLabel?: string;
   onChange: (value: boolean) => void;
+  onText: string;
 }
 
-export const ToggleComponent: FC<IToggleComponentProps> = ({ field, value, onChange }) => {
-  const label = getString(field.properties?.label || field.properties?.Label);
-  const onText = getString(field.properties?.onText || field.properties?.OnText) || 'On';
-  const offText = getString(field.properties?.offText || field.properties?.OffText) || 'Off';
-
-  return (
-    <Toggle
-      label={label}
-      checked={!!value}
-      onText={onText}
-      offText={offText}
-      onChange={(_, checked) => onChange(!!checked)}
-    />
-  );
-};
+export const ToggleComponent: FC<IToggleComponentProps> = ({
+  ariaLabel,
+  checked,
+  disabled,
+  inlineLabel,
+  label,
+  offAriaLabel,
+  offText,
+  onAriaLabel,
+  onChange,
+  onText,
+}) => (
+  <Toggle
+    ariaLabel={ariaLabel}
+    checked={checked}
+    disabled={disabled}
+    inlineLabel={inlineLabel}
+    label={label}
+    offAriaLabel={offAriaLabel}
+    offText={inlineLabel ? undefined : offText} // Align with buggy behavior in M365
+    onAriaLabel={onAriaLabel}
+    onText={inlineLabel ? undefined : onText} // Align with buggy behavior in M365
+    onChange={(_, nextChecked) => onChange(!!nextChecked)}
+    styles={{
+      root: {
+        marginBottom: 0, // Override to align with buggy behavior in M365
+      },
+      label: {
+        fontWeight: 400,
+        padding: 0,
+        margin: 0, // Override to align with buggy behavior in M365
+      },
+      container: {
+        margin: 8,
+      },
+      pill: {
+        marginRight: 4,
+      },
+    }}
+  />
+);

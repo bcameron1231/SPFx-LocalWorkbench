@@ -1,0 +1,53 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "f155c3f4-aa35-4297-b585-90e5eb5c5468",
+  "alias": "PnpControlsWebPart",
+  "componentType": "WebPart",
+
+  "version": "1.22.2",
+  "manifestVersion": 2,
+
+  // If true, the component can only be installed on sites where Custom Script is allowed.
+  // Components that allow authors to embed arbitrary script code should set this to true.
+  // https://support.office.com/en-us/article/Turn-scripting-capabilities-on-or-off-1f2c515f-5d7e-448a-9fd7-835da935584f
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
+  "supportsThemeVariants": true,
+
+  "preconfiguredEntries": [{
+    "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Advanced
+    "group": { "default": "Advanced" },
+    "title": { "default": "PnP Controls" },
+    "description": { "default": "pnpControls description" },
+    "officeFabricIconFontName": "Balloons",
+    "properties": {
+      "color": "#0078d4",
+      "dateTime": null,
+      "numberValue": 5,
+      "password": "secret123",
+      "multiSelect": ["EN"],
+      "spinValue": 3,
+      "htmlCode": "<h1>Hello World</h1>",
+      "monacoCode": "{}",
+      "guid": "",
+      "searchValue": "",
+      "swatchColor": "#0078d4",
+      "brandFont": "",
+      "iconName": "",
+      "orderedItems": [{"title":"First"},{"title":"Second"},{"title":"Third"}],
+      "collectionData": [],
+      "gridItems": [],
+      "lists": "",
+      "column": "",
+      "view": "",
+      "people": [],
+      "teams": [],
+      "filePickerResult": null,
+      "folderPicker": null,
+      "terms": [],
+      "enterpriseTerms": [],
+      "sites": [],
+      "roleDefinitions": []
+    }
+  }]
+}

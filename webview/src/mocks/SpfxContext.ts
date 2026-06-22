@@ -4,8 +4,10 @@ import {
   ProxyHttpClient,
   ProxySPHttpClient,
 } from '@spfx-local-workbench/shared';
+import type { IClientSideComponentManifest } from '@spfx-local-workbench/shared';
 
 import { getVsCodeProxyTransport } from '../proxy';
+import { DynamicDataHost } from '../dynamicData/DynamicDataHost';
 import { PassthroughHttpClient } from '../proxy/PassthroughHttpClient';
 import type { IContextSettings } from '../types';
 
@@ -19,14 +21,23 @@ export class SpfxContext {
   private contextSettings: IContextSettings;
   private proxyEnabled: boolean;
   private statusRenderer: StatusRenderer;
+  private dynamicDataHost: DynamicDataHost;
 
-  constructor(contextSettings: IContextSettings, proxyEnabled: boolean = true) {
+  constructor(
+    contextSettings: IContextSettings,
+    dynamicDataHost: DynamicDataHost,
+    proxyEnabled: boolean = true,
+  ) {
     this.contextSettings = contextSettings;
+    this.dynamicDataHost = dynamicDataHost;
     this.proxyEnabled = proxyEnabled;
     this.statusRenderer = new StatusRenderer();
   }
 
-  createMockContext(webPartId: string, instanceId: string): any {
+  createMockContext(
+    manifest: IClientSideComponentManifest,
+    instanceId: string,
+  ): any {
     const mockPageContext = buildMockPageContext(this.contextSettings.pageContext);
 
     // Get the VS Code proxy transport for routing API calls through the extension
@@ -34,7 +45,7 @@ export class SpfxContext {
 
     return {
       instanceId: instanceId,
-      manifest: { id: webPartId },
+      manifest,
       pageContext: mockPageContext,
       serviceScope: {
         consume: (_key: any) => {
@@ -71,6 +82,12 @@ export class SpfxContext {
         microsoftTeams: undefined, // Not running in Teams context
       },
       isServedFromLocalhost: true,
+      dynamicDataProvider: this.dynamicDataHost.createProvider(),
+      dynamicDataSourceManager: this.dynamicDataHost.createSourceManager(
+        manifest.id,
+        instanceId,
+        manifest.alias,
+      ),
       domElement: null,
       propertyPane: {
         refresh: () => {},

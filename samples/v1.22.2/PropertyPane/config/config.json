@@ -2,17 +2,83 @@
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
   "version": "2.0",
   "bundles": {
-    "property-pane-web-part": {
+    "standard-controls-web-part": {
       "components": [
         {
-          "entrypoint": "./lib/webparts/propertyPane/PropertyPaneWebPart.js",
-          "manifest": "./src/webparts/propertyPane/PropertyPaneWebPart.manifest.json"
+          "entrypoint": "./lib/webparts/standardControls/StandardControlsWebPart.js",
+          "manifest": "./src/webparts/standardControls/StandardControlsWebPart.manifest.json"
+        }
+      ]
+    },
+    "pnp-controls-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/pnpControls/PnpControlsWebPart.js",
+          "manifest": "./src/webparts/pnpControls/PnpControlsWebPart.manifest.json"
+        }
+      ]
+    },
+    "advanced-behavior-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/advancedBehavior/AdvancedBehaviorWebPart.js",
+          "manifest": "./src/webparts/advancedBehavior/AdvancedBehaviorWebPart.manifest.json"
+        }
+      ]
+    },
+    "page-and-accordion-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/pageAndAccordion/PageAndAccordionWebPart.js",
+          "manifest": "./src/webparts/pageAndAccordion/PageAndAccordionWebPart.manifest.json"
+        }
+      ]
+    },
+    "validation-and-focus-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/validationAndFocus/ValidationAndFocusWebPart.js",
+          "manifest": "./src/webparts/validationAndFocus/ValidationAndFocusWebPart.manifest.json"
+        }
+      ]
+    },
+    "standard-control-variations-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/standardControlVariations/StandardControlVariationsWebPart.js",
+          "manifest": "./src/webparts/standardControlVariations/StandardControlVariationsWebPart.manifest.json"
+        }
+      ]
+    },
+    "dynamic-data-source-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/dynamicDataSource/DynamicDataSourceWebPart.js",
+          "manifest": "./src/webparts/dynamicDataSource/DynamicDataSourceWebPart.manifest.json"
+        }
+      ]
+    },
+    "dynamic-data-consumer-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/dynamicDataConsumer/DynamicDataConsumerWebPart.js",
+          "manifest": "./src/webparts/dynamicDataConsumer/DynamicDataConsumerWebPart.manifest.json"
+        }
+      ]
+    },
+    "empty-pane-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/emptyPane/EmptyPaneWebPart.js",
+          "manifest": "./src/webparts/emptyPane/EmptyPaneWebPart.manifest.json"
         }
       ]
     }
   },
   "externals": {},
   "localizedResources": {
-    "PropertyPaneWebPartStrings": "lib/webparts/propertyPane/loc/{locale}.js"
+    "StandardControlsWebPartStrings": "lib/webparts/standardControls/loc/{locale}.js",
+    "PnpControlsWebPartStrings": "lib/webparts/pnpControls/loc/{locale}.js",
+    "PropertyControlStrings": "node_modules/@pnp/spfx-property-controls/lib/loc/{locale}.js"
   }
 }

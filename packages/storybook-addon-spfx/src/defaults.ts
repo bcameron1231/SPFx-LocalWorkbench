@@ -1,4 +1,9 @@
-import { DEFAULT_PAGE_CONTEXT, deepMerge } from '@spfx-local-workbench/shared';
+import {
+  DEFAULT_PAGE_CONTEXT,
+  deepMerge,
+  isRtlCulture,
+  type IPageContextConfig,
+} from '@spfx-local-workbench/shared';
 
 /**
  * Default values for SPFx context
@@ -20,12 +25,22 @@ export { DEFAULT_PAGE_CONTEXT };
  * Merge utility for pageContext objects
  * Merges provided context with defaults, preserving additional properties
  */
-export function mergePageContext(provided: any = {}, locale?: string): typeof DEFAULT_PAGE_CONTEXT {
+export function mergePageContext(
+  provided: Partial<IPageContextConfig> = {},
+  locale?: string,
+): IPageContextConfig {
   // Handle locale override for cultureInfo
-  const mergedContext = deepMerge({ ...DEFAULT_PAGE_CONTEXT }, provided);
+  const mergedContext = deepMerge(
+    structuredClone(DEFAULT_PAGE_CONTEXT),
+    provided,
+  ) as IPageContextConfig;
 
-  if (locale && !provided.cultureInfo?.currentCultureName) {
+  if (locale) {
     mergedContext.cultureInfo.currentCultureName = locale;
+    mergedContext.cultureInfo.currentUICultureName = locale;
+    if (provided.cultureInfo?.isRightToLeft === undefined) {
+      mergedContext.cultureInfo.isRightToLeft = isRtlCulture(locale);
+    }
   }
 
   return mergedContext;

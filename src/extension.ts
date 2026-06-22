@@ -26,6 +26,8 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+type ServeStartResult = 'ready' | 'cancelled' | 'timedOut';
+
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   // Initialize localization
@@ -55,7 +57,9 @@ export function activate(context: vscode.ExtensionContext) {
   }
 
   // Helper function to start serve if needed and wait for it to be ready
-  async function startServeIfNeeded(): Promise<boolean> {
+  async function startServeIfNeeded(options?: {
+    showOpenWorkbenchAnywayPrompt?: boolean;
+  }): Promise<boolean> {
     const det = getDetector();
     if (!det) {
       vscode.window.showErrorMessage(localize('extension.noWorkspace', 'No workspace folder open'));
@@ -90,7 +94,7 @@ export function activate(context: vscode.ExtensionContext) {
     terminal.sendText(settings.serveCommand);
 
     // Wait for the serve port to accept connections, with a progress indicator
-    const serverReady = await vscode.window.withProgress(
+    const serveStartResult = await vscode.window.withProgress<ServeStartResult>(
       {
         location: vscode.ProgressLocation.Notification,
         title: 'SPFx Serve',
@@ -105,11 +109,11 @@ export function activate(context: vscode.ExtensionContext) {
 
         while (Date.now() - startTime < maxWaitMs) {
           if (cancellationToken.isCancellationRequested) {
-            return false;
+            return 'cancelled';
           }
 
           if (await isPortReachable(serveHost, servePort)) {
-            return true;
+            return 'ready';
           }
 
           const elapsed = Math.round((Date.now() - startTime) / 1000);
@@ -123,14 +127,20 @@ export function activate(context: vscode.ExtensionContext) {
           await delay(pollIntervalMs);
         }
 
-        return false; // timed out
+        return 'timedOut';
       },
     );
 
-    if (!serverReady) {
+    if (serveStartResult !== 'ready') {
+      if (options?.showOpenWorkbenchAnywayPrompt === false) {
+        return false;
+      }
+
       const openChoice = localize('common.open', 'Open');
       const choice = await vscode.window.showWarningMessage(
-        localize('serve.timedout', 'SPFx serve did not start in time. Open workbench anyway?'),
+        serveStartResult === 'cancelled'
+          ? localize('serve.cancelled', 'SPFx serve cancelled. Open workbench anyway?')
+          : localize('serve.timedout', 'SPFx serve did not start in time. Open workbench anyway?'),
         openChoice,
         localize('common.cancel', 'Cancel'),
       );
@@ -164,7 +174,9 @@ export function activate(context: vscode.ExtensionContext) {
   const startServeWorkbenchCommand = vscode.commands.registerCommand(
     'spfx-local-workbench.startServeWorkbench',
     async () => {
-      const ready = await startServeIfNeeded();
+      const ready = await startServeIfNeeded({
+        showOpenWorkbenchAnywayPrompt: !WorkbenchPanel.currentPanel,
+      });
       if (ready) {
         WorkbenchPanel.createOrShow(context.extensionUri, apiProxyOutputChannel);
       }
@@ -216,7 +228,7 @@ export function activate(context: vscode.ExtensionContext) {
     () => {
       vscode.commands.executeCommand(
         'workbench.action.openWorkspaceSettings',
-        '@ext:thechriskent.spfx-local-workbench',
+        '@ext:m365pnp.pnp-spfx-local-workbench',
       );
     },
   );

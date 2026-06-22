@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Added
+
+- Workbench theme picker accessibility improvements including keyboard controls
+- Extended manifest context to provide the full manifest
+- Property Pane simulates the always present Visibility group
+- Dynamic Data is now supported including the standard Page enivonment source populated using page context configuration
+
+## Changed
+
+- Workbench status bar now uses VS Code styles to match user theming while preserving M365 theming for main canvas
+- Workbench theme picker shows a tiny palette swatch for extra prettiness
+- Property Pane now supports page navigation, accordion group interaction, richer built-in control props, button bound-value updates, and initial field focus behavior
+- Page Context defaults now provide the full set of properties and legacyPageContext is auto built from them while remaining overridable
+- The workbench component picker now auto-focuses on the searchbox
+
+## Fixed
+
+- Serve not running message wasn't readable in dark themes, now it is
+- Property Pane no longer overlaps the status bar and theme picker
+- Property Pane closes when associated web part is removed
+- SPFx serve and open command cancellation/timeout no longer prompts to open workbench if it's already open
+- Property Pane custom fields can now update bound properties beyond their default target
+- Property Pane dynamic field surfaces no longer fall back to placeholders
+- Property Pane control styles now match M365 property pane controls
+
+## [0.1.3] - 2026-06-04
+
+## Added
+
+- HTML Field Security Settings
+  - policy (none, allowAll, allowList), default: allowList
+  - allowedDomains, default: matches SharePoint Online
+
+### Changed
+
+- Change VS Code Marketplace publisher to [M365pnp](https://marketplace.visualstudio.com/publishers/m365pnp)
+
 ## [0.0.1] - 2026-04-17
 
 ### Added

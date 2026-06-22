@@ -1,0 +1,50 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "cb4c47ea-0eb7-4987-a359-667f7bdb8e1d",
+  "alias": "StandardControlVariationsWebPart",
+  "componentType": "WebPart",
+  "version": "1.22.2",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
+  "supportsThemeVariants": true,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "Advanced" },
+      "title": { "default": "Standard Control Variations" },
+      "description": { "default": "Exercises stylistic and behavioral variations of built-in property pane fields." },
+      "officeFabricIconFontName": "TextBox",
+      "properties": {
+        "ariaPlaceholderText": "",
+        "buttonValue": "Ready",
+        "checkboxAriaLabelValue": false,
+        "checkboxDisabledValue": true,
+        "checkboxValue": true,
+        "choiceGroupDisabledOptionValue": "available",
+        "choiceGroupImageValue": "orange",
+        "choiceGroupIconValue": "lamp",
+        "choiceGroupValue": "beta",
+        "disabledValue": "Disabled sample",
+        "dropdownAriaValue": "medium",
+        "dropdownAnimalValue": "giraffe",
+        "dropdownDisabledValue": "locked-a",
+        "dropdownGroupedValue": "review",
+        "dropdownValue": "green",
+        "limitedLengthValue": "1234567890",
+        "multilineResizableValue": "Resizable\nmultiline\nsample",
+        "multilineStaticValue": "Standard\nmultiline\nsample",
+        "readOnlyValue": "Read-only sample",
+        "sliderHiddenValue": 40,
+        "sliderValue": 6,
+        "toggleAriaLabelOnlyValue": false,
+        "toggleDisabledValue": true,
+        "toggleInlineLabelTextValue": false,
+        "toggleInlineLabelValue": true,
+        "toggleStateAriaLabelValue": false,
+        "toggleTextValue": true,
+        "underlinedValue": "Underlined sample"
+      }
+    }
+  ]
+}

@@ -97,7 +97,7 @@ export function onConfigurationChanged(
 export async function openWorkbenchSettings(): Promise<void> {
   await vscode.commands.executeCommand(
     'workbench.action.openSettings',
-    '@ext:BeauCameron.spfx-local-workbench',
+    '@ext:m365pnp.pnp-spfx-local-workbench',
   );
 }
 

@@ -32,6 +32,12 @@ export const PropertyPaneDropdownOptionType = {
   Header: 2,
 };
 
+export const DynamicDataSharedDepth = {
+  None: 0,
+  Source: 1,
+  Property: 2,
+};
+
 // Property pane field factory functions
 export function PropertyPaneTextField(targetProperty: string, properties?: any) {
   return {
@@ -147,6 +153,7 @@ export function PropertyPaneDynamicFieldSet(properties?: any) {
 
 // Module exports for AMD registration
 export const spPropertyPaneModule = {
+  DynamicDataSharedDepth,
   PropertyPaneFieldType,
   PropertyPaneButtonType,
   PropertyPaneDropdownOptionType,

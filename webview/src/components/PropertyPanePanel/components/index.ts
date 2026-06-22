@@ -9,3 +9,5 @@ export { LabelComponent } from './LabelComponent';
 export { LinkComponent } from './LinkComponent';
 export { HeadingComponent } from './HeadingComponent';
 export { CustomFieldComponent } from './CustomFieldComponent';
+export { DynamicFieldComponent } from './DynamicFieldComponent';
+export { DynamicFieldSetComponent } from './DynamicFieldSetComponent';

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "a72170df-6e8c-44ae-b1ca-e298f49791ad",
+  "alias": "PageAndAccordionWebPart",
+  "componentType": "WebPart",
+  "version": "1.22.2",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
+  "supportsThemeVariants": true,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "Advanced" },
+      "title": { "default": "Page And Accordion" },
+      "description": { "default": "Exercises multi-page property pane behavior and accordion groups." },
+      "officeFabricIconFontName": "GroupedList",
+      "properties": {
+        "accordionName": "Accordion demo",
+        "collapsedNotes": "Initially hidden details",
+        "pageTwoAudience": "reviewers",
+        "pageTwoHighlight": true,
+        "pageTwoNotes": "Second page notes",
+        "pageThreeHiddenNameValue": "Hidden group value",
+        "pageThreeSummary": "Third page summary",
+        "pageThreeStatus": "review"
+      }
+    }
+  ]
+}

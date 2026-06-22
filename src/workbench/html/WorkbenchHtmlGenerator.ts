@@ -39,6 +39,47 @@ export interface IHtmlGeneratorConfig {
   externalDependencies?: IExternalDependency[];
   // HTML field security configuration controlling which external domains web parts may iframe
   htmlFieldSecurity?: IHtmlFieldSecurityConfig;
+  propertyPaneStrings?: {
+    applyButtonText: string;
+    backButtonText: string;
+    collapseGroupAriaLabel: string;
+    connectToSourceText: string;
+    conditionalConnectToSourceText: string;
+    conditionalMenuAriaLabel: string;
+    conditionalRemoveConnectionText: string;
+    defaultHeaderText: string;
+    expandGroupAriaLabel: string;
+    nextButtonText: string;
+    pageCountText: string;
+    unsupportedFieldTypeText: string;
+    visibilityGroupName: string;
+    visibilityToggleLabel: string;
+    visibilityToggleOnText: string;
+    visibilityToggleOffText: string;
+  };
+  dynamicDataStrings?: {
+    itemIdLabel: string;
+    fragmentLabel: string;
+    listUrlLabel: string;
+    pageEnvironmentDescription: string;
+    propertiesLabelFormat: string;
+    pageEnvironmentSourceAlias: string;
+    pageEnvironmentSourceTitle: string;
+    currentUserInformationTitle: string;
+    queryParametersLabel: string;
+    queryStringTitle: string;
+    searchTitle: string;
+    siteClassificationLabel: string;
+    siteCollectionUrlLabel: string;
+    siteDescriptionLabel: string;
+    siteLogoUrlLabel: string;
+    sitePropertiesTitle: string;
+    siteTitleLabel: string;
+    siteUrlLabel: string;
+    userEmailLabel: string;
+    userLoginLabel: string;
+    userNameLabel: string;
+  };
 }
 
 // Generates the Content Security Policy for the webview
@@ -160,6 +201,8 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
     context: config.contextSettings,
     proxyEnabled: config.proxyEnabled !== false,
     propertyPaneShrinkCanvas: config.propertyPaneShrinkCanvas !== false,
+    propertyPaneStrings: config.propertyPaneStrings,
+    dynamicDataStrings: config.dynamicDataStrings,
     externalDependencies: (config.externalDependencies || []).map((dep) => ({
       moduleName: dep.moduleName,
       globalName: dep.globalName,

@@ -446,6 +446,101 @@ export class WorkbenchPanel {
       contextSettings: this._settings.context,
       proxyEnabled: this._apiProxyService?.enabled ?? true,
       propertyPaneShrinkCanvas: this._settings.propertyPaneShrinkCanvas,
+      propertyPaneStrings: {
+        applyButtonText: localize('propertyPane.applyButtonText', 'Apply'),
+        backButtonText: localize('propertyPane.backButtonText', 'Back'),
+        collapseGroupAriaLabel: localize('propertyPane.collapseGroupAriaLabel', 'Collapse group'),
+        connectToSourceText: localize(
+          'propertyPane.connectToSourceText',
+          'Connect to source',
+        ),
+        conditionalConnectToSourceText: localize(
+          'propertyPane.conditional.connectToSourceText',
+          'Connect to source',
+        ),
+        conditionalMenuAriaLabel: localize(
+          'propertyPane.conditional.menuAriaLabel',
+          'Conditional group actions',
+        ),
+        conditionalRemoveConnectionText: localize(
+          'propertyPane.conditional.removeConnectionText',
+          'Remove connection',
+        ),
+        defaultHeaderText: localize('propertyPane.defaultHeaderText', 'Properties'),
+        expandGroupAriaLabel: localize('propertyPane.expandGroupAriaLabel', 'Expand group'),
+        nextButtonText: localize('propertyPane.nextButtonText', 'Next'),
+        pageCountText: localize('propertyPane.pageCountText', '{0} of {1}'),
+        unsupportedFieldTypeText: localize(
+          'propertyPane.unsupportedFieldTypeText',
+          'Unsupported field type: {0}',
+        ),
+        visibilityGroupName: localize('propertyPane.visibility.groupName', 'Visibility'),
+        visibilityToggleLabel: localize(
+          'propertyPane.visibility.toggleLabel',
+          'Show in mobile and email view',
+        ),
+        visibilityToggleOnText: localize('propertyPane.visibility.onText', 'On'),
+        visibilityToggleOffText: localize('propertyPane.visibility.offText', 'Off'),
+      },
+      dynamicDataStrings: {
+        currentUserInformationTitle: localize(
+          'dynamicData.pageEnvironment.currentUserInformationTitle',
+          'Current user information',
+        ),
+        fragmentLabel: localize('dynamicData.pageEnvironment.fragmentLabel', 'URL fragment'),
+        itemIdLabel: localize('dynamicData.pageEnvironment.itemIdLabel', 'Item id'),
+        listUrlLabel: localize('dynamicData.pageEnvironment.listUrlLabel', 'List link'),
+        pageEnvironmentDescription: localize(
+          'dynamicData.pageEnvironment.description',
+          'Built-in mock page environment values mapped from the configured SPFx page context.',
+        ),
+        propertiesLabelFormat: localize(
+          'dynamicData.propertiesLabelFormat',
+          "{0}'s properties",
+        ),
+        pageEnvironmentSourceAlias: localize(
+          'dynamicData.pageEnvironment.sourceAlias',
+          'Page environment',
+        ),
+        pageEnvironmentSourceTitle: localize(
+          'dynamicData.pageEnvironment.sourceTitle',
+          'Page environment',
+        ),
+        queryParametersLabel: localize(
+          'dynamicData.pageEnvironment.queryParametersLabel',
+          'Query parameters',
+        ),
+        queryStringTitle: localize(
+          'dynamicData.pageEnvironment.queryStringTitle',
+          'Query string',
+        ),
+        searchTitle: localize('dynamicData.pageEnvironment.searchTitle', 'Search'),
+        siteClassificationLabel: localize(
+          'dynamicData.pageEnvironment.siteClassificationLabel',
+          'Site classification',
+        ),
+        siteCollectionUrlLabel: localize(
+          'dynamicData.pageEnvironment.siteCollectionUrlLabel',
+          'Site collection link',
+        ),
+        siteDescriptionLabel: localize(
+          'dynamicData.pageEnvironment.siteDescriptionLabel',
+          'Site description',
+        ),
+        siteLogoUrlLabel: localize(
+          'dynamicData.pageEnvironment.siteLogoUrlLabel',
+          'Site logo',
+        ),
+        sitePropertiesTitle: localize(
+          'dynamicData.pageEnvironment.sitePropertiesTitle',
+          'Site properties',
+        ),
+        siteTitleLabel: localize('dynamicData.pageEnvironment.siteTitleLabel', 'Site title'),
+        siteUrlLabel: localize('dynamicData.pageEnvironment.siteUrlLabel', 'Site link'),
+        userEmailLabel: localize('dynamicData.pageEnvironment.userEmailLabel', 'User email'),
+        userLoginLabel: localize('dynamicData.pageEnvironment.userLoginLabel', 'Login name'),
+        userNameLabel: localize('dynamicData.pageEnvironment.userNameLabel', 'User name'),
+      },
       externalDependencies: this._externalDependencies,
       htmlFieldSecurity: this._settings.htmlFieldSecurity,
     });
