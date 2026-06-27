@@ -19,6 +19,7 @@ export const TOOLBAR_IDS = {
 export const EVENTS = {
   UPDATE_PROPERTIES: `${ADDON_ID}/update-properties`,
   PROPERTY_CHANGED: `${ADDON_ID}/property-changed`,
+  PROPERTY_PANE_VISIBILITY_CHANGED: `${ADDON_ID}/property-pane-visibility-changed`,
   DISPLAY_MODE_CHANGED: `${ADDON_ID}/display-mode-changed`,
   THEME_CHANGED: `${ADDON_ID}/theme-changed`,
   LOCALE_CHANGED: `${ADDON_ID}/locale-changed`,

@@ -1,8 +1,9 @@
 import { Separator, Text } from '@fluentui/react';
 import React, { FC } from 'react';
 
-import { PropertyPaneFieldType } from '@spfx-local-workbench/shared';
+import { PropertyPaneFieldType } from '../../mocks/PropertyPaneMocks';
 
+import { getPropertyPaneStrings } from './config';
 import styles from './PropertyPanePanel.module.css';
 import {
   ButtonComponent,
@@ -35,7 +36,7 @@ import {
   getDynamicPropertyReference,
   getDynamicPropertyValue,
 } from './shared';
-import type { IPropertyPaneFieldModel } from './types';
+import type { IPropertyPaneCustomFieldPropsModel, IPropertyPaneFieldModel } from './types';
 
 interface IPropertyPaneFieldRendererProps {
   autoFocus?: boolean;
@@ -58,11 +59,7 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
   onPropertyChange,
   provider,
 }) => {
-  const propertyPaneStrings =
-    window.__workbenchConfig?.propertyPaneStrings ?? {
-      connectToSourceText: 'Connect to source',
-      unsupportedFieldTypeText: 'Unsupported field type: {0}',
-    };
+  const propertyPaneStrings = getPropertyPaneStrings();
   const handleChange = (newValue: unknown) => {
     if (field.targetProperty) {
       onPropertyChange(field.targetProperty, newValue);
@@ -157,7 +154,7 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
     case PropertyPaneFieldType.Custom:
       return wrapField(
         <CustomFieldComponent
-          field={field}
+          field={field as IPropertyPaneFieldModel<IPropertyPaneCustomFieldPropsModel>}
           onFieldValidityChange={onFieldValidityChange || (() => {})}
           value={currentValue}
           onPropertyChange={onPropertyChange}

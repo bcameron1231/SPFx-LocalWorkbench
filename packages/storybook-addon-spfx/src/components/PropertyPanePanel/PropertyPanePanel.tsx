@@ -4,31 +4,17 @@
  */
 import { AddonPanel } from '@storybook/components';
 import { useChannel } from '@storybook/manager-api';
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { EVENTS } from '../../constants';
 import styles from './PropertyPanePanel.module.css';
 
 export const PropertyPanePanel: React.FC<{ active: boolean }> = ({ active }) => {
-  const [properties, setProperties] = useState<Record<string, any>>({});
+  const emit = useChannel({});
 
-  const emit = useChannel({
-    [EVENTS.PROPERTY_CHANGED]: ({ propertyPath, newValue }: any) => {
-      setProperties((prev) => ({
-        ...prev,
-        [propertyPath]: newValue,
-      }));
-    },
-  });
-
-  const handlePropertyChange = (propertyPath: string, value: any) => {
-    const newProperties = {
-      ...properties,
-      [propertyPath]: value,
-    };
-    setProperties(newProperties);
-    emit(EVENTS.UPDATE_PROPERTIES, newProperties);
-  };
+  useEffect(() => {
+    emit(EVENTS.PROPERTY_PANE_VISIBILITY_CHANGED, { isOpen: active });
+  }, [active, emit]);
 
   if (!active) {
     return null;
@@ -38,25 +24,14 @@ export const PropertyPanePanel: React.FC<{ active: boolean }> = ({ active }) => 
     <AddonPanel active={active}>
       <div className={styles.container}>
         <h3 className={styles.heading}>Property Pane</h3>
-        {Object.keys(properties).length === 0 ? (
-          <p className={styles.emptyMessage}>
-            No properties available. The web part will expose its property pane configuration here.
-          </p>
-        ) : (
-          <div className={styles.propertiesContainer}>
-            {Object.entries(properties).map(([key, value]) => (
-              <div key={key} className={styles.propertyItem}>
-                <label className={styles.propertyLabel}>{key}</label>
-                <input
-                  type="text"
-                  value={String(value)}
-                  onChange={(e) => handlePropertyChange(key, e.target.value)}
-                  className={styles.propertyInput}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+        <p className={styles.emptyMessage}>
+          The live property pane now opens inside the Storybook preview so it can use the real
+          SPFx web part instance, field callbacks, and non-reactive apply flow.
+        </p>
+        <p className={styles.emptyMessage}>
+          Keep this tab selected to show the pane, or close the preview-side pane with its header
+          close button when you want more canvas space.
+        </p>
       </div>
     </AddonPanel>
   );

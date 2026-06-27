@@ -1,15 +1,17 @@
 import { loadTheme as loadFluentUiTheme } from '@fluentui/react';
 import { useChannel, useGlobals } from '@storybook/preview-api';
 import type { Decorator, StoryContext } from '@storybook/react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   BrowserProxyTransport,
   DEFAULT_HTML_FIELD_SECURITY_DOMAINS,
   DEFAULT_THEME_NAME,
   type IHtmlFieldSecurityConfig,
+  type IActiveWebPart,
   type ITheme,
   type IWebPartManifest,
+  PropertyPanePanel,
   ProxyAadHttpClient,
   ProxyHttpClient,
   ProxySPHttpClient,
@@ -87,6 +89,50 @@ function createMockSpHttpClient(): any {
   };
 }
 
+function getStoryWebPartInstanceId(
+  componentId: string,
+  preconfiguredEntryIndex: number | undefined,
+): string {
+  return `storybook:${componentId}:${preconfiguredEntryIndex ?? 0}`;
+}
+
+function updateStoryWebPartProperty(
+  webPart: IActiveWebPart,
+  targetProperty: string,
+  newValue: unknown,
+): Record<string, any> {
+  const liveInstanceProperty = (webPart.instance as { properties?: Record<string, unknown> })
+    .properties?.[targetProperty];
+  const oldValue = liveInstanceProperty ?? webPart.properties[targetProperty];
+  const internalPropertyPaneChanged = (
+    webPart.instance as {
+      _onPropertyPaneFieldChanged?: (
+        propertyPath: string,
+        updatedValue: unknown,
+        fieldType?: unknown,
+      ) => boolean;
+    }
+  )._onPropertyPaneFieldChanged;
+
+  webPart.properties[targetProperty] = newValue;
+
+  if (typeof internalPropertyPaneChanged === 'function') {
+    internalPropertyPaneChanged.call(webPart.instance, targetProperty, newValue);
+  } else if (typeof webPart.instance.onPropertyPaneFieldChanged === 'function') {
+    webPart.instance.onPropertyPaneFieldChanged(
+      targetProperty,
+      oldValue,
+      webPart.properties[targetProperty],
+    );
+  }
+
+  if (typeof webPart.instance.render === 'function') {
+    webPart.instance.render();
+  }
+
+  return { ...webPart.properties };
+}
+
 /**
  * SPFx decorator that wraps stories with SPFx context
  */
@@ -127,10 +173,14 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
   // parameters.properties acts only as a fallback when the entry has none.
   const [properties, setProperties] = useState<Record<string, any>>(parameters.properties || {});
   const [propertiesSeeded, setPropertiesSeeded] = useState(false);
+  const [propertyPaneOpen, setPropertyPaneOpen] = useState(parameters.showPropertyPane === true);
+  const [activeWebPart, setActiveWebPart] = useState<IActiveWebPart>();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const componentInstanceRef = useRef<any>(null);
   const proxyTransportRef = useRef<BrowserProxyTransport | null>(null);
+  const activeWebPartRef = useRef<IActiveWebPart>();
+  const propertyPaneOpenRef = useRef(propertyPaneOpen);
 
   // Proxy enabled: story-level override → VS Code global setting → default true
   const globalProxyEnabled: boolean = globals[STORYBOOK_GLOBAL_KEYS.PROXY_ENABLED] ?? true;
@@ -201,6 +251,9 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
   // properties are picked up from the serve on the next load.
   useEffect(() => {
     setPropertiesSeeded(false);
+    setPropertyPaneOpen(parameters.showPropertyPane === true);
+    setActiveWebPart(undefined);
+    activeWebPartRef.current = undefined;
   }, [parameters.componentId, parameters.preconfiguredEntryIndex]);
 
   // Update displayMode when global changes
@@ -231,10 +284,51 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     [EVENTS.LOCALE_CHANGED]: (newLocale: string) => {
       setLocale(newLocale);
     },
+    [EVENTS.PROPERTY_PANE_VISIBILITY_CHANGED]: ({
+      isOpen,
+    }: {
+      isOpen?: boolean;
+    }) => {
+      setPropertyPaneOpen(isOpen === true);
+    },
     [EVENTS.UPDATE_PROPERTIES]: (newProperties: Record<string, any>) => {
       setProperties(newProperties);
     },
   });
+
+  useEffect(() => {
+    activeWebPartRef.current = activeWebPart;
+  }, [activeWebPart]);
+
+  useEffect(() => {
+    propertyPaneOpenRef.current = propertyPaneOpen;
+  }, [propertyPaneOpen]);
+
+  const handlePropertyPaneChange = useCallback(
+    (targetProperty: string, newValue: unknown) => {
+      const webPart = activeWebPartRef.current;
+      if (!webPart) {
+        return;
+      }
+
+      const nextProperties = updateStoryWebPartProperty(webPart, targetProperty, newValue);
+      setProperties(nextProperties);
+      setActiveWebPart({ ...webPart, properties: nextProperties });
+      emit(EVENTS.PROPERTY_CHANGED, { propertyPath: targetProperty, newValue });
+    },
+    [emit],
+  );
+
+  const storyWebPart = useMemo(() => {
+    if (!activeWebPart) {
+      return undefined;
+    }
+
+    return {
+      ...activeWebPart,
+      properties,
+    };
+  }, [activeWebPart, properties]);
 
   // Load and render the SPFx component
   useEffect(() => {
@@ -379,14 +473,28 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
           },
           isServedFromLocalhost: true,
           propertyPane: {
-            refresh: () => {},
-            open: () => {},
-            close: () => {},
+            refresh: () => setActiveWebPart((prev) => (prev ? { ...prev } : prev)),
+            open: () => setPropertyPaneOpen(true),
+            close: () => setPropertyPaneOpen(false),
             isRenderedByWebPart: () => true,
-            isPropertyPaneOpen: () => false,
+            isPropertyPaneOpen: () => propertyPaneOpenRef.current,
           },
           statusRenderer: new StatusRenderer(),
         };
+
+        const nextActiveWebPart: IActiveWebPart = {
+          context: instance._context,
+          instance,
+          instanceId: getStoryWebPartInstanceId(
+            parameters.componentId,
+            parameters.preconfiguredEntryIndex,
+          ),
+          manifest,
+          preconfiguredEntryIndex: entryIndex,
+          properties: resolvedProperties,
+        };
+        setActiveWebPart(nextActiveWebPart);
+        activeWebPartRef.current = nextActiveWebPart;
 
         // Call onInit if it exists
         if (typeof instance.onInit === 'function') {
@@ -480,8 +588,10 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         componentInstanceRef.current.onDispose();
       }
       componentInstanceRef.current = null;
+      activeWebPartRef.current = undefined;
+      setActiveWebPart(undefined);
     };
-  }, [parameters.componentId, parameters.serveUrl]);
+  }, [parameters.componentId, parameters.preconfiguredEntryIndex, parameters.serveUrl]);
 
   // Update component when properties, display mode, theme, or locale change
   useEffect(() => {
@@ -526,6 +636,10 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     instance.render();
   }, [properties, displayMode, themeName, locale, htmlFieldSecurity]);
 
+  useEffect(() => {
+    setActiveWebPart((prev) => (prev ? { ...prev, properties } : prev));
+  }, [properties]);
+
   return (
     <SpfxContextProvider
       componentId={parameters.componentId}
@@ -534,7 +648,14 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
       locale={locale}
       properties={properties}
     >
-      <div ref={containerRef} className={styles.componentContainer} />
+      <>
+        <div ref={containerRef} className={styles.componentContainer} />
+        <PropertyPanePanel
+          webPart={propertyPaneOpen ? storyWebPart : undefined}
+          onClose={() => setPropertyPaneOpen(false)}
+          onPropertyChange={handlePropertyPaneChange}
+        />
+      </>
     </SpfxContextProvider>
   );
 };

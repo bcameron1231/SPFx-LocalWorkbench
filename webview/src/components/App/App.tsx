@@ -2,6 +2,7 @@ import { IconButton, css } from '@fluentui/react';
 import React, { FC, useEffect, useState } from 'react';
 
 import { logger } from '@spfx-local-workbench/shared';
+import { PropertyPanePanel } from '@spfx-local-workbench/shared';
 import type {
   IActiveWebPart,
   IComponentManifest,
@@ -14,7 +15,6 @@ import type { IWorkbenchConfig } from '../../types';
 import { ComponentPicker } from '../ComponentPicker';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { ExtensionPropertiesPanel } from '../ExtensionPropertiesPanel';
-import { PropertyPanePanel } from '../PropertyPanePanel';
 import { WorkbenchCanvas } from '../WorkbenchCanvas';
 import styles from './App.module.css';
 
@@ -239,6 +239,7 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
         )}
 
         <PropertyPanePanel
+          includeWorkbenchVisibilityGroup
           webPart={selectedWebPart}
           onClose={() => setSelectedWebPart(undefined)}
           onPropertyChange={(targetProperty, newValue) => {

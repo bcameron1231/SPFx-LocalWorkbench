@@ -1,4 +1,5 @@
 import {
+  PropertyPaneDropdown,
   DynamicDataSharedDepth,
   PropertyPaneDynamicField,
   PropertyPaneDynamicFieldSet,
@@ -14,7 +15,6 @@ import {
 } from './constants';
 import type {
   DynamicPropertyLike,
-  IDynamicDataConsumerConnectionState,
   IDynamicDataSourceState,
   ISerializedDynamicPropertyState,
 } from './types';

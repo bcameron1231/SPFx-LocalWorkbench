@@ -1,5 +1,5 @@
-import { getLocalizedString } from '@spfx-local-workbench/shared';
-import type { IActiveWebPart, ILocalizedString } from '@spfx-local-workbench/shared';
+import { getLocalizedString } from '../../../utils/getLocalizedString';
+import type { IActiveWebPart, ILocalizedString } from '../../../types';
 
 import type {
   IButtonFieldViewModel,
@@ -221,11 +221,13 @@ export function createDropdownFieldViewModel(
   field: IPropertyPaneFieldModel,
   locale: string,
 ): IDropdownFieldViewModel {
-  const options = (getPropertyValue<Array<{ key: string | number; text: unknown }>>(
+  const options = (getPropertyValue<
+    Array<{ disabled?: boolean; key: string | number; text: unknown }>
+  >(
     field.properties,
     'options',
     'Options',
-  ) || []) as Array<{ key: string | number; text: unknown }>;
+  ) || []) as Array<{ disabled?: boolean; key: string | number; text: unknown }>;
 
   return {
     label: getTextProperty(field.properties, locale, 'label', 'Label'),
@@ -513,6 +515,7 @@ export function getDynamicDataSources(provider: unknown): IDynamicDataSourceView
           title?: string;
         };
         getPropertyDefinitions?: () => Array<{ id: string; title: string }>;
+        getPropertyValue?: (propertyId: string) => unknown;
       }>;
     }
   ).getAvailableSources;

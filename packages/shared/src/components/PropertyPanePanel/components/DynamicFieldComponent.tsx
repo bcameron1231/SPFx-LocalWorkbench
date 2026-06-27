@@ -1,6 +1,7 @@
 import { type IDropdownOption, Text } from '@fluentui/react';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 
+import { getDynamicDataStrings, getPropertyPaneStrings } from '../config';
 import type { IDynamicDataSourceViewModel, IDynamicFieldFiltersViewModel } from '../types';
 import { DropdownComponent } from './DropdownComponent';
 
@@ -75,9 +76,7 @@ function isObjectLike(value: unknown): boolean {
 }
 
 function formatPropertiesLabel(name: string): string {
-  const template =
-    window.__workbenchConfig?.dynamicDataStrings?.propertiesLabelFormat ?? "{0}'s properties";
-  return template.replace('{0}', name);
+  return getDynamicDataStrings().propertiesLabelFormat.replace('{0}', name);
 }
 
 function getNestedPropertyDisplayLabel(
@@ -85,7 +84,7 @@ function getNestedPropertyDisplayLabel(
   propertyId: string | undefined,
   childKey: string,
 ): string {
-  const strings = window.__workbenchConfig?.dynamicDataStrings;
+  const strings = getDynamicDataStrings();
 
   if (sourceTitle === strings?.pageEnvironmentSourceTitle && propertyId === 'siteProperties') {
     const sitePropertyLabels: Record<string, string | undefined> = {
@@ -140,7 +139,7 @@ function getForcedPropertyId(
 
 export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
   currentReference,
-  currentValue,
+  currentValue: _currentValue,
   filters,
   hideSourceDropdown = false,
   label,
@@ -150,9 +149,7 @@ export const DynamicFieldComponent: FC<IDynamicFieldComponentProps> = ({
   sources,
 }) => {
   const resolvedSourceLabel =
-    sourceLabel ||
-    window.__workbenchConfig?.propertyPaneStrings?.connectToSourceText ||
-    'Connect to source';
+    sourceLabel || getPropertyPaneStrings().connectToSourceText;
   const maxPropertyValueDepth = propertyValueDepth ?? 2;
   const [optimisticReference, setOptimisticReference] = useState<string | undefined>();
   const effectiveReference = optimisticReference ?? currentReference;

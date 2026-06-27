@@ -15,6 +15,7 @@ export {
   StatusRenderer,
   StatusRendererStrings,
 } from './mocks'; // Explicit re-exports
+export { PropertyPanePanel } from './components';
 export { ProxyHttpClient } from './proxy/clients/ProxyHttpClient';
 export { ProxySPHttpClient } from './proxy/clients/ProxySPHttpClient';
 export { ProxyAadHttpClient } from './proxy/clients/ProxyAadHttpClient';
