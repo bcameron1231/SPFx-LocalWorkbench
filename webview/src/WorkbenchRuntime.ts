@@ -16,6 +16,7 @@ import type {
   IExtensionConfig,
   IExtensionManifest,
   ITheme,
+  IProxyScenarioState,
   IWebPartConfig,
   IWebPartManifest,
 } from '@spfx-local-workbench/shared';
@@ -45,6 +46,8 @@ export class WorkbenchRuntime {
   private activeWebParts: IWebPartConfig[] = [];
   private activeExtensions: IExtensionConfig[] = [];
   private displayMode: DisplayMode = DisplayMode.Edit;
+  private isReinitializingForScenario = false;
+  private scenarioReinitialization: Promise<void> | undefined;
 
   constructor(config: IWorkbenchConfig, vscodeApi: IVsCodeApi) {
     this.vscode = vscodeApi;
@@ -132,6 +135,36 @@ export class WorkbenchRuntime {
       );
     }
     this.log.debug('Settings updated in-place');
+  }
+
+  /**
+   * Updates the status-bar scenario state and optionally recreates active components.
+   */
+  async updateProxyScenarioState(
+    state: IProxyScenarioState,
+    reinitialize: boolean,
+  ): Promise<void> {
+    let pendingReinitialization = this.scenarioReinitialization;
+    if (reinitialize && state.proxyActive && !pendingReinitialization) {
+      window.dispatchEvent(new CustomEvent('workbenchProxyScenarioApplying'));
+      pendingReinitialization = this.reinitializeActiveComponentsForScenario(
+        state.activeScenarioName ?? 'Base rules',
+      );
+      this.scenarioReinitialization = pendingReinitialization;
+    }
+    window.dispatchEvent(
+      new CustomEvent('workbenchProxyScenarioStateUpdated', { detail: state }),
+    );
+    try {
+      if (pendingReinitialization) {
+        await pendingReinitialization;
+      }
+    } finally {
+      if (this.scenarioReinitialization === pendingReinitialization) {
+        this.scenarioReinitialization = undefined;
+      }
+      window.dispatchEvent(new CustomEvent('workbenchProxyScenarioApplied'));
+    }
   }
 
   async initialize(): Promise<void> {
@@ -724,6 +757,124 @@ export class WorkbenchRuntime {
     this.updateStatus('Reloaded');
     this.updateConnectionStatus(true);
     this.log.info('Live reload complete');
+  }
+
+  /**
+   * Recreates active SPFx components so they request data from the newly selected scenario.
+   * The surrounding workbench React tree and component configuration stay intact.
+   */
+  private async reinitializeActiveComponentsForScenario(
+    scenarioLabel: string,
+  ): Promise<void> {
+    if (this.isReinitializingForScenario) {
+      return;
+    }
+
+    this.isReinitializingForScenario = true;
+    this.updateStatus(`Applying proxy scenario: ${scenarioLabel}...`);
+
+    try {
+      const webPartConfigs: IWebPartConfig[] = this.activeWebParts.map((webPart) => ({
+        manifest: webPart.manifest,
+        instanceId: webPart.instanceId,
+        preconfiguredEntryIndex: webPart.preconfiguredEntryIndex,
+        properties: webPart.properties,
+      }));
+      const extensionConfigs: IExtensionConfig[] = this.activeExtensions.map((extension) => ({
+        manifest: extension.manifest,
+        instanceId: extension.instanceId,
+        properties: extension.properties,
+      }));
+
+      for (const webPart of this.activeWebParts) {
+        if (!isActiveWebPart(webPart)) {
+          continue;
+        }
+        const dynamicDataSourceManager = (
+          webPart.context as {
+            dynamicDataSourceManager?: { dispose?: () => void };
+          }
+        ).dynamicDataSourceManager;
+        try {
+          dynamicDataSourceManager?.dispose?.();
+        } catch (error: unknown) {
+          this.log.warn('Error disposing dynamic data before scenario switch:', error);
+        }
+        try {
+          webPart.instance.onDispose?.();
+        } catch (error: unknown) {
+          this.log.warn('Error disposing web part before scenario switch:', error);
+        }
+        const element = document.getElementById(`webpart-${webPart.instanceId}`);
+        if (element) {
+          element.innerHTML = '';
+        }
+      }
+
+      for (const extension of this.activeExtensions) {
+        if (!isActiveExtension(extension)) {
+          continue;
+        }
+        const dynamicDataSourceManager = (
+          extension.context as {
+            dynamicDataSourceManager?: { dispose?: () => void };
+          }
+        ).dynamicDataSourceManager;
+        try {
+          dynamicDataSourceManager?.dispose?.();
+        } catch (error: unknown) {
+          this.log.warn(
+            'Error disposing extension dynamic data before scenario switch:',
+            error,
+          );
+        }
+        try {
+          extension.instance.onDispose?.();
+        } catch (error: unknown) {
+          this.log.warn('Error disposing extension before scenario switch:', error);
+        }
+        extension.headerDomElement?.replaceChildren();
+        extension.footerDomElement?.replaceChildren();
+      }
+
+      this.activeWebParts = webPartConfigs;
+      this.activeExtensions = extensionConfigs;
+
+      for (const config of webPartConfigs) {
+        await this.instantiateWebPart(config);
+      }
+
+      for (let index = 0; index < extensionConfigs.length; index++) {
+        const config = extensionConfigs[index];
+        const headerElement = document.getElementById(
+          `ext-header-${config.instanceId}`,
+        ) as HTMLDivElement | null;
+        const footerElement = document.getElementById(
+          `ext-footer-${config.instanceId}`,
+        ) as HTMLDivElement | null;
+        if (!headerElement || !footerElement) {
+          this.log.warn(
+            'Missing extension placeholder while applying proxy scenario:',
+            config.instanceId,
+          );
+          continue;
+        }
+        const active = await this.extensionManager.instantiateExtension(
+          config,
+          headerElement,
+          footerElement,
+        );
+        if (active) {
+          this.activeExtensions[index] = active;
+        }
+      }
+
+      this.appHandlers?.setActiveWebParts([...this.activeWebParts]);
+      this.appHandlers?.setActiveExtensions([...this.activeExtensions]);
+      this.updateStatus(`Proxy scenario applied: ${scenarioLabel}`);
+    } finally {
+      this.isReinitializingForScenario = false;
+    }
   }
 
   handleRefresh(): void {

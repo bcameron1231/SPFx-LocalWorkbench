@@ -129,10 +129,60 @@ Create a file at `.spfx-workbench/api-mocks.json` in your project root (or run t
 
 ### 2. Configuration File Structure
 
-| Property | Type          | Description                                                                    |
-| -------- | ------------- | ------------------------------------------------------------------------------ |
-| `delay`  | `number`      | Global default delay (ms) applied to all responses unless overridden per-rule. |
-| `rules`  | `IMockRule[]` | Array of mock rules. Evaluated in order; first match wins.                     |
+| Property    | Type               | Description                                                                                                           |
+| ----------- | ------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `delay`     | `number`           | File-level delay (ms). Precedence is rule, file, `proxy.defaultDelay`, then zero.                                      |
+| `rules`     | `IMockRule[]`      | Base rules that are always available.                                                                                 |
+| `scenarios` | `IProxyScenario[]` | Optional additive rule sets. The active scenario is composed with the base rules before requests are matched.         |
+
+### Additive Scenarios
+
+Scenarios let you keep shared behavior in `rules` and define only the differences needed for a particular state:
+
+```json
+{
+  "rules": [
+    {
+      "name": "Get projects",
+      "match": { "url": "/_api/projects", "method": "GET" },
+      "response": { "status": 200, "body": { "value": [] } }
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "Populated",
+      "description": "Returns several representative projects.",
+      "rules": [
+        {
+          "name": "Get projects",
+          "match": { "url": "/_api/projects", "method": "GET" },
+          "response": {
+            "status": 200,
+            "body": { "value": [{ "id": 1, "title": "Project One" }] }
+          }
+        },
+        {
+          "name": "Get project owners",
+          "match": { "url": "/_api/project-owners", "method": "GET" },
+          "response": { "status": 200, "body": { "value": [] } }
+        }
+      ]
+    }
+  ]
+}
+```
+
+The Workbench status bar shows a scenario switcher whenever the configuration contains at least one scenario. **Base rules** means no scenario is active. The selection is stored for the workspace, while Storybook keeps its own independent selection.
+
+Composition is deterministic:
+
+1. Start with base `rules` in their configured order.
+2. A scenario rule whose `name` exactly matches a base rule completely replaces that rule at its original position.
+3. Every other scenario rule is appended in scenario order. Unnamed rules are therefore always additive.
+4. Rule fields are never deep-merged.
+5. An absent or unknown selection resolves to Base rules.
+
+Names used for overrides are case-sensitive. Named rules must be unique within the base collection and within each scenario. Scenario names must be non-empty and unique; `Base` and `Base rules` are reserved, case-insensitively.
 
 ### 3. Mock Rule Structure
 
@@ -144,7 +194,7 @@ Each rule has a **match** section and a **response** section:
 | ------------ | --------- | -------- | ------------------------------------------------------------------------- |
 | `url`        | `string`  | Yes      | URL substring to match against the request URL.                           |
 | `method`     | `string`  | No       | HTTP method filter (`GET`, `POST`, etc.). If omitted, matches any method. |
-| `clientType` | `string`  | No       | Restrict to a specific client: `spHttp`, `http`, or `aadHttp`.            |
+| `clientType` | `string`  | No       | Restrict to a specific client: `spHttp`, `http`, `aadHttp`, or `fetch`.   |
 | `urlPattern` | `boolean` | No       | When `true`, `url` is treated as a glob pattern instead of a substring.   |
 
 #### Response
@@ -157,7 +207,7 @@ Each rule has a **match** section and a **response** section:
 | `bodyFile` | `string` | No       | Path to a file containing the response body (relative to workspace root). Use this for large responses. |
 | `delay`    | `number` | No       | Per-rule delay in milliseconds (overrides the global `delay`).                                          |
 
-> **Note:** `body` and `bodyFile` are mutually exclusive. If both are specified, `bodyFile` takes precedence.
+> **Note:** `body` and `bodyFile` are mutually exclusive. The configuration is rejected when both are specified.
 
 #### Top-Level Rule Properties
 
@@ -315,6 +365,7 @@ You can customize proxy behavior through VS Code settings:
 | ----------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `spfxLocalWorkbench.proxy.enabled`        | `true`                           | Enable or disable the API proxy system. When disabled, HTTP client calls make real `fetch()` requests instead of routing through the mock rule engine, allowing external tools like Dev Proxy to handle them. **Requires closing and reopening the workbench to take effect.** |
 | `spfxLocalWorkbench.proxy.mockFile`       | `.spfx-workbench/api-mocks.json` | Path to the mock config file (relative to workspace root).                                                                                                                                                                                                                     |
+| `spfxLocalWorkbench.proxy.activeScenario` | _unset_                          | Workspace-scoped active scenario name. An unset value uses Base rules. Prefer the Workbench switcher so stale or unknown names are handled for you.                                                                                                                            |
 | `spfxLocalWorkbench.proxy.defaultDelay`   | `0`                              | Default delay (ms) for all mock responses.                                                                                                                                                                                                                                     |
 | `spfxLocalWorkbench.proxy.fallbackStatus` | `404`                            | HTTP status returned when no mock rule matches a request.                                                                                                                                                                                                                      |
 | `spfxLocalWorkbench.proxy.logRequests`    | `true`                           | Log all proxied requests to the **SPFx API Proxy** output channel.                                                                                                                                                                                                             |
@@ -341,6 +392,7 @@ Your existing web part code like `response.json().then(data => ...)` works witho
 
 - **Rules are evaluated in order** — put more specific rules above generic catch-all rules.
 - **Hot reload** — edit `api-mocks.json` and save; the extension picks up changes automatically without restarting the workbench.
+- **Scenario edits hot-reload** for the next request. Changing the active selection recreates active components in place so their initialization requests use the new effective rules.
 - **Use `bodyFile`** for large payloads to keep your mock config readable.
 - **Check the Output channel** ("SPFx API Proxy") to verify which rules are matching and debug unexpected 404s.
 - **Unmatched requests** return the `fallbackStatus` (default `404`) with a JSON body describing what was requested, making it easy to identify missing mock rules.

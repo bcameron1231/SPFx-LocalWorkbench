@@ -5,7 +5,12 @@
 import { addons, types } from '@storybook/manager-api';
 import React from 'react';
 
-import { DisplayModeToolbar, PropertyPanePanel, ThemeToolbar } from './components';
+import {
+  DisplayModeToolbar,
+  PropertyPanePanel,
+  ScenarioToolbar,
+  ThemeToolbar,
+} from './components';
 import { ADDON_ID, PANEL_ID, TOOLBAR_IDS } from './constants';
 
 // Register the addon
@@ -24,6 +29,13 @@ addons.register(ADDON_ID, () => {
     title: 'Theme',
     match: ({ viewMode }) => viewMode === 'story',
     render: () => <ThemeToolbar />,
+  });
+
+  addons.add(TOOLBAR_IDS.SCENARIO, {
+    type: types.TOOL,
+    title: 'Proxy Scenario',
+    match: ({ viewMode }) => viewMode === 'story',
+    render: () => <ScenarioToolbar />,
   });
 
   // // Register locale toolbar

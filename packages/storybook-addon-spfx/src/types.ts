@@ -121,6 +121,12 @@ export interface ISpfxProxyConfig {
    * Overrides the global `spfxLocalWorkbench.proxy.mode` VS Code setting.
    */
   mode?: 'mock' | 'mock-passthrough';
+
+  /**
+   * Case-sensitive additive proxy scenario name.
+   * When omitted, only Base rules are used.
+   */
+  scenario?: string;
 }
 
 /**

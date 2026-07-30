@@ -147,6 +147,7 @@ function generateStatusBar(
         <span id="component-count">${countText}</span>
         <div class="separator"></div>
         <span id="locale-switcher">${locale.toLowerCase()}</span>
+        <div id="scenario-picker"></div>
         <div id="theme-picker"></div>
     </div>
     `;

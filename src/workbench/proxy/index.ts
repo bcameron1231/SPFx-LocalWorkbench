@@ -5,12 +5,15 @@
 export { ApiProxyService } from './ApiProxyService';
 export { MockRuleEngine } from '@spfx-local-workbench/shared';
 export { MockConfigGenerator } from './MockConfigGenerator';
+export type { IMockRuleSaveResult } from './MockConfigGenerator';
 export type { IRecordedRequest } from './generators';
 export type {
   IMockConfig,
   IMockRule,
   IMockRuleMatch,
   IMockRuleResponse,
+  IProxyScenario,
+  IProxyScenarioState,
   IProxyRequest,
   IProxyResponse,
   IProxySettings,

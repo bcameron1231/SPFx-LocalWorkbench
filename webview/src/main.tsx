@@ -10,6 +10,7 @@ import type { ITheme, IThemeGroup } from '@spfx-local-workbench/shared';
 
 import { WorkbenchRuntime } from './WorkbenchRuntime';
 import { App, IAppHandlers } from './components/App';
+import { StatusBarScenarioPicker } from './components/StatusBarScenarioPicker';
 import { StatusBarThemePicker } from './components/StatusBarThemePicker';
 import { initializeVsCodeProxyTransport, installFetchProxy } from './proxy';
 import './styles/global.css';
@@ -86,6 +87,13 @@ function initialize() {
       runtime.persistTheme(e.detail);
     }) as EventListener);
 
+    window.addEventListener('workbenchProxyScenarioChanged', ((e: CustomEvent) => {
+      vscodeApi.postMessage({
+        command: 'setProxyScenario',
+        scenarioName: e.detail?.scenarioName,
+      });
+    }) as EventListener);
+
     window.addEventListener('refresh', (() => {
       runtime.handleRefresh();
     }) as EventListener);
@@ -136,6 +144,21 @@ function initialize() {
             runtime.setDisplayMode(message.displayMode);
           }
           return;
+        case 'proxyScenarioState':
+          if (message.state) {
+            void runtime.updateProxyScenarioState(
+              message.state,
+              message.reinitialize === true,
+            );
+          }
+          return;
+        case 'proxyScenarioSelectionError':
+          window.dispatchEvent(
+            new CustomEvent('workbenchProxyScenarioSelectionError', {
+              detail: message.message,
+            }),
+          );
+          return;
       }
       if (message && message.command === 'settingsChanged' && message.settings) {
         runtime.updateSettings(message.settings);
@@ -165,6 +188,13 @@ function initialize() {
       }),
       root,
     );
+
+    // Mount the theme picker into the status bar element
+    const scenarioPickerRoot = document.getElementById('scenario-picker');
+    if (scenarioPickerRoot) {
+      ReactDOM.render(React.createElement(StatusBarScenarioPicker), scenarioPickerRoot);
+      vscodeApi.postMessage({ command: 'requestProxyScenarioState' });
+    }
 
     // Mount the theme picker into the status bar element
     const themePickerRoot = document.getElementById('theme-picker');

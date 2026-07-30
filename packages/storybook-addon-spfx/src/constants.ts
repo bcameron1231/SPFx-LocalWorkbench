@@ -13,6 +13,7 @@ export const PARAM_KEY = 'spfx';
 export const TOOLBAR_IDS = {
   DISPLAY_MODE: `${ADDON_ID}/display-mode`,
   THEME: `${ADDON_ID}/theme`,
+  SCENARIO: `${ADDON_ID}/scenario`,
   LOCALE: `${ADDON_ID}/locale`,
 } as const;
 
@@ -35,6 +36,8 @@ export const STORYBOOK_GLOBAL_KEYS = {
   PROXY_FALLBACK_STATUS: `${PARAM_KEY}ProxyFallbackStatus`,
   /** Set by the VS Code extension from `spfxLocalWorkbench.proxy.mode`. Defaults to `'mock'`. */
   PROXY_MODE: `${PARAM_KEY}ProxyMode`,
+  /** Session-local active proxy scenario. Null or undefined represents Base rules. */
+  PROXY_SCENARIO: `${PARAM_KEY}ProxyScenario`,
   /**
    * HTML Field Security configuration. Controls which external domains web parts may iframe.
    * Mirrors SharePoint's built-in HTML Field Security setting.

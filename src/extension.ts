@@ -22,6 +22,7 @@ import {
   generatePseudoLocale,
   getWorkbenchSettings,
 } from './workbench';
+import type { IMockRuleSaveResult } from './workbench/proxy/MockConfigGenerator';
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -406,14 +407,32 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
       const proxy = new ApiProxyService(wsFolder.uri.fsPath, apiProxyOutputChannel);
-      await proxy.scaffoldMockConfig();
-      proxy.dispose();
-      vscode.window.showInformationMessage(
-        localize(
-          'mock.scaffolded',
-          'API mock configuration scaffolded at .spfx-workbench/api-mocks.json',
-        ),
+      let result: Awaited<ReturnType<ApiProxyService['scaffoldMockConfig']>>;
+      try {
+        result = await proxy.scaffoldMockConfig();
+      } finally {
+        proxy.dispose();
+      }
+
+      const openFileAction = localize('mock.action.openFile', 'Open file');
+      const selection = await vscode.window.showInformationMessage(
+        result.created
+          ? localize(
+              'mock.scaffolded',
+              'API mock configuration scaffolded at {0}',
+              vscode.workspace.asRelativePath(result.uri),
+            )
+          : localize(
+              'mock.scaffold.exists',
+              'API mock configuration already exists at {0}',
+              vscode.workspace.asRelativePath(result.uri),
+            ),
+        openFileAction,
       );
+      if (selection === openFileAction) {
+        const document = await vscode.workspace.openTextDocument(result.uri);
+        await vscode.window.showTextDocument(document);
+      }
     },
   );
 
@@ -486,7 +505,9 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // Helper to create a MockConfigGenerator for the current workspace
-  function createGenerator(): MockConfigGenerator | undefined {
+  function createGenerator(
+    activeScenarioName: string | undefined = ApiProxyService.readActiveScenarioName(),
+  ): MockConfigGenerator | undefined {
     const wsFolder = vscode.workspace.workspaceFolders?.[0];
     if (!wsFolder) {
       vscode.window.showWarningMessage(
@@ -497,10 +518,53 @@ export function activate(context: vscode.ExtensionContext) {
     const settings = ApiProxyService.readSettings();
     const { activeMode } = settings;
     const mockFile =
-      activeMode.mode === 'mock' || activeMode.mode === 'record'
+      activeMode.mode === 'mock' ||
+      activeMode.mode === 'mock-passthrough' ||
+      activeMode.mode === 'record'
         ? activeMode.options.mockFile
         : undefined;
-    return new MockConfigGenerator(wsFolder.uri.fsPath, mockFile);
+    return new MockConfigGenerator(wsFolder.uri.fsPath, mockFile, activeScenarioName);
+  }
+
+  async function showMockRuleSaveResult(result: IMockRuleSaveResult): Promise<void> {
+    const activeScenarioName = ApiProxyService.readActiveScenarioName();
+    const destinationIsActive = result.scenarioName === activeScenarioName;
+    const message = localize(
+      'mock.destination.saved',
+      'Saved {0} generated rule(s) to {1}.',
+      result.ruleCount,
+      result.destinationLabel,
+    );
+    if (destinationIsActive) {
+      await vscode.window.showInformationMessage(message);
+      return;
+    }
+
+    const switchAction = result.scenarioName
+      ? localize(
+          'mock.destination.switchToScenario',
+          'Switch to {0}',
+          result.scenarioName,
+        )
+      : localize('mock.destination.switchToBase', 'Switch to Base rules');
+    const selection = await vscode.window.showInformationMessage(message, switchAction);
+    if (selection !== switchAction) {
+      return;
+    }
+
+    const proxyService = WorkbenchPanel.currentPanel?.apiProxyService;
+    if (proxyService) {
+      await proxyService.reloadConfig();
+      await proxyService.setActiveScenario(result.scenarioName);
+    } else {
+      await vscode.workspace
+        .getConfiguration('spfxLocalWorkbench.proxy')
+        .update(
+          'activeScenario',
+          result.scenarioName,
+          vscode.ConfigurationTarget.Workspace,
+        );
+    }
   }
 
   // Generate status-code stubs via interactive wizard
@@ -511,11 +575,9 @@ export function activate(context: vscode.ExtensionContext) {
       if (!gen) {
         return;
       }
-      const ok = await gen.generateStatusStubs();
-      if (ok) {
-        vscode.window.showInformationMessage(
-          localize('mock.generated', 'Mock rules generated successfully.'),
-        );
+      const result = await gen.generateStatusStubs();
+      if (result) {
+        await showMockRuleSaveResult(result);
       }
     },
   );
@@ -528,11 +590,9 @@ export function activate(context: vscode.ExtensionContext) {
       if (!gen) {
         return;
       }
-      const ok = await gen.importJsonFile();
-      if (ok) {
-        vscode.window.showInformationMessage(
-          localize('mock.importJson.success', 'JSON file imported as mock rule.'),
-        );
+      const result = await gen.importJsonFile();
+      if (result) {
+        await showMockRuleSaveResult(result);
       }
     },
   );
@@ -545,11 +605,9 @@ export function activate(context: vscode.ExtensionContext) {
       if (!gen) {
         return;
       }
-      const ok = await gen.importCsvFile();
-      if (ok) {
-        vscode.window.showInformationMessage(
-          localize('mock.importCsv.success', 'CSV file imported as mock rule.'),
-        );
+      const result = await gen.importCsvFile();
+      if (result) {
+        await showMockRuleSaveResult(result);
       }
     },
   );
@@ -573,6 +631,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       // If already recording, stop and generate
       if (proxy.isRecording) {
+        const recordingScenarioName = proxy.recordingScenarioName;
         const requests = proxy.stopRecording();
         recordingStatusBar.hide();
 
@@ -586,17 +645,11 @@ export function activate(context: vscode.ExtensionContext) {
           return;
         }
 
-        const gen = createGenerator();
+        const gen = createGenerator(recordingScenarioName);
         if (gen) {
-          const ok = await gen.generateFromRecordedRequests(requests);
-          if (ok) {
-            vscode.window.showInformationMessage(
-              localize(
-                'record.generated',
-                'Generated rules from {0} recorded request(s).',
-                requests.length,
-              ),
-            );
+          const result = await gen.generateFromRecordedRequests(requests);
+          if (result) {
+            await showMockRuleSaveResult(result);
           }
         }
         return;

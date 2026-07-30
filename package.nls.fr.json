@@ -144,6 +144,7 @@
   "configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.passthrough": "Transférer tous les appels API vers leurs véritables points de terminaison",
   "configuration.spfxLocalWorkbench.proxy.mode.enumDescriptions.record": "Servir les règles mock existantes et capturer les requêtes non appariées pour la génération de stubs",
   "configuration.spfxLocalWorkbench.proxy.mockFile.description": "Chemin vers le fichier de configuration des règles mock (relatif à la racine du dossier de travail)",
+  "configuration.spfxLocalWorkbench.proxy.activeScenario.description": "Scénario de proxy actif. Laissez ce paramètre non défini pour utiliser les règles de base ; il est normalement mis à jour via le sélecteur de scénario du workbench.",
   "configuration.spfxLocalWorkbench.proxy.defaultDelay.description": "Latence simulée par défaut en millisecondes pour les réponses mock",
   "configuration.spfxLocalWorkbench.proxy.fallbackStatus.description": "Code d'état HTTP retourné lorsqu'aucune règle mock ne correspond en mode mock",
   "configuration.spfxLocalWorkbench.proxy.logRequests.description": "Enregistrer toutes les requêtes proxy dans le canal de sortie 'SPFx API Proxy'",

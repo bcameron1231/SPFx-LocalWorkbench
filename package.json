@@ -997,6 +997,11 @@
             "default": ".spfx-workbench/api-mocks.json",
             "description": "%configuration.spfxLocalWorkbench.proxy.mockFile.description%"
           },
+          "spfxLocalWorkbench.proxy.activeScenario": {
+            "order": 35,
+            "type": "string",
+            "description": "%configuration.spfxLocalWorkbench.proxy.activeScenario.description%"
+          },
           "spfxLocalWorkbench.proxy.defaultDelay": {
             "order": 40,
             "type": "number",
@@ -1031,6 +1036,12 @@
             "description": "%configuration.spfxLocalWorkbench.proxy.serveMocksWhileRecording.description%"
           }
         }
+      }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": "**/api-mocks.json",
+        "url": "./schemas/api-mocks.schema.json"
       }
     ]
   },

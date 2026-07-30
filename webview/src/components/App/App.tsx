@@ -87,6 +87,23 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
     }
   }, [activeWebParts, selectedWebPart]);
 
+  useEffect(() => {
+    if (!selectedExtension) {
+      return;
+    }
+
+    const matchingExtension = activeExtensions.find(
+      (extension) => extension.instanceId === selectedExtension.instanceId,
+    );
+    if (!matchingExtension) {
+      setSelectedExtension(undefined);
+      return;
+    }
+    if (matchingExtension !== selectedExtension) {
+      setSelectedExtension(matchingExtension);
+    }
+  }, [activeExtensions, selectedExtension]);
+
   const shrinkCanvas = config.propertyPaneShrinkCanvas !== false;
 
   return (

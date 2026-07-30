@@ -7,6 +7,7 @@ This addon provides SharePoint Framework-specific features for Storybook, includ
 - **Theme Switching**: Preview components with different SharePoint themes
 - **Locale Support**: Test components with different locales
 - **Property Pane Panel**: Interactive property pane for web parts
+- **Proxy Scenarios**: Switch additive API mock scenarios without leaving Storybook
 - **Break Out Panel**: View components in isolation
 
 ## Installation
@@ -29,6 +30,9 @@ const meta: Meta = {
       componentId: 'abc-123-def-456',
       properties: {
         description: 'Hello World'
+      },
+      proxy: {
+        scenario: 'Populated'
       }
     }
   }
@@ -39,3 +43,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 ```
+
+When the effective mock configuration contains scenarios, Storybook shows a proxy scenario toolbar. `parameters.spfx.proxy.scenario` seeds the selection when a story loads; omitting it seeds **Base rules**. A toolbar choice is temporary and is reset from the next story's parameters on navigation or reload. Unknown scenario names warn and fall back to Base.
+
+The addon remains standalone: it loads proxy metadata from `parameters.spfx.proxy.mockFile`, or `/proxy/api-mocks.json` when no custom path is supplied, and does not use VS Code APIs.

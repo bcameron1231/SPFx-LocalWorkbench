@@ -107,11 +107,26 @@ export interface IMockRule {
   disabled?: boolean;
 }
 
+/** A named set of rules applied on top of the base mock rules */
+export interface IProxyScenario {
+  /** Unique scenario name used by Workbench settings and Storybook parameters */
+  name: string;
+
+  /** Optional explanation shown in scenario pickers */
+  description?: string;
+
+  /** Rules added to, or replacing same-named rules from, the base rule set */
+  rules: IMockRule[];
+}
+
 /** Top-level mock configuration file structure (.spfx-workbench/api-mocks.json) */
 export interface IMockConfig {
   /** Global default delay in milliseconds */
   delay?: number;
 
-  /** Mock rules evaluated in order; first match wins */
+  /** Base mock rules */
   rules: IMockRule[];
+
+  /** Optional additive rule scenarios */
+  scenarios?: IProxyScenario[];
 }

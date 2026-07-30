@@ -127,6 +127,8 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
   // parameters.properties acts only as a fallback when the entry has none.
   const [properties, setProperties] = useState<Record<string, any>>(parameters.properties || {});
   const [propertiesSeeded, setPropertiesSeeded] = useState(false);
+  const [proxyReady, setProxyReady] = useState(false);
+  const [proxyScenarioRevision, setProxyScenarioRevision] = useState(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const componentInstanceRef = useRef<any>(null);
@@ -149,6 +151,10 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
   const globalProxyMode: 'mock' | 'mock-passthrough' =
     rawGlobalProxyMode === 'mock-passthrough' ? 'mock-passthrough' : 'mock';
   const proxyMode = parameters.proxy?.mode ?? globalProxyMode;
+  const globalProxyScenario =
+    typeof globals[STORYBOOK_GLOBAL_KEYS.PROXY_SCENARIO] === 'string'
+      ? (globals[STORYBOOK_GLOBAL_KEYS.PROXY_SCENARIO] as string)
+      : undefined;
   // HTML field security: VS Code global setting → default allowList with SharePoint domains
   const htmlFieldSecurity: IHtmlFieldSecurityConfig = globals[
     STORYBOOK_GLOBAL_KEYS.HTML_FIELD_SECURITY
@@ -157,15 +163,19 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
   // Initialize proxy transport when proxy is enabled (or when config changes between stories)
   useEffect(() => {
     if (!proxyEnabled) {
+      proxyTransportRef.current = null;
+      setProxyReady(true);
       return;
     }
 
+    setProxyReady(false);
     // Create transport — pass custom mockFile URL, fallback status, and proxy mode if specified
     const transport = new BrowserProxyTransport(
       proxyMockFile,
       undefined,
       proxyFallbackStatus,
       proxyMode,
+      globalProxyScenario,
     );
     proxyTransportRef.current = transport;
 
@@ -180,6 +190,11 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
       .then(() => {
         if (!cancelled) {
           installFetchInterceptor(transport);
+          const resolvedScenario = transport.getActiveScenarioName();
+          if (globalProxyScenario && !resolvedScenario) {
+            updateGlobals({ [STORYBOOK_GLOBAL_KEYS.PROXY_SCENARIO]: null });
+          }
+          setProxyReady(true);
         }
       })
       .catch((error) => {
@@ -194,8 +209,36 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
       cancelled = true;
       uninstallFetchInterceptor();
       proxyTransportRef.current = null;
+      setProxyReady(false);
     };
   }, [proxyEnabled, proxyMockFile, proxyFallbackStatus, proxyMode]);
+
+  // Story parameters seed Base or a named scenario on every story navigation.
+  // Toolbar changes remain temporary until the next navigation/reload.
+  useEffect(() => {
+    updateGlobals({
+      [STORYBOOK_GLOBAL_KEYS.PROXY_SCENARIO]: parameters.proxy?.scenario ?? null,
+    });
+  }, [context.id, parameters.proxy?.scenario]);
+
+  // Switch the stable transport in place, then remount only the active SPFx component.
+  useEffect(() => {
+    if (!proxyEnabled || !proxyReady) {
+      return;
+    }
+    const transport = proxyTransportRef.current;
+    if (!transport) {
+      return;
+    }
+    const previousScenario = transport.getActiveScenarioName();
+    const resolvedScenario = transport.setScenario(globalProxyScenario);
+    if (globalProxyScenario && !resolvedScenario) {
+      updateGlobals({ [STORYBOOK_GLOBAL_KEYS.PROXY_SCENARIO]: null });
+    }
+    if (previousScenario !== resolvedScenario) {
+      setProxyScenarioRevision((revision) => revision + 1);
+    }
+  }, [globalProxyScenario, proxyEnabled, proxyReady]);
 
   // Reset seed flag whenever the story target changes so the new manifest entry's
   // properties are picked up from the serve on the next load.
@@ -238,7 +281,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
 
   // Load and render the SPFx component
   useEffect(() => {
-    if (!containerRef.current) {
+    if (!containerRef.current || (proxyEnabled && !proxyReady)) {
       return;
     }
 
@@ -283,6 +326,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         const entryIndex = parameters.preconfiguredEntryIndex ?? 0;
         const serveProperties = manifest.preconfiguredEntries?.[entryIndex]?.properties ?? {};
         const resolvedProperties = { ...serveProperties, ...parameters.properties };
+        const instanceProperties = propertiesSeeded ? properties : resolvedProperties;
 
         // Seed React state once per component load so downstream effects see the correct values.
         if (!propertiesSeeded) {
@@ -297,7 +341,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         // Set up the component with getters (similar to WebPartManager)
         instance._context = undefined;
         instance._domElement = containerRef.current;
-        instance._properties = resolvedProperties;
+        instance._properties = instanceProperties;
         instance._displayMode = displayMode;
 
         // Define property getters
@@ -481,7 +525,13 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
       }
       componentInstanceRef.current = null;
     };
-  }, [parameters.componentId, parameters.serveUrl]);
+  }, [
+    parameters.componentId,
+    parameters.serveUrl,
+    proxyEnabled,
+    proxyReady,
+    proxyScenarioRevision,
+  ]);
 
   // Update component when properties, display mode, theme, or locale change
   useEffect(() => {
