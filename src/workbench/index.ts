@@ -39,3 +39,6 @@ export { generateWorkbenchHtml, generateErrorHtml } from './html';
 
 // API Proxy
 export { ApiProxyService, MockConfigGenerator } from './proxy';
+
+// Pseudo-locales
+export { DEFAULT_PSEUDO_LOCALE_EXPANSION_PERCENT, generatePseudoLocale } from './pseudoLocale';

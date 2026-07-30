@@ -19,6 +19,7 @@
   "command.spfx-local-workbench.startServeStorybook.title": "Start SPFx Serve & Open Storybook",
   "command.spfx-local-workbench.generateStories.title": "Generate SPFx Storybook Stories",
   "command.spfx-local-workbench.cleanStorybook.title": "Clean SPFx Storybook",
+  "command.spfx-local-workbench.generatePseudoLocale.title": "Generate pseudo locale for component",
   "command.spfx-local-workbench.scaffoldMockConfig.title": "Scaffold API Mock Configuration",
   "command.spfx-local-workbench.mockDataMenu.title": "Mock Data",
   "command.spfx-local-workbench.generateStatusStubs.title": "Generate Status Code Stubs",
@@ -44,6 +45,9 @@
   "configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.iconAndText": "Show icon and text label on each status bar button",
   "configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.iconOnly": "Show icon only on each status bar button",
   "configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.hidden": "Hide all status bar buttons",
+
+  "configuration.spfxLocalWorkbench.group.pseudoLocale.title": "Pseudo Locale",
+  "configuration.spfxLocalWorkbench.pseudoLocale.lengthExpansionPercent.description": "Percentage of the source string length to add as exclamation-mark padding around pseudo-localized strings. Brackets are added separately.",
 
   "configuration.spfxLocalWorkbench.group.theme.title": "Theme",
   "configuration.spfxLocalWorkbench.theme.current.description": "Select the theme for the workbench",

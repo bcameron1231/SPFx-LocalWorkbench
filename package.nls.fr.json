@@ -18,6 +18,7 @@
   "command.spfx-local-workbench.startServeStorybook.title": "Démarrer SPFx Serve et ouvrir le storybook",
   "command.spfx-local-workbench.generateStories.title": "Générer les histoires du storybook SPFx",
   "command.spfx-local-workbench.cleanStorybook.title": "Nettoyer le storybook SPFx",
+  "command.spfx-local-workbench.generatePseudoLocale.title": "Générer une pseudo-locale pour le composant",
   "command.spfx-local-workbench.scaffoldMockConfig.title": "Générer la configuration de mock d'API",
   "command.spfx-local-workbench.mockDataMenu.title": "Données simulées",
   "command.spfx-local-workbench.generateStatusStubs.title": "Générer des stubs de code d'état",
@@ -43,6 +44,9 @@
   "configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.iconAndText": "Afficher l'icône et l'étiquette de texte sur chaque bouton de la barre d'état",
   "configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.iconOnly": "Afficher uniquement l'icône sur chaque bouton de la barre d'état",
   "configuration.spfxLocalWorkbench.statusBarDisplay.mdEnumDescriptions.hidden": "Masquer tous les boutons de la barre d'état",
+
+  "configuration.spfxLocalWorkbench.group.pseudoLocale.title": "Pseudo-locale",
+  "configuration.spfxLocalWorkbench.pseudoLocale.lengthExpansionPercent.description": "Pourcentage de la longueur de la chaîne source à ajouter sous forme de points d’exclamation autour des chaînes pseudo-localisées. Les crochets sont ajoutés séparément.",
 
   "configuration.spfxLocalWorkbench.group.theme.title": "Thème",
   "configuration.spfxLocalWorkbench.theme.current.description": "Sélectionner le thème du workbench",

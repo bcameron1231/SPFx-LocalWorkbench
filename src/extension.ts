@@ -19,6 +19,7 @@ import {
   StorybookPanelSerializer,
   WorkbenchPanel,
   createManifestWatcher,
+  generatePseudoLocale,
   getWorkbenchSettings,
 } from './workbench';
 
@@ -385,6 +386,14 @@ export function activate(context: vscode.ExtensionContext) {
     },
   );
 
+  // Register the Generate Pseudo Locale command
+  const generatePseudoLocaleCommand = vscode.commands.registerCommand(
+    'spfx-local-workbench.generatePseudoLocale',
+    async (resource?: vscode.Uri) => {
+      await generatePseudoLocale(resource);
+    },
+  );
+
   // Register the Scaffold Mock Config command
   const scaffoldMockConfigCommand = vscode.commands.registerCommand(
     'spfx-local-workbench.scaffoldMockConfig',
@@ -732,6 +741,7 @@ export function activate(context: vscode.ExtensionContext) {
     openStorybookCommand,
     generateStoriesCommand,
     cleanStorybookCommand,
+    generatePseudoLocaleCommand,
     scaffoldMockConfigCommand,
     mockDataMenuCommand,
     generateStatusStubsCommand,

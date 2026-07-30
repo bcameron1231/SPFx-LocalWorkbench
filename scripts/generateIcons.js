@@ -18,13 +18,14 @@ const path = require('path');
 // List of required icon glyphs (Unicode codepoints in hex)
 // You can copy these from flicon.io
 const REQUIRED_GLYPHS = [
+  0xf2b7, // LocaleLanguage icon
   0xf3a5, // TestBeaker icon
   0xf3a6, // TestBeakerSolid icon
   0xf3ac, // TestStep icon
 ];
 
 const INPUT_FONT = path.join(__dirname, 'FabExMDL2.3.36.woff');
-const OUTPUT_FONT = path.join(__dirname, '../media/icons.woff');
+const OUTPUT_FONT = path.join(__dirname, '../media/fluent-icons.woff');
 
 async function generateIconFont() {
   try {
