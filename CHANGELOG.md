@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Extended manifest context to provide the full manifest
 - Property Pane simulates the always present Visibility group
 - Dynamic Data is now supported including the standard Page enivonment source populated using page context configuration
+- Pseudo-locale generation for any SPFx component from `loc` folders or locale files while preserving formatting and placeholders using configurable SPFx-style length expansion
 
 ## Changed
 
