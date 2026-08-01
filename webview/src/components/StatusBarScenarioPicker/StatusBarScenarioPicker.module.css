@@ -1,0 +1,89 @@
+.container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.inactive {
+  opacity: 0.65;
+}
+
+.popup {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  width: min(400px, calc(100vw - 16px));
+  overflow: hidden;
+  border: 1px solid
+    var(--vscode-menu-border, var(--vscode-panel-border, var(--neutralLight, #edebe9)));
+  border-radius: 4px;
+  background: var(
+    --vscode-menu-background,
+    var(--vscode-dropdown-background, var(--primaryBackground, white))
+  );
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.28);
+  color: var(
+    --vscode-menu-foreground,
+    var(--vscode-foreground, var(--neutralPrimary, #323130))
+  );
+  z-index: var(--workbench-layer-popover);
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  height: 22px;
+  margin: 0;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.trigger:hover {
+  background: var(--vscode-toolbar-hoverBackground, var(--neutralLight, #edebe9));
+}
+
+.trigger:disabled {
+  cursor: wait;
+}
+
+.trigger:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  outline-offset: -1px;
+}
+
+.icon {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+}
+
+.name {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.count {
+  min-width: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--vscode-badge-background, rgb(127 127 127 / 0.2));
+  color: var(--vscode-badge-foreground, inherit);
+  font-size: 10px;
+  line-height: 14px;
+  text-align: center;
+}
+
+@media (max-width: 620px) {
+  .name {
+    display: none;
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SPFx Local Workbench API Mock Configuration",
+  "type": "object",
+  "required": ["rules"],
+  "properties": {
+    "delay": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Default response delay in milliseconds. Individual rule delays override this value."
+    },
+    "rules": {
+      "type": "array",
+      "description": "Base mock rules.",
+      "items": {
+        "$ref": "#/definitions/rule"
+      }
+    },
+    "scenarios": {
+      "type": "array",
+      "description": "Optional additive rule scenarios. Same-named rules replace complete base rules.",
+      "items": {
+        "$ref": "#/definitions/scenario"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "scenario": {
+      "type": "object",
+      "required": ["name", "rules"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique scenario name. Base and Base rules are reserved."
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional description shown in scenario pickers."
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/rule"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "rule": {
+      "type": "object",
+      "required": ["match", "response"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Friendly rule name and override identity."
+        },
+        "disabled": {
+          "type": "boolean"
+        },
+        "match": {
+          "$ref": "#/definitions/match"
+        },
+        "response": {
+          "$ref": "#/definitions/response"
+        }
+      },
+      "additionalProperties": false
+    },
+    "match": {
+      "type": "object",
+      "required": ["url"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "method": {
+          "type": "string"
+        },
+        "clientType": {
+          "enum": ["spHttp", "http", "aadHttp", "fetch"]
+        },
+        "urlPattern": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "number"
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "body": {},
+        "bodyFile": {
+          "type": "string",
+          "minLength": 1
+        },
+        "delay": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "not": {
+        "required": ["body", "bodyFile"]
+      },
+      "additionalProperties": false
+    }
+  }
+}

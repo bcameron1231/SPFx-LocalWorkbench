@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
+- Additive API proxy scenarios: optional named scenario rules extend base rules and replace base rules with the same exact name
+- Scenario switchers in the Workbench status bar and Storybook toolbar, with descriptions, effective-rule counts, rule-type summaries, and Base rules selection
+- Active proxy scenario persistence for the Workbench and story-level scenario selection for Storybook
+- Scenario-aware mock-data generation, including saving generated or recorded rules to Base rules, an existing scenario, or a newly created scenario
+- JSON schema support for `api-mocks.json`, including the generated mock-config starter and an action to open the new file
+- Shared live Property Pane support in Storybook, with an Edit Properties toolbar control and `showPropertyPane` story parameter
+- Storybook Dynamic Data support, including the Page Environment source, source registration, DynamicProperty references, and source disposal across scenario remounts
 - Workbench theme picker accessibility improvements including keyboard controls
 - Extended manifest context to provide the full manifest
 - Property Pane simulates the always present Visibility group
@@ -17,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 
+- Property Pane rendering and property-change handling are now shared by Workbench and Storybook
+- Storybook proxy scenarios update the existing proxy transport and remount only the active SPFx component
 - Workbench status bar now uses VS Code styles to match user theming while preserving M365 theming for main canvas
 - Workbench theme picker shows a tiny palette swatch for extra prettiness
 - Property Pane now supports page navigation, accordion group interaction, richer built-in control props, button bound-value updates, and initial field focus behavior

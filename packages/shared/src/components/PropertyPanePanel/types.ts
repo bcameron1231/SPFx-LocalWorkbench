@@ -1,4 +1,4 @@
-import type { ILocalizedString } from '@spfx-local-workbench/shared';
+import type { ILocalizedString } from '../../types';
 
 export type PropertyPanePropertyBag = Record<string, unknown>;
 export type PropertyPaneTextValue = string | ILocalizedString | undefined;

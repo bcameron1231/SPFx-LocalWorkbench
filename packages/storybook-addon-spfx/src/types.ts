@@ -67,7 +67,8 @@ export interface ISpfxParameters {
   serveUrl?: string;
 
   /**
-   * Whether to show the property pane panel by default when the story loads.
+   * Whether to open the live preview-side property pane when the story loads.
+   * Toolbar changes remain temporary until the next story navigation or reload.
    * Defaults to `false`.
    */
   showPropertyPane?: boolean;
@@ -121,6 +122,12 @@ export interface ISpfxProxyConfig {
    * Overrides the global `spfxLocalWorkbench.proxy.mode` VS Code setting.
    */
   mode?: 'mock' | 'mock-passthrough';
+
+  /**
+   * Case-sensitive additive proxy scenario name.
+   * When omitted, only Base rules are used.
+   */
+  scenario?: string;
 }
 
 /**

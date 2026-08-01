@@ -7,8 +7,11 @@ import {
   DEFAULT_STORYBOOK_PORT,
   PROCESS_FORCE_KILL_TIMEOUT_MS,
   STORYBOOK_STARTUP_TIMEOUT_MS,
+  getAllConfiguredMockRules,
+  validateMockConfig,
 } from '@spfx-local-workbench/shared';
 import { getErrorMessage, logger } from '@spfx-local-workbench/shared';
+import type { IMockConfig } from '@spfx-local-workbench/shared';
 
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
 import { getCurrentTheme, getCustomThemes } from '../config';
@@ -383,9 +386,9 @@ export class StorybookServerManager {
       await vscode.workspace.fs.createDirectory(vscode.Uri.file(proxyDir));
 
       // Parse the mock config to extract bodyFile references
-      let mockConfig: any;
+      let mockConfig: IMockConfig;
       try {
-        mockConfig = JSON.parse(mockConfigContent);
+        mockConfig = validateMockConfig(JSON.parse(mockConfigContent) as unknown);
       } catch (error: unknown) {
         this.log.warn('Failed to parse mock config:', error);
         this.outputChannel.appendLine(
@@ -398,9 +401,10 @@ export class StorybookServerManager {
       const copiedFiles = new Map<string, string>(); // source path -> dest filename
       const usedNames = new Set<string>();
 
-      // Process each rule and copy its bodyFile if present
-      if (mockConfig.rules && Array.isArray(mockConfig.rules)) {
-        for (const rule of mockConfig.rules) {
+      // Process base and scenario rules and copy each bodyFile if present
+      const allRules = getAllConfiguredMockRules(mockConfig);
+      if (allRules.length > 0) {
+        for (const rule of allRules) {
           if (rule.response?.bodyFile) {
             const bodyFilePath = rule.response.bodyFile;
 

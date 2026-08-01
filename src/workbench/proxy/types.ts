@@ -10,6 +10,9 @@ import type {
   IMockRule,
   IMockRuleMatch,
   IMockRuleResponse,
+  IProxyScenario,
+  IProxyScenarioState,
+  IProxyScenarioSummary,
   IProxyRequest,
   IProxyResponse,
 } from '@spfx-local-workbench/shared';
@@ -21,6 +24,9 @@ export type {
   IMockRule,
   IMockRuleMatch,
   IMockRuleResponse,
+  IProxyScenario,
+  IProxyScenarioState,
+  IProxyScenarioSummary,
   IProxyRequest,
   IProxyResponse,
 };

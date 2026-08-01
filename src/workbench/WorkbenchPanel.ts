@@ -40,6 +40,8 @@ export class WorkbenchPanel {
   private _settings: IWorkbenchSettings;
   private _liveReloadDebounceTimer: ReturnType<typeof setTimeout> | undefined;
   private _apiProxyService: ApiProxyService | undefined;
+  private _hasProxyScenarioState = false;
+  private _lastProxyScenarioName: string | undefined;
   private _lastProxyEnabled: boolean = vscode.workspace
     .getConfiguration('spfxLocalWorkbench.proxy')
     .get<boolean>('enabled', true);
@@ -231,6 +233,21 @@ export class WorkbenchPanel {
         WorkbenchPanel._apiProxyOutputChannel,
       );
       this._disposables.push(this._apiProxyService);
+      this._disposables.push(
+        this._apiProxyService.onDidChangeScenarioState((state) => {
+          const reinitialize =
+            this._hasProxyScenarioState &&
+            this._lastProxyScenarioName !== state.activeScenarioName &&
+            state.proxyActive;
+          this._hasProxyScenarioState = true;
+          this._lastProxyScenarioName = state.activeScenarioName;
+          void this._panel.webview.postMessage({
+            command: 'proxyScenarioState',
+            state,
+            reinitialize,
+          });
+        }),
+      );
     }
 
     // Watch for bundle changes (live reload)
@@ -247,6 +264,7 @@ export class WorkbenchPanel {
     text?: string;
     themeName?: string;
     isCustomTheme?: boolean;
+    scenarioName?: string;
     [key: string]: any; // TODO: Should this be more strongly typed?
   }): Promise<void> {
     switch (message.command) {
@@ -322,6 +340,34 @@ export class WorkbenchPanel {
       case 'setTheme':
         if (message.themeName) {
           await setCurrentTheme(message.themeName, message.isCustomTheme ?? false);
+        }
+        return;
+
+      case 'requestProxyScenarioState':
+        if (this._apiProxyService) {
+          this._hasProxyScenarioState = true;
+          this._lastProxyScenarioName = this._apiProxyService.activeScenarioName;
+          await this._panel.webview.postMessage({
+            command: 'proxyScenarioState',
+            state: this._apiProxyService.getScenarioState(),
+            reinitialize: false,
+          });
+        }
+        return;
+
+      case 'setProxyScenario':
+        if (!this._apiProxyService) {
+          return;
+        }
+        try {
+          await this._apiProxyService.setActiveScenario(message.scenarioName);
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          await this._panel.webview.postMessage({
+            command: 'proxyScenarioSelectionError',
+            message: errorMessage,
+          });
+          vscode.window.showErrorMessage(errorMessage);
         }
         return;
     }

@@ -5,9 +5,9 @@ import {
   ProxySPHttpClient,
 } from '@spfx-local-workbench/shared';
 import type { IClientSideComponentManifest } from '@spfx-local-workbench/shared';
+import type { DynamicDataHost } from '@spfx-local-workbench/shared';
 
 import { getVsCodeProxyTransport } from '../proxy';
-import { DynamicDataHost } from '../dynamicData/DynamicDataHost';
 import { PassthroughHttpClient } from '../proxy/PassthroughHttpClient';
 import type { IContextSettings } from '../types';
 
@@ -34,10 +34,7 @@ export class SpfxContext {
     this.statusRenderer = new StatusRenderer();
   }
 
-  createMockContext(
-    manifest: IClientSideComponentManifest,
-    instanceId: string,
-  ): any {
+  createMockContext(manifest: IClientSideComponentManifest, instanceId: string): any {
     const mockPageContext = buildMockPageContext(this.contextSettings.pageContext);
 
     // Get the VS Code proxy transport for routing API calls through the extension

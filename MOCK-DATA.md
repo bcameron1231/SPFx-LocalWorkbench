@@ -25,7 +25,7 @@ The SPFx Local Workbench includes tools to help you **generate and populate** yo
     - [How It Works](#how-it-works)
     - [What It Generates](#what-it-generates-1)
     - [Typical Workflow](#typical-workflow)
-  - [How Rules Are Merged](#how-rules-are-merged)
+  - [Choose Where Rules Are Saved](#choose-where-rules-are-saved)
   - [Rule Names](#rule-names)
   - [Disabled Rules](#disabled-rules)
   - [URL Matching Behavior](#url-matching-behavior)
@@ -38,6 +38,8 @@ The SPFx Local Workbench includes tools to help you **generate and populate** yo
 **Command:** `SPFx Mock Data: Scaffold API Mock Configuration`
 
 Creates a starter `.spfx-workbench/api-mocks.json` file with one example rule if it doesn't already exist. This is the quickest way to get started.
+
+The scaffold intentionally creates only Base `rules`. It does not add an empty `scenarios` collection.
 
 ```json
 {
@@ -256,11 +258,23 @@ This saves you from manually discovering all the API endpoints your web part cal
 
 ---
 
-## How Rules Are Merged
+## Choose Where Rules Are Saved
 
-All generators **append** new rules to your existing `api-mocks.json` file. They never overwrite or remove existing rules. If the file doesn't exist, it is created automatically.
+After a generator prepares rules, it asks where to save them:
+
+- **Base rules**
+- Any existing scenario, including its description and current rule count
+- **New scenario…**
+
+The currently active Workbench selection is highlighted initially, but saving elsewhere does not silently change runtime behavior. Choosing **New scenario…** prompts for a unique name and an optional description, then writes the scenario and generated rules together. If no configuration exists, the new file contains `"rules": []` plus the new scenario.
+
+This destination step applies to status-code stubs, JSON and CSV imports, and rules generated from recorded requests. Cancelling the picker or either new-scenario prompt leaves the configuration unchanged. The scaffold command remains focused on Base rules and does not show the destination picker.
+
+Generators append rules to the chosen collection; they never overwrite or remove existing rules. Immediately before writing, the latest configuration is re-read and validated to avoid overwriting edits made while a prompt was open.
 
 After generation, the file is opened in the editor so you can review and adjust the rules.
+
+If you saved somewhere other than the current runtime selection, the completion notification offers to switch to that destination.
 
 ---
 
@@ -282,6 +296,8 @@ Rules can include an optional `"name"` property to provide a friendly identifier
 ```
 
 This is especially useful when working with glob patterns or long URLs, making it easier to identify which rule matched in the proxy logs.
+
+Names also define scenario overrides. A scenario rule with the exact same case-sensitive name as a Base rule replaces that complete Base rule at the same position. Other scenario rules are appended. See [Additive Scenarios](PROXY.md#additive-scenarios) for the complete composition rules.
 
 ---
 

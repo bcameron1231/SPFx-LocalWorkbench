@@ -7,6 +7,13 @@
  */
 import type { IProxyTransport } from './IProxyTransport';
 import { MockRuleEngine } from './MockRuleEngine';
+import {
+  BASE_SCENARIO_LABEL,
+  composeMockRules,
+  getProxyScenarioSummaries,
+  validateMockConfig,
+} from './scenarios';
+import type { IProxyScenarioSummary } from './scenarios';
 import type { IMockConfig, IMockRule, IProxyRequest, IProxyResponse } from './types';
 
 /** Default location for mock config in Storybook static directory */
@@ -25,6 +32,8 @@ export class BrowserProxyTransport implements IProxyTransport {
   private _mockConfigUrl: string;
   private _bodyFileBaseUrl: string;
   private _mode: 'mock' | 'mock-passthrough';
+  private _config: IMockConfig | undefined;
+  private _activeScenarioName: string | undefined;
   /** Original window.fetch captured before the interceptor is installed, for passthrough calls */
   private _passthroughFetch: typeof window.fetch;
 
@@ -34,16 +43,19 @@ export class BrowserProxyTransport implements IProxyTransport {
    * @param bodyFileBaseUrl Base URL for body files (default: /proxy/)
    * @param fallbackStatus HTTP status returned when no rule matches (default: 404)
    * @param mode 'mock' returns fallback for unmatched; 'mock-passthrough' calls real network (default: 'mock')
+   * @param scenarioName Initial additive scenario name; undefined uses Base rules
    */
   constructor(
     mockConfigUrl?: string,
     bodyFileBaseUrl?: string,
     fallbackStatus?: number,
     mode?: 'mock' | 'mock-passthrough',
+    scenarioName?: string,
   ) {
     this._mockConfigUrl = mockConfigUrl || DEFAULT_MOCK_CONFIG_URL;
     this._bodyFileBaseUrl = bodyFileBaseUrl || DEFAULT_BODY_FILE_BASE_URL;
     this._mode = mode ?? 'mock';
+    this._activeScenarioName = scenarioName;
     // Capture window.fetch now, before installFetchInterceptor replaces it
     this._passthroughFetch = window.fetch.bind(window);
 
@@ -93,21 +105,26 @@ export class BrowserProxyTransport implements IProxyTransport {
           `[BrowserProxyTransport] Failed to load mock config from ${this._mockConfigUrl}: HTTP ${response.status}`,
         );
         // Initialize with empty config - requests will return empty responses
+        this._config = undefined;
         this._ruleEngine.setConfig({ rules: [] });
         this._initialized = true;
         return;
       }
 
-      const config: IMockConfig = await response.json();
-      this._ruleEngine.setConfig(config);
+      const config = validateMockConfig(await response.json());
+      this._config = config;
+      this._applyScenario();
       this._initialized = true;
 
       console.log(
-        `[BrowserProxyTransport] Loaded ${config.rules?.length ?? 0} mock rules from ${this._mockConfigUrl}`,
+        `[BrowserProxyTransport] Loaded ${this._ruleEngine.getRules().length} effective mock rule(s) for ${
+          this._activeScenarioName ?? BASE_SCENARIO_LABEL
+        } from ${this._mockConfigUrl}`,
       );
     } catch (error) {
       console.warn(`[BrowserProxyTransport] Failed to initialize:`, error);
       // Initialize with empty config so requests don't fail
+      this._config = undefined;
       this._ruleEngine.setConfig({ rules: [] });
       this._initialized = true;
     }
@@ -160,9 +177,48 @@ export class BrowserProxyTransport implements IProxyTransport {
   }
 
   /**
+   * Selects Base rules or a named scenario without replacing the transport.
+   * Unknown names fall back to Base rules.
+   */
+  setScenario(scenarioName?: string): string | undefined {
+    this._activeScenarioName = scenarioName;
+    if (this._config) {
+      this._applyScenario();
+    }
+    return this._activeScenarioName;
+  }
+
+  /** Returns the resolved scenario name; undefined represents Base rules. */
+  getActiveScenarioName(): string | undefined {
+    return this._activeScenarioName;
+  }
+
+  /** Returns picker summaries for the loaded configuration. */
+  getScenarioSummaries(): IProxyScenarioSummary[] {
+    return this._config ? getProxyScenarioSummaries(this._config) : [];
+  }
+
+  /**
    * Get the current mock rules (for diagnostics)
    */
   getRules(): readonly IMockRule[] {
     return this._ruleEngine.getRules();
+  }
+
+  private _applyScenario(): void {
+    if (!this._config) {
+      this._activeScenarioName = undefined;
+      this._ruleEngine.setConfig({ rules: [] });
+      return;
+    }
+
+    const composed = composeMockRules(this._config, this._activeScenarioName);
+    if (!composed.requestedScenarioFound) {
+      console.warn(
+        `[BrowserProxyTransport] Scenario "${this._activeScenarioName}" was not found; using ${BASE_SCENARIO_LABEL}`,
+      );
+      this._activeScenarioName = undefined;
+    }
+    this._ruleEngine.setConfig({ ...this._config, rules: composed.rules });
   }
 }

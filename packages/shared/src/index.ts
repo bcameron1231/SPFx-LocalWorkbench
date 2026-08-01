@@ -1,5 +1,13 @@
 export * from './components';
+export {
+  PropertyPanePanel,
+  ScenarioIcon,
+  ScenarioPickerDropdown,
+  applyWebPartPropertyChange,
+} from './components';
 export * from './constants';
+export * from './dynamicData';
+export { DynamicDataHost } from './dynamicData';
 export * from './loaders';
 export {
   amdLoader,
@@ -31,8 +39,26 @@ export type {
   IMockRule,
   IMockRuleMatch,
   IMockRuleResponse,
+  IProxyScenario,
   ApiClientType,
 } from './proxy/types';
+export {
+  BASE_SCENARIO_KEY,
+  BASE_SCENARIO_LABEL,
+  MockConfigValidationError,
+  composeMockRules,
+  getAllConfiguredMockRules,
+  getProxyScenario,
+  getProxyScenarioSummaries,
+  isReservedScenarioName,
+  validateMockConfig,
+} from './proxy/scenarios';
+export type {
+  IComposedMockRules,
+  IProxyRuleTypeCounts,
+  IProxyScenarioState,
+  IProxyScenarioSummary,
+} from './proxy/scenarios';
 export type { BodyFileLoader } from './proxy/MockRuleEngine';
 export * from './types';
 export { type IHtmlFieldSecurityConfig } from './types/IHtmlFieldSecurityConfig';

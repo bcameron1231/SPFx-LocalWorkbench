@@ -1,11 +1,11 @@
 import {
-  concatStyleSets,
   Dropdown,
   DropdownMenuItemType,
   type IDropdownOption,
   type IDropdownStyles,
   Icon,
   Stack,
+  concatStyleSets,
 } from '@fluentui/react';
 import React, { FC } from 'react';
 

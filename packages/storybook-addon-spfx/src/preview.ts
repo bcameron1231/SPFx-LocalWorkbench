@@ -19,8 +19,14 @@ export const globalTypes = {
   [STORYBOOK_GLOBAL_KEYS.DISPLAY_MODE]: {
     defaultValue: DisplayMode.Edit,
   },
+  [STORYBOOK_GLOBAL_KEYS.PROPERTY_PANE_OPEN]: {
+    defaultValue: false,
+  },
   [STORYBOOK_GLOBAL_KEYS.THEME]: {
     defaultValue: DEFAULT_THEME_NAME,
+  },
+  [STORYBOOK_GLOBAL_KEYS.PROXY_SCENARIO]: {
+    defaultValue: null,
   },
   [STORYBOOK_GLOBAL_KEYS.HTML_FIELD_SECURITY]: {
     defaultValue: { policy: 'allowList', allowedDomains: DEFAULT_HTML_FIELD_SECURITY_DOMAINS },

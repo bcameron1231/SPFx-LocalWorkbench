@@ -1,0 +1,119 @@
+.dropdown {
+  display: flex;
+  flex-direction: column;
+  max-height: min(480px, calc(100vh - 32px));
+  overflow-y: auto;
+  color: inherit;
+}
+
+.dropdownM365 {
+  gap: 4px;
+  width: min(380px, calc(100vw - 24px));
+  padding: 8px;
+}
+
+.dropdownVscode {
+  gap: 2px;
+  width: 100%;
+  padding: 6px;
+  font-family: var(--vscode-font-family, 'Segoe UI', sans-serif);
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.option:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.optionM365 {
+  padding: 10px;
+}
+
+.optionM365:hover {
+  background: rgb(0 0 0 / 0.05);
+}
+
+.optionVscode {
+  padding: 8px;
+}
+
+.optionVscode:hover {
+  background: var(--vscode-list-hoverBackground, rgb(127 127 127 / 0.12));
+}
+
+.option:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  outline-offset: -1px;
+}
+
+.optionSelected {
+  border-color: var(--themePrimary, var(--vscode-focusBorder, #0078d4));
+  background: var(--vscode-list-activeSelectionBackground, rgb(0 120 212 / 0.12));
+}
+
+.optionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.optionName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selectedMark {
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
+.description {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--vscode-descriptionForeground, inherit);
+  font-size: 12px;
+  line-height: 1.35;
+  opacity: 0.8;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.metrics,
+.typeChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 11px;
+}
+
+.metrics {
+  color: var(--vscode-descriptionForeground, inherit);
+}
+
+.typeChip {
+  padding: 1px 5px;
+  border: 1px solid var(--vscode-panel-border, rgb(127 127 127 / 0.35));
+  border-radius: 8px;
+  background: var(--vscode-badge-background, rgb(127 127 127 / 0.12));
+  color: var(--vscode-badge-foreground, inherit);
+  white-space: nowrap;
+}

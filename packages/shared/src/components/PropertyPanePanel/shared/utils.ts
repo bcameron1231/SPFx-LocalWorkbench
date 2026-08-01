@@ -1,6 +1,5 @@
-import { getLocalizedString } from '@spfx-local-workbench/shared';
-import type { IActiveWebPart, ILocalizedString } from '@spfx-local-workbench/shared';
-
+import type { IActiveWebPart, ILocalizedString } from '../../../types';
+import { getLocalizedString } from '../../../utils/getLocalizedString';
 import type {
   IButtonFieldViewModel,
   ICheckboxFieldViewModel,
@@ -221,11 +220,13 @@ export function createDropdownFieldViewModel(
   field: IPropertyPaneFieldModel,
   locale: string,
 ): IDropdownFieldViewModel {
-  const options = (getPropertyValue<Array<{ key: string | number; text: unknown }>>(
-    field.properties,
-    'options',
-    'Options',
-  ) || []) as Array<{ key: string | number; text: unknown }>;
+  const options = (getPropertyValue<
+    Array<{ disabled?: boolean; key: string | number; text: unknown }>
+  >(field.properties, 'options', 'Options') || []) as Array<{
+    disabled?: boolean;
+    key: string | number;
+    text: unknown;
+  }>;
 
   return {
     label: getTextProperty(field.properties, locale, 'label', 'Label'),
@@ -359,11 +360,9 @@ export function createButtonFieldViewModel(
     description: getTextProperty(field.properties, locale, 'description', 'Description'),
     disabled: getBooleanProperty(field.properties, false, 'disabled', 'Disabled'),
     iconProps: normalizeButtonIconProps(
-      getPropertyValue<{ iconName?: string; officeFabricIconFontName?: string } | string | undefined>(
-        field.properties,
-        'icon',
-        'Icon',
-      ),
+      getPropertyValue<
+        { iconName?: string; officeFabricIconFontName?: string } | string | undefined
+      >(field.properties, 'icon', 'Icon'),
     ),
     text: getTextProperty(field.properties, locale, 'text', 'Text'),
     onClick: getPropertyValue<(value: unknown) => unknown>(field.properties, 'onClick'),
@@ -513,6 +512,7 @@ export function getDynamicDataSources(provider: unknown): IDynamicDataSourceView
           title?: string;
         };
         getPropertyDefinitions?: () => Array<{ id: string; title: string }>;
+        getPropertyValue?: (propertyId: string) => unknown;
       }>;
     }
   ).getAvailableSources;

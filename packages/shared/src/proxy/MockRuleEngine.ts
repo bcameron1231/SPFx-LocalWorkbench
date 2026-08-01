@@ -82,10 +82,11 @@ export class MockRuleEngine {
   /**
    * Load mock configuration (replaces all rules)
    * @param config Mock configuration with rules and optional default delay
+   * @param fallbackDefaultDelay Delay used when config.delay is not specified
    */
-  setConfig(config: IMockConfig): void {
+  setConfig(config: IMockConfig, fallbackDefaultDelay: number = 0): void {
     this._rules = config.rules;
-    this._defaultDelay = config.delay ?? 0;
+    this._defaultDelay = config.delay ?? fallbackDefaultDelay;
   }
 
   /** Set the HTTP status returned when no rule matches. Defaults to 404. */
