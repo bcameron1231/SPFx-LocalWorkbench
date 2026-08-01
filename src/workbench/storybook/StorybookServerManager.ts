@@ -11,6 +11,7 @@ import {
   validateMockConfig,
 } from '@spfx-local-workbench/shared';
 import { getErrorMessage, logger } from '@spfx-local-workbench/shared';
+import type { IMockConfig } from '@spfx-local-workbench/shared';
 
 import { SpfxProjectDetector } from '../SpfxProjectDetector';
 import { getCurrentTheme, getCustomThemes } from '../config';
@@ -385,7 +386,7 @@ export class StorybookServerManager {
       await vscode.workspace.fs.createDirectory(vscode.Uri.file(proxyDir));
 
       // Parse the mock config to extract bodyFile references
-      let mockConfig;
+      let mockConfig: IMockConfig;
       try {
         mockConfig = validateMockConfig(JSON.parse(mockConfigContent) as unknown);
       } catch (error: unknown) {
