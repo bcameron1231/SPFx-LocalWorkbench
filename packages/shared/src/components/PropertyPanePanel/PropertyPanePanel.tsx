@@ -1,6 +1,5 @@
 import {
   ContextualMenu,
-  DirectionalHint,
   Icon,
   IconButton,
   Link,
@@ -12,11 +11,12 @@ import {
 } from '@fluentui/react';
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { PropertyPaneFieldType, logger } from '@spfx-local-workbench/shared';
-import type { IActiveWebPart } from '@spfx-local-workbench/shared';
-
+import { PropertyPaneFieldType } from '../../mocks/PropertyPaneMocks';
+import type { IActiveWebPart } from '../../types';
+import { logger } from '../../utils';
 import { PropertyPaneFieldRenderer } from './PropertyPaneFieldRenderer';
 import styles from './PropertyPanePanel.module.css';
+import { getPropertyPaneStrings } from './config';
 import {
   isConditionalGroup,
   resolveFieldValue,
@@ -31,32 +31,21 @@ import type {
 } from './types';
 
 const WORKBENCH_VISIBILITY_TARGET_PROPERTY = '__workbenchVisibility.showInMobileAndEmailView';
-const DEFAULT_PROPERTY_PANE_STRINGS = {
-  applyButtonText: 'Apply',
-  backButtonText: 'Back',
-  collapseGroupAriaLabel: 'Collapse group',
-  connectToSourceText: 'Connect to source',
-  conditionalConnectToSourceText: 'Connect to source',
-  conditionalMenuAriaLabel: 'Conditional group actions',
-  conditionalRemoveConnectionText: 'Remove connection',
-  defaultHeaderText: 'Properties',
-  expandGroupAriaLabel: 'Expand group',
-  nextButtonText: 'Next',
-  pageCountText: '{0} of {1}',
-  unsupportedFieldTypeText: 'Unsupported field type: {0}',
-  visibilityGroupName: 'Visibility',
-  visibilityToggleLabel: 'Show in mobile and email view',
-  visibilityToggleOnText: 'On',
-  visibilityToggleOffText: 'Off',
-};
 
-interface IPropertyPanePanelProps {
+/** Props for the host-neutral SPFx property pane. */
+export interface IPropertyPanePanelProps {
+  /** Include the Workbench-only visibility simulation group. */
+  includeWorkbenchVisibilityGroup?: boolean;
+  /** Active web part whose property pane should be rendered. */
   webPart?: IActiveWebPart;
+  /** Close the property pane. */
   onClose: () => void;
+  /** Apply a property change to the active web part. */
   onPropertyChange: (targetProperty: string, newValue: unknown) => void;
 }
 
 export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
+  includeWorkbenchVisibilityGroup = false,
   webPart,
   onClose,
   onPropertyChange,
@@ -72,8 +61,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
   const previousInstanceIdRef = useRef<string | undefined>();
 
   const locale = resolvePropertyPaneLocale(webPart);
-  const propertyPaneStrings =
-    window.__workbenchConfig?.propertyPaneStrings ?? DEFAULT_PROPERTY_PANE_STRINGS;
+  const propertyPaneStrings = getPropertyPaneStrings();
   const headerText = resolvePropertyPaneTitle(
     webPart,
     locale,
@@ -112,16 +100,18 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
         }
 
         if (options?.preserveGroupState) {
-          setCollapsedGroups((prev) => mergeCollapsedGroupState(prev, paneConfig));
+          setCollapsedGroups((prev) =>
+            mergeCollapsedGroupState(prev, paneConfig, includeWorkbenchVisibilityGroup),
+          );
         } else {
-          setCollapsedGroups(buildCollapsedGroupState(paneConfig));
+          setCollapsedGroups(buildCollapsedGroupState(paneConfig, includeWorkbenchVisibilityGroup));
         }
       } catch (error: unknown) {
         logger.warn('Error getting property pane configuration:', error);
         setConfig(null);
       }
     },
-    [webPart],
+    [includeWorkbenchVisibilityGroup, webPart],
   );
 
   useEffect(() => {
@@ -226,8 +216,10 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
       return page.groups;
     }
 
-    return [...page.groups, createWorkbenchVisibilityGroup()];
-  }, [config, currentPageIndex, page]);
+    return includeWorkbenchVisibilityGroup
+      ? [...page.groups, createWorkbenchVisibilityGroup()]
+      : page.groups;
+  }, [config, currentPageIndex, includeWorkbenchVisibilityGroup, page]);
 
   useEffect(() => {
     if (!config) {
@@ -329,9 +321,9 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
       styles={{
         main: {
           top: 0,
-          bottom: 'var(--workbench-status-bar-height)',
-          height: 'calc(100vh - var(--workbench-status-bar-height))',
-          zIndex: 'var(--workbench-layer-property-pane)',
+          bottom: 'var(--workbench-status-bar-height, 0px)',
+          height: 'calc(100vh - var(--workbench-status-bar-height, 0px))',
+          zIndex: 'var(--workbench-layer-property-pane, 1000)',
         },
         scrollableContent: {
           overflowY: 'hidden',
@@ -552,16 +544,19 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
 
 function buildCollapsedGroupState(
   config: IPropertyPaneConfigurationModel,
+  includeWorkbenchVisibilityGroup: boolean,
 ): Record<string, boolean> {
   const state: Record<string, boolean> = {};
 
   config.pages.forEach((page, pageIndex) => {
-    [...page.groups, createWorkbenchVisibilityGroup()].forEach(
-      (groupOrConditionalGroup, groupIndex) => {
-        const group = resolveGroup(groupOrConditionalGroup);
-        state[getGroupKey(pageIndex, groupIndex)] = !!group.isCollapsed;
-      },
-    );
+    const pageGroups = includeWorkbenchVisibilityGroup
+      ? [...page.groups, createWorkbenchVisibilityGroup()]
+      : page.groups;
+
+    pageGroups.forEach((groupOrConditionalGroup, groupIndex) => {
+      const group = resolveGroup(groupOrConditionalGroup);
+      state[getGroupKey(pageIndex, groupIndex)] = !!group.isCollapsed;
+    });
   });
 
   return state;
@@ -570,8 +565,9 @@ function buildCollapsedGroupState(
 function mergeCollapsedGroupState(
   existingState: Record<string, boolean>,
   config: IPropertyPaneConfigurationModel,
+  includeWorkbenchVisibilityGroup: boolean,
 ): Record<string, boolean> {
-  const nextState = buildCollapsedGroupState(config);
+  const nextState = buildCollapsedGroupState(config, includeWorkbenchVisibilityGroup);
 
   Object.keys(nextState).forEach((groupKey) => {
     if (groupKey in existingState) {
@@ -609,8 +605,7 @@ function findFirstFocusedField(
 }
 
 function createWorkbenchVisibilityGroup(): IPropertyPaneGroupModel {
-  const propertyPaneStrings =
-    window.__workbenchConfig?.propertyPaneStrings ?? DEFAULT_PROPERTY_PANE_STRINGS;
+  const propertyPaneStrings = getPropertyPaneStrings();
 
   return {
     groupName: propertyPaneStrings.visibilityGroupName,

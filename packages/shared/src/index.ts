@@ -1,6 +1,13 @@
 export * from './components';
-export { ScenarioIcon, ScenarioPickerDropdown } from './components';
+export {
+  PropertyPanePanel,
+  ScenarioIcon,
+  ScenarioPickerDropdown,
+  applyWebPartPropertyChange,
+} from './components';
 export * from './constants';
+export * from './dynamicData';
+export { DynamicDataHost } from './dynamicData';
 export * from './loaders';
 export {
   amdLoader,

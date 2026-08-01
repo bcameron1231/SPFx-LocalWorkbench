@@ -6,7 +6,7 @@ This addon provides SharePoint Framework-specific features for Storybook, includ
 - **Display Mode Control**: Toggle between Edit/Read modes
 - **Theme Switching**: Preview components with different SharePoint themes
 - **Locale Support**: Test components with different locales
-- **Property Pane Panel**: Interactive property pane for web parts
+- **Live Property Pane**: Use the web part's real property pane inside the Storybook preview
 - **Proxy Scenarios**: Switch additive API mock scenarios without leaving Storybook
 - **Break Out Panel**: View components in isolation
 
@@ -31,6 +31,7 @@ const meta: Meta = {
       properties: {
         description: 'Hello World'
       },
+      showPropertyPane: true,
       proxy: {
         scenario: 'Populated'
       }
@@ -43,6 +44,12 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 ```
+
+The Edit-properties toolbar button opens the live SPFx property pane in the preview. It is available
+in Edit mode and uses the same field rendering, validation, non-reactive Apply behavior, custom
+fields, and Dynamic Data provider/source contracts as the Workbench.
+`parameters.spfx.showPropertyPane` controls the initial open state whenever a story is loaded; a
+toolbar choice only affects the active story.
 
 When the effective mock configuration contains scenarios, Storybook shows a proxy scenario toolbar. `parameters.spfx.proxy.scenario` seeds the selection when a story loads; omitting it seeds **Base rules**. A toolbar choice is temporary and is reset from the next story's parameters on navigation or reload. Unknown scenario names warn and fall back to Base.
 

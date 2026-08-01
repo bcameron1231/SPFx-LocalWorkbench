@@ -1,20 +1,21 @@
-import {
-  DynamicDataSharedDepth,
-  PropertyPaneDynamicField,
-  PropertyPaneDynamicFieldSet,
-  type IPropertyPaneConditionalGroup,
-  PropertyPaneTextField,
-  type IPropertyPaneConfiguration,
-} from '@microsoft/sp-property-pane';
 import { DynamicProperty } from '@microsoft/sp-component-base';
 import {
-  buildDynamicDataDetails,
+  DynamicDataSharedDepth,
+  type IPropertyPaneConditionalGroup,
+  type IPropertyPaneConfiguration,
+  PropertyPaneDropdown,
+  PropertyPaneDynamicField,
+  PropertyPaneDynamicFieldSet,
+  PropertyPaneTextField,
+} from '@microsoft/sp-property-pane';
+
+import {
   DYNAMIC_DATA_PROPERTY_IDS,
   DYNAMIC_DATA_SOURCE_COMPONENT_ID,
+  buildDynamicDataDetails,
 } from './constants';
 import type {
   DynamicPropertyLike,
-  IDynamicDataConsumerConnectionState,
   IDynamicDataSourceState,
   ISerializedDynamicPropertyState,
 } from './types';
@@ -31,7 +32,8 @@ export function buildDynamicDataSourcePropertyPaneConfiguration(): IPropertyPane
     pages: [
       {
         header: {
-          description: 'Values configured here are published through the SPFx dynamic-data source contract.',
+          description:
+            'Values configured here are published through the SPFx dynamic-data source contract.',
         },
         groups: [
           {
@@ -43,11 +45,13 @@ export function buildDynamicDataSourcePropertyPaneConfiguration(): IPropertyPane
               }),
               PropertyPaneTextField('sourceCategory', {
                 label: 'Source Category',
-                description: 'Included in the object-valued property to test structured consumer rendering.',
+                description:
+                  'Included in the object-valued property to test structured consumer rendering.',
               }),
               PropertyPaneTextField('sourceEmphasis', {
                 label: 'Source Emphasis',
-                description: 'Additional object-only detail so structured values are easier to distinguish.',
+                description:
+                  'Additional object-only detail so structured values are easier to distinguish.',
               }),
               PropertyPaneDropdown('sourceCount', {
                 label: 'Source Count',
@@ -106,7 +110,8 @@ export function buildDynamicDataConsumerPropertyPaneConfiguration(
     pages: [
       {
         header: {
-          description: 'Dynamic data consumer scenarios for standalone fields, field sets, filters, and shared source selection.',
+          description:
+            'Dynamic data consumer scenarios for standalone fields, field sets, filters, and shared source selection.',
         },
         displayGroupsAsAccordion: true,
         groups: [
@@ -261,7 +266,8 @@ export function buildDynamicDataConsumerPropertyPaneConfiguration(
       },
       {
         header: {
-          description: 'Conditional groups in SPFx are used for connection-style alternate configuration.',
+          description:
+            'Conditional groups in SPFx are used for connection-style alternate configuration.',
         },
         displayGroupsAsAccordion: true,
         groups: [conditionalGroup],
@@ -318,9 +324,7 @@ export function getDynamicDataPropertyValue(
   }
 }
 
-export function resolveDynamicDisplayValue(
-  property: DynamicProperty<unknown> | undefined,
-): string {
+export function resolveDynamicDisplayValue(property: DynamicProperty<unknown> | undefined): string {
   return formatDynamicValue(tryReadDynamicValue(property));
 }
 
@@ -343,9 +347,11 @@ function tryReadDynamicValue<TValue>(
     return undefined;
   }
 
-  const serializedProperty = (property as DynamicProperty<TValue> & {
-    toJSON?: () => ISerializedDynamicPropertyState<TValue>;
-  }).toJSON?.();
+  const serializedProperty = (
+    property as DynamicProperty<TValue> & {
+      toJSON?: () => ISerializedDynamicPropertyState<TValue>;
+    }
+  ).toJSON?.();
 
   if (!serializedProperty) {
     return undefined;

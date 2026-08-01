@@ -1,19 +1,24 @@
 import { loadTheme as loadFluentUiTheme } from '@fluentui/react';
 import { useChannel, useGlobals } from '@storybook/preview-api';
 import type { Decorator, StoryContext } from '@storybook/react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   BrowserProxyTransport,
   DEFAULT_HTML_FIELD_SECURITY_DOMAINS,
   DEFAULT_THEME_NAME,
+  DynamicDataHost,
+  type IActiveWebPart,
+  type IDynamicDataSourceManagerLike,
   type IHtmlFieldSecurityConfig,
   type ITheme,
   type IWebPartManifest,
+  PropertyPanePanel,
   ProxyAadHttpClient,
   ProxyHttpClient,
   ProxySPHttpClient,
   StatusRenderer,
+  applyWebPartPropertyChange,
   buildFrameSrc,
   buildMockPageContext,
   buildThemeList,
@@ -87,6 +92,13 @@ function createMockSpHttpClient(): any {
   };
 }
 
+function getStoryWebPartInstanceId(
+  componentId: string,
+  preconfiguredEntryIndex: number | undefined,
+): string {
+  return `storybook:${componentId}:${preconfiguredEntryIndex ?? 0}`;
+}
+
 /**
  * SPFx decorator that wraps stories with SPFx context
  */
@@ -113,12 +125,14 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
 
   // Read displayMode from globals (managed by the toolbar)
   const globalDisplayMode = globals[STORYBOOK_GLOBAL_KEYS.DISPLAY_MODE];
+  const globalPropertyPaneOpen = globals[STORYBOOK_GLOBAL_KEYS.PROPERTY_PANE_OPEN] === true;
   const globalThemeName = globals[STORYBOOK_GLOBAL_KEYS.THEME];
   const globalCustomThemes: ITheme[] = globals[STORYBOOK_GLOBAL_KEYS.CUSTOM_THEMES] ?? [];
   const storyThemes: ITheme[] = parameters?.customThemes ?? [];
   const [displayMode, setDisplayMode] = useState<DisplayMode>(
     globalDisplayMode || parameters.displayMode || DisplayMode.Edit,
   );
+  const propertyPaneOpen = displayMode === DisplayMode.Edit && globalPropertyPaneOpen;
   const [themeName, setThemeName] = useState<string>(
     globalThemeName || parameters.themeName || DEFAULT_THEME_NAME,
   );
@@ -126,13 +140,18 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
   // Properties are seeded from the serve's manifest preconfiguredEntry once loaded;
   // parameters.properties acts only as a fallback when the entry has none.
   const [properties, setProperties] = useState<Record<string, any>>(parameters.properties || {});
-  const [propertiesSeeded, setPropertiesSeeded] = useState(false);
+  const [activeWebPart, setActiveWebPart] = useState<IActiveWebPart>();
   const [proxyReady, setProxyReady] = useState(false);
   const [proxyScenarioRevision, setProxyScenarioRevision] = useState(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const componentInstanceRef = useRef<any>(null);
+  const dynamicDataHostRef = useRef<DynamicDataHost | null>(null);
   const proxyTransportRef = useRef<BrowserProxyTransport | null>(null);
+  const activeWebPartRef = useRef<IActiveWebPart>();
+  const displayModeRef = useRef(displayMode);
+  const propertyPaneOpenRef = useRef(false);
+  const propertySeedTargetRef = useRef<string>();
 
   // Proxy enabled: story-level override → VS Code global setting → default true
   const globalProxyEnabled: boolean = globals[STORYBOOK_GLOBAL_KEYS.PROXY_ENABLED] ?? true;
@@ -219,7 +238,14 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     updateGlobals({
       [STORYBOOK_GLOBAL_KEYS.PROXY_SCENARIO]: parameters.proxy?.scenario ?? null,
     });
-  }, [context.id, parameters.proxy?.scenario]);
+  }, [context.id, parameters.proxy?.scenario, updateGlobals]);
+
+  // A story parameter seeds the pane for that story. Toolbar changes remain temporary.
+  useEffect(() => {
+    updateGlobals({
+      [STORYBOOK_GLOBAL_KEYS.PROPERTY_PANE_OPEN]: parameters.showPropertyPane === true,
+    });
+  }, [context.id, parameters.showPropertyPane, updateGlobals]);
 
   // Switch the stable transport in place, then remount only the active SPFx component.
   useEffect(() => {
@@ -238,13 +264,7 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     if (previousScenario !== resolvedScenario) {
       setProxyScenarioRevision((revision) => revision + 1);
     }
-  }, [globalProxyScenario, proxyEnabled, proxyReady]);
-
-  // Reset seed flag whenever the story target changes so the new manifest entry's
-  // properties are picked up from the serve on the next load.
-  useEffect(() => {
-    setPropertiesSeeded(false);
-  }, [parameters.componentId, parameters.preconfiguredEntryIndex]);
+  }, [globalProxyScenario, proxyEnabled, proxyReady, updateGlobals]);
 
   // Update displayMode when global changes
   useEffect(() => {
@@ -252,6 +272,15 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
       setDisplayMode(globalDisplayMode);
     }
   }, [globalDisplayMode]);
+
+  useEffect(() => {
+    displayModeRef.current = displayMode;
+    propertyPaneOpenRef.current = propertyPaneOpen;
+
+    if (displayMode !== DisplayMode.Edit && globalPropertyPaneOpen) {
+      updateGlobals({ [STORYBOOK_GLOBAL_KEYS.PROPERTY_PANE_OPEN]: false });
+    }
+  }, [displayMode, globalPropertyPaneOpen, propertyPaneOpen, updateGlobals]);
 
   // Update themeName when global changes
   useEffect(() => {
@@ -267,23 +296,80 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     if (parameters.themeName) {
       updateGlobals({ [STORYBOOK_GLOBAL_KEYS.THEME]: parameters.themeName });
     }
-  }, [parameters.themeName]);
+  }, [parameters.themeName, updateGlobals]);
 
-  // Listen to events from toolbar and panels
-  const emit = useChannel({
+  // Locale remains channel-driven until its toolbar is enabled.
+  useChannel({
     [EVENTS.LOCALE_CHANGED]: (newLocale: string) => {
       setLocale(newLocale);
     },
-    [EVENTS.UPDATE_PROPERTIES]: (newProperties: Record<string, any>) => {
-      setProperties(newProperties);
-    },
   });
+
+  useEffect(() => {
+    activeWebPartRef.current = activeWebPart;
+  }, [activeWebPart]);
+
+  const closePropertyPane = useCallback(() => {
+    updateGlobals({ [STORYBOOK_GLOBAL_KEYS.PROPERTY_PANE_OPEN]: false });
+  }, [updateGlobals]);
+
+  const openPropertyPane = useCallback(() => {
+    if (displayModeRef.current === DisplayMode.Edit) {
+      updateGlobals({ [STORYBOOK_GLOBAL_KEYS.PROPERTY_PANE_OPEN]: true });
+    }
+  }, [updateGlobals]);
+
+  const handlePropertyPaneChange = useCallback((targetProperty: string, newValue: unknown) => {
+    const webPart = activeWebPartRef.current;
+    if (!webPart) {
+      return;
+    }
+
+    const nextProperties = applyWebPartPropertyChange(webPart, targetProperty, newValue);
+    setProperties(nextProperties);
+    setActiveWebPart({ ...webPart, properties: nextProperties });
+  }, []);
+
+  const storyWebPart = useMemo(
+    () => (activeWebPart ? { ...activeWebPart, properties } : undefined),
+    [activeWebPart, properties],
+  );
 
   // Load and render the SPFx component
   useEffect(() => {
     if (!containerRef.current || (proxyEnabled && !proxyReady)) {
       return;
     }
+
+    let cancelled = false;
+    let disposed = false;
+    let loadedInstance: any;
+    let loadedSourceManager: IDynamicDataSourceManagerLike | undefined;
+
+    const disposeLoadedComponent = () => {
+      if (disposed) {
+        return;
+      }
+      disposed = true;
+
+      if (typeof loadedInstance?.onDispose === 'function') {
+        try {
+          loadedInstance.onDispose();
+        } catch (error: unknown) {
+          console.warn('[withSpfx] onDispose error:', error);
+        }
+      }
+
+      loadedSourceManager?.dispose();
+
+      if (componentInstanceRef.current === loadedInstance) {
+        componentInstanceRef.current = null;
+      }
+      if (activeWebPartRef.current?.instance === loadedInstance) {
+        activeWebPartRef.current = undefined;
+        setActiveWebPart(undefined);
+      }
+    };
 
     const loadComponent = async () => {
       try {
@@ -317,6 +403,9 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
           serveUrl,
           locale,
         );
+        if (cancelled) {
+          return;
+        }
         // withSpfx is web-part–specific; cast to access preconfiguredEntries.
         const manifest = rawManifest as IWebPartManifest;
 
@@ -326,16 +415,19 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         const entryIndex = parameters.preconfiguredEntryIndex ?? 0;
         const serveProperties = manifest.preconfiguredEntries?.[entryIndex]?.properties ?? {};
         const resolvedProperties = { ...serveProperties, ...parameters.properties };
-        const instanceProperties = propertiesSeeded ? properties : resolvedProperties;
+        const propertySeedTarget = `${context.id}:${parameters.componentId}:${entryIndex}`;
+        const targetAlreadySeeded = propertySeedTargetRef.current === propertySeedTarget;
+        const instanceProperties = targetAlreadySeeded ? properties : resolvedProperties;
 
-        // Seed React state once per component load so downstream effects see the correct values.
-        if (!propertiesSeeded) {
+        // Scenario remounts retain current values; story/entry changes seed manifest defaults.
+        if (!targetAlreadySeeded) {
+          propertySeedTargetRef.current = propertySeedTarget;
           setProperties(resolvedProperties);
-          setPropertiesSeeded(true);
         }
 
         // Create component instance
         const instance = new ComponentClass();
+        loadedInstance = instance;
         componentInstanceRef.current = instance;
 
         // Set up the component with getters (similar to WebPartManager)
@@ -383,6 +475,20 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
         const spHttpClient = transport
           ? new ProxySPHttpClient(transport)
           : createMockSpHttpClient();
+        const instanceId = getStoryWebPartInstanceId(
+          parameters.componentId,
+          parameters.preconfiguredEntryIndex,
+        );
+        const dynamicDataHost = dynamicDataHostRef.current ?? new DynamicDataHost(contextConfig);
+        dynamicDataHostRef.current = dynamicDataHost;
+        dynamicDataHost.updatePageContext(contextConfig);
+        const dynamicDataProvider = dynamicDataHost.createProvider();
+        const dynamicDataSourceManager = dynamicDataHost.createSourceManager(
+          manifest.id,
+          instanceId,
+          manifest.alias,
+        );
+        loadedSourceManager = dynamicDataSourceManager;
 
         instance._context = {
           pageContext: mockPageContext,
@@ -422,12 +528,14 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
               }),
           },
           isServedFromLocalhost: true,
+          dynamicDataProvider,
+          dynamicDataSourceManager,
           propertyPane: {
-            refresh: () => {},
-            open: () => {},
-            close: () => {},
+            refresh: () => setActiveWebPart((previous) => (previous ? { ...previous } : previous)),
+            open: openPropertyPane,
+            close: closePropertyPane,
             isRenderedByWebPart: () => true,
-            isPropertyPaneOpen: () => false,
+            isPropertyPaneOpen: () => propertyPaneOpenRef.current,
           },
           statusRenderer: new StatusRenderer(),
         };
@@ -442,6 +550,10 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
           } catch (e: any) {
             console.error('onInit error:', e);
           }
+        }
+        if (cancelled) {
+          disposeLoadedComponent();
+          return;
         }
 
         // Apply theme before first render so the web part sees the correct palette
@@ -488,19 +600,27 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
 
         // Render the component — theme is already applied above.
         instance.render();
-
-        if (instance.onPropertyPaneFieldChanged) {
-          const originalHandler = instance.onPropertyPaneFieldChanged.bind(instance);
-          instance.onPropertyPaneFieldChanged = (
-            propertyPath: string,
-            oldValue: any,
-            newValue: any,
-          ) => {
-            originalHandler(propertyPath, oldValue, newValue);
-            emit(EVENTS.PROPERTY_CHANGED, { propertyPath, oldValue, newValue });
-          };
+        if (cancelled) {
+          disposeLoadedComponent();
+          return;
         }
+
+        const nextActiveWebPart: IActiveWebPart = {
+          context: instance._context,
+          instance,
+          instanceId,
+          manifest,
+          preconfiguredEntryIndex: entryIndex,
+          properties: instanceProperties,
+        };
+        activeWebPartRef.current = nextActiveWebPart;
+        setActiveWebPart(nextActiveWebPart);
       } catch (error) {
+        disposeLoadedComponent();
+        if (cancelled) {
+          return;
+        }
+
         console.error('Failed to load SPFx component:', error);
         if (containerRef.current) {
           containerRef.current.innerHTML = `
@@ -516,17 +636,20 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
       }
     };
 
-    loadComponent();
+    void loadComponent();
 
     // Cleanup
     return () => {
-      if (componentInstanceRef.current?.onDispose) {
-        componentInstanceRef.current.onDispose();
-      }
-      componentInstanceRef.current = null;
+      cancelled = true;
+      disposeLoadedComponent();
     };
   }, [
+    closePropertyPane,
+    context.id,
+    locale,
+    openPropertyPane,
     parameters.componentId,
+    parameters.preconfiguredEntryIndex,
     parameters.serveUrl,
     proxyEnabled,
     proxyReady,
@@ -576,6 +699,10 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
     instance.render();
   }, [properties, displayMode, themeName, locale, htmlFieldSecurity]);
 
+  useEffect(() => {
+    setActiveWebPart((previous) => (previous ? { ...previous, properties } : previous));
+  }, [properties]);
+
   return (
     <SpfxContextProvider
       componentId={parameters.componentId}
@@ -584,7 +711,15 @@ export const withSpfx: Decorator = (Story, context: StoryContext) => {
       locale={locale}
       properties={properties}
     >
-      <div ref={containerRef} className={styles.componentContainer} />
+      <>
+        <div ref={containerRef} className={styles.componentContainer} />
+        <PropertyPanePanel
+          includeWorkbenchVisibilityGroup
+          webPart={propertyPaneOpen ? storyWebPart : undefined}
+          onClose={closePropertyPane}
+          onPropertyChange={handlePropertyPaneChange}
+        />
+      </>
     </SpfxContextProvider>
   );
 };

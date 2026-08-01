@@ -1,8 +1,7 @@
 import { Separator, Text } from '@fluentui/react';
 import React, { FC } from 'react';
 
-import { PropertyPaneFieldType } from '@spfx-local-workbench/shared';
-
+import { PropertyPaneFieldType } from '../../mocks/PropertyPaneMocks';
 import styles from './PropertyPanePanel.module.css';
 import {
   ButtonComponent,
@@ -19,6 +18,7 @@ import {
   TextFieldComponent,
   ToggleComponent,
 } from './components';
+import { getPropertyPaneStrings } from './config';
 import {
   createButtonFieldViewModel,
   createCheckboxFieldViewModel,
@@ -35,7 +35,7 @@ import {
   getDynamicPropertyReference,
   getDynamicPropertyValue,
 } from './shared';
-import type { IPropertyPaneFieldModel } from './types';
+import type { IPropertyPaneCustomFieldPropsModel, IPropertyPaneFieldModel } from './types';
 
 interface IPropertyPaneFieldRendererProps {
   autoFocus?: boolean;
@@ -58,20 +58,14 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
   onPropertyChange,
   provider,
 }) => {
-  const propertyPaneStrings =
-    window.__workbenchConfig?.propertyPaneStrings ?? {
-      connectToSourceText: 'Connect to source',
-      unsupportedFieldTypeText: 'Unsupported field type: {0}',
-    };
+  const propertyPaneStrings = getPropertyPaneStrings();
   const handleChange = (newValue: unknown) => {
     if (field.targetProperty) {
       onPropertyChange(field.targetProperty, newValue);
     }
   };
 
-  const wrapField = (node: React.ReactNode) => (
-    <div className={styles.fieldWrapper}>{node}</div>
-  );
+  const wrapField = (node: React.ReactNode) => <div className={styles.fieldWrapper}>{node}</div>;
 
   switch (field.type) {
     case PropertyPaneFieldType.TextField:
@@ -86,7 +80,7 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
           }
           value={typeof currentValue === 'string' ? currentValue : ''}
           onChange={handleChange}
-        />
+        />,
       );
     case PropertyPaneFieldType.CheckBox:
       return wrapField(
@@ -94,7 +88,7 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
           {...createCheckboxFieldViewModel(field, locale)}
           checked={!!currentValue}
           onChange={handleChange}
-        />
+        />,
       );
     case PropertyPaneFieldType.Toggle:
       return wrapField(
@@ -102,7 +96,7 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
           {...createToggleFieldViewModel(field, locale)}
           checked={!!currentValue}
           onChange={handleChange}
-        />
+        />,
       );
     case PropertyPaneFieldType.Dropdown:
       return wrapField(
@@ -114,7 +108,7 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
               : undefined
           }
           onChange={handleChange}
-        />
+        />,
       );
     case PropertyPaneFieldType.Slider: {
       const slider = createSliderFieldViewModel(field, locale);
@@ -123,7 +117,7 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
           {...slider}
           value={typeof currentValue === 'number' ? currentValue : slider.min}
           onChange={handleChange}
-        />
+        />,
       );
     }
     case PropertyPaneFieldType.ChoiceGroup: {
@@ -135,7 +129,7 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
           options={choiceGroup.options}
           selectedKey={typeof currentValue === 'string' ? currentValue : undefined}
           onChange={handleChange}
-        />
+        />,
       );
     }
     case PropertyPaneFieldType.Button:
@@ -144,7 +138,7 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
           {...createButtonFieldViewModel(field, locale)}
           currentValue={currentValue}
           onChange={handleChange}
-        />
+        />,
       );
     case PropertyPaneFieldType.Label:
       return wrapField(<LabelComponent {...createTextOnlyFieldViewModel(field, locale)} />);
@@ -157,11 +151,11 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
     case PropertyPaneFieldType.Custom:
       return wrapField(
         <CustomFieldComponent
-          field={field}
+          field={field as IPropertyPaneFieldModel<IPropertyPaneCustomFieldPropsModel>}
           onFieldValidityChange={onFieldValidityChange || (() => {})}
           value={currentValue}
           onPropertyChange={onPropertyChange}
-        />
+        />,
       );
     case PropertyPaneFieldType.DynamicField: {
       const dynamicField = createDynamicFieldViewModel(field, locale);
@@ -177,7 +171,7 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
           sourceLabel={dynamicField.sourcesLabel || propertyPaneStrings.connectToSourceText}
           sources={getDynamicDataSources(provider)}
           onChange={handleChange}
-        />
+        />,
       );
     }
     case PropertyPaneFieldType.DynamicFieldSet: {
@@ -200,14 +194,14 @@ export const PropertyPaneFieldRenderer: FC<IPropertyPaneFieldRendererProps> = ({
             };
           })}
           onChange={onPropertyChange}
-        />
+        />,
       );
     }
     default:
       return wrapField(
         <Text className={styles.required}>
           {propertyPaneStrings.unsupportedFieldTypeText.replace('{0}', String(field.type))}
-        </Text>
+        </Text>,
       );
   }
 };

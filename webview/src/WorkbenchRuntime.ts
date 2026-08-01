@@ -5,8 +5,10 @@ import {
   COMPONENT_REMOVAL_DELAY_MS,
   DOM_RENDER_DELAY_MS,
   DisplayMode,
+  DynamicDataHost,
   ManifestLoader,
   amdLoader,
+  applyWebPartPropertyChange,
   getErrorMessage,
   initializeSpfxMocks,
   logger,
@@ -15,8 +17,8 @@ import type {
   IComponentManifest,
   IExtensionConfig,
   IExtensionManifest,
-  ITheme,
   IProxyScenarioState,
+  ITheme,
   IWebPartConfig,
   IWebPartManifest,
 } from '@spfx-local-workbench/shared';
@@ -25,7 +27,6 @@ import { isActiveExtension, isActiveWebPart } from '@spfx-local-workbench/shared
 import { ExtensionManager } from './ExtensionManager';
 import { WebPartManager } from './WebPartManager';
 import type { IAppHandlers } from './components/App';
-import { DynamicDataHost } from './dynamicData/DynamicDataHost';
 import { SpfxContext, ThemeProvider } from './mocks';
 import { registerProxyHttpClients } from './proxy';
 import type { IVsCodeApi, IWorkbenchConfig } from './types';
@@ -140,10 +141,7 @@ export class WorkbenchRuntime {
   /**
    * Updates the status-bar scenario state and optionally recreates active components.
    */
-  async updateProxyScenarioState(
-    state: IProxyScenarioState,
-    reinitialize: boolean,
-  ): Promise<void> {
+  async updateProxyScenarioState(state: IProxyScenarioState, reinitialize: boolean): Promise<void> {
     let pendingReinitialization = this.scenarioReinitialization;
     if (reinitialize && state.proxyActive && !pendingReinitialization) {
       window.dispatchEvent(new CustomEvent('workbenchProxyScenarioApplying'));
@@ -152,9 +150,7 @@ export class WorkbenchRuntime {
       );
       this.scenarioReinitialization = pendingReinitialization;
     }
-    window.dispatchEvent(
-      new CustomEvent('workbenchProxyScenarioStateUpdated', { detail: state }),
-    );
+    window.dispatchEvent(new CustomEvent('workbenchProxyScenarioStateUpdated', { detail: state }));
     try {
       if (pendingReinitialization) {
         await pendingReinitialization;
@@ -368,7 +364,9 @@ export class WorkbenchRuntime {
 
     // Dispose the web part instance if active
     if (isActiveWebPart(webPart)) {
-      const dynamicDataSourceManager = (webPart.context as { dynamicDataSourceManager?: { dispose?: () => void } }).dynamicDataSourceManager;
+      const dynamicDataSourceManager = (
+        webPart.context as { dynamicDataSourceManager?: { dispose?: () => void } }
+      ).dynamicDataSourceManager;
       if (typeof dynamicDataSourceManager?.dispose === 'function') {
         try {
           dynamicDataSourceManager.dispose();
@@ -404,7 +402,9 @@ export class WorkbenchRuntime {
     // Dispose all web part instances
     for (const webPart of this.activeWebParts) {
       if (isActiveWebPart(webPart)) {
-        const dynamicDataSourceManager = (webPart.context as { dynamicDataSourceManager?: { dispose?: () => void } }).dynamicDataSourceManager;
+        const dynamicDataSourceManager = (
+          webPart.context as { dynamicDataSourceManager?: { dispose?: () => void } }
+        ).dynamicDataSourceManager;
         if (typeof dynamicDataSourceManager?.dispose === 'function') {
           try {
             dynamicDataSourceManager.dispose();
@@ -473,134 +473,8 @@ export class WorkbenchRuntime {
     if (!webPart) {
       return;
     }
-
-    const liveInstanceProperty = isActiveWebPart(webPart)
-      ? (webPart.instance as { properties?: Record<string, unknown> }).properties?.[targetProperty]
-      : undefined;
-    const oldValue = liveInstanceProperty ?? webPart.properties[targetProperty];
-    const dynamicProperty = oldValue as {
-      constructor?: new (provider: unknown, callback?: () => void) => {
-        setReference?: (reference: string) => void;
-        setValue?: (value: unknown) => void;
-      };
-      setReference?: (reference: string) => void;
-      setValue?: (value: unknown) => void;
-    };
-    let nextValue = newValue;
-    const internalPropertyPaneChanged = isActiveWebPart(webPart)
-      ? (
-          webPart.instance as {
-            _onPropertyPaneFieldChanged?: (
-              propertyPath: string,
-              updatedValue: unknown,
-              fieldType?: unknown,
-            ) => boolean;
-          }
-        )._onPropertyPaneFieldChanged
-      : undefined;
-    const dynamicPropertyConstructor = (
-      window as {
-        __amdModules?: Record<string, { DynamicProperty?: new (provider: unknown, callback?: () => void) => {
-          setReference?: (reference: string) => void;
-          setValue?: (value: unknown) => void;
-        } }>;
-      }
-    ).__amdModules?.['@microsoft/sp-component-base']?.DynamicProperty;
-
-    const isDynamicPropertyLike =
-      dynamicProperty &&
-      typeof dynamicProperty === 'object' &&
-      (typeof dynamicProperty.setReference === 'function' ||
-        typeof dynamicProperty.setValue === 'function');
-
-    if (typeof newValue === 'string' && newValue.includes(':')) {
-      if (
-        typeof internalPropertyPaneChanged !== 'function' &&
-        isDynamicPropertyLike &&
-        typeof dynamicProperty.setReference === 'function'
-      ) {
-        dynamicProperty.setReference(newValue);
-        nextValue = dynamicProperty;
-      } else if (
-        isDynamicPropertyLike &&
-        typeof dynamicProperty.constructor === 'function'
-      ) {
-        const nextDynamicProperty = new dynamicProperty.constructor(
-          webPart.context.dynamicDataProvider,
-          () => {
-            if (typeof webPart.instance?.render === 'function') {
-              webPart.instance.render();
-            }
-          },
-        );
-        nextDynamicProperty.setReference?.(newValue);
-        nextValue = nextDynamicProperty;
-      } else if (typeof dynamicPropertyConstructor === 'function') {
-        const nextDynamicProperty = new dynamicPropertyConstructor(
-          webPart.context.dynamicDataProvider,
-          () => {
-            if (typeof webPart.instance?.render === 'function') {
-              webPart.instance.render();
-            }
-          },
-        );
-        nextDynamicProperty.setReference?.(newValue);
-        nextValue = nextDynamicProperty;
-      } else if (
-        isDynamicPropertyLike &&
-        typeof dynamicProperty.setReference === 'function'
-      ) {
-        dynamicProperty.setReference(newValue);
-        nextValue = dynamicProperty;
-      }
-    } else if (
-      isDynamicPropertyLike &&
-      typeof dynamicProperty.setReference === 'function'
-    ) {
-      if (typeof dynamicProperty.setValue === 'function') {
-        dynamicProperty.setValue(newValue);
-      }
-      nextValue = dynamicProperty;
-    }
-
-    // When SPFx's internal property-pane handler is available, let it own the
-    // property write so old/new diffing and DynamicProperty behavior match the
-    // framework's expectations.
-    if (typeof internalPropertyPaneChanged !== 'function') {
-      if (isDynamicPropertyLike) {
-        webPart.properties[targetProperty] = nextValue;
-      } else {
-        webPart.properties[targetProperty] = newValue;
-      }
-    }
-
-    // Call lifecycle methods and re-render if instantiated
     if (isActiveWebPart(webPart)) {
-      if (typeof internalPropertyPaneChanged === 'function') {
-        try {
-          internalPropertyPaneChanged.call(webPart.instance, targetProperty, nextValue);
-        } catch (error: unknown) {
-          this.log.warn('Error calling _onPropertyPaneFieldChanged:', error);
-        }
-      } else if (typeof webPart.instance.onPropertyPaneFieldChanged === 'function') {
-        try {
-          webPart.instance.onPropertyPaneFieldChanged(
-            targetProperty,
-            oldValue,
-            webPart.properties[targetProperty],
-          );
-        } catch (error: unknown) {
-          this.log.warn('Error calling onPropertyPaneFieldChanged:', error);
-        }
-
-        if (typeof webPart.instance.render === 'function') {
-          try {
-            webPart.instance.render();
-          } catch (error: unknown) {
-            this.log.warn('Error rendering web part:', error);
-          }
-        }
-      }
+      applyWebPartPropertyChange(webPart, targetProperty, newValue);
     } else {
       webPart.properties[targetProperty] = newValue;
     }
@@ -763,9 +637,7 @@ export class WorkbenchRuntime {
    * Recreates active SPFx components so they request data from the newly selected scenario.
    * The surrounding workbench React tree and component configuration stay intact.
    */
-  private async reinitializeActiveComponentsForScenario(
-    scenarioLabel: string,
-  ): Promise<void> {
+  private async reinitializeActiveComponentsForScenario(scenarioLabel: string): Promise<void> {
     if (this.isReinitializingForScenario) {
       return;
     }
@@ -823,10 +695,7 @@ export class WorkbenchRuntime {
         try {
           dynamicDataSourceManager?.dispose?.();
         } catch (error: unknown) {
-          this.log.warn(
-            'Error disposing extension dynamic data before scenario switch:',
-            error,
-          );
+          this.log.warn('Error disposing extension dynamic data before scenario switch:', error);
         }
         try {
           extension.instance.onDispose?.();

@@ -1,1 +1,0 @@
-export { PropertyPanePanel } from './PropertyPanePanel';

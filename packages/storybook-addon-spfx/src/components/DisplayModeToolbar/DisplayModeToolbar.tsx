@@ -15,7 +15,16 @@ export const DisplayModeToolbar: React.FC = () => {
 
   const toggleDisplayMode = () => {
     const newMode = displayMode === DisplayMode.Edit ? DisplayMode.Read : DisplayMode.Edit;
-    updateGlobals({ [STORYBOOK_GLOBAL_KEYS.DISPLAY_MODE]: newMode });
+    updateGlobals(
+      newMode === DisplayMode.Edit
+        ? {
+            [STORYBOOK_GLOBAL_KEYS.DISPLAY_MODE]: newMode,
+          }
+        : {
+            [STORYBOOK_GLOBAL_KEYS.DISPLAY_MODE]: newMode,
+            [STORYBOOK_GLOBAL_KEYS.PROPERTY_PANE_OPEN]: false,
+          },
+    );
   };
 
   const isEditMode = displayMode === DisplayMode.Edit;

@@ -1,12 +1,10 @@
-import { Stack, type IDropdownOption } from '@fluentui/react';
+import { type IDropdownOption, Stack } from '@fluentui/react';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 
+import { getDynamicDataStrings, getPropertyPaneStrings } from '../config';
+import type { IDynamicDataSourceViewModel, IDynamicFieldSetViewModel } from '../types';
 import { DropdownComponent } from './DropdownComponent';
 import { DynamicFieldComponent } from './DynamicFieldComponent';
-import type {
-  IDynamicDataSourceViewModel,
-  IDynamicFieldSetViewModel,
-} from '../types';
 
 interface IDynamicFieldSetEntry {
   key: string;
@@ -42,9 +40,7 @@ function parseReference(reference?: string): { propertyId?: string; sourceId?: s
 }
 
 function formatPropertiesLabel(name: string): string {
-  const template =
-    window.__workbenchConfig?.dynamicDataStrings?.propertiesLabelFormat ?? "{0}'s properties";
-  return template.replace('{0}', name);
+  return getDynamicDataStrings().propertiesLabelFormat.replace('{0}', name);
 }
 
 export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
@@ -60,9 +56,7 @@ export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
   const sharedSourceFilters = sharedConfiguration?.source?.filters;
   const sharedPropertyFilters = sharedConfiguration?.property?.filters;
   const sharedSourceLabel =
-    sharedConfiguration?.source?.sourcesLabel ||
-    window.__workbenchConfig?.propertyPaneStrings?.connectToSourceText ||
-    'Connect to source';
+    sharedConfiguration?.source?.sourcesLabel || getPropertyPaneStrings().connectToSourceText;
 
   const availableSources = useMemo(
     () =>
@@ -130,7 +124,8 @@ export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
     () =>
       entries.map((entry) => {
         const parsedEntryReference = parseReference(entry.reference);
-        const sourceMatches = !sharedSourceEnabled || parsedEntryReference.sourceId === sharedSourceId;
+        const sourceMatches =
+          !sharedSourceEnabled || parsedEntryReference.sourceId === sharedSourceId;
         const propertyMatches =
           !sharedPropertyEnabled || parsedEntryReference.propertyId === sharedPropertyId;
 
@@ -209,7 +204,7 @@ export const DynamicFieldSetComponent: FC<IDynamicFieldSetComponentProps> = ({
             hideSourceDropdown={sharedSourceEnabled}
             label={entry.label}
             propertyValueDepth={entry.propertyValueDepth}
-            sourceLabel={window.__workbenchConfig?.propertyPaneStrings?.connectToSourceText}
+            sourceLabel={getPropertyPaneStrings().connectToSourceText}
             sources={sources}
             onChange={(reference) => onChange(entry.key, reference)}
           />

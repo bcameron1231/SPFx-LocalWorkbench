@@ -1,9 +1,12 @@
 import React, { FC, useCallback, useEffect, useRef } from 'react';
 
-import { logger } from '@spfx-local-workbench/shared';
-
+import { logger } from '../../../utils';
+import type {
+  IPropertyPaneCustomFieldPropsModel,
+  IPropertyPaneFieldModel,
+  PropertyPaneFieldChangeCallback,
+} from '../types';
 import styles from './CustomFieldComponent.module.css';
-import type { IPropertyPaneCustomFieldPropsModel, IPropertyPaneFieldChangeCallback, IPropertyPaneFieldModel } from '../types';
 
 interface ICustomFieldComponentProps {
   field: IPropertyPaneFieldModel<IPropertyPaneCustomFieldPropsModel>;
@@ -29,7 +32,7 @@ export const CustomFieldComponent: FC<ICustomFieldComponentProps> = ({
     onPropertyChangeRef.current = onPropertyChange;
   }, [field.targetProperty, onFieldValidityChange, onPropertyChange]);
 
-  const changeCallback = useCallback<IPropertyPaneFieldChangeCallback>(
+  const changeCallback = useCallback<PropertyPaneFieldChangeCallback>(
     (targetProperty, newValue, isValidEntry) => {
       const resolvedTargetProperty = targetProperty || targetPropertyRef.current;
 

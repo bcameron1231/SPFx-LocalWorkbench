@@ -1,17 +1,17 @@
 /**
  * Storybook manager configuration for SPFx addon
- * This file is loaded in the Storybook manager and registers toolbar controls and panels
+ * This file is loaded in the Storybook manager and registers toolbar controls.
  */
 import { addons, types } from '@storybook/manager-api';
 import React from 'react';
 
 import {
   DisplayModeToolbar,
-  PropertyPanePanel,
+  PropertyPaneToolbar,
   ScenarioToolbar,
   ThemeToolbar,
 } from './components';
-import { ADDON_ID, PANEL_ID, TOOLBAR_IDS } from './constants';
+import { ADDON_ID, TOOLBAR_IDS } from './constants';
 
 // Register the addon
 addons.register(ADDON_ID, () => {
@@ -21,6 +21,13 @@ addons.register(ADDON_ID, () => {
     title: 'Display Mode',
     match: ({ viewMode }) => viewMode === 'story',
     render: () => <DisplayModeToolbar />,
+  });
+
+  addons.add(TOOLBAR_IDS.PROPERTY_PANE, {
+    type: types.TOOL,
+    title: 'Edit properties',
+    match: ({ viewMode }) => viewMode === 'story',
+    render: () => <PropertyPaneToolbar />,
   });
 
   // Register theme toolbar
@@ -45,12 +52,4 @@ addons.register(ADDON_ID, () => {
   //   match: ({ viewMode }) => viewMode === 'story',
   //   render: () => <LocaleToolbar />,
   // });
-
-  // Register property pane panel
-  addons.add(PANEL_ID, {
-    type: types.PANEL,
-    title: 'Property Pane',
-    match: ({ viewMode }) => viewMode === 'story',
-    render: ({ active }) => <PropertyPanePanel active={!!active} />,
-  });
 });

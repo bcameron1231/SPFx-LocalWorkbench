@@ -6,27 +6,24 @@
 export { DisplayMode } from '@spfx-local-workbench/shared';
 
 export const ADDON_ID = 'spfx-addon';
-export const PANEL_ID = `${ADDON_ID}/property-pane`;
 
 export const PARAM_KEY = 'spfx';
 
 export const TOOLBAR_IDS = {
   DISPLAY_MODE: `${ADDON_ID}/display-mode`,
+  PROPERTY_PANE: `${ADDON_ID}/property-pane`,
   THEME: `${ADDON_ID}/theme`,
   SCENARIO: `${ADDON_ID}/scenario`,
   LOCALE: `${ADDON_ID}/locale`,
 } as const;
 
 export const EVENTS = {
-  UPDATE_PROPERTIES: `${ADDON_ID}/update-properties`,
-  PROPERTY_CHANGED: `${ADDON_ID}/property-changed`,
-  DISPLAY_MODE_CHANGED: `${ADDON_ID}/display-mode-changed`,
-  THEME_CHANGED: `${ADDON_ID}/theme-changed`,
   LOCALE_CHANGED: `${ADDON_ID}/locale-changed`,
 } as const;
 
 export const STORYBOOK_GLOBAL_KEYS = {
   DISPLAY_MODE: `${PARAM_KEY}DisplayMode`,
+  PROPERTY_PANE_OPEN: `${PARAM_KEY}PropertyPaneOpen`,
   THEME: `${PARAM_KEY}Theme`,
   LOCALE: `${PARAM_KEY}Locale`,
   CUSTOM_THEMES: `${PARAM_KEY}CustomThemes`,
