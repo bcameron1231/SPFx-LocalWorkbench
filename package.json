@@ -3,7 +3,7 @@
   "private": true,
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "publisher": "m365pnp",
   "homepage": "https://pnp.github.io/",
   "author": {

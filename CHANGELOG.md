@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-04
+
 ## Added
 
 - Additive API proxy scenarios: optional named scenario rules extend base rules and replace base rules with the same exact name

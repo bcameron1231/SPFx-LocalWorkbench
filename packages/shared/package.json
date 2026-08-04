@@ -1,6 +1,6 @@
 {
   "name": "@spfx-local-workbench/shared",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Shared code for SPFx Local Workbench extension and Storybook addon",
   "author": {
     "name": "Chris Kent",
