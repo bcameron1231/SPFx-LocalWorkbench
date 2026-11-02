@@ -971,6 +971,17 @@
             "type": "boolean",
             "default": true,
             "description": "%configuration.spfxLocalWorkbench.propertyPane.shrinkCanvas.description%"
+          },
+          "spfxLocalWorkbench.canvas.layout": {
+            "order": 20,
+            "type": "string",
+            "enum": ["free", "sharepoint"],
+            "default": "free",
+            "enumDescriptions": [
+              "%configuration.spfxLocalWorkbench.canvas.layout.enumDescriptions.free%",
+              "%configuration.spfxLocalWorkbench.canvas.layout.enumDescriptions.sharepoint%"
+            ],
+            "description": "%configuration.spfxLocalWorkbench.canvas.layout.description%"
           }
         }
       },

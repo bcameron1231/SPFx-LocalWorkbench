@@ -20,6 +20,12 @@ export const CHANGED_EVENT_DELAY_MS = 50;
 export const CONTENT_CHECK_DELAY_MS = 500;
 
 // Debounce delays (in milliseconds)
+/** Delay before re-measuring web part widths after a layout change, so the new layout has been applied */
+export const CANVAS_RESIZE_CHECK_DELAY_MS = 150;
+
+/** Debounce delay before saving the canvas state (web parts, properties and layout) */
+export const CANVAS_STATE_SAVE_DEBOUNCE_MS = 300;
+
 /** Debounce delay for live reload when multiple files change */
 export const LIVE_RELOAD_DEBOUNCE_MS = 500;
 

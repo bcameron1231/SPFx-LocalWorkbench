@@ -18,6 +18,7 @@ import {
   getCustomThemes,
   getWorkbenchSettings,
   onConfigurationChanged,
+  setCanvasLayout,
   setCurrentTheme,
 } from './config';
 import { generateWorkbenchHtml } from './html';
@@ -211,6 +212,7 @@ export class WorkbenchPanel {
             theme: currentTheme,
             customThemes: getCustomThemes(),
             context: newSettings.context,
+            canvasLayout: newSettings.canvasLayout,
           },
         });
       }),
@@ -334,6 +336,12 @@ export class WorkbenchPanel {
         log.error('Webview error:', message.text);
         if (message.text) {
           vscode.window.showErrorMessage(message.text);
+        }
+        return;
+
+      case 'setCanvasLayout':
+        if (message.layout === 'free' || message.layout === 'sharepoint') {
+          await setCanvasLayout(message.layout);
         }
         return;
 
@@ -492,6 +500,7 @@ export class WorkbenchPanel {
       contextSettings: this._settings.context,
       proxyEnabled: this._apiProxyService?.enabled ?? true,
       propertyPaneShrinkCanvas: this._settings.propertyPaneShrinkCanvas,
+      canvasLayout: this._settings.canvasLayout,
       propertyPaneStrings: {
         applyButtonText: localize('propertyPane.applyButtonText', 'Apply'),
         backButtonText: localize('propertyPane.backButtonText', 'Back'),

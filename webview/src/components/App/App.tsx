@@ -1,5 +1,5 @@
 import { IconButton, css } from '@fluentui/react';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 
 import { PropertyPanePanel, logger } from '@spfx-local-workbench/shared';
 import type {
@@ -10,7 +10,9 @@ import type {
 } from '@spfx-local-workbench/shared';
 import { isActiveWebPart } from '@spfx-local-workbench/shared';
 
-import type { IWorkbenchConfig } from '../../types';
+import { createPageLayout, reconcileLayout, removeWebPart } from '../../canvas/pageLayout';
+import type { IPageLayout } from '../../canvas/pageLayout';
+import type { CanvasLayoutMode, IWorkbenchConfig } from '../../types';
 import { ComponentPicker } from '../ComponentPicker';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { ExtensionPropertiesPanel } from '../ExtensionPropertiesPanel';
@@ -29,6 +31,8 @@ export interface IAppHandlers {
   openPropertyPane: (webPart: IActiveWebPart) => void;
   closePropertyPane: () => void;
   updateWebPartProperties: (instanceId: string, properties: any) => void;
+  /** Section layout restored from the saved canvas */
+  setPageLayout: (layout: IPageLayout) => void;
 }
 
 export const App: FC<IAppProps> = ({ config, onInitialized }) => {
@@ -38,6 +42,8 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
   const [selectedWebPart, setSelectedWebPart] = useState<IActiveWebPart>();
   const [selectedExtension, setSelectedExtension] = useState<IExtensionConfig>();
   const [extensionPickerOpen, setExtensionPickerOpen] = useState(false);
+  const [canvasLayout, setCanvasLayout] = useState<CanvasLayoutMode>(config.canvasLayout ?? 'free');
+  const [pageLayout, setPageLayout] = useState<IPageLayout>(createPageLayout);
 
   const availableExtensions = manifests
     .filter((m) => m.componentType === 'Extension')
@@ -51,6 +57,7 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
       setActiveExtensions,
       openPropertyPane: (webPart: IActiveWebPart) => setSelectedWebPart(webPart),
       closePropertyPane: () => setSelectedWebPart(undefined),
+      setPageLayout,
       updateWebPartProperties: (instanceId: string, properties: any) => {
         setActiveWebParts((prev) =>
           prev.map((wp) => (wp.instanceId === instanceId ? { ...wp, properties } : wp)),
@@ -66,6 +73,44 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
     };
     onInitialized(handlers);
   }, [onInitialized]);
+
+  // The SharePoint layout mode can be switched from the status bar or the extension settings
+  useEffect(() => {
+    const onModeChanged = (e: Event) =>
+      setCanvasLayout((e as CustomEvent<CanvasLayoutMode>).detail);
+    window.addEventListener('workbenchCanvasLayoutChanged', onModeChanged);
+    return () => window.removeEventListener('workbenchCanvasLayoutChanged', onModeChanged);
+  }, []);
+
+  // Web parts without a place (added in the free canvas, restored) go to the first section
+  useEffect(() => {
+    setPageLayout((prev) =>
+      reconcileLayout(
+        prev,
+        activeWebParts.map((wp) => wp.instanceId),
+      ),
+    );
+  }, [activeWebParts]);
+
+  // The runtime saves the layout and gives web parts their section's theme variant
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent('pageLayoutChanged', {
+        detail: { layout: pageLayout, sectionsActive: canvasLayout === 'sharepoint' },
+      }),
+    );
+  }, [pageLayout, canvasLayout]);
+
+  const deleteWebPartAt = useCallback(
+    (index: number) => {
+      const webPart = activeWebParts[index];
+      if (webPart) {
+        setPageLayout((prev) => removeWebPart(prev, webPart.instanceId));
+      }
+      window.dispatchEvent(new CustomEvent('deleteWebPart', { detail: { index } }));
+    },
+    [activeWebParts],
+  );
 
   useEffect(() => {
     if (!selectedWebPart) {
@@ -182,6 +227,9 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
         <WorkbenchCanvas
           manifests={manifests}
           activeWebParts={activeWebParts}
+          canvasLayout={canvasLayout}
+          pageLayout={pageLayout}
+          onPageLayoutChange={setPageLayout}
           onAddWebPart={(insertIndex, manifestIndex, preconfiguredEntryIndex) => {
             window.dispatchEvent(
               new CustomEvent('addWebPart', {
@@ -198,13 +246,7 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
               logger.warn(`Web part at index ${index} is not active or does not exist.`);
             }
           }}
-          onDeleteWebPart={(index) => {
-            window.dispatchEvent(
-              new CustomEvent('deleteWebPart', {
-                detail: { index },
-              }),
-            );
-          }}
+          onDeleteWebPart={deleteWebPartAt}
         />
 
         {/* Application Customizer Footer Placeholder */}

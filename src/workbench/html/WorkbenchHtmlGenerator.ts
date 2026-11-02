@@ -35,6 +35,8 @@ export interface IHtmlGeneratorConfig {
   proxyEnabled?: boolean;
   // Whether opening the property pane should shrink the canvas (default true)
   propertyPaneShrinkCanvas?: boolean;
+  // Canvas layout mode ('sharepoint' shows SharePoint sections and columns)
+  canvasLayout?: 'free' | 'sharepoint';
   // External dependencies resolved from the SPFx project's node_modules
   externalDependencies?: IExternalDependency[];
   // HTML field security configuration controlling which external domains web parts may iframe
@@ -148,6 +150,7 @@ function generateStatusBar(
         <span id="component-count">${countText}</span>
         <div class="separator"></div>
         <span id="locale-switcher">${locale.toLowerCase()}</span>
+        <div id="layout-toggle"></div>
         <div id="scenario-picker"></div>
         <div id="theme-picker"></div>
     </div>
@@ -203,6 +206,7 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
     context: config.contextSettings,
     proxyEnabled: config.proxyEnabled !== false,
     propertyPaneShrinkCanvas: config.propertyPaneShrinkCanvas !== false,
+    canvasLayout: config.canvasLayout ?? 'free',
     propertyPaneStrings: config.propertyPaneStrings,
     dynamicDataStrings: config.dynamicDataStrings,
     externalDependencies: (config.externalDependencies || []).map((dep) => ({

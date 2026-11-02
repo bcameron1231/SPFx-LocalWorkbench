@@ -1,4 +1,4 @@
-import { IconButton, Link, PrimaryButton, Stack, Text } from '@fluentui/react';
+import { Link, PrimaryButton, Stack, Text } from '@fluentui/react';
 import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
 
 import type {
@@ -7,9 +7,12 @@ import type {
   IWebPartManifest,
 } from '@spfx-local-workbench/shared';
 
+import type { IPageLayout } from '../../canvas/pageLayout';
 import { getLocalizedString } from '../../utilities';
 import { ComponentPicker, IComponentItem } from '../ComponentPicker';
 //import { WebPartPicker } from '../WebPartPicker';
+import { SharePointCanvas } from '../SharePointCanvas';
+import { WebPartZone } from './WebPartZone';
 import styles from './WorkbenchCanvas.module.css';
 
 interface IWorkbenchCanvasProps {
@@ -23,6 +26,10 @@ interface IWorkbenchCanvasProps {
   onEditWebPart: (index: number) => void;
   onDeleteWebPart: (index: number) => void;
   locale?: string;
+  /** 'sharepoint' renders SharePoint sections and columns; 'free' is the plain stacked canvas */
+  canvasLayout?: 'free' | 'sharepoint';
+  pageLayout?: IPageLayout;
+  onPageLayoutChange?: (layout: IPageLayout) => void;
 }
 
 export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
@@ -32,6 +39,9 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
   onEditWebPart,
   onDeleteWebPart,
   locale,
+  canvasLayout = 'free',
+  pageLayout,
+  onPageLayoutChange,
 }) => {
   const [openPickerIndex, setOpenPickerIndex] = useState<number | null>(null);
   const [serveClicked, setServeClicked] = useState(false);
@@ -80,7 +90,8 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
       <div id="canvas" className={styles.canvas}>
         <Stack horizontalAlign="center" tokens={{ childrenGap: 16 }} className={styles.emptyState}>
           <Text variant="large" className={styles.emptyStateMessage}>
-            No SPFx components found. Make sure your project is served / running.
+            No SPFx components found. Make sure your project's dev server is running (heft start or
+            gulp serve).
           </Text>
           <PrimaryButton
             text="Serve"
@@ -102,6 +113,20 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
           </Link>
         </Stack>
       </div>
+    );
+  }
+
+  if (canvasLayout === 'sharepoint' && pageLayout && onPageLayoutChange) {
+    return (
+      <SharePointCanvas
+        manifests={manifests}
+        activeWebParts={activeWebParts}
+        pageLayout={pageLayout}
+        onPageLayoutChange={onPageLayoutChange}
+        onEditWebPart={onEditWebPart}
+        onDeleteWebPart={onDeleteWebPart}
+        locale={locale}
+      />
     );
   }
 
@@ -145,7 +170,7 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
   );
 };
 
-interface IAddZoneProps {
+export interface IAddZoneProps {
   insertIndex: number;
   isOpen: boolean;
   manifests: IComponentManifest[];
@@ -154,7 +179,7 @@ interface IAddZoneProps {
   locale?: string;
 }
 
-const AddZone: FC<IAddZoneProps> = ({
+export const AddZone: FC<IAddZoneProps> = ({
   insertIndex,
   isOpen,
   manifests,
@@ -214,38 +239,6 @@ const AddZone: FC<IAddZoneProps> = ({
           onSelect(manifestIndex, location, preconfiguredEntryIndex)
         }
       />
-    </div>
-  );
-};
-
-interface IWebPartZoneProps {
-  webPart: IWebPartConfig;
-  onEdit: () => void;
-  onDelete: () => void;
-}
-
-const WebPartZone: FC<IWebPartZoneProps> = ({ webPart, onEdit, onDelete }) => {
-  return (
-    <div className={styles.webPartZone}>
-      <div className={styles.webPartToolbar}>
-        <IconButton
-          iconProps={{ iconName: 'Edit' }}
-          title="Edit properties"
-          ariaLabel="Edit properties"
-          onClick={onEdit}
-        />
-        <IconButton
-          iconProps={{ iconName: 'Delete' }}
-          title="Delete"
-          ariaLabel="Delete web part"
-          onClick={onDelete}
-        />
-      </div>
-      <div className={styles.webPartContainer}>
-        <div className={styles.webPartContent} id={`webpart-${webPart.instanceId}`}>
-          {/* Web part rendered here by WorkbenchRuntime */}
-        </div>
-      </div>
     </div>
   );
 };

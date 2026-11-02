@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - JSOM scripts (`SP.js`, `SP.Runtime.js`, `SP.Search.js`...) load from your tenant, and their `XMLHttpRequest` calls go through the proxy
 - SharePoint-hosted images (`<img>` and inline `background-image`) load through the proxy as `blob:` URLs
 - [Authentication patches](TENANT.md#authentication-patches) for addresses SharePoint refuses a token on but serves to a signed-in page: static `_layouts` files, direct file links (retried through `download.aspx`) and `userphoto.aspx` profile photos (retried through Microsoft Graph)
+- SharePoint page layout mode (`spfxLocalWorkbench.canvas.layout`, also a status bar switch): sections with one, two or three columns, one-third left/right, full-width and vertical sections, SharePoint's widths and edit toolbars, and Section > Design (theme colours, backgrounds, overlays). Web parts in a coloured section get that section's theme variant through `ThemeProvider`. `free` stays the default ([docs/sharepoint-canvas-measurements.md](docs/sharepoint-canvas-measurements.md))
+- `onAfterResize` is called when a web part's column width changes (layout, column change, window resize)
+- The web parts, their properties and the page layout survive refreshes and VS Code reloads
+- SharePoint's "Fluent MDL2 Hybrid Icons" font for Fluent icon names, as SharePoint Online uses
 
 ### Changed
 

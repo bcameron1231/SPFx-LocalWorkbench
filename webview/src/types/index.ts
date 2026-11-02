@@ -14,6 +14,8 @@ export interface IVsCodeApi {
   setState(state: any): void;
 }
 
+export type CanvasLayoutMode = 'free' | 'sharepoint';
+
 export interface IWorkbenchConfig {
   serveUrl: string;
   serveCommand: string;
@@ -27,6 +29,8 @@ export interface IWorkbenchConfig {
   proxyEnabled?: boolean;
   /** When true, the canvas shrinks to make room when the property pane is open (default true). */
   propertyPaneShrinkCanvas?: boolean;
+  /** `spfxLocalWorkbench.canvas.layout`: 'sharepoint' shows SharePoint sections and columns */
+  canvasLayout?: CanvasLayoutMode;
   propertyPaneStrings?: {
     applyButtonText: string;
     backButtonText: string;

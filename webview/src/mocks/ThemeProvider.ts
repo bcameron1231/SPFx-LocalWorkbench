@@ -8,6 +8,9 @@ import {
   buildFluentTheme,
 } from '@spfx-local-workbench/shared/fluent';
 
+import type { ISectionDesign } from '../canvas/pageLayout';
+import { getSectionPalette } from '../canvas/sectionTheme';
+
 /**
  * Provides theme services for SPFx web parts in the local workbench.
  *
@@ -44,5 +47,21 @@ export class ThemeProvider {
    */
   getTheme(): any {
     return buildFluentTheme(this.theme.palette, this.theme.isInverted);
+  }
+
+  /** The theme a web part gets inside a section with this design (SharePoint theme variants) */
+  getSectionTheme(design: ISectionDesign | undefined): any {
+    const section = getSectionPalette(this.theme.palette, !!this.theme.isInverted, design);
+    return buildFluentTheme(section.palette, section.isInverted);
+  }
+
+  /** Applies a section's theme variant as CSS custom properties on the section element */
+  applySectionThemeTo(element: HTMLElement, design: ISectionDesign | undefined): void {
+    const section = getSectionPalette(this.theme.palette, !!this.theme.isInverted, design);
+    applyPaletteAsCssVars(element, section.palette, section.isInverted);
+  }
+
+  getPalette(): ITheme['palette'] {
+    return this.theme.palette;
   }
 }

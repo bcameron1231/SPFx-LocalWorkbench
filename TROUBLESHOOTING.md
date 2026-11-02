@@ -54,3 +54,4 @@ This is a known limitation of the local workbench.
 | `403` / sign-in errors for tenant requests | Tenant settings, scopes or consent | See the troubleshooting table in [TENANT.md](TENANT.md) and **View > Output > SPFx API Proxy** |
 | `NotifyScriptLoadedAndExecuteWaitingJobs is not defined` from `SP.*.js` | The web part loaded a JSOM script without `/_layouts/15/init.js` first (on SharePoint pages init.js is usually already there) | Load `init.js` before the other JSOM scripts in your web part |
 | Tenant images or profile photos do not show (avatars show initials) | SharePoint refuses the sign-in token on that address | Check **SPFx API Proxy** for the `retrying through ...` lines of the [authentication patches](TENANT.md#authentication-patches) |
+| Web part layout does not adapt when columns change | It sizes itself only on load | Handle `onAfterResize`; the SharePoint layout calls it when the width changes |

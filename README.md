@@ -17,6 +17,7 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 - **Live Reload Support**: Works with `heft start` (or `gulp serve` in SPFx 1.21 and older) for real-time development
 - **Multiple Web Parts**: Add, configure, and test multiple web parts simultaneously on the canvas
 - **Theme Support**: Choose from standard SharePoint themes and even use your own directly within the workbench
+- **SharePoint Page Layout** (optional): Sections and columns with SharePoint's sizes (one, two and three columns, one-third left/right, full-width and vertical sections), a Section pane with SharePoint's Design options (theme colour pairs, backgrounds with fill mode, focal point and white/black/gradient overlays with opacity), edit-mode toolbars placed like SharePoint's, and `onAfterResize` when a column's width changes. Turn it on from the **SharePoint layout** switch in the status bar or with `spfxLocalWorkbench.canvas.layout`. The canvas (web parts, properties, sections) is kept across refreshes and VS Code reloads.
 
 ### Application Customizers
 
@@ -263,6 +264,7 @@ You can add additional properties as needed to match your SPFx solution requirem
 | Setting                                        | Default | Description                                                                                                      |
 | ---------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
 | `spfxLocalWorkbench.propertyPane.shrinkCanvas` | `true`  | Shrinks the canvas while the property pane is open, matching SharePoint; disable it to overlay the pane instead. |
+| `spfxLocalWorkbench.canvas.layout` | `free` | `sharepoint` lays the canvas out like a SharePoint page (sections, columns, section backgrounds); `free` stacks web parts in one column. Sizes come from [docs/sharepoint-canvas-measurements.md](docs/sharepoint-canvas-measurements.md). Flexible sections are not supported. |
 
 ### Proxy Settings
 

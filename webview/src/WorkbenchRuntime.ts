@@ -2,6 +2,8 @@
 //
 // Main runtime class that manages the SPFx local workbench
 import {
+  CANVAS_RESIZE_CHECK_DELAY_MS,
+  CANVAS_STATE_SAVE_DEBOUNCE_MS,
   COMPONENT_REMOVAL_DELAY_MS,
   DOM_RENDER_DELAY_MS,
   DisplayMode,
@@ -26,10 +28,14 @@ import { isActiveExtension, isActiveWebPart } from '@spfx-local-workbench/shared
 
 import { ExtensionManager } from './ExtensionManager';
 import { WebPartManager } from './WebPartManager';
+import type { IPageLayout, ISectionDesign } from './canvas/pageLayout';
+import { findWebPartSection, getSectionDesign, orderedWebParts } from './canvas/pageLayout';
+import { setSectionThemeApplier } from './canvas/sectionTheme';
+import { releaseWebPartHost } from './canvas/webPartHosts';
 import type { IAppHandlers } from './components/App';
-import { SpfxContext, ThemeProvider } from './mocks';
+import { SpfxContext, ThemeProvider, spfxThemeService } from './mocks';
 import { registerProxyHttpClients } from './proxy';
-import type { IVsCodeApi, IWorkbenchConfig } from './types';
+import type { CanvasLayoutMode, IVsCodeApi, IWorkbenchConfig } from './types';
 
 export class WorkbenchRuntime {
   private log = logger.createChild('Workbench');
@@ -49,6 +55,14 @@ export class WorkbenchRuntime {
   private displayMode: DisplayMode = DisplayMode.Edit;
   private isReinitializingForScenario = false;
   private scenarioReinitialization: Promise<void> | undefined;
+  /** Section layout of the SharePoint canvas mode (kept in sync by the canvas) */
+  private pageLayout: IPageLayout | undefined;
+  /** Whether the canvas shows SharePoint sections (section backgrounds only apply then) */
+  private sectionsActive = false;
+  private resizeObservers = new Map<string, ResizeObserver>();
+  private lastWidths = new Map<string, number>();
+  private saveTimer: ReturnType<typeof setTimeout> | undefined;
+  private restoredFromState = false;
 
   constructor(config: IWorkbenchConfig, vscodeApi: IVsCodeApi) {
     this.vscode = vscodeApi;
@@ -64,6 +78,7 @@ export class WorkbenchRuntime {
     );
     this.themeProvider = new ThemeProvider(config.theme);
     this.themeProvider.applyThemeToDocument();
+    this.registerSectionThemes();
     this.webPartManager = new WebPartManager(
       this.vscode,
       config.serveUrl,
@@ -77,6 +92,9 @@ export class WorkbenchRuntime {
       this.contextProvider,
       this.themeProvider,
     );
+
+    // A window resize changes column widths
+    window.addEventListener('resize', () => this.checkWebPartSizesSoon());
 
     // Expose to window for debugging
     (window as any).__workbench = this;
@@ -102,13 +120,20 @@ export class WorkbenchRuntime {
     customThemes?: ITheme[];
     context?: any;
     proxyEnabled?: boolean;
+    canvasLayout?: CanvasLayoutMode;
   }): void {
+    if (settings.canvasLayout) {
+      window.dispatchEvent(
+        new CustomEvent('workbenchCanvasLayoutChanged', { detail: settings.canvasLayout }),
+      );
+    }
     if (settings.serveUrl) {
       this.config.serveUrl = settings.serveUrl;
     }
     if (settings.theme) {
       this.themeProvider = new ThemeProvider(settings.theme);
       this.themeProvider.applyThemeToDocument();
+      this.registerSectionThemes();
       // Keep WebPartManager's reference in sync so new web parts added after
       // this settings change are instantiated with the updated theme.
       this.webPartManager.updateThemeProvider(this.themeProvider);
@@ -204,6 +229,8 @@ export class WorkbenchRuntime {
         this.appHandlers.setActiveWebParts(this.activeWebParts);
         this.appHandlers.setActiveExtensions(this.activeExtensions);
       }
+
+      await this.restoreFromState();
     } catch (error: unknown) {
       this.log.error('Initialization failed:', error);
       this.updateConnectionStatus(false);
@@ -386,11 +413,167 @@ export class WorkbenchRuntime {
     }
 
     this.activeWebParts.splice(index, 1);
+    if (webPart) {
+      this.stopResizeTracking(webPart.instanceId);
+      spfxThemeService.forget(webPart.instanceId);
+      releaseWebPartHost(webPart.instanceId);
+    }
 
     // Update React app
     if (this.appHandlers) {
       this.appHandlers.setActiveWebParts([...this.activeWebParts]);
     }
+    this.scheduleSave();
+  }
+
+  /** Removes a web part by its instance ID (used by the SharePoint canvas) */
+  async removeWebPartById(instanceId: string): Promise<void> {
+    const index = this.activeWebParts.findIndex((wp) => wp.instanceId === instanceId);
+    if (index !== -1) {
+      await this.removeWebPart(index);
+    }
+  }
+
+  /** The SharePoint canvas reports its section layout here, so it is saved and themes follow sections */
+  setPageLayout(layout: IPageLayout | undefined, sectionsActive: boolean): void {
+    this.pageLayout = layout;
+    this.sectionsActive = sectionsActive;
+    this.applySectionThemes();
+    this.checkWebPartSizesSoon();
+    this.scheduleSave();
+  }
+
+  /** Section backgrounds of the SharePoint canvas are variants of the current workbench theme */
+  private registerSectionThemes(): void {
+    const provider = this.themeProvider;
+    setSectionThemeApplier(
+      (element, design) => provider.applySectionThemeTo(element, design),
+      provider.getPalette(),
+    );
+  }
+
+  /** Gives every web part the theme variant of its section's background */
+  private applySectionThemes(): void {
+    for (const webPart of this.activeWebParts) {
+      if (!isActiveWebPart(webPart)) {
+        continue;
+      }
+      this.webPartManager.applySectionDesign(
+        webPart,
+        this.getWebPartSectionDesign(webPart.instanceId),
+      );
+    }
+  }
+
+  private getWebPartSectionDesign(instanceId: string): ISectionDesign | undefined {
+    if (!this.sectionsActive || !this.pageLayout) {
+      return undefined;
+    }
+    return getSectionDesign(findWebPartSection(this.pageLayout, instanceId));
+  }
+
+  /**
+   * SharePoint calls onAfterResize when the space a web part has changes (columns, window size).
+   * The workbench watches each web part's element, and also re-measures after every canvas change:
+   * observers don't report while the webview is hidden, and a web part moved to another column is
+   * detached and re-attached.
+   */
+  private trackResize(instanceId: string, domElement: HTMLElement): void {
+    this.stopResizeTracking(instanceId);
+    this.lastWidths.set(instanceId, Math.round(domElement.getBoundingClientRect().width));
+    const observer = new ResizeObserver(() => this.checkWebPartSize(instanceId));
+    observer.observe(domElement);
+    this.resizeObservers.set(instanceId, observer);
+  }
+
+  private stopResizeTracking(instanceId: string): void {
+    this.resizeObservers.get(instanceId)?.disconnect();
+    this.resizeObservers.delete(instanceId);
+    this.lastWidths.delete(instanceId);
+  }
+
+  /** Re-measures every web part once the canvas has re-rendered */
+  checkWebPartSizesSoon(): void {
+    requestAnimationFrame(() => setTimeout(() => this.checkWebPartSizes(), 0));
+    // requestAnimationFrame doesn't run while the webview is hidden
+    setTimeout(() => this.checkWebPartSizes(), CANVAS_RESIZE_CHECK_DELAY_MS);
+  }
+
+  private checkWebPartSizes(): void {
+    for (const webPart of this.activeWebParts) {
+      this.checkWebPartSize(webPart.instanceId);
+    }
+  }
+
+  private checkWebPartSize(instanceId: string): void {
+    const element = document.getElementById(`webpart-${instanceId}`);
+    if (!element || !element.isConnected) {
+      return;
+    }
+    const width = Math.round(element.getBoundingClientRect().width);
+    if (width === 0 || width === this.lastWidths.get(instanceId)) {
+      return;
+    }
+    this.lastWidths.set(instanceId, width);
+    const current = this.activeWebParts.find((wp) => wp.instanceId === instanceId);
+    const instance = current && isActiveWebPart(current) ? (current.instance as any) : undefined;
+    if (typeof instance?.onAfterResize === 'function') {
+      try {
+        instance.onAfterResize(width);
+      } catch (error: unknown) {
+        this.log.warn('Error in onAfterResize:', error);
+      }
+    }
+  }
+
+  /** Saves the canvas (web parts, their properties and the section layout) in the webview state */
+  scheduleSave(): void {
+    if (this.saveTimer) {
+      clearTimeout(this.saveTimer);
+    }
+    this.saveTimer = setTimeout(() => {
+      try {
+        const previous = this.vscode.getState() ?? {};
+        this.vscode.setState({
+          ...previous,
+          canvas: { configs: this.getComponentConfigs(), layout: this.pageLayout },
+        });
+      } catch (error: unknown) {
+        this.log.warn('Could not save the canvas state:', error);
+      }
+    }, CANVAS_STATE_SAVE_DEBOUNCE_MS);
+  }
+
+  /** Restores the canvas saved in the webview state (it survives refreshes and VS Code reloads) */
+  private async restoreFromState(): Promise<void> {
+    if (this.restoredFromState) {
+      return;
+    }
+    this.restoredFromState = true;
+    const saved = this.vscode.getState()?.canvas;
+    if (!saved?.configs?.length) {
+      return;
+    }
+    const layout: IPageLayout | undefined = saved.layout;
+    // Restore in layout order, so the free canvas lists them in the same order
+    const order = layout ? orderedWebParts(layout) : [];
+    const configs = [...saved.configs].sort(
+      (a: any, b: any) => indexOrEnd(order, a.instanceId) - indexOrEnd(order, b.instanceId),
+    );
+    if (layout) {
+      this.pageLayout = layout;
+      this.appHandlers?.setPageLayout(layout);
+    }
+    await this.restoreComponents(configs);
+  }
+
+  private getComponentConfigs(): any[] {
+    return this.activeWebParts.map((wp) => ({
+      manifestId: wp.manifest.id,
+      instanceId: wp.instanceId,
+      properties: JSON.parse(JSON.stringify(wp.properties ?? {})),
+      preconfiguredEntryIndex: wp.preconfiguredEntryIndex ?? 0,
+    }));
   }
 
   /**
@@ -453,13 +636,21 @@ export class WorkbenchRuntime {
       return;
     }
 
+    // Section background first, so the first render already uses the section's theme variant
+    spfxThemeService.setSectionDesign(
+      config.instanceId,
+      this.getWebPartSectionDesign(config.instanceId),
+    );
+
     const active = await this.webPartManager.instantiateWebPart(config, domElement);
     if (active) {
       const idx = this.activeWebParts.findIndex((wp) => wp.instanceId === config.instanceId);
       if (idx !== -1) {
         this.activeWebParts[idx] = active;
       }
+      this.trackResize(config.instanceId, domElement);
     }
+    this.scheduleSave();
   }
 
   openPropertyPane(webPart: IWebPartConfig): void {
@@ -483,6 +674,7 @@ export class WorkbenchRuntime {
     if (this.appHandlers) {
       this.appHandlers.updateWebPartProperties(instanceId, { ...webPart.properties });
     }
+    this.scheduleSave();
   }
 
   async updateExtensionProperties(
@@ -838,12 +1030,7 @@ export class WorkbenchRuntime {
   preserveComponentConfigs(): void {
     this.log.debug('Preserving component configs for refresh');
 
-    const configs = this.activeWebParts.map((wp) => ({
-      manifestId: wp.manifest.id,
-      instanceId: wp.instanceId,
-      properties: JSON.parse(JSON.stringify(wp.properties)), // Deep clone
-      preconfiguredEntryIndex: wp.preconfiguredEntryIndex ?? 0,
-    }));
+    const configs = this.getComponentConfigs();
 
     this.vscode.postMessage({
       command: 'componentConfigsPreserved',
@@ -862,6 +1049,10 @@ export class WorkbenchRuntime {
     );
 
     for (const config of configs) {
+      // The same canvas can come back twice (saved state and a refresh); keep one copy
+      if (this.activeWebParts.some((wp) => wp.instanceId === config.instanceId)) {
+        continue;
+      }
       // Find the manifest in the filtered webParts array (same array addWebPartAt uses)
       const manifestIndex = webParts.findIndex((m) => m.id === config.manifestId);
 
@@ -883,4 +1074,9 @@ export class WorkbenchRuntime {
       }
     }
   }
+}
+
+function indexOrEnd(order: string[], id: string): number {
+  const index = order.indexOf(id);
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
 }

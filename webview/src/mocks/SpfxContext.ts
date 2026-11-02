@@ -49,7 +49,8 @@ export class SpfxContext {
 
     // Services web parts consume with serviceScope.consume(<Class>.serviceKey)
     const digestCache = new MockDigestCache();
-    const themeService = spfxThemeService;
+    // Per web part, so a web part in a section with a background gets that section's theme variant
+    const themeService = spfxThemeService.forInstance(instanceId);
     const consumeService = (key: any): any => {
       if (key === MockThemeProvider.serviceKey) {
         return themeService;
@@ -84,11 +85,12 @@ export class SpfxContext {
           ),
       },
       msGraphClientFactory: {
-        // Graph calls go through the proxy like the other clients (mock rules)
+        // Graph calls go through the proxy like the other clients (mock rules, or the tenant)
         getClient: () => Promise.resolve(new ProxyGraphClient(transport)),
       },
       aadTokenProviderFactory: {
-        // Web parts only need a placeholder token: the workbench never holds a real one.
+        // The real token stays in the extension host: requests sent to the tenant get their
+        // Authorization header replaced there, so web parts only need a placeholder here.
         getTokenProvider: () =>
           Promise.resolve({
             getToken: (_resource: string) => Promise.resolve(LOCAL_WORKBENCH_TOKEN),

@@ -15,6 +15,9 @@ import { StatusBarThemePicker } from './components/StatusBarThemePicker';
 import { getVsCodeProxyTransport, initializeVsCodeProxyTransport, installFetchProxy } from './proxy';
 import { installTenantImages } from './proxy/tenantImages';
 import { installTenantJsom } from './proxy/tenantJsom';
+import { StatusBarLayoutToggle } from './components/StatusBarLayoutToggle';
+import { applySharePointIconFont } from './sharePointIcons';
+import type { CanvasLayoutMode } from './types';
 import './styles/global.css';
 
 const log = logger.createChild('Main');
@@ -29,6 +32,8 @@ if (document.readyState === 'loading') {
 function initialize() {
   try {
     initializeIcons();
+    // Draw icons with SharePoint's icon font, as web parts get on a SharePoint page
+    log.debug('Icons moved to the SharePoint icon font:', applySharePointIconFont());
 
     // Get configuration injected by the extension
     const config = window.__workbenchConfig;
@@ -60,7 +65,21 @@ function initialize() {
         e.detail.insertIndex,
         e.detail.manifestIndex,
         e.detail.preconfiguredEntryIndex,
+        e.detail.instanceId,
       );
+    }) as EventListener);
+
+    window.addEventListener('deleteWebPartById', ((e: CustomEvent) => {
+      runtime.removeWebPartById(e.detail.instanceId);
+    }) as EventListener);
+
+    window.addEventListener('pageLayoutChanged', ((e: CustomEvent) => {
+      runtime.setPageLayout(e.detail.layout, e.detail.sectionsActive);
+    }) as EventListener);
+
+    window.addEventListener('workbenchCanvasLayoutToggled', ((e: CustomEvent<CanvasLayoutMode>) => {
+      window.dispatchEvent(new CustomEvent('workbenchCanvasLayoutChanged', { detail: e.detail }));
+      vscodeApi.postMessage({ command: 'setCanvasLayout', layout: e.detail });
     }) as EventListener);
 
     window.addEventListener('deleteWebPart', ((e: CustomEvent) => {
@@ -199,6 +218,15 @@ function initialize() {
     if (scenarioPickerRoot) {
       ReactDOM.render(React.createElement(StatusBarScenarioPicker), scenarioPickerRoot);
       vscodeApi.postMessage({ command: 'requestProxyScenarioState' });
+    }
+
+    // Mount the SharePoint layout switch into the status bar
+    const layoutToggleRoot = document.getElementById('layout-toggle');
+    if (layoutToggleRoot) {
+      ReactDOM.render(
+        React.createElement(StatusBarLayoutToggle, { initialLayout: config.canvasLayout ?? 'free' }),
+        layoutToggleRoot,
+      );
     }
 
     // Mount the theme picker into the status bar element

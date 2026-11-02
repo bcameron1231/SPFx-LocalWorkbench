@@ -141,6 +141,15 @@
 .webPartContent {
   padding: 16px;
   min-height: 80px;
+  /* Base text a SharePoint page gives web parts (its ControlZone): without this, web parts inherit
+     the VS Code webview defaults (13px, editor foreground colour, no font smoothing). */
+  font-family: 'Segoe UI', 'Segoe UI Web (West European)', -apple-system, BlinkMacSystemFont, Roboto,
+    'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--neutralPrimary, #323130);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Picker overlay */
@@ -152,4 +161,95 @@
   bottom: 0;
   z-index: 50;
   display: block;
+}
+
+/* SharePoint layout: web part chrome as on a SharePoint page in edit mode
+   (docs/sharepoint-canvas-measurements.md) */
+.spWebPartZone {
+  margin: 0 0 16px;
+  border-radius: 4px;
+
+  &:hover {
+    outline: 1px solid var(--neutralTertiaryAlt, #c8c6c4);
+
+    .spNameChip {
+      opacity: 1;
+    }
+  }
+}
+
+.spSelected,
+.spSelected:hover {
+  outline: 1px solid #0f6cbd;
+
+  .spWebPartToolbar {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .spNameChip,
+  &:hover .spNameChip {
+    opacity: 0;
+  }
+}
+
+.spWebPartZone {
+  padding: 16px;
+}
+
+.spWebPartContainer {
+  border-radius: 4px;
+  min-height: 48px;
+}
+
+/* The padding is on the zone (SharePoint's CanvasControl), not on the web part's element */
+.webPartContent.spWebPartContent {
+  padding: 0;
+}
+
+/* One white bar, 8px in from the web part's left edge and 44px above it, level with the
+   ActionsMenu (both measured on SharePoint) */
+.spWebPartToolbar {
+  position: absolute;
+  top: -44px;
+  left: 8px;
+  display: flex;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 6.4px 14.4px rgba(0, 0, 0, 0.133), 0 1.2px 3.6px rgba(0, 0, 0, 0.11);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 10;
+
+  :global(.ms-Button) {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    background: transparent;
+    color: #424242;
+  }
+
+  :global(.ms-Button:hover) {
+    background: #f5f5f5;
+    color: #242424;
+  }
+}
+
+/* Web part name, above the top left corner on hover */
+.spNameChip {
+  position: absolute;
+  top: -26px;
+  left: 0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #323130;
+  color: #fff;
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 11;
 }

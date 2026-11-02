@@ -1,0 +1,31 @@
+/* StatusBarLayoutToggle: matches the other status bar triggers */
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  margin: 0;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.trigger:hover {
+  background: var(--vscode-statusBarItem-hoverBackground, rgb(255 255 255 / 0.12));
+}
+
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+}
+
+.on {
+  background: currentColor;
+}

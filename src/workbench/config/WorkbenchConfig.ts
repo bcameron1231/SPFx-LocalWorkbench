@@ -29,6 +29,8 @@ export interface IWorkbenchSettings {
   serveCommand: string;
   context: IContextConfig;
   propertyPaneShrinkCanvas: boolean;
+  /** 'sharepoint': SharePoint sections and columns on the canvas */
+  canvasLayout: 'free' | 'sharepoint';
   htmlFieldSecurity: IHtmlFieldSecurityConfig;
 }
 
@@ -41,6 +43,7 @@ const defaults = {
     pageContext: DEFAULT_PAGE_CONTEXT,
   },
   propertyPaneShrinkCanvas: true,
+  canvasLayout: 'free' as const,
   htmlFieldSecurity: {
     // VS Code always provides the package.json default; this fallback is never reached in practice
     policy: 'allowList' as const,
@@ -76,6 +79,10 @@ export function getWorkbenchSettings(): IWorkbenchSettings {
       'propertyPane.shrinkCanvas',
       defaults.propertyPaneShrinkCanvas,
     ),
+    canvasLayout:
+      config.get<string>('canvas.layout', defaults.canvasLayout) === 'sharepoint'
+        ? 'sharepoint'
+        : 'free',
     htmlFieldSecurity: {
       policy: config.get<'none' | 'allowAll' | 'allowList'>(
         'htmlFieldSecurity.policy',
@@ -181,6 +188,15 @@ export async function setCurrentTheme(themeName: string, isCustom: boolean): Pro
     await config.update('theme.current', 'Custom', vscode.ConfigurationTarget.Workspace);
     await config.update('theme.customName', themeName, vscode.ConfigurationTarget.Workspace);
   }
+}
+
+/** Saves the canvas layout mode chosen in the workbench (workspace setting, like the theme) */
+export async function setCanvasLayout(layout: 'free' | 'sharepoint'): Promise<void> {
+  const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
+  const target = vscode.workspace.workspaceFolders?.length
+    ? vscode.ConfigurationTarget.Workspace
+    : vscode.ConfigurationTarget.Global;
+  await config.update('canvas.layout', layout, target);
 }
 
 /**
