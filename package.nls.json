@@ -35,7 +35,7 @@
   "configuration.spfxLocalWorkbench.serveUrl.description": "The URL where the SPFx serve is running",
   "configuration.spfxLocalWorkbench.statusBarWorkbenchAction.description": "Action to perform when clicking the SPFx Workbench status bar button",
   "configuration.spfxLocalWorkbench.autoOpenWorkbench.description": "Automatically open the workbench when starting serve",
-  "configuration.spfxLocalWorkbench.serveCommand.mdDescription": "The command to run when starting the SPFx serve from the extension. Common options:\n- `heft start --clean --nobrowser`, `heft start --clean --nobrowser --locales=fr-fr`, `npm run start`",
+  "configuration.spfxLocalWorkbench.serveCommand.mdDescription": "The command to run when starting the SPFx serve from the extension. Common options:\n- Heft (SPFx 1.22+): `heft start --clean --nobrowser`, `heft start --clean --nobrowser --locales=fr-fr`\n- gulp (SPFx 1.21 and older): `gulp serve --nobrowser`\n- Your own script: `npm run start`",
   "configuration.spfxLocalWorkbench.statusBarWorkbenchAction.mdEnumDescriptions.openWorkbench": "$(fluentui-testbeaker) Open the Local Workbench panel",
   "configuration.spfxLocalWorkbench.statusBarWorkbenchAction.mdEnumDescriptions.startServe": "$(fluentui-testbeakersolid) Start serve and open the Local Workbench panel",
   "configuration.spfxLocalWorkbench.statusBarStorybookAction.description": "Action to perform when clicking the SPFx Storybook status bar button",

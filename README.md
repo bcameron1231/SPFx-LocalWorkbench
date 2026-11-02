@@ -14,7 +14,7 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 - **Web Part Discovery**: Parses all web part manifests from your project
 - **SPFx Runtime Environment**: Custom-built workbench that simulates the SPFx runtime with AMD module loading
 - **Property Pane**: Full property pane support for configuring web parts
-- **Live Reload Support**: Works with `heft start` for real-time development
+- **Live Reload Support**: Works with `heft start` (or `gulp serve` in SPFx 1.21 and older) for real-time development
 - **Multiple Web Parts**: Add, configure, and test multiple web parts simultaneously on the canvas
 - **Theme Support**: Choose from standard SharePoint themes and even use your own directly within the workbench
 
@@ -59,13 +59,13 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 ## Requirements
 
 - VS Code 1.100.0 or higher
-- An SPFx 1.22+ project (Heft-based)
+- An SPFx 1.22+ project (Heft-based), or an older gulp-based project (tested with SPFx 1.21.1, see [docs/gulp-projects.md](docs/gulp-projects.md))
 - Node.js and npm/pnpm/yarn
 
 ## Getting Started
 
 1. Open your SPFx project in VS Code
-2. Start your SPFx development server: Run `heft start --nobrowser` in a terminal
+2. Start your SPFx development server: Run `heft start --nobrowser` in a terminal (gulp projects: `gulp serve --nobrowser`)
 3. Use the Command Palette (`Ctrl+Shift+P`) and search for "SPFx Local Workbench: Open Local Workbench" or click the button in the status bar
 
 ## Usage
@@ -82,7 +82,7 @@ There are several ways to open the workbench:
 
 Use the command "SPFx Local Workbench: Start SPFx Serve and Open Workbench" to:
 
-1. Start `heft start` in a terminal
+1. Start your serve command (`spfxLocalWorkbench.serveCommand`, by default `heft start`; gulp projects set it to `gulp serve --nobrowser`) in a terminal
 2. Open the workbench after a short delay
 
 ### Generating a Pseudo-Locale
