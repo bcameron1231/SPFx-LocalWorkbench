@@ -26,6 +26,11 @@ export {
 export { ProxyHttpClient } from './proxy/clients/ProxyHttpClient';
 export { ProxySPHttpClient } from './proxy/clients/ProxySPHttpClient';
 export { ProxyAadHttpClient } from './proxy/clients/ProxyAadHttpClient';
+export {
+  ProxyGraphClient,
+  ProxyGraphError,
+  ProxyGraphRequest,
+} from './proxy/clients/ProxyGraphClient';
 export { extractOptions } from './proxy/utils/clientHelpers';
 export { MockProxyResponse } from './proxy/MockProxyResponse';
 export { MockRuleEngine } from './proxy/MockRuleEngine';

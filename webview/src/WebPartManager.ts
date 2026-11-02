@@ -17,7 +17,7 @@ import type {
   IWebPartManifest,
 } from '@spfx-local-workbench/shared';
 
-import { SpfxContext, ThemeProvider } from './mocks';
+import { SpfxContext, ThemeProvider, spfxThemeService } from './mocks';
 import type { IVsCodeApi } from './types';
 
 export class WebPartManager {
@@ -40,6 +40,7 @@ export class WebPartManager {
     this.componentResolver = new ComponentResolver();
     this.contextProvider = contextProvider;
     this.themeProvider = themeProvider;
+    spfxThemeService.setProvider(themeProvider, false);
   }
 
   async loadWebPartBundle(manifest: IWebPartManifest): Promise<string[]> {
@@ -255,6 +256,7 @@ export class WebPartManager {
    */
   updateThemeProvider(themeProvider: ThemeProvider): void {
     this.themeProvider = themeProvider;
+    spfxThemeService.setProvider(themeProvider, false);
   }
 
   /**
@@ -266,6 +268,9 @@ export class WebPartManager {
    * @param themeProvider - The new ThemeProvider built from the updated theme
    */
   reapplyTheme(activeWebParts: IActiveWebPart[], themeProvider: ThemeProvider): void {
+    // Notify web parts subscribed through ThemeProvider.themeChangedEvent
+    spfxThemeService.setProvider(themeProvider, true);
+
     for (const webPart of activeWebParts) {
       const instance = webPart.instance as any;
 

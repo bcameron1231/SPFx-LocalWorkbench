@@ -13,6 +13,11 @@ function generateRequestId(): string {
 
 /** Proxy-aware HttpClient replacement. */
 export class ProxyHttpClient {
+  /** SPFx HttpClient requires this as a static property (accessed as HttpClient.configurations.v1) */
+  static configurations = {
+    v1: { flags: {} },
+  };
+
   /** The client type tag sent with every request for rule matching. */
   protected readonly clientType: ApiClientType = 'http';
   protected readonly transport: IProxyTransport | undefined;
