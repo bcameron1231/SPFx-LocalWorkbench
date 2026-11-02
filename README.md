@@ -58,9 +58,10 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 
 ### Real Tenant Data
 
-- **Your own tenant**: SharePoint REST, search and Microsoft Graph requests are sent to your Microsoft 365 tenant, signed in with VS Code's Microsoft sign-in. Mock rules still win
+- **Your own tenant**: SharePoint REST, search, JSOM (`SP.js`, `SP.Search.js`) and Microsoft Graph requests are sent to your Microsoft 365 tenant, signed in with VS Code's Microsoft sign-in. Mock rules still win
 - **Token stays in the extension**: web parts only get a placeholder token; the extension host adds the real one
 - **Read-only by default**: requests that change data are blocked unless you set `allowWrites`
+- **SharePoint images**: `<img>` and inline backgrounds hosted in your tenant load through the proxy
 - **Personal settings file**: tenant, site and app ID live in `~/.spfx-local-workbench/settings.json`, never in a repository
 
 > **[Tenant setup guide →](TENANT.md)** — settings, the optional Entra ID app for Graph, troubleshooting.

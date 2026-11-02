@@ -162,6 +162,67 @@ describe('TenantForwarder.resolveSharePointUrl', () => {
   });
 });
 
+describe('TenantForwarder.toGraphPhotoUrl', () => {
+  it('turns userphoto.aspx links into Graph photo requests', () => {
+    expect(
+      TenantForwarder.toGraphPhotoUrl(
+        req(
+          'GET',
+          'https://contoso.sharepoint.com/_layouts/15/userphoto.aspx?size=M&username=alex%40contoso.com',
+        ),
+      ),
+    ).toBe('https://graph.microsoft.com/v1.0/users/alex%40contoso.com/photos/96x96/$value');
+    expect(
+      TenantForwarder.toGraphPhotoUrl(
+        req(
+          'GET',
+          'https://contoso.sharepoint.com/sites/dev/_layouts/15/UserPhoto.aspx?Size=L&AccountName=i%3A0%23.f%7Cmembership%7Calex%40contoso.com',
+        ),
+      ),
+    ).toBe('https://graph.microsoft.com/v1.0/users/alex%40contoso.com/photos/240x240/$value');
+  });
+
+  it('leaves other requests alone', () => {
+    for (const r of [
+      req('GET', 'https://contoso.sharepoint.com/_layouts/15/userphoto.aspx?size=M'),
+      req('GET', 'https://contoso.sharepoint.com/_layouts/15/download.aspx?SourceUrl=a.png'),
+      req('POST', 'https://contoso.sharepoint.com/_layouts/15/userphoto.aspx?username=a%40b.com'),
+    ]) {
+      expect(TenantForwarder.toGraphPhotoUrl(r)).toBeUndefined();
+    }
+  });
+});
+
+describe('TenantForwarder.toDownloadUrl', () => {
+  it('turns direct file links into download.aspx on their site', () => {
+    expect(
+      TenantForwarder.toDownloadUrl(
+        req('GET', 'https://contoso.sharepoint.com/sites/dev/Media/My%20Image.png?X=NaN&ar=1.8'),
+      ),
+    ).toBe(
+      'https://contoso.sharepoint.com/sites/dev/_layouts/15/download.aspx?SourceUrl=%2Fsites%2Fdev%2FMedia%2FMy%20Image.png',
+    );
+    expect(
+      TenantForwarder.toDownloadUrl(
+        req('GET', 'https://contoso.sharepoint.com/Shared%20Documents/a.jpg'),
+      ),
+    ).toBe(
+      'https://contoso.sharepoint.com/_layouts/15/download.aspx?SourceUrl=%2FShared%20Documents%2Fa.jpg',
+    );
+  });
+
+  it('leaves API calls, pages and writes alone', () => {
+    for (const r of [
+      req('GET', 'https://contoso.sharepoint.com/sites/dev/_api/web/lists'),
+      req('GET', 'https://contoso.sharepoint.com/sites/dev/SitePages/Home.aspx'),
+      req('GET', 'https://contoso.sharepoint.com/sites/dev/Media'),
+      req('POST', 'https://contoso.sharepoint.com/sites/dev/Media/a.png'),
+    ]) {
+      expect(TenantForwarder.toDownloadUrl(r)).toBeUndefined();
+    }
+  });
+});
+
 describe('TenantForwarder.getResource', () => {
   const forwarder = new TenantForwarder(() => {});
   const settings = {

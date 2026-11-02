@@ -20,11 +20,35 @@ tenant**, signed in with your account. Mock rules still win: a request that matc
 - **Read-only by default.** `GET` requests, SharePoint POSTs that only read (`contextinfo`, search `postquery`,
   `RenderListDataAsStream`, `RenderListFilterData`, `GetItems`) and batches made only of reads are sent. Anything
   else gets a `403` from the workbench unless you set `allowWrites`.
-- **CSOM reads work.** `ProcessQuery` requests count as reads unless they call a write method (`Update`,
-  `Add*`, `Delete*`, `Recycle`, `SetFieldValue`, ...) on a server object; filling client-side objects such as a
-  `KeywordQuery` is a read.
+- **JSOM works.** `SPComponentLoader.loadScript('/_layouts/15/SP.js')` and the other JSOM scripts are fetched from
+  your tenant (anonymously: SharePoint rejects tokens on static `_layouts` files), the page gets
+  `_spPageContextInfo`, and JSOM's `XMLHttpRequest` calls go through the proxy. `ProcessQuery` requests count as
+  reads unless they call a write method (`Update`, `Add*`, `Delete*`, `Recycle`, `SetFieldValue`, ...) on a server
+  object; filling client-side objects such as a `KeywordQuery` is a read.
+- **SharePoint images load.** `<img>` (`src`/`srcset`) and inline `background-image` that point at your site are
+  loaded through the proxy and replaced with a local `blob:` URL. Some image links need an
+  [authentication patch](#authentication-patches) to load.
 - If a sign-in fails, the extension remembers it and stops asking. Requests for that resource get a `403`
   explaining why, and a notification links to this guide. Change your settings or reload the window to try again.
+
+## Authentication patches
+
+A web part's requests reach your tenant unchanged, as they would from a SharePoint page. The difference is how
+they're signed in: a SharePoint page sends your browser's sign-in **cookie**, while the workbench can only send an
+**access token** (a VS Code extension can't hold a SharePoint browser session, and SharePoint's endpoint that turns
+a token into a cookie only accepts Microsoft's own apps). SharePoint accepts tokens on its APIs but not on every
+address, so the workbench patches the cases below. Each patch only runs when the original request fails, and logs
+a line in the **SPFx API Proxy** output channel.
+
+| Request | What SharePoint does with a token | Patch | Where |
+|---|---|---|---|
+| Static `_layouts` files (`/_layouts/15/SP.js`, CSS, images, fonts) | `401` | Sent without a token (they are public) | `TenantForwarder.tryForward` |
+| Direct file links (`/sites/x/Media/photo.png`, what list image columns hold) | `401` | Retried once through the same site's `/_layouts/15/download.aspx?SourceUrl=...`, which returns the same file | `TenantForwarder.toDownloadUrl` |
+| Profile photos (`/_layouts/15/userphoto.aspx?size=M&username=...`) | `401` some of the time | Retried once through Microsoft Graph, `/v1.0/users/{user}/photos/{size}/$value` (`S` 48, `M` 96, `L` 240 pixels). Needs Graph sign-in (`clientId`, `User.ReadBasic.All`); without it the photo stays missing | `TenantForwarder.toGraphPhotoUrl` |
+| Any tenant `<img>` | Its first load, made by the webview itself, always fails (no sign-in) | The page doesn't see that failure (`error` event stopped), so components such as avatars don't switch to their fallback before the signed-in copy arrives. If the signed-in load fails too, the image gets a `data:,` source that fails for real and the fallback runs | `webview/src/proxy/tenantImages.ts` |
+
+Add a patch only for a case like these: the original request is correct and works on a SharePoint page, and only
+its sign-in fails here. Document it in this table.
 
 ## 1. Personal settings
 
@@ -127,6 +151,7 @@ One multi-tenant app avoids each developer registering their own
 | SharePoint `403` "Access is denied" elsewhere | Your account has no access to that list or site | Check permissions in SharePoint |
 | `403` "Blocked by the SPFx Local Workbench: writes ... are disabled" | Read-only guard | Expected; set `allowWrites` only if you need writes |
 | Requests go to `contoso.sharepoint.com` | No site configured | Set `siteUrl` |
+| Images set through CSS classes don't show | Only `<img>` and inline `background-image` are proxied | Known limit |
 | Likes, ratings, follows fail with `403` | They are writes | Set `allowWrites`; your app also needs `AllSites.Write` |
 
 Where to look:

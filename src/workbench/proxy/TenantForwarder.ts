@@ -192,11 +192,22 @@ export class TenantForwarder {
       });
     }
 
-    let token: string;
-    try {
-      token = await this._getToken(resource, settings);
-    } catch (error: unknown) {
-      return this._signInFailedResponse(request, resource, settings, error);
+    // SharePoint's static files (e.g. JSOM: /_layouts/15/SP.js) are public, and SharePoint rejects
+    // bearer tokens on them (401): send those without a token
+    const isStaticLayoutsFile =
+      resource === 'sharepoint' &&
+      request.method === 'GET' &&
+      /\/_layouts\/15\/[^?]+\.(js|css|png|gif|jpe?g|svg|ico|woff2?|ttf|eot)(\?|$)/i.test(
+        request.url,
+      );
+
+    let token: string | undefined;
+    if (!isStaticLayoutsFile) {
+      try {
+        token = await this._getToken(resource, settings);
+      } catch (error: unknown) {
+        return this._signInFailedResponse(request, resource, settings, error);
+      }
     }
 
     const headers: Record<string, string> = {};
@@ -205,7 +216,9 @@ export class TenantForwarder {
         headers[key] = value;
       }
     }
-    headers['Authorization'] = `Bearer ${token}`;
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
     if (
       resource === 'sharepoint' &&
       !Object.keys(headers).some((k) => k.toLowerCase() === 'accept')
@@ -213,11 +226,39 @@ export class TenantForwarder {
       headers['Accept'] = 'application/json;odata=nometadata';
     }
 
-    const response = await fetch(request.url, {
+    let response = await fetch(request.url, {
       method: request.method,
       headers,
       body: request.method === 'GET' || request.method === 'HEAD' ? undefined : request.body,
     });
+
+    // SharePoint rejects bearer tokens on direct file links (/sites/x/Media/a.png: 401) but serves the
+    // same file through download.aspx. List image columns hold direct links, so retry those once.
+    const downloadUrl =
+      response.status === 401 && token ? TenantForwarder.toDownloadUrl(request) : undefined;
+    if (downloadUrl) {
+      this._log(`  Tenant: direct file link refused (401), retrying through download.aspx`);
+      response = await fetch(downloadUrl, { method: 'GET', headers });
+    }
+
+    // userphoto.aspx refuses bearer tokens too (not always): Graph serves the same profile photo.
+    // Needs a Graph sign-in (clientId); without one the 401 stands and the page shows its fallback.
+    const graphPhotoUrl =
+      response.status === 401 && token ? TenantForwarder.toGraphPhotoUrl(request) : undefined;
+    if (graphPhotoUrl) {
+      this._log(`  Tenant: userphoto.aspx refused (401), retrying through Graph`);
+      try {
+        const graphToken = await this._getToken('graph', settings);
+        response = await fetch(graphPhotoUrl, {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${graphToken}` },
+        });
+      } catch (error: unknown) {
+        this._log(
+          `  Tenant: no Graph sign-in for the photo: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
 
     const responseHeaders: Record<string, string> = {};
     response.headers.forEach((value, key) => {
@@ -275,6 +316,64 @@ export class TenantForwarder {
       return request;
     }
     return { ...request, url: settings.sharePointOrigin + url.pathname + url.search };
+  }
+
+  /**
+   * The download.aspx address of a direct SharePoint file link (GET, a file path outside /_api,
+   * /_vti_bin and /_layouts), on the site the file belongs to. Undefined for anything else.
+   */
+  static toDownloadUrl(request: IProxyRequest): string | undefined {
+    if (request.method.toUpperCase() !== 'GET') {
+      return undefined;
+    }
+    let url: URL;
+    try {
+      url = new URL(request.url);
+    } catch {
+      return undefined;
+    }
+    const path = decodeURIComponent(url.pathname);
+    if (
+      /\/(_api|_vti_bin|_layouts)(\/|$)/i.test(path) ||
+      !/\/[^/]+\.[a-z0-9]{2,5}$/i.test(path) ||
+      /\.aspx$/i.test(path)
+    ) {
+      return undefined;
+    }
+    const site = /^\/(sites|teams)\/[^/]+/i.exec(path)?.[0] ?? '';
+    return `${url.origin}${site}/_layouts/15/download.aspx?SourceUrl=${encodeURIComponent(path)}`;
+  }
+
+  /**
+   * The Graph photo address for a SharePoint userphoto.aspx link (GET, with a username or
+   * accountname), at the closest Graph size. Undefined for anything else.
+   */
+  static toGraphPhotoUrl(request: IProxyRequest): string | undefined {
+    if (request.method.toUpperCase() !== 'GET') {
+      return undefined;
+    }
+    let url: URL;
+    try {
+      url = new URL(request.url);
+    } catch {
+      return undefined;
+    }
+    if (!/\/_layouts\/15\/userphoto\.aspx$/i.test(url.pathname)) {
+      return undefined;
+    }
+    const params = new URLSearchParams([...url.searchParams].map(([k, v]) => [k.toLowerCase(), v]));
+    // accountname may be a claims login (i:0#.f|membership|user@contoso.com)
+    const user = (params.get('username') ?? params.get('accountname') ?? '')
+      .split('|')
+      .pop()
+      ?.trim();
+    if (!user) {
+      return undefined;
+    }
+    const size =
+      { s: '48x48', m: '96x96', l: '240x240' }[(params.get('size') ?? 'm').toLowerCase()] ??
+      '96x96';
+    return `${GRAPH_ORIGIN}/v1.0/users/${encodeURIComponent(user)}/photos/${size}/$value`;
   }
 
   /** Requests that only read data. Batches count as reads only when every part is a read. */

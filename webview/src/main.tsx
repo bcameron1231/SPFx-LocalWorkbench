@@ -12,7 +12,9 @@ import { WorkbenchRuntime } from './WorkbenchRuntime';
 import { App, IAppHandlers } from './components/App';
 import { StatusBarScenarioPicker } from './components/StatusBarScenarioPicker';
 import { StatusBarThemePicker } from './components/StatusBarThemePicker';
-import { initializeVsCodeProxyTransport, installFetchProxy } from './proxy';
+import { getVsCodeProxyTransport, initializeVsCodeProxyTransport, installFetchProxy } from './proxy';
+import { installTenantImages } from './proxy/tenantImages';
+import { installTenantJsom } from './proxy/tenantJsom';
 import './styles/global.css';
 
 const log = logger.createChild('Main');
@@ -44,6 +46,9 @@ function initialize() {
     if (config.proxyEnabled !== false) {
       initializeVsCodeProxyTransport(vscodeApi); // Used by proxy HTTP clients AND fetch interceptor
       installFetchProxy(); // Intercepts fetch() for libraries like PnPjs
+      // SharePoint-hosted images and JSOM (SP.js, CSOM requests) go through the proxy, with the user's sign-in
+      installTenantImages(getVsCodeProxyTransport(), config.context?.pageContext?.site?.absoluteUrl);
+      installTenantJsom(getVsCodeProxyTransport(), config.context?.pageContext);
     }
 
     // Create the workbench runtime

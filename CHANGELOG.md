@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real tenant data: requests to your SharePoint site and to Microsoft Graph are sent to your own tenant with VS Code's Microsoft sign-in. Read-only unless `allowWrites` is set, and the token never reaches the web part ([TENANT.md](TENANT.md))
 - Personal settings file `~/.spfx-local-workbench/settings.json` for tenant, site and app ID, and the commands Open Personal Settings and Open Tenant Setup Guide
 - Binary proxy responses (`bodyEncoding: 'base64'`): `arrayBuffer()` and `blob()` on proxied responses
+- JSOM scripts (`SP.js`, `SP.Runtime.js`, `SP.Search.js`...) load from your tenant, and their `XMLHttpRequest` calls go through the proxy
+- SharePoint-hosted images (`<img>` and inline `background-image`) load through the proxy as `blob:` URLs
+- [Authentication patches](TENANT.md#authentication-patches) for addresses SharePoint refuses a token on but serves to a signed-in page: static `_layouts` files, direct file links (retried through `download.aspx`) and `userphoto.aspx` profile photos (retried through Microsoft Graph)
 
 ### Changed
 

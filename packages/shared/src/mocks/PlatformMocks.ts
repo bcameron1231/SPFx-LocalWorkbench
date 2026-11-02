@@ -5,6 +5,31 @@
 
 const loadedScripts: Record<string, Promise<any>> = {};
 
+/** Fetches the text of a SharePoint-hosted script (e.g. through the tenant proxy); undefined when unavailable */
+type SharePointScriptFetcher = (serverRelativeUrl: string) => Promise<string | undefined>;
+let sharePointScriptFetcher: SharePointScriptFetcher | undefined;
+
+/**
+ * Lets SPComponentLoader load SharePoint-hosted scripts (e.g. JSOM: /_layouts/15/SP.js) by fetching
+ * their text from the tenant. Without it, those scripts are skipped.
+ */
+export function configureSharePointScripts(fetcher: SharePointScriptFetcher | undefined): void {
+  sharePointScriptFetcher = fetcher;
+}
+
+/** Runs script text in the global scope, with the workbench AMD define hidden like a classic script */
+function runGlobalScript(source: string, url: string): void {
+  const win = window as any;
+  const savedDefine = win.define;
+  win.define = undefined;
+  try {
+    // Indirect eval: top-level declarations become globals, as with a <script> tag
+    (0, eval)(`${source}\n//# sourceURL=${url}`);
+  } finally {
+    win.define = savedDefine;
+  }
+}
+
 /**
  * Resolves a URL the way SharePoint would. Server-relative URLs (e.g. /_layouts/15/SP.js)
  * have no host in the workbench, so they are rejected instead of hitting the webview origin.
@@ -39,13 +64,26 @@ export const MockSPComponentLoader = {
 
     const resolved = resolveExternalUrl(url);
     if (!resolved) {
-      // SharePoint-hosted script (e.g. JSOM: /_layouts/15/SP.js) has no host in the workbench. Resolve
-      // instead of rejecting so web parts that load them up front still initialize; code that later
-      // uses the missing global (window.SP) fails at that point.
-      console.warn(
-        `[SPComponentLoader] SharePoint-hosted script is not available in the local workbench, skipped: ${url}`,
-      );
-      return Promise.resolve(globalName ? (window as any)[globalName] : undefined);
+      // SharePoint-hosted script (e.g. JSOM: /_layouts/15/SP.js): fetch it from the tenant when one is
+      // configured. Otherwise resolve instead of rejecting so web parts that load them up front still
+      // initialize; code that later uses the missing global (window.SP) fails at that point.
+      if (!loadedScripts[url]) {
+        loadedScripts[url] = (
+          sharePointScriptFetcher ? sharePointScriptFetcher(url) : Promise.resolve(undefined)
+        )
+          .catch(() => undefined)
+          .then((source) => {
+            if (source === undefined) {
+              console.warn(
+                `[SPComponentLoader] SharePoint-hosted script is not available in the local workbench, skipped: ${url}`,
+              );
+            } else {
+              runGlobalScript(source, url);
+            }
+            return globalName ? (window as any)[globalName] : undefined;
+          });
+      }
+      return loadedScripts[url];
     }
 
     if (!loadedScripts[resolved]) {

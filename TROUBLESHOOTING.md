@@ -52,3 +52,5 @@ This is a known limitation of the local workbench.
 | Workbench still shows old behaviour after installing a new `.vsix` | VS Code caches the webview code | Close every VS Code window and reopen it; a window reload is not enough |
 | gulp project: strings or bundles not found | `serveUrl` wrong, or serve not running | See [docs/gulp-projects.md](docs/gulp-projects.md) |
 | `403` / sign-in errors for tenant requests | Tenant settings, scopes or consent | See the troubleshooting table in [TENANT.md](TENANT.md) and **View > Output > SPFx API Proxy** |
+| `NotifyScriptLoadedAndExecuteWaitingJobs is not defined` from `SP.*.js` | The web part loaded a JSOM script without `/_layouts/15/init.js` first (on SharePoint pages init.js is usually already there) | Load `init.js` before the other JSOM scripts in your web part |
+| Tenant images or profile photos do not show (avatars show initials) | SharePoint refuses the sign-in token on that address | Check **SPFx API Proxy** for the `retrying through ...` lines of the [authentication patches](TENANT.md#authentication-patches) |

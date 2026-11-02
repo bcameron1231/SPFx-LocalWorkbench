@@ -36,6 +36,7 @@ export { MockProxyResponse } from './proxy/MockProxyResponse';
 export { MockRuleEngine } from './proxy/MockRuleEngine';
 export { BrowserProxyTransport } from './proxy/BrowserProxyTransport';
 export { installFetchInterceptor, uninstallFetchInterceptor } from './proxy/utils/fetchInterceptor';
+export { base64ToBytes, decodeProxyBody } from './proxy/utils/proxyBody';
 export type { IProxyTransport } from './proxy/IProxyTransport';
 export type {
   IProxyRequest,
