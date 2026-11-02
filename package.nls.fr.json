@@ -151,5 +151,14 @@
   "configuration.spfxLocalWorkbench.proxy.allowedOrigins.description": "Modèles d'URL autorisés en mode passthrough (vide = tous)",
   "configuration.spfxLocalWorkbench.proxy.serveMocksWhileRecording.description": "En mode enregistrement, servir également les règles mock existantes pour les requêtes appariées",
   "configuration.spfxLocalWorkbench.group.workbench.title": "Workbench",
-  "configuration.spfxLocalWorkbench.propertyPane.shrinkCanvas.description": "Lorsque le volet des propriétés est ouvert, réduire la largeur du canvas (correspond au workbench en ligne) ; désactiver pour superposer le volet des propriétés à la place."
+  "configuration.spfxLocalWorkbench.propertyPane.shrinkCanvas.description": "Lorsque le volet des propriétés est ouvert, réduire la largeur du canvas (correspond au workbench en ligne) ; désactiver pour superposer le volet des propriétés à la place.",
+  "command.spfx-local-workbench.openPersonalSettings.title": "Ouvrir les paramètres personnels (tenant, site, ID d'application)",
+  "command.spfx-local-workbench.openTenantGuide.title": "Ouvrir le guide de configuration du tenant",
+  "configuration.spfxLocalWorkbench.tenant.enabled.description": "Envoyer les requêtes qui atteignent le réseau réel (passthrough, mock-passthrough, record) à votre tenant Microsoft 365 avec un jeton de connexion. S'applique au site SharePoint de spfxLocalWorkbench.context.pageContext et à Microsoft Graph.",
+  "configuration.spfxLocalWorkbench.tenant.tenantId.description": "Tenant auquel se connecter : son ID ou son domaine (par ex. contoso.onmicrosoft.com). VS Code vous demande de vous connecter avec un compte de ce tenant.",
+  "configuration.spfxLocalWorkbench.tenant.clientId.description": "ID (client) facultatif d'une application Entra ID à utiliser à la place de celle de VS Code. À utiliser lorsque le tenant n'autorise pas l'application de VS Code à accéder à SharePoint ou à Graph.",
+  "configuration.spfxLocalWorkbench.tenant.allowWrites.description": "Autoriser les requêtes qui modifient les données du tenant. Désactivé par défaut : seules les lectures sont envoyées et les écritures reçoivent une erreur 403 du workbench.",
+  "configuration.spfxLocalWorkbench.tenant.sharePointScopes.description": "Autorisations déléguées SharePoint à demander, sans le préfixe du site (par ex. AllSites.Read).",
+  "configuration.spfxLocalWorkbench.tenant.graphScopes.description": "Autorisations déléguées Microsoft Graph à demander (par ex. User.Read, Calendars.Read).",
+  "configuration.spfxLocalWorkbench.tenant.graphTokenHosts.description": "Origines HTTPS des API qui peuvent recevoir votre jeton Microsoft Graph (par ex. le backend de votre produit, appelé par les composants WebPart avec un jeton obtenu via aadTokenProviderFactory). Seules les requêtes qui portent le jeton factice du workbench reçoivent le vrai. Vide par défaut : n'indiquez que des API en lesquelles vous avez confiance."
 }

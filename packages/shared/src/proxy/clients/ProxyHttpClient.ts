@@ -91,6 +91,11 @@ export class ProxyHttpClient {
       body,
       clientType: this.clientType,
     });
-    return new MockProxyResponse(response.status, response.body, response.headers);
+    return new MockProxyResponse(
+      response.status,
+      response.body,
+      response.headers,
+      response.bodyEncoding,
+    );
   }
 }

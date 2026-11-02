@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mocks for `@microsoft/sp-loader` (`SPComponentLoader`), `@microsoft/sp-page-context` (`SPPermission`), `DigestCache` and the `ThemeProvider` service (`serviceScope.consume(ThemeProvider.serviceKey)`, with `themeChangedEvent`)
 - `msGraphClientFactory` returns a chainable Graph client whose requests go through the API proxy, so they can be mocked
 - `aadTokenProviderFactory` and `HttpClient.configurations` stand-ins, and `BaseClientSideWebPart.renderError`/`clearError`
+- Real tenant data: requests to your SharePoint site and to Microsoft Graph are sent to your own tenant with VS Code's Microsoft sign-in. Read-only unless `allowWrites` is set, and the token never reaches the web part ([TENANT.md](TENANT.md))
+- Personal settings file `~/.spfx-local-workbench/settings.json` for tenant, site and app ID, and the commands Open Personal Settings and Open Tenant Setup Guide
+- Binary proxy responses (`bodyEncoding: 'base64'`): `arrayBuffer()` and `blob()` on proxied responses
 
 ### Changed
 

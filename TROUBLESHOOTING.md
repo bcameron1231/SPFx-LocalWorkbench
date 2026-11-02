@@ -51,3 +51,4 @@ This is a known limitation of the local workbench.
 |---|---|---|
 | Workbench still shows old behaviour after installing a new `.vsix` | VS Code caches the webview code | Close every VS Code window and reopen it; a window reload is not enough |
 | gulp project: strings or bundles not found | `serveUrl` wrong, or serve not running | See [docs/gulp-projects.md](docs/gulp-projects.md) |
+| `403` / sign-in errors for tenant requests | Tenant settings, scopes or consent | See the troubleshooting table in [TENANT.md](TENANT.md) and **View > Output > SPFx API Proxy** |
