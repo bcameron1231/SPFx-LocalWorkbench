@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for gulp-based projects (SPFx 1.21 and older, tested with 1.21.1): localized strings in the compact `localizedPath` form, several strings modules per bundle, and property pane lifecycle hooks such as `loadPropertyPaneResources` ([docs/gulp-projects.md](docs/gulp-projects.md))
+- Mocks for `@microsoft/sp-loader` (`SPComponentLoader`), `@microsoft/sp-page-context` (`SPPermission`), `DigestCache` and the `ThemeProvider` service (`serviceScope.consume(ThemeProvider.serviceKey)`, with `themeChangedEvent`)
+- `msGraphClientFactory` returns a chainable Graph client whose requests go through the API proxy, so they can be mocked
+- `aadTokenProviderFactory` and `HttpClient.configurations` stand-ins, and `BaseClientSideWebPart.renderError`/`clearError`
+- Real tenant data: requests to your SharePoint site and to Microsoft Graph are sent to your own tenant with VS Code's Microsoft sign-in. Read-only unless `allowWrites` is set, and the token never reaches the web part ([TENANT.md](TENANT.md))
+- Personal settings file `~/.spfx-local-workbench/settings.json` for tenant, site and app ID, and the commands Open Personal Settings and Open Tenant Setup Guide
+- Binary proxy responses (`bodyEncoding: 'base64'`): `arrayBuffer()` and `blob()` on proxied responses
+
+### Changed
+
+- The webview CSP allows `https:` stylesheets, for CDN CSS loaded with `SPComponentLoader.loadCss`
+- Request headers given as a `Headers` instance or as pairs are converted to a plain object before they cross to the extension host
+
 ## [0.2.0] - 2026-08-04
 
 ## Added

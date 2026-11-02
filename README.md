@@ -14,7 +14,7 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 - **Web Part Discovery**: Parses all web part manifests from your project
 - **SPFx Runtime Environment**: Custom-built workbench that simulates the SPFx runtime with AMD module loading
 - **Property Pane**: Full property pane support for configuring web parts
-- **Live Reload Support**: Works with `heft start` for real-time development
+- **Live Reload Support**: Works with `heft start` (or `gulp serve` in SPFx 1.21 and older) for real-time development
 - **Multiple Web Parts**: Add, configure, and test multiple web parts simultaneously on the canvas
 - **Theme Support**: Choose from standard SharePoint themes and even use your own directly within the workbench
 
@@ -56,16 +56,25 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 >
 > **[Mock data generation →](MOCK-DATA.md)** — status code stubs, JSON/CSV import, request recording, and more.
 
+### Real Tenant Data
+
+- **Your own tenant**: SharePoint REST, search and Microsoft Graph requests are sent to your Microsoft 365 tenant, signed in with VS Code's Microsoft sign-in. Mock rules still win
+- **Token stays in the extension**: web parts only get a placeholder token; the extension host adds the real one
+- **Read-only by default**: requests that change data are blocked unless you set `allowWrites`
+- **Personal settings file**: tenant, site and app ID live in `~/.spfx-local-workbench/settings.json`, never in a repository
+
+> **[Tenant setup guide →](TENANT.md)** — settings, the optional Entra ID app for Graph, troubleshooting.
+
 ## Requirements
 
 - VS Code 1.100.0 or higher
-- An SPFx 1.22+ project (Heft-based)
+- An SPFx 1.22+ project (Heft-based), or an older gulp-based project (tested with SPFx 1.21.1, see [docs/gulp-projects.md](docs/gulp-projects.md))
 - Node.js and npm/pnpm/yarn
 
 ## Getting Started
 
 1. Open your SPFx project in VS Code
-2. Start your SPFx development server: Run `heft start --nobrowser` in a terminal
+2. Start your SPFx development server: Run `heft start --nobrowser` in a terminal (gulp projects: `gulp serve --nobrowser`)
 3. Use the Command Palette (`Ctrl+Shift+P`) and search for "SPFx Local Workbench: Open Local Workbench" or click the button in the status bar
 
 ## Usage
@@ -82,7 +91,7 @@ There are several ways to open the workbench:
 
 Use the command "SPFx Local Workbench: Start SPFx Serve and Open Workbench" to:
 
-1. Start `heft start` in a terminal
+1. Start your serve command (`spfxLocalWorkbench.serveCommand`, by default `heft start`; gulp projects set it to `gulp serve --nobrowser`) in a terminal
 2. Open the workbench after a short delay
 
 ### Generating a Pseudo-Locale
@@ -165,6 +174,8 @@ The extension includes **Storybook integration** for visual testing and componen
 | `SPFx Local Workbench: Discard Components (reset workbench)` | Removes all loaded components and resets the canvas               |
 | `SPFx Local Workbench: Open Developer Tools`                 | Opens the webview developer tools                                 |
 | `SPFx Local Workbench: Open SPFx Workbench Settings`         | Opens the extension settings in VS Code                           |
+| `SPFx Local Workbench: Open Personal Settings`               | Creates or opens `~/.spfx-local-workbench/settings.json` (tenant, site, app ID) |
+| `SPFx Local Workbench: Open Tenant Setup Guide`              | Opens [TENANT.md](TENANT.md)                                      |
 | `SPFx Local Workbench: Open SPFx Storybook`                  | Opens the Storybook panel, starting its server if needed          |
 | `SPFx Local Workbench: Start SPFx Serve & Open Storybook`    | Starts SPFx serve and opens Storybook                             |
 | `SPFx Local Workbench: Generate SPFx Storybook Stories`      | Generates stories from SPFx manifests                             |
@@ -267,6 +278,20 @@ You can add additional properties as needed to match your SPFx solution requirem
 | `spfxLocalWorkbench.proxy.serveMocksWhileRecording` | `true`                           | Serve existing matching mock rules while recording unmatched requests                                                                                                                                                                                           |
 
 > See [PROXY.md](PROXY.md) for the full mock rule reference, architecture details, and examples.
+
+### Tenant Settings
+
+Usually set in the personal settings file instead (see [TENANT.md](TENANT.md)). These settings are machine-scoped: only your user settings count, never a workspace's `.vscode/settings.json`, and a value set there wins over the personal settings file.
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| `spfxLocalWorkbench.tenant.enabled` | `false` | Send unmatched requests for your tenant to it (turned on by a `tenantId` in the personal settings) |
+| `spfxLocalWorkbench.tenant.tenantId` | _empty_ | Tenant ID or domain to sign in to |
+| `spfxLocalWorkbench.tenant.clientId` | _empty_ | Your own Entra ID app, needed for Microsoft Graph |
+| `spfxLocalWorkbench.tenant.allowWrites` | `false` | Allow requests that change tenant data |
+| `spfxLocalWorkbench.tenant.sharePointScopes` | `AllSites.Read` | Delegated SharePoint permissions requested (`AllSites.Write` when `allowWrites` is on) |
+| `spfxLocalWorkbench.tenant.graphScopes` | see `package.json` | Delegated Microsoft Graph permissions requested |
+| `spfxLocalWorkbench.tenant.graphTokenHosts` | `[]` | Other HTTPS APIs that may receive your Graph token |
 
 ## Troubleshooting
 

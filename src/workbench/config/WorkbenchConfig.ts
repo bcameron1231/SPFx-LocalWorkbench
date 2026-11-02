@@ -12,6 +12,8 @@ import {
   MICROSOFT_THEMES,
 } from '@spfx-local-workbench/shared';
 
+import { explicitSetting, readPersonalSettings } from './PersonalSettings';
+
 // Context configuration for SharePoint mock
 // NOTE: Default values come from @spfx-local-workbench/shared package (DEFAULT_PAGE_CONTEXT).
 // This ensures consistency across extension, webview, and Storybook addon.
@@ -51,10 +53,17 @@ export function getWorkbenchSettings(): IWorkbenchSettings {
   const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
 
   // Get pageContext and wrap it in context object structure
-  const pageContext = config.get<IPageContextConfig>(
+  let pageContext = config.get<IPageContextConfig>(
     'context.pageContext',
     defaults.context.pageContext,
   );
+
+  // The personal settings file can point the page context at a real site, unless the
+  // pageContext setting was set explicitly
+  const personalSiteUrl = readPersonalSettings().siteUrl;
+  if (personalSiteUrl && !explicitSetting('spfxLocalWorkbench', 'context.pageContext')) {
+    pageContext = withSiteUrl(pageContext, personalSiteUrl);
+  }
 
   return {
     serveUrl: config.get<string>('serveUrl', defaults.serveUrl),
@@ -77,6 +86,23 @@ export function getWorkbenchSettings(): IWorkbenchSettings {
         defaults.htmlFieldSecurity.allowedDomains,
       ),
     },
+  };
+}
+
+/** Page context with its site and web moved to siteUrl (invalid URLs leave it unchanged) */
+function withSiteUrl(pageContext: IPageContextConfig, siteUrl: string): IPageContextConfig {
+  let url: URL;
+  try {
+    url = new URL(siteUrl);
+  } catch {
+    return pageContext;
+  }
+  const absoluteUrl = `${url.origin}${url.pathname.replace(/\/$/, '')}`;
+  const serverRelativeUrl = url.pathname.replace(/\/$/, '') || '/';
+  return {
+    ...pageContext,
+    site: { ...pageContext.site, absoluteUrl, serverRelativeUrl },
+    web: { ...pageContext.web, absoluteUrl, serverRelativeUrl },
   };
 }
 

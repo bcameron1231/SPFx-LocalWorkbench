@@ -156,6 +156,7 @@ export class VsCodeProxyTransport implements IProxyTransport {
         body: message.body,
         matched: message.matched,
         passthrough: message.passthrough,
+        bodyEncoding: message.bodyEncoding,
       });
     }
   }

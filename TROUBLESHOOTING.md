@@ -2,10 +2,10 @@
 
 ## "Could not load manifests from serve URL"
 
-- Make sure `heft start` is running
+- Make sure `heft start` (or `gulp serve` in a gulp project) is running
 - Check that the serve URL matches your SPFx project's port (default: 4321)
 - Ensure you have trusted the dev certificate by running `heft trust-dev-cert` (see [Certificate errors](#certificate-errors))
-- This extension only supports SPFx 1.22+ (Heft-based projects)
+- SPFx 1.22+ projects use Heft; older projects that use gulp are supported too (see [docs/gulp-projects.md](docs/gulp-projects.md))
 
 ## Web parts not rendering
 
@@ -28,6 +28,8 @@ Run the following command to trust the dev certificate:
 
 ```bash
 heft trust-dev-cert
+# gulp projects (SPFx 1.21 and older)
+gulp trust-dev-cert
 ```
 
 For more details, see the [official documentation](https://learn.microsoft.com/sharepoint/dev/spfx/set-up-your-development-environment#trusting-the-self-signed-developer-certificate).
@@ -41,3 +43,12 @@ This is a known limitation of the local workbench.
 **Why it works in the online SharePoint workbench**: SharePoint pages are served over HTTPS, so the browser automatically sends `https://tenant.sharepoint.com/…` as the Referer when the web part creates a YouTube iframe.
 
 **Workaround**: Test YouTube (and other video embeds that perform origin checking) in Storybook. Video embed playback that depends on a verified HTTPS embedding origin is not fixable at the workbench level without a significant architectural change (serving the workbench itself from an HTTPS origin).
+
+
+## Other issues
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Workbench still shows old behaviour after installing a new `.vsix` | VS Code caches the webview code | Close every VS Code window and reopen it; a window reload is not enough |
+| gulp project: strings or bundles not found | `serveUrl` wrong, or serve not running | See [docs/gulp-projects.md](docs/gulp-projects.md) |
+| `403` / sign-in errors for tenant requests | Tenant settings, scopes or consent | See the troubleshooting table in [TENANT.md](TENANT.md) and **View > Output > SPFx API Proxy** |
