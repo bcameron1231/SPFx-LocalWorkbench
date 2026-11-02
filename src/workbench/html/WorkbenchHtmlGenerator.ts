@@ -86,12 +86,13 @@ export interface IHtmlGeneratorConfig {
 function generateCsp(config: IHtmlGeneratorConfig): string {
   return [
     `default-src 'none'`,
-    `style-src ${config.cspSource} 'unsafe-inline' ${config.serveUrl}`,
+    // https: allows CDN stylesheets that web parts load via SPComponentLoader.loadCss
+    `style-src ${config.cspSource} 'unsafe-inline' ${config.serveUrl} https:`,
     // Note: 'unsafe-eval' is still required for AMD module loader and SPFx bundles
     // 'nonce-${nonce}' allows our bundled script while blocking inline scripts
     `script-src 'nonce-${config.nonce}' 'unsafe-eval' ${config.cspSource} ${config.serveUrl}`,
     `connect-src ${config.serveUrl} https://*.sharepoint.com https://login.windows.net`,
-    `img-src ${config.cspSource} ${config.serveUrl} https: data:`,
+    `img-src ${config.cspSource} ${config.serveUrl} https: data: blob:`,
     `font-src ${config.cspSource} ${config.serveUrl} https: data:`,
     `frame-src ${buildFrameSrc(config.serveUrl, config.htmlFieldSecurity)}`,
   ].join('; ');

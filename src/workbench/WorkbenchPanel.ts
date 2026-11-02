@@ -416,12 +416,12 @@ export class WorkbenchPanel {
       return;
     }
 
-    // Watch for compiled bundle changes in dist/ (heft start output)
+    // Watch for compiled bundle changes in dist/ (heft start or gulp serve output)
     const distPattern = new vscode.RelativePattern(workspaceFolder, 'dist/*.js');
     const distWatcher = vscode.workspace.createFileSystemWatcher(distPattern);
 
     const onBundleChanged = () => {
-      // Debounce: heft may write multiple files in quick succession
+      // Debounce: the build may write multiple files in quick succession
       if (this._liveReloadDebounceTimer) {
         clearTimeout(this._liveReloadDebounceTimer);
       }

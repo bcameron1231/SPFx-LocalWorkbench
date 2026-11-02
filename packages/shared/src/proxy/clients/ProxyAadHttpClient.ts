@@ -8,5 +8,10 @@ import { ProxyHttpClient } from './ProxyHttpClient';
  * AAD-protected API calls specifically.
  */
 export class ProxyAadHttpClient extends ProxyHttpClient {
+  /** SPFx AadHttpClient requires this as a static property (accessed as AadHttpClient.configurations.v1) */
+  static configurations = {
+    v1: { flags: {} },
+  };
+
   protected readonly clientType: ApiClientType = 'aadHttp';
 }

@@ -1,6 +1,13 @@
 import { deepMerge } from '../utils/deepMerge';
 import { loadThemedStylesModule } from '../utils/loadThemedStyles';
 import { MockGuid } from './MockGuid';
+import {
+  MockDigestCache,
+  MockSPComponentLoader,
+  MockSPPermission,
+  MockThemeChangedEventArgs,
+  MockThemeProvider,
+} from './PlatformMocks';
 import { spPropertyPaneModule } from './PropertyPaneMocks';
 
 export function initializeSpfxMocks(): void {
@@ -151,6 +158,23 @@ export function initializeSpfxMocks(): void {
     },
     onPropertyPaneFieldChanged: function () {},
     onDispose: function () {},
+    // SPFx renders an error message in place of the web part
+    renderError: function (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (this._domElement) {
+        const box = document.createElement('div');
+        box.className = 'error-message';
+        box.textContent = `Error: ${message}`;
+        this._domElement.replaceChildren(box);
+      }
+      console.error('[BaseClientSideWebPart.renderError]', error);
+    },
+    clearError: function () {
+      const box = this._domElement?.querySelector(':scope > .error-message');
+      if (box) {
+        box.remove();
+      }
+    },
   };
 
   // Ensure the prototype chain is correct for ES5 inheritance patterns
@@ -275,10 +299,14 @@ export function initializeSpfxMocks(): void {
 
   amdModules['@microsoft/sp-component-base'] = {
     DynamicProperty: MockDynamicProperty,
+    ThemeProvider: MockThemeProvider,
+    ThemeChangedEventArgs: MockThemeChangedEventArgs,
   };
 
   // Mock HTTP clients
   class MockHttpClient {
+    static configurations = { v1: {} };
+
     async get() {
       return { ok: true, json: async () => ({}) };
     }
@@ -299,6 +327,17 @@ export function initializeSpfxMocks(): void {
     SPHttpClient: MockSPHttpClient,
     SPHttpClientConfiguration: {},
     HttpClientConfiguration: {},
+    DigestCache: MockDigestCache,
+  };
+
+  // Mock @microsoft/sp-loader - SPComponentLoader loads external CSS/JS at runtime
+  amdModules['@microsoft/sp-loader'] = {
+    SPComponentLoader: MockSPComponentLoader,
+  };
+
+  // Mock @microsoft/sp-page-context - SPPermission is used for permission checks
+  amdModules['@microsoft/sp-page-context'] = {
+    SPPermission: MockSPPermission,
   };
 
   // Register load-themed-styles so SPFx web-part CSS reaches the DOM and

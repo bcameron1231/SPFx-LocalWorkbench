@@ -46,6 +46,9 @@ export interface IProxyResponse {
   /** Whether this response matched a mock rule */
   matched: boolean;
 
+  /** 'base64' when body holds binary content (e.g. an image from the tenant) encoded as base64 */
+  bodyEncoding?: 'base64';
+
   /**
    * When true, the caller should pass this request through to the real network.
    * Set by ApiProxyService in mock-passthrough mode when no rule matched.
