@@ -17,6 +17,7 @@ import { logger } from '../../utils';
 import { PropertyPaneFieldRenderer } from './PropertyPaneFieldRenderer';
 import styles from './PropertyPanePanel.module.css';
 import { getPropertyPaneStrings } from './config';
+import { callPropertyPaneHook, ensurePropertyPaneResources } from './propertyPaneLifecycle';
 import {
   isConditionalGroup,
   resolveFieldValue,
@@ -29,6 +30,8 @@ import type {
   IPropertyPaneGroupModel,
   IPropertyPanePageModel,
 } from './types';
+
+const warnLifecycle = (message: string, error: unknown): void => logger.warn(message, error);
 
 const WORKBENCH_VISIBILITY_TARGET_PROPERTY = '__workbenchVisibility.showInMobileAndEmailView';
 
@@ -118,11 +121,30 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
     const previousInstanceId = previousInstanceIdRef.current;
     const currentInstanceId = webPart?.instanceId;
     const isSameWebPart = !!currentInstanceId && currentInstanceId === previousInstanceId;
+    const instance = webPart?.instance;
+    let cancelled = false;
 
-    refreshPropertyPaneConfiguration({
-      preserveCurrentPage: isSameWebPart,
-      preserveGroupState: isSameWebPart,
-    });
+    if (isSameWebPart) {
+      refreshPropertyPaneConfiguration({ preserveCurrentPage: true, preserveGroupState: true });
+    } else {
+      // A new pane session: run the SPFx lifecycle before asking for the configuration
+      callPropertyPaneHook(instance, 'onPropertyPaneConfigurationStart', warnLifecycle);
+      ensurePropertyPaneResources(instance)
+        .catch((error: unknown) => logger.warn('Error in loadPropertyPaneResources:', error))
+        .then(() => {
+          if (cancelled) {
+            return;
+          }
+          refreshPropertyPaneConfiguration({
+            preserveCurrentPage: false,
+            preserveGroupState: false,
+          });
+          setTimeout(
+            () => callPropertyPaneHook(instance, 'onPropertyPaneRendered', warnLifecycle),
+            0,
+          );
+        });
+    }
 
     if (!isSameWebPart) {
       setInvalidProperties({});
@@ -133,7 +155,18 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
     }
 
     previousInstanceIdRef.current = currentInstanceId;
+
+    return () => {
+      cancelled = true;
+    };
   }, [refreshPropertyPaneConfiguration, webPart]);
+
+  // The pane session for an instance ends when the panel switches web part or closes
+  const paneInstance = webPart?.instance;
+  useEffect(() => {
+    return () =>
+      callPropertyPaneHook(paneInstance, 'onPropertyPaneConfigurationComplete', warnLifecycle);
+  }, [paneInstance]);
 
   const handlePropertyChange = useCallback(
     (targetProperty: string, newValue: unknown) => {

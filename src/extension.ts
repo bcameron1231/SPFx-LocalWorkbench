@@ -22,7 +22,9 @@ import {
   generatePseudoLocale,
   getWorkbenchSettings,
 } from './workbench';
+import { openPersonalSettings } from './workbench/config/PersonalSettings';
 import type { IMockRuleSaveResult } from './workbench/proxy/MockConfigGenerator';
+import { openTenantGuide } from './workbench/proxy/TenantForwarder';
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -233,6 +235,16 @@ export function activate(context: vscode.ExtensionContext) {
         '@ext:m365pnp.pnp-spfx-local-workbench',
       );
     },
+  );
+
+  // Personal settings (tenant, site, own app ID) and the tenant setup guide
+  const openPersonalSettingsCommand = vscode.commands.registerCommand(
+    'spfx-local-workbench.openPersonalSettings',
+    () => openPersonalSettings(),
+  );
+  const openTenantGuideCommand = vscode.commands.registerCommand(
+    'spfx-local-workbench.openTenantGuide',
+    () => openTenantGuide(),
   );
 
   // Register the Switch to Display Mode command
@@ -788,6 +800,8 @@ export function activate(context: vscode.ExtensionContext) {
     detectWebPartsCommand,
     openDevToolsCommand,
     openSettingsCommand,
+    openPersonalSettingsCommand,
+    openTenantGuideCommand,
     switchToDisplayModeCommand,
     switchToEditModeCommand,
     discardComponentsCommand,

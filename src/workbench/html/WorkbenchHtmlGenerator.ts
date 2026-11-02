@@ -35,6 +35,8 @@ export interface IHtmlGeneratorConfig {
   proxyEnabled?: boolean;
   // Whether opening the property pane should shrink the canvas (default true)
   propertyPaneShrinkCanvas?: boolean;
+  // Canvas layout mode ('sharepoint' shows SharePoint sections and columns)
+  canvasLayout?: 'free' | 'sharepoint';
   // External dependencies resolved from the SPFx project's node_modules
   externalDependencies?: IExternalDependency[];
   // HTML field security configuration controlling which external domains web parts may iframe
@@ -86,12 +88,13 @@ export interface IHtmlGeneratorConfig {
 function generateCsp(config: IHtmlGeneratorConfig): string {
   return [
     `default-src 'none'`,
-    `style-src ${config.cspSource} 'unsafe-inline' ${config.serveUrl}`,
+    // https: allows CDN stylesheets that web parts load via SPComponentLoader.loadCss
+    `style-src ${config.cspSource} 'unsafe-inline' ${config.serveUrl} https:`,
     // Note: 'unsafe-eval' is still required for AMD module loader and SPFx bundles
     // 'nonce-${nonce}' allows our bundled script while blocking inline scripts
     `script-src 'nonce-${config.nonce}' 'unsafe-eval' ${config.cspSource} ${config.serveUrl}`,
     `connect-src ${config.serveUrl} https://*.sharepoint.com https://login.windows.net`,
-    `img-src ${config.cspSource} ${config.serveUrl} https: data:`,
+    `img-src ${config.cspSource} ${config.serveUrl} https: data: blob:`,
     `font-src ${config.cspSource} ${config.serveUrl} https: data:`,
     `frame-src ${buildFrameSrc(config.serveUrl, config.htmlFieldSecurity)}`,
   ].join('; ');
@@ -147,6 +150,7 @@ function generateStatusBar(
         <span id="component-count">${countText}</span>
         <div class="separator"></div>
         <span id="locale-switcher">${locale.toLowerCase()}</span>
+        <div id="layout-toggle"></div>
         <div id="scenario-picker"></div>
         <div id="theme-picker"></div>
     </div>
@@ -202,6 +206,7 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
     context: config.contextSettings,
     proxyEnabled: config.proxyEnabled !== false,
     propertyPaneShrinkCanvas: config.propertyPaneShrinkCanvas !== false,
+    canvasLayout: config.canvasLayout ?? 'free',
     propertyPaneStrings: config.propertyPaneStrings,
     dynamicDataStrings: config.dynamicDataStrings,
     externalDependencies: (config.externalDependencies || []).map((dep) => ({

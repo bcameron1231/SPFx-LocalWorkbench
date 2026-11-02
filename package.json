@@ -133,6 +133,16 @@
         "icon": "$(gear)"
       },
       {
+        "command": "spfx-local-workbench.openPersonalSettings",
+        "title": "%command.spfx-local-workbench.openPersonalSettings.title%",
+        "category": "SPFx Local Workbench"
+      },
+      {
+        "command": "spfx-local-workbench.openTenantGuide",
+        "title": "%command.spfx-local-workbench.openTenantGuide.title%",
+        "category": "SPFx Local Workbench"
+      },
+      {
         "command": "spfx-local-workbench.openStorybook",
         "title": "%command.spfx-local-workbench.openStorybook.title%",
         "category": "SPFx Local Workbench",
@@ -961,6 +971,17 @@
             "type": "boolean",
             "default": true,
             "description": "%configuration.spfxLocalWorkbench.propertyPane.shrinkCanvas.description%"
+          },
+          "spfxLocalWorkbench.canvas.layout": {
+            "order": 20,
+            "type": "string",
+            "enum": ["free", "sharepoint"],
+            "default": "free",
+            "enumDescriptions": [
+              "%configuration.spfxLocalWorkbench.canvas.layout.enumDescriptions.free%",
+              "%configuration.spfxLocalWorkbench.canvas.layout.enumDescriptions.sharepoint%"
+            ],
+            "description": "%configuration.spfxLocalWorkbench.canvas.layout.description%"
           }
         }
       },
@@ -1034,6 +1055,58 @@
             "type": "boolean",
             "default": true,
             "description": "%configuration.spfxLocalWorkbench.proxy.serveMocksWhileRecording.description%"
+          },
+          "spfxLocalWorkbench.tenant.enabled": {
+            "order": 100,
+            "scope": "machine",
+            "type": "boolean",
+            "default": false,
+            "description": "%configuration.spfxLocalWorkbench.tenant.enabled.description%"
+          },
+          "spfxLocalWorkbench.tenant.tenantId": {
+            "order": 110,
+            "scope": "machine",
+            "type": "string",
+            "default": "",
+            "description": "%configuration.spfxLocalWorkbench.tenant.tenantId.description%"
+          },
+          "spfxLocalWorkbench.tenant.clientId": {
+            "order": 120,
+            "scope": "machine",
+            "type": "string",
+            "default": "",
+            "description": "%configuration.spfxLocalWorkbench.tenant.clientId.description%"
+          },
+          "spfxLocalWorkbench.tenant.allowWrites": {
+            "order": 130,
+            "scope": "machine",
+            "type": "boolean",
+            "default": false,
+            "description": "%configuration.spfxLocalWorkbench.tenant.allowWrites.description%"
+          },
+          "spfxLocalWorkbench.tenant.sharePointScopes": {
+            "order": 140,
+            "scope": "machine",
+            "type": "array",
+            "items": { "type": "string" },
+            "default": ["AllSites.Read"],
+            "description": "%configuration.spfxLocalWorkbench.tenant.sharePointScopes.description%"
+          },
+          "spfxLocalWorkbench.tenant.graphScopes": {
+            "order": 150,
+            "scope": "machine",
+            "type": "array",
+            "items": { "type": "string" },
+            "default": ["User.Read", "User.ReadBasic.All", "Calendars.Read", "Group.Read.All", "Sites.Read.All"],
+            "description": "%configuration.spfxLocalWorkbench.tenant.graphScopes.description%"
+          },
+          "spfxLocalWorkbench.tenant.graphTokenHosts": {
+            "order": 160,
+            "scope": "machine",
+            "type": "array",
+            "items": { "type": "string" },
+            "default": [],
+            "description": "%configuration.spfxLocalWorkbench.tenant.graphTokenHosts.description%"
           }
         }
       }

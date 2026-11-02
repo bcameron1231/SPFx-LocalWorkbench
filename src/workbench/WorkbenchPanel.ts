@@ -18,6 +18,7 @@ import {
   getCustomThemes,
   getWorkbenchSettings,
   onConfigurationChanged,
+  setCanvasLayout,
   setCurrentTheme,
 } from './config';
 import { generateWorkbenchHtml } from './html';
@@ -211,6 +212,7 @@ export class WorkbenchPanel {
             theme: currentTheme,
             customThemes: getCustomThemes(),
             context: newSettings.context,
+            canvasLayout: newSettings.canvasLayout,
           },
         });
       }),
@@ -337,6 +339,12 @@ export class WorkbenchPanel {
         }
         return;
 
+      case 'setCanvasLayout':
+        if (message.layout === 'free' || message.layout === 'sharepoint') {
+          await setCanvasLayout(message.layout);
+        }
+        return;
+
       case 'setTheme':
         if (message.themeName) {
           await setCurrentTheme(message.themeName, message.isCustomTheme ?? false);
@@ -416,12 +424,12 @@ export class WorkbenchPanel {
       return;
     }
 
-    // Watch for compiled bundle changes in dist/ (heft start output)
+    // Watch for compiled bundle changes in dist/ (heft start or gulp serve output)
     const distPattern = new vscode.RelativePattern(workspaceFolder, 'dist/*.js');
     const distWatcher = vscode.workspace.createFileSystemWatcher(distPattern);
 
     const onBundleChanged = () => {
-      // Debounce: heft may write multiple files in quick succession
+      // Debounce: the build may write multiple files in quick succession
       if (this._liveReloadDebounceTimer) {
         clearTimeout(this._liveReloadDebounceTimer);
       }
@@ -492,6 +500,7 @@ export class WorkbenchPanel {
       contextSettings: this._settings.context,
       proxyEnabled: this._apiProxyService?.enabled ?? true,
       propertyPaneShrinkCanvas: this._settings.propertyPaneShrinkCanvas,
+      canvasLayout: this._settings.canvasLayout,
       propertyPaneStrings: {
         applyButtonText: localize('propertyPane.applyButtonText', 'Apply'),
         backButtonText: localize('propertyPane.backButtonText', 'Back'),

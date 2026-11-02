@@ -12,6 +12,7 @@
  */
 import type { IProxyTransport } from '../IProxyTransport';
 import { extractHeaders, serializeBody } from './fetchHelpers';
+import { decodeProxyBody } from './proxyBody';
 
 // Store the original fetch so we can restore it later
 let originalFetch: typeof window.fetch | null = null;
@@ -89,7 +90,10 @@ export function installFetchInterceptor(transport: IProxyTransport): void {
 
       // The transport always returns a complete response — use it directly
       const responseHeaders = new Headers(proxyResponse.headers || {});
-      return new Response(proxyResponse.body || '{}', {
+      const responseBody = proxyResponse.body
+        ? decodeProxyBody(proxyResponse.body, proxyResponse.bodyEncoding)
+        : '{}';
+      return new Response(responseBody as BodyInit, {
         status: proxyResponse.status,
         statusText: proxyResponse.status >= 200 && proxyResponse.status < 300 ? 'OK' : 'Error',
         headers: responseHeaders,

@@ -32,19 +32,26 @@ export class StringsLoader {
       return;
     }
 
-    // Find the localized strings resource
-    const { moduleName, path } = this.findStringsResource(
+    // Find every localized strings resource. A bundle can have several (e.g. its own strings
+    // plus ControlStrings from @pnp/spfx-controls-react), and all of them must be registered.
+    const resources = this.findStringsResources(
       scriptResources,
       manifest.loaderConfig?.entryModuleId,
       localeOverride,
     );
 
-    if (!moduleName || !path) {
-      return; // No localized strings found
-    }
-
     const baseUrl = manifest.loaderConfig?.internalModuleBaseUrls?.[0] || `${this.serveUrl}/`;
-    const fullUrl = baseUrl + path;
+
+    // Load sequentially: each script defines an anonymous module that is mapped to its name on load
+    for (const { moduleName, path } of resources) {
+      await this.loadStringsModule(baseUrl + path, moduleName);
+    }
+  }
+
+  /**
+   * Load one localized strings script and register its anonymous AMD module under moduleName
+   */
+  private loadStringsModule(fullUrl: string, moduleName: string): Promise<void> {
     const cacheBustedUrl = `${fullUrl + (fullUrl.includes('?') ? '&' : '?')}_v=${Date.now()}`;
 
     return new Promise((resolve, reject) => {
@@ -77,45 +84,64 @@ export class StringsLoader {
   }
 
   /**
-   * Find strings resource in script resources
+   * Find all strings resources in script resources
    * @param scriptResources - Script resources from manifest
    * @param entryModuleId - Entry module ID (to skip main bundle)
    * @param localeOverride - Optional locale override
-   * @returns Module name and path for strings resource
+   * @returns Module name and path for each strings resource
    */
-  private findStringsResource(
+  private findStringsResources(
     scriptResources: Record<string, any>,
     entryModuleId?: string,
     localeOverride?: string,
-  ): { moduleName: string | null; path: string | null } {
-    let moduleName: string | null = null;
-    let path: string | null = null;
+  ): { moduleName: string; path: string }[] {
+    const found: { moduleName: string; path: string }[] = [];
 
     for (const [name, resource] of Object.entries(scriptResources)) {
       // Case 1: Served without locale parameter - manifest has 'localizedPath' type
       if (resource.type === 'localizedPath') {
-        moduleName = name;
-        if (localeOverride && resource.paths) {
-          // Try to find the locale in the paths object (case-insensitive)
-          const localeKey = Object.keys(resource.paths).find(
-            (key) => key.toLowerCase() === localeOverride.toLowerCase(),
-          );
-          path = localeKey ? resource.paths[localeKey] : resource.defaultPath;
-        } else {
-          path = resource.defaultPath;
+        const path = this.resolveLocalizedPath(resource, localeOverride);
+        if (path) {
+          found.push({ moduleName: name, path });
         }
-        break;
+        continue;
       }
 
-      // Case 2: Served with locale parameter - manifest has 'path' type for strings
-      if (resource.type === 'path' && name !== entryModuleId) {
-        moduleName = name;
-        path = resource.path;
-        break;
+      // Case 2: Served with locale parameter - manifest has 'path' type for strings.
+      // Only names ending in "Strings" are localization modules; other 'path' resources are bundles.
+      if (
+        resource.type === 'path' &&
+        name !== entryModuleId &&
+        /Strings$/.test(name) &&
+        resource.path
+      ) {
+        found.push({ moduleName: name, path: resource.path });
       }
     }
 
-    return { moduleName, path };
+    return found;
+  }
+
+  /**
+   * Resolve the script path of a 'localizedPath' resource. Supports both the expanded form
+   * ({ paths: { 'en-US': '...' }, defaultPath }) and the compact form gulp serve emits
+   * ({ paths: { p: 'AllStrings_', l: { 'en-US': 'en-us' }, s: '.js' }, defaultPath }).
+   */
+  private resolveLocalizedPath(resource: any, localeOverride?: string): string | null {
+    const paths = resource.paths;
+    const compact = paths && typeof paths.p === 'string' && paths.l && typeof paths.l === 'object';
+    const locales: Record<string, string> = compact ? paths.l : paths || {};
+
+    if (localeOverride) {
+      const localeKey = Object.keys(locales).find(
+        (key) => key.toLowerCase() === localeOverride.toLowerCase(),
+      );
+      if (localeKey) {
+        return compact ? `${paths.p}${locales[localeKey]}${paths.s || '.js'}` : locales[localeKey];
+      }
+    }
+
+    return resource.defaultPath || null;
   }
 }
 
