@@ -7,7 +7,11 @@ Contributions are welcome! Please feel free to submit issues and pull requests.
 ```bash
 npm install
 npm run compile
+npm test
 ```
+
+Before changing code, read [AGENTS.md](AGENTS.md) (conventions, for people and AI agents alike) and
+[docs/architecture.md](docs/architecture.md). How to try a change: [docs/testing.md](docs/testing.md).
 
 ## Publishing NPM Packages
 

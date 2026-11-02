@@ -20,3 +20,6 @@ vsc-extension-quickstart.md
 AGENTS.md
 .nvmrc
 .prettierignore
+
+.harness/**
+*.vsix

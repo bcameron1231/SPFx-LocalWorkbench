@@ -1,5 +1,21 @@
 # Agents Guide for SPFx LocalWorkbench
 
+## Start here
+
+| Task | Read first |
+|---|---|
+| Anything | This file, then [docs/architecture.md](docs/architecture.md) |
+| API proxy, mock rules | [PROXY.md](PROXY.md), [MOCK-DATA.md](MOCK-DATA.md) |
+| SharePoint page layout mode | [docs/sharepoint-canvas-measurements.md](docs/sharepoint-canvas-measurements.md), `webview/src/canvas/` |
+| Real tenant data, sign-in (has its own "Notes for AI agents") | [TENANT.md](TENANT.md) |
+| gulp-based SPFx projects | [docs/gulp-projects.md](docs/gulp-projects.md) |
+| Testing a change (including driving VS Code as an agent) | [docs/testing.md](docs/testing.md) |
+| Something doesn't work | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) |
+| All docs | [docs/README.md](docs/README.md) |
+
+Workflows for Claude Code live in `.claude/skills/` (plain Markdown, usable as checklists by any agent):
+`verify-change` (build, test, lint) and `install-local-build` (package and install the `.vsix`).
+
 ## Project Overview
 
 **SPFx LocalWorkbench** is an open-source VS Code extension created by the PnP team that provides a local development environment for SharePoint Framework (SPFx) web parts and extensions. It offers features unavailable in Microsoft's standard workbench:
@@ -489,6 +505,9 @@ Before submitting changes:
 - [ ] `npm run compile` succeeds with no errors
 - [ ] TypeScript types are correct (`npm run check-types`)
 - [ ] ESLint passes (`npm run lint`)
+- [ ] `npm test` passes (add tests for pure logic)
+- [ ] New strings are in `package.nls.json`; new settings are in README.md and the relevant doc
+- [ ] No tokens, secrets or real tenant data were added; examples use `contoso.sharepoint.com` and `example.com`
 - [ ] Changes work in **workbench** (F5 extension host)
 - [ ] Changes work in **Storybook** (if applicable)
 - [ ] No console errors in browser/webview
