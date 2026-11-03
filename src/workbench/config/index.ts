@@ -7,6 +7,7 @@ export {
   serializeSettings,
   getThemes,
   getCurrentTheme,
+  setCanvasLayout,
   setCurrentTheme,
   getCustomThemes,
 } from './WorkbenchConfig';

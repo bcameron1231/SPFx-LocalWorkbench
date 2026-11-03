@@ -12,6 +12,8 @@ import {
   MICROSOFT_THEMES,
 } from '@spfx-local-workbench/shared';
 
+import { explicitSetting, readPersonalSettings } from './PersonalSettings';
+
 // Context configuration for SharePoint mock
 // NOTE: Default values come from @spfx-local-workbench/shared package (DEFAULT_PAGE_CONTEXT).
 // This ensures consistency across extension, webview, and Storybook addon.
@@ -27,6 +29,8 @@ export interface IWorkbenchSettings {
   serveCommand: string;
   context: IContextConfig;
   propertyPaneShrinkCanvas: boolean;
+  /** 'sharepoint': SharePoint sections and columns on the canvas */
+  canvasLayout: 'free' | 'sharepoint';
   htmlFieldSecurity: IHtmlFieldSecurityConfig;
 }
 
@@ -39,6 +43,7 @@ const defaults = {
     pageContext: DEFAULT_PAGE_CONTEXT,
   },
   propertyPaneShrinkCanvas: true,
+  canvasLayout: 'free' as const,
   htmlFieldSecurity: {
     // VS Code always provides the package.json default; this fallback is never reached in practice
     policy: 'allowList' as const,
@@ -51,10 +56,17 @@ export function getWorkbenchSettings(): IWorkbenchSettings {
   const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
 
   // Get pageContext and wrap it in context object structure
-  const pageContext = config.get<IPageContextConfig>(
+  let pageContext = config.get<IPageContextConfig>(
     'context.pageContext',
     defaults.context.pageContext,
   );
+
+  // The personal settings file can point the page context at a real site, unless the
+  // pageContext setting was set explicitly
+  const personalSiteUrl = readPersonalSettings().siteUrl;
+  if (personalSiteUrl && !explicitSetting('spfxLocalWorkbench', 'context.pageContext')) {
+    pageContext = withSiteUrl(pageContext, personalSiteUrl);
+  }
 
   return {
     serveUrl: config.get<string>('serveUrl', defaults.serveUrl),
@@ -67,6 +79,10 @@ export function getWorkbenchSettings(): IWorkbenchSettings {
       'propertyPane.shrinkCanvas',
       defaults.propertyPaneShrinkCanvas,
     ),
+    canvasLayout:
+      config.get<string>('canvas.layout', defaults.canvasLayout) === 'sharepoint'
+        ? 'sharepoint'
+        : 'free',
     htmlFieldSecurity: {
       policy: config.get<'none' | 'allowAll' | 'allowList'>(
         'htmlFieldSecurity.policy',
@@ -77,6 +93,23 @@ export function getWorkbenchSettings(): IWorkbenchSettings {
         defaults.htmlFieldSecurity.allowedDomains,
       ),
     },
+  };
+}
+
+/** Page context with its site and web moved to siteUrl (invalid URLs leave it unchanged) */
+function withSiteUrl(pageContext: IPageContextConfig, siteUrl: string): IPageContextConfig {
+  let url: URL;
+  try {
+    url = new URL(siteUrl);
+  } catch {
+    return pageContext;
+  }
+  const absoluteUrl = `${url.origin}${url.pathname.replace(/\/$/, '')}`;
+  const serverRelativeUrl = url.pathname.replace(/\/$/, '') || '/';
+  return {
+    ...pageContext,
+    site: { ...pageContext.site, absoluteUrl, serverRelativeUrl },
+    web: { ...pageContext.web, absoluteUrl, serverRelativeUrl },
   };
 }
 
@@ -155,6 +188,15 @@ export async function setCurrentTheme(themeName: string, isCustom: boolean): Pro
     await config.update('theme.current', 'Custom', vscode.ConfigurationTarget.Workspace);
     await config.update('theme.customName', themeName, vscode.ConfigurationTarget.Workspace);
   }
+}
+
+/** Saves the canvas layout mode chosen in the workbench (workspace setting, like the theme) */
+export async function setCanvasLayout(layout: 'free' | 'sharepoint'): Promise<void> {
+  const config = vscode.workspace.getConfiguration('spfxLocalWorkbench');
+  const target = vscode.workspace.workspaceFolders?.length
+    ? vscode.ConfigurationTarget.Workspace
+    : vscode.ConfigurationTarget.Global;
+  await config.update('canvas.layout', layout, target);
 }
 
 /**

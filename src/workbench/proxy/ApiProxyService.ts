@@ -16,7 +16,9 @@ import {
   validateMockConfig,
 } from '@spfx-local-workbench/shared';
 
+import { explicitSetting, readPersonalSettings } from '../config/PersonalSettings';
 import type { IRecordedRequest } from './MockConfigGenerator';
+import { TenantForwarder } from './TenantForwarder';
 import { createMockConfigScaffold } from './mockConfigScaffold';
 import type {
   IMockConfig,
@@ -49,6 +51,7 @@ export class ApiProxyService implements vscode.Disposable {
   private readonly _outputChannel: vscode.OutputChannel;
   private readonly _workspaceRoot: string;
   private readonly _scenarioStateEmitter = new vscode.EventEmitter<IProxyScenarioState>();
+  private readonly _tenantForwarder = new TenantForwarder((message) => this._log(message));
 
   private _config: IMockConfig | undefined;
   private _settings: IProxySettings;
@@ -110,6 +113,13 @@ export class ApiProxyService implements vscode.Disposable {
     // Watch for settings changes
     this._disposables.push(
       vscode.workspace.onDidChangeConfiguration((e) => {
+        if (
+          e.affectsConfiguration('spfxLocalWorkbench.tenant') ||
+          e.affectsConfiguration('spfxLocalWorkbench.context')
+        ) {
+          // New tenant settings deserve a new sign-in attempt
+          this._tenantForwarder.resetSignInFailures();
+        }
         if (e.affectsConfiguration('spfxLocalWorkbench.proxy')) {
           const previousMockFile = this._mockFile;
           const wasRecording = this.isRecording;
@@ -144,7 +154,10 @@ export class ApiProxyService implements vscode.Disposable {
   // Read proxy settings from VS Code configuration
   static readSettings(): IProxySettings {
     const config = vscode.workspace.getConfiguration('spfxLocalWorkbench.proxy');
-    const mode = config.get<ProxyMode>('mode', defaultProxySettings.activeMode.mode);
+    // With a tenant in the personal settings file, unmatched requests go to the tenant by default
+    const mode =
+      explicitSetting<ProxyMode>('spfxLocalWorkbench.proxy', 'mode') ??
+      (readPersonalSettings().tenantId ? 'mock-passthrough' : defaultProxySettings.activeMode.mode);
     const mockFile = config.get<string>('mockFile', DEFAULT_MOCK_FILE);
     const fallbackStatus = config.get<number>('fallbackStatus', DEFAULT_FALLBACK_STATUS);
 
@@ -317,14 +330,14 @@ export class ApiProxyService implements vscode.Disposable {
       // In pure passthrough mode every request goes straight to the real network
       if (this._settings.activeMode.mode === 'passthrough') {
         this._log(`  Passthrough mode - forwarding to real network`);
-        return {
+        return this._passthrough(request, {
           id: request.id,
           status: 0,
           headers: {},
           body: '',
           matched: false,
           passthrough: true,
-        };
+        });
       }
 
       // In record mode without serveMocksWhileRecording, skip the mock engine and
@@ -341,14 +354,14 @@ export class ApiProxyService implements vscode.Disposable {
           timestamp: Date.now(),
         });
         this._log(`  Recorded request (${this._recordedRequests.length} total)`);
-        return {
+        return this._passthrough(request, {
           id: request.id,
           status: 0,
           headers: {},
           body: '',
           matched: false,
           passthrough: true,
-        };
+        });
       }
 
       // Use MockRuleEngine to process the request
@@ -363,7 +376,7 @@ export class ApiProxyService implements vscode.Disposable {
         // In mock-passthrough mode, signal the webview to make the real network call
         if (this._settings.activeMode.mode === 'mock-passthrough') {
           this._log(`  No match - passing through to real network`);
-          return { ...response, passthrough: true };
+          return this._passthrough(request, { ...response, passthrough: true });
         }
 
         this._log(`  No match - fallback ${this._fallbackStatus}`);
@@ -404,6 +417,18 @@ export class ApiProxyService implements vscode.Disposable {
         matched: false,
       };
     }
+  }
+
+  /**
+   * Requests for the configured tenant (its SharePoint site or Microsoft Graph) are sent from here
+   * with a signed-in token. Anything else keeps the original behaviour: the webview makes the call.
+   */
+  private async _passthrough(
+    request: IProxyRequest,
+    webviewPassthrough: IProxyResponse,
+  ): Promise<IProxyResponse> {
+    const tenantResponse = await this._tenantForwarder.tryForward(request);
+    return tenantResponse ?? webviewPassthrough;
   }
 
   // ── Config Loading ──────────────────────────────────────────────

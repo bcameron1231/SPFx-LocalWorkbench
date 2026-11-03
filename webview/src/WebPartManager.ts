@@ -17,7 +17,8 @@ import type {
   IWebPartManifest,
 } from '@spfx-local-workbench/shared';
 
-import { SpfxContext, ThemeProvider } from './mocks';
+import type { ISectionDesign } from './canvas/pageLayout';
+import { SpfxContext, ThemeProvider, spfxThemeService } from './mocks';
 import type { IVsCodeApi } from './types';
 
 export class WebPartManager {
@@ -26,7 +27,6 @@ export class WebPartManager {
   private stringsLoader: StringsLoader;
   private componentResolver: ComponentResolver;
   private contextProvider: SpfxContext;
-  private themeProvider: ThemeProvider;
   private currentDisplayMode: DisplayMode = DisplayMode.Edit;
 
   constructor(
@@ -39,7 +39,7 @@ export class WebPartManager {
     this.stringsLoader = new StringsLoader(serveUrl);
     this.componentResolver = new ComponentResolver();
     this.contextProvider = contextProvider;
-    this.themeProvider = themeProvider;
+    spfxThemeService.setProvider(themeProvider, false);
   }
 
   async loadWebPartBundle(manifest: IWebPartManifest): Promise<string[]> {
@@ -142,7 +142,7 @@ export class WebPartManager {
       // Call onThemeChanged if available
       if (typeof instance.onThemeChanged === 'function') {
         try {
-          instance.onThemeChanged(this.themeProvider.getTheme());
+          instance.onThemeChanged(spfxThemeService.getThemeFor(config.instanceId));
         } catch (error: unknown) {
           // onThemeChanged error - log but continue
           this.log.warn('Error in onThemeChanged:', error);
@@ -254,7 +254,7 @@ export class WebPartManager {
    * change receive the updated theme on their first render.
    */
   updateThemeProvider(themeProvider: ThemeProvider): void {
-    this.themeProvider = themeProvider;
+    spfxThemeService.setProvider(themeProvider, false);
   }
 
   /**
@@ -266,6 +266,9 @@ export class WebPartManager {
    * @param themeProvider - The new ThemeProvider built from the updated theme
    */
   reapplyTheme(activeWebParts: IActiveWebPart[], themeProvider: ThemeProvider): void {
+    // Notify web parts subscribed through ThemeProvider.themeChangedEvent
+    spfxThemeService.setProvider(themeProvider, true);
+
     for (const webPart of activeWebParts) {
       const instance = webPart.instance as any;
 
@@ -273,7 +276,7 @@ export class WebPartManager {
       // in web parts that implement it).
       if (typeof instance?.onThemeChanged === 'function') {
         try {
-          instance.onThemeChanged(themeProvider.getTheme());
+          instance.onThemeChanged(spfxThemeService.getThemeFor(webPart.instanceId));
         } catch (error: unknown) {
           this.log.warn('Error in onThemeChanged during reapplyTheme:', error);
         }
@@ -287,6 +290,23 @@ export class WebPartManager {
           this.log.warn('Error in render during reapplyTheme:', error);
         }
       }
+    }
+  }
+
+  /**
+   * Gives a web part the theme variant of the section it is in (SharePoint section backgrounds).
+   * Subscribers to themeChangedEvent are notified; onThemeChanged and render run as in reapplyTheme.
+   */
+  applySectionDesign(webPart: IActiveWebPart, design: ISectionDesign | undefined): void {
+    if (!spfxThemeService.setSectionDesign(webPart.instanceId, design)) {
+      return;
+    }
+    const instance = webPart.instance as any;
+    try {
+      instance?.onThemeChanged?.(spfxThemeService.getThemeFor(webPart.instanceId));
+      instance?.render?.();
+    } catch (error: unknown) {
+      this.log.warn('Error re-theming web part for its section:', error);
     }
   }
 

@@ -1,0 +1,415 @@
+/* SharePoint page layout. Sizes are measured on a SharePoint Online page in edit mode:
+   see docs/sharepoint-canvas-measurements.md */
+
+.page {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  min-height: calc(100vh - 96px);
+  padding: 32px 0 48px;
+}
+
+.main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* With a vertical section the other sections keep a 1236px box and the vertical one takes 412px */
+.withVertical .main {
+  flex: 0 1 1236px;
+}
+
+.vertical {
+  flex: 0 0 412px;
+  display: flex;
+}
+
+/* Section: CanvasZone, padding 0 16px; background from its theme variant */
+.section {
+  position: relative;
+  padding: 0 16px;
+  background: var(--primaryBackground, #fff);
+  color: var(--neutralPrimary, #323130);
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+
+  &:hover {
+    outline-color: var(--neutralTertiaryAlt, #c8c6c4);
+  }
+}
+
+.sectionSelected,
+.sectionSelected:hover {
+  outline-color: #0f6cbd;
+}
+
+/* CanvasZoneSectionContainer: max-width 1236px, padding 16px 0, centred */
+.sectionContainer {
+  position: relative;
+  display: flex;
+  max-width: 1236px;
+  margin: 0 auto;
+  padding: 16px 0;
+}
+
+.fullWidth {
+  padding: 0;
+
+  .sectionContainer {
+    max-width: none;
+    padding: 0;
+  }
+
+  .column {
+    padding: 0;
+  }
+}
+
+.verticalSection {
+  flex: 1;
+  padding: 0;
+
+  .sectionContainer {
+    height: 100%;
+  }
+}
+
+/* CanvasSection: padding 0 8px; width from the 12-column grid (set inline) */
+.column {
+  box-sizing: border-box;
+  flex-grow: 0;
+  flex-shrink: 0;
+  min-width: 0;
+  padding: 0 8px;
+}
+
+.emptyColumn {
+  min-height: 88px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px dashed var(--neutralTertiaryAlt, #c8c6c4);
+  border-radius: 4px;
+}
+
+.columnAddZone {
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  .section:hover & {
+    opacity: 1;
+  }
+}
+
+/* Toolbars are one white bar: 36px buttons, 4px corners, a shared shadow (measured) */
+.toolbarBar {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 6.4px 14.4px rgba(0, 0, 0, 0.133), 0 1.2px 3.6px rgba(0, 0, 0, 0.11);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 12;
+
+  :global(.ms-Button) {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    background: transparent;
+    color: #424242;
+  }
+
+  :global(.ms-Button:hover) {
+    background: #f5f5f5;
+    color: #242424;
+  }
+
+  :global(.ms-Button-icon) {
+    font-size: 16px;
+  }
+}
+
+.section:hover .toolbarBar,
+.sectionSelected .toolbarBar {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Overlay between the section background and its content */
+.sectionOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* "+" between sections: 28px theme-coloured circle on the line */
+.addSectionLine {
+  position: relative;
+  height: 0;
+  z-index: 13;
+
+  &:hover::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    border-top: 1px solid var(--themePrimary, #0078d4);
+  }
+}
+
+.addSectionButton {
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: var(--themePrimary, #0078d4);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  .addSectionLine:hover &,
+  &:focus-visible {
+    opacity: 1;
+  }
+}
+
+.main:hover .addSectionLine:last-child .addSectionButton {
+  opacity: 1;
+}
+
+/* Add-section menu: 4 x 2 grid, like SharePoint's */
+.sectionMenu {
+  display: grid;
+  grid-template-columns: repeat(4, 96px);
+  gap: 4px;
+  padding: 12px;
+}
+
+.sectionMenuItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 4px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #242424;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #f5f5f5;
+  }
+
+  &:disabled {
+    color: #bdbdbd;
+    cursor: default;
+  }
+}
+
+.sectionMenuIcon {
+  font-size: 22px;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+
+/* Section settings panel */
+.settingsLabel {
+  margin: 16px 0 8px;
+  font-weight: 600;
+}
+
+.settingsNote {
+  color: var(--neutralSecondary, #605e5c);
+  font-size: 12px;
+}
+
+/* Layout tab: icon tiles */
+.layoutTiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.layoutTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: #f5f5f5;
+  color: #242424;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+
+  &:hover {
+    background: #ebebeb;
+  }
+}
+
+.layoutTileSelected {
+  border-color: #242424;
+  background: #fff;
+}
+
+/* Design tab */
+.designPane {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 24px;
+}
+
+.colorPairs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.colorPair {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 6px;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.colorPairSelected {
+  outline: 2px solid #242424;
+  outline-offset: 1px;
+}
+
+.colorPairText {
+  line-height: 18px;
+}
+
+.colorPairAccent {
+  width: 100%;
+  border-radius: 2px;
+  line-height: 18px;
+  text-align: center;
+}
+
+.backgroundGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.backgroundTile {
+  height: 52px;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
+  background-size: cover;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.backgroundTileSelected {
+  outline: 2px solid #242424;
+  outline-offset: 1px;
+}
+
+.backgroundPreview {
+  width: 160px;
+  height: 100px;
+  border-radius: 4px;
+  border: 1px solid #d1d1d1;
+}
+
+.addImage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.buttonRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.overlayChoices {
+  display: flex;
+  gap: 8px;
+}
+
+.overlayChoice {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #616161;
+  cursor: pointer;
+
+  &[data-overlay='white'] {
+    background: #fff;
+  }
+
+  &[data-overlay='black'] {
+    background: #000;
+  }
+
+  &[data-overlay='lightGradient'] {
+    background: linear-gradient(#fff, #c8c8c8);
+  }
+
+  &[data-overlay='darkGradient'] {
+    background: linear-gradient(#000, #8a8a8a);
+  }
+}
+
+.overlayChoiceSelected {
+  outline: 2px solid #0f6cbd;
+  outline-offset: 2px;
+}
+
+/* Narrow windows: columns stack (SharePoint's grid: CanvasSection-sm12 below 1024px), and the
+   vertical section moves below the others */
+@media (max-width: 1023px) {
+  .page {
+    flex-direction: column;
+  }
+
+  .sectionContainer {
+    flex-wrap: wrap;
+  }
+
+  .column {
+    flex-basis: 100% !important;
+  }
+
+  .withVertical .main,
+  .vertical {
+    flex: 0 0 auto;
+  }
+}

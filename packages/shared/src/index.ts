@@ -26,11 +26,17 @@ export {
 export { ProxyHttpClient } from './proxy/clients/ProxyHttpClient';
 export { ProxySPHttpClient } from './proxy/clients/ProxySPHttpClient';
 export { ProxyAadHttpClient } from './proxy/clients/ProxyAadHttpClient';
+export {
+  ProxyGraphClient,
+  ProxyGraphError,
+  ProxyGraphRequest,
+} from './proxy/clients/ProxyGraphClient';
 export { extractOptions } from './proxy/utils/clientHelpers';
 export { MockProxyResponse } from './proxy/MockProxyResponse';
 export { MockRuleEngine } from './proxy/MockRuleEngine';
 export { BrowserProxyTransport } from './proxy/BrowserProxyTransport';
 export { installFetchInterceptor, uninstallFetchInterceptor } from './proxy/utils/fetchInterceptor';
+export { base64ToBytes, decodeProxyBody } from './proxy/utils/proxyBody';
 export type { IProxyTransport } from './proxy/IProxyTransport';
 export type {
   IProxyRequest,
